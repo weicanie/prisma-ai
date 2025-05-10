@@ -1,0 +1,55 @@
+services:
+  nest-app:
+    build:
+      context: .
+      dockerfile: ./packages/backend/Dockerfile
+    depends_on:
+      # mysql经常需要启动好几次才能成功,得在它启动成功后再启动服务
+      mysql-container:
+        condition: service_healthy
+      redis-container:
+        condition: service_healthy
+    restart: unless-stopped
+    container_name: nest-app
+    # 将指定的文件的环境变量加载到容器中
+    env_file:
+      - ./packages/backend/.env
+    # 覆盖env_file中的同名环境变量
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: mysql://root:qwqw1314.@mysql-container:3306/fetch
+    ports:
+      - '3003:3003'
+    volumes:
+      - D:/docker/fetch-backend:/app/packages/backend/logs
+  mysql-container:
+    image: mysql
+    #占用的主机端口:网络内访问使用的端口
+    ports:
+      - '3308:3306'
+      # 目录内不能有文件,否则报错
+    volumes:
+      - D:/docker/redis:/var/lib/mysql
+    environment:
+      # 初始数据库
+      MYSQL_DATABASE: fetch
+      MYSQL_ROOT_PASSWORD: qwqw1314.
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  redis-container:
+    image: redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - D:/docker/mysql:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+#使用默认桥接网络

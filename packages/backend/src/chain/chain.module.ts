@@ -1,0 +1,20 @@
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ModelModule } from '../model/model.module';
+import { PromptModule } from '../prompt/prompt.module';
+import { AgentModule } from './agent/agent.module';
+import { ChainService } from './chain.service';
+import { Project, ProjectSchema } from './entities/project.entities';
+
+@Module({
+	controllers: [],
+	providers: [ChainService],
+	imports: [
+		AgentModule,
+		ModelModule,
+		PromptModule,
+		MongooseModule.forFeature([{ name: Project.name, schema: ProjectSchema }])
+	],
+	exports: [ChainService, AgentModule, ModelModule, PromptModule]
+})
+export class ChainModule {}

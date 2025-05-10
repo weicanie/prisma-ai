@@ -1,0 +1,21 @@
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import * as bodyParser from 'body-parser';
+import { ChainModule } from '../chain/chain.module';
+import { Project, ProjectSchema } from './entities/project.entities';
+import { ProjectController } from './project.controller';
+import { ProjectService } from './project.service';
+@Module({
+	controllers: [ProjectController],
+	providers: [ProjectService],
+	exports: [ProjectService],
+	//Schema 注入模块作为 Model,然后实例化以操控mongodb数据库
+	imports: [ChainModule, MongooseModule.forFeature([{ name: Project.name, schema: ProjectSchema }])] //forFeature指定模块可用的集合（表）
+})
+export class GeneralResumeModule implements NestModule {
+	configure(consumer: MiddlewareConsumer) {
+		consumer
+			.apply(bodyParser.text({ type: 'text/plain' }))
+			.forRoutes('general-resume', 'general-resume/ask');
+	}
+}

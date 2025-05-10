@@ -1,0 +1,71 @@
+services:
+  nest-app:
+    build:
+      context: .
+      dockerfile: ./packages/backend/Dockerfile.cloud
+    depends_on:
+      # mysql经常需要启动好几次才能成功,得在它启动成功后再启动服务
+      mysql-container:
+        condition: service_healthy
+      redis-container:
+        condition: service_healthy
+    restart: unless-stopped
+    container_name: nest-app
+    # 将指定的文件的环境变量加载到容器中
+    env_file:
+      - ./packages/backend/.env
+    environment:
+      NODE_ENV: production
+      # 覆盖env_file中的同名环境变量
+      DATABASE_URL: mysql://root:qwqw1314.@mysql-container:3306/fetch
+    ports:
+      - '3003:3003'
+    volumes:
+      - ./docker-data/nest-app/logs:/app/packages/backend/logs
+  mysql-container:
+    image: docker.1ms.run/library/mysql
+    #占用的主机端口:网络内访问使用的端口
+    ports:
+      - '3308:3306'
+      # 目录内不能有文件,否则报错
+    volumes:
+      - ./docker-data/redis:/var/lib/mysql
+    environment:
+      # 初始数据库
+      MYSQL_DATABASE: fetch
+      MYSQL_ROOT_PASSWORD: qwqw1314.
+      # 允许任何主机连接
+      MYSQL_ROOT_HOST: '%'
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  redis-container:
+    image: docker.1ms.run/library/redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - ./docker-data/mysql:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  nginx-container:
+    image: docker.1ms.run/library/nginx:alpine
+    ports:
+      - '80:80' # HTTP
+      - '443:443' # HTTPS (如需启用)
+    volumes:
+      - ./frontend-build:/usr/share/nginx/html # 前端静态文件
+      - ./nginx/conf/default.conf:/etc/nginx/conf.d/default.conf # Nginx 配置
+      - ./nginx/logs:/var/log/nginx # Nginx 日志
+      # 如果启用 HTTPS，还需要
+      # - ./nginx/ssl:/etc/nginx/ssl
+    restart: unless-stopped
+    depends_on:
+      - nest-app
+#使用默认桥接网络

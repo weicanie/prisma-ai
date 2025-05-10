@@ -1,0 +1,20 @@
+#register-container {
+  padding: 50px 70px 50px 10px;
+  width: 400px;
+  height: 550px;
+  margin: 100px auto 0 auto;
+  text-align: center;
+  background-color: #fff;
+  border-radius: 10px;
+}
+#register-container .links {
+  display: flex;
+  justify-content: flex-end;
+}
+#register-container .btn {
+  width: 100%;
+}
+#register-container .captcha-wrapper {
+  display: flex;
+  justify-content: flex-end;
+}
