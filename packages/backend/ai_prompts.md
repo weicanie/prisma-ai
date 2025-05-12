@@ -1,0 +1,8 @@
+# stategraph 添加 waitEdge支持
+
+这是一个事件总线的简易实现。
+目标是完成graph.service里让graph的执行支持在某一节点等待用户响应,并且用户超时未响应后将当前状态和进度(一个之后会的字符串)储存到mongodb数据库（使用nest/mogoose）。
+实现思路参考如下：
+1、给Eventbus添加足够的类型定义
+2、给diyStateGraph添加一种新的边WaitEdge,如果nodeA有WaitEdge指向nodeB，则nodeA执行结束轮到执行nodeB时，监听nodeB完成的事件node B done,nodeB执行时监听自身完成的事件node B self done。比如nodeB是等待获取用户上传的项目经验的,则用户上传项目经验的接口在接收到用户上传后会emit node B self done。
+3、给diyStateGraph添加新方法storeState,以将当前state储存到mongodb数据库

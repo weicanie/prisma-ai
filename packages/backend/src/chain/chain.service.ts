@@ -28,7 +28,7 @@ export class ChainService {
 	) {}
 
 	/**
-	 * 创建链, memory使用BufferMemory, memory是否注入prompt取决于prompt是否提供{chat_history}插槽
+	 * 创建链, memory默认使用BufferMemory, memory是否注入prompt取决于prompt是否提供{chat_history}插槽
 	 * @description chat_record -> memory -> chat_history -> prompt -> llm
 	 * @param llm 模型实例
 	 * @param prompt 输入模型的整个prompt
@@ -88,7 +88,7 @@ export class ChainService {
 	}
 
 	/**
-	 * 储存用户上传项目描述
+	 * @description 储存用户上传的项目描述
 	 */
 	async projectInfo() {
 		//*前端上传项目描述的字符串,存入数据库
@@ -96,7 +96,9 @@ export class ChainService {
 	}
 
 	/**
-	 * 输入的项目经验（单个）转化为JSON对象
+	 * 输入的项目经验（单个）转化为JSON
+	 * @description 1、用户导入现有的项目经验,则通过llm转为JSON
+	 * @description 2、用户以表单提交项目经验,则直接就是JSON
 	 */
 	async tansformChain() {
 		const schema = projectSchema;
@@ -127,7 +129,7 @@ export class ChainService {
 
 	/**
 	 * 项目信息检查和补全。
-	 * -> 信息完整
+	 * @description -> 信息完整
 	 */
 	async infoCompletion(project: ProjectExperience) {
 		//* 返回转换后的数据给前端, 前端把表单展示给用户,通过必填项的方式让用户补全项目信息，然后上传
@@ -135,7 +137,7 @@ export class ChainService {
 
 	/**
 	 * 现有亮点评估、改进。
-	 * -> 亮点突出
+	 * @description -> 亮点突出
 	 */
 	async polishChain(project: ProjectExperience) {
 		const schema = projectPolishedSchema;
@@ -150,7 +152,7 @@ export class ChainService {
 
 	/**
 	 * 项目亮点挖掘。
-	 * -> 亮点充足
+	 * @description -> 亮点充足
 	 */
 	async mineChain(project: ProjectExperience) {
 		const schema = projectMinedSchema;

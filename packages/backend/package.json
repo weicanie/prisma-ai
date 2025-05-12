@@ -36,6 +36,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "dotenv": "^16.5.0",
+    "globals": "^16.0.0",
     "immer": "^10.1.1",
     "langchain": "^0.3.22",
     "mongoose": "^8.14.1",
