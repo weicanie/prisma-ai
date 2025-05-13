@@ -2,7 +2,7 @@ import { ChatPromptTemplate, PromptTemplate } from '@langchain/core/prompts';
 import { Injectable } from '@nestjs/common';
 import { AgentExecutor, createOpenAIToolsAgent, createReactAgent } from 'langchain/agents';
 import { pull } from 'langchain/hub';
-import { ModelService } from '../../model/model.service';
+import { ModelService } from '../model/model.service';
 @Injectable()
 export class AgentService {
 	constructor(private modelService: ModelService) {}

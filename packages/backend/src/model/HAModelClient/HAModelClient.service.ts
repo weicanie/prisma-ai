@@ -2,6 +2,7 @@ import { BaseLanguageModelInput } from '@langchain/core/language_models/base';
 import { AIMessageChunk } from '@langchain/core/messages';
 import { ChatOpenAI, ChatOpenAICallOptions, ChatOpenAIFields } from '@langchain/openai';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { CircuitBreakerService } from './circuit-breaker.service';
 import { RateLimiterService } from './rate-limiter.service';
 import { RequestQueueService } from './request-queue.service';
@@ -40,6 +41,7 @@ type DeepPartial<T> = {
  * @description 增强的ChatOpenAI, 继承自langchain的ChatOpenAI
  * @description 拦截invoke方法, 添加熔断器、限流器、指数退避重试、请求队列,实现模型服务的高可用
  */
+//TODO 不如组合?
 export class HAModelClient extends ChatOpenAI {
 	//模型参数
 	private modelConfig: ChatOpenAIFields;
@@ -129,16 +131,17 @@ export class HAModelClientService {
 		private circuitBreakerService: CircuitBreakerService,
 		private retryService: RetryService,
 		private requestQueueService: RequestQueueService,
-		private rateLimiter: RateLimiterService
+		private rateLimiter: RateLimiterService,
+		private configService: ConfigService
 	) {}
 	createClient(
 		config: DeepPartial<HAModelClientOptions> = {
 			modelConfig: {
 				model: 'deepseek-reasoner',
 				configuration: {
-					apiKey: process.env.API_KEY_DEEPSEEK,
+					apiKey: this.configService.get('API_KEY_DEEPSEEK'),
 					timeout: 6000,
-					baseURL: process.env.BASE_URL_DEEPSEEK,
+					baseURL: this.configService.get('BASE_URL_DEEPSEEK'),
 					maxRetries: 3
 				}
 			},

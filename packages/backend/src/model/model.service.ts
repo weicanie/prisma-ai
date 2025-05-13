@@ -6,6 +6,7 @@ import {
 	OpenAIEmbeddingsParams
 } from '@langchain/openai';
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
 import { ChatHistoryService } from './chat_history.service';
 import { HAModelClientService } from './HAModelClient/HAModelClient.service';
@@ -16,7 +17,6 @@ type EmbedOpenAIFields = Partial<OpenAIEmbeddingsParams> & {
 	apiKey?: string;
 	configuration?: ClientOptions;
 };
-console.log('ModelService 模块加载');
 
 @Injectable()
 export class ModelService {
@@ -40,34 +40,32 @@ export class ModelService {
 	openai_config: ChatOpenAIFields = {
 		model: 'gpt-4o-mini',
 		configuration: {
-			apiKey: process.env.OPENAI_API_KEY,
+			apiKey: this.configService.get('OPENAI_API_KEY'),
 			timeout: 6000,
-			baseURL: process.env.OPENAI_API_BASE_URL,
+			baseURL: this.configService.get('OPENAI_API_BASE_URL'),
 			maxRetries: 3
 		}
 	};
 	deepseek_config: ChatOpenAIFields = {
 		model: 'deepseek-reasoner',
 		configuration: {
-			apiKey: process.env.API_KEY_DEEPSEEK,
+			apiKey: this.configService.get('API_KEY_DEEPSEEK'),
 			timeout: 6000,
-			baseURL: process.env.BASE_URL_DEEPSEEK,
+			baseURL: this.configService.get('BASE_URL_DEEPSEEK'),
 			maxRetries: 3
 		}
 	};
 
-	public LLM_openaiRaw: ChatOpenAI;
-	public LLM_deepseekRaw: ChatOpenAI;
-
 	constructor(
 		public chatHistoryService: ChatHistoryService,
-		public HAModelClientService: HAModelClientService
+		public HAModelClientService: HAModelClientService,
+		// @Inject(ConfigService)
+		public configService: ConfigService
 	) {
 		//初始化模型池
-		this.LLM_openaiRaw = new ChatOpenAI(this.openai_config);
-		this.LLM_deepseekRaw = new ChatOpenAI(this.deepseek_config);
-		this.rawModels.set(JSON.stringify(this.openai_config), this.LLM_openaiRaw);
-		this.rawModels.set(JSON.stringify(this.deepseek_config), this.LLM_deepseekRaw);
+
+		this.rawModels.set(JSON.stringify(this.openai_config), new ChatOpenAI(this.openai_config));
+		this.rawModels.set(JSON.stringify(this.deepseek_config), new ChatOpenAI(this.deepseek_config));
 		//TODO 这样能行? 不行就放onMuduleInit里
 		const LLM_openai = this.HAModelClientService.createClient({ modelConfig: this.openai_config });
 		const LLM_deepseek = this.HAModelClientService.createClient({
@@ -80,9 +78,9 @@ export class ModelService {
 		const embedModel_openai_config: EmbedOpenAIFields = {
 			model: 'text-embedding-3-small',
 			configuration: {
-				apiKey: process.env.OPENAI_API_KEY,
+				apiKey: this.configService.get('OPENAI_API_KEY'),
 				timeout: 6000,
-				baseURL: process.env.OPENAI_API_BASE_URL,
+				baseURL: this.configService.get('OPENAI_API_BASE_URL'),
 				maxRetries: 1
 			}
 		};

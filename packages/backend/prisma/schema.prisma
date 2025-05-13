@@ -1,0 +1,41 @@
+generator client {
+  provider      = "prisma-client-js"
+  // 提高兼容性
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+  //使用自定义路径则需要修改代码中PrismaClient的import路径
+  //默认路径:'@prisma/client'
+  // output        = "../generated/client"
+}
+
+generator docs {
+  provider = "node node_modules/prisma-docs-generator"
+  output   = "../generated/docs"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+//用户
+model user {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique(map: "username") @db.VarChar(50)
+  password  String    @db.VarChar(500)
+  create_at DateTime? @default(now()) @db.Timestamp(0)
+  update_at DateTime? @default(now()) @db.Timestamp(0)
+  email     String    @db.VarChar(100)
+}
+
+//面试题
+model question {
+  id        Int       @id @default(autoincrement())
+  user_id   Int
+  create_at DateTime? @default(now()) @db.Timestamp(0)
+  update_at DateTime? @default(now()) @db.Timestamp(0)
+  title     String    @db.VarChar(255)
+  content   String    @db.LongText
+  gist      String    @db.LongText
+  type      String    @db.VarChar(255)
+  hard      Int
+}

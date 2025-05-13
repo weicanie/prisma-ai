@@ -12,7 +12,7 @@ import { ProjectService } from './project.service';
 	//Schema 注入模块作为 Model,然后实例化以操控mongodb数据库
 	imports: [ChainModule, MongooseModule.forFeature([{ name: Project.name, schema: ProjectSchema }])] //forFeature指定模块可用的集合（表）
 })
-export class GeneralResumeModule implements NestModule {
+export class ProjectModule implements NestModule {
 	configure(consumer: MiddlewareConsumer) {
 		consumer
 			.apply(bodyParser.text({ type: 'text/plain' }))

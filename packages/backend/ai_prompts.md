@@ -6,3 +6,9 @@
 1、给Eventbus添加足够的类型定义
 2、给diyStateGraph添加一种新的边WaitEdge,如果nodeA有WaitEdge指向nodeB，则nodeA执行结束轮到执行nodeB时，监听nodeB完成的事件node B done,nodeB执行时监听自身完成的事件node B self done。比如nodeB是等待获取用户上传的项目经验的,则用户上传项目经验的接口在接收到用户上传后会emit node B self done。
 3、给diyStateGraph添加新方法storeState,以将当前state储存到mongodb数据库
+
+# 组合增强stategraph
+
+将现在的DiyStateGraph实现改为继承自langGraph的StateGraph,且内部的CompiledGraph实现langchain的Runnable接口。并且保留原有功能。
+
+> 因为原来生成的diystategraph太烂, 导致后续改的很折腾

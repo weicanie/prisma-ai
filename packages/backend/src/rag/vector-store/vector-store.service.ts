@@ -2,6 +2,7 @@ import { Document } from '@langchain/core/documents';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { PineconeStore } from '@langchain/pinecone';
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Pinecone } from '@pinecone-database/pinecone';
 import * as fs from 'fs';
 /**pinecone云向量数据库的使用
@@ -23,9 +24,9 @@ interface RetriverConfig {
 @Injectable()
 export class VectorStoreService {
 	private pinecone: Pinecone;
-	constructor() {
+	constructor(private configService: ConfigService) {
 		this.pinecone = new Pinecone({
-			apiKey: process.env.PINECONE_API_KEY
+			apiKey: this.configService.get('PINECONE_API_KEY')
 		});
 	}
 

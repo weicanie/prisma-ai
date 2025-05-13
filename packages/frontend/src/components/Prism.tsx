@@ -15,7 +15,7 @@ const Prism: React.FC<PrismProps> = ({ light: externalLight = false, className, 
 	const [animationComplete, setAnimationComplete] = useState(false);
 	const { theme } = useTheme();
 	//FIXME 现在会保持system
-	const lightColor = theme === 'dark' ? 'rgba(184, 214, 200, 0.743)' : 'rgb(233, 251, 251)';
+	const lightColor = theme === 'dark' ? 'rgb(233, 251, 251)' : 'rgb(233, 251, 251)';
 	useEffect(() => {
 		setShowLight(externalLight);
 		if (!externalLight) {

@@ -1,3 +1,4 @@
+//从文件中读取prompt
 import { ChatPromptTemplate, PromptTemplate } from '@langchain/core/prompts';
 import { Injectable } from '@nestjs/common';
 import * as fs from 'fs';
@@ -22,7 +23,7 @@ export class PromptService {
 	private readonly mineT: PromptTemplate;
 	constructor() {
 		const polishStr = fs.readFileSync(
-			path.join(process.cwd(), 'data/prompt/project_frontend/polish.md'),
+			path.join(process.cwd(), 'data/prompt/project_frontend/polish-T.md'),
 			{
 				encoding: 'utf-8'
 			}

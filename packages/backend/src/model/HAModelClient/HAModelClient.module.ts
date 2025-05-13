@@ -24,7 +24,7 @@ import { RetryService } from './retry.service';
 			useFactory: () => new RateLimiterService(60) //默认限制每分钟最多60次请求
 		}
 	],
-	exports: [],
+	exports: [HAModelClientService],
 	imports: []
 })
 export class HAModelClientModule {}

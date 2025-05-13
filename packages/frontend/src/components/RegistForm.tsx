@@ -14,7 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { message } from 'antd';
 import type { Dispatch, PropsWithChildren, SetStateAction } from 'react';
-import { register, registerCaptcha } from '../services';
+import { register, registerCaptcha } from '../services/login_regist';
 
 const formSchema = z.object({
 	username: z.string().min(2, {

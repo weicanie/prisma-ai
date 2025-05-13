@@ -9,13 +9,13 @@ import { Model } from 'mongoose';
 import { z } from 'zod';
 import { ModelService } from '../model/model.service';
 import { PromptService, role } from '../prompt/prompt.service';
-import { Project } from './entities/project.entities';
 import {
 	ProjectExperience,
 	projectMinedSchema,
 	projectPolishedSchema,
 	projectSchema
-} from './types';
+} from '../types/project';
+import { Project } from './entities/project.entities';
 
 @Injectable()
 export class ChainService {
@@ -88,15 +88,7 @@ export class ChainService {
 	}
 
 	/**
-	 * @description 储存用户上传的项目描述
-	 */
-	async projectInfo() {
-		//*前端上传项目描述的字符串,存入数据库
-		//*前端上传表单数据 就不用llm参与转换了!
-	}
-
-	/**
-	 * 输入的项目经验（单个）转化为JSON
+	 * 输入的文本项目经验（单个）转化为JSON
 	 * @description 1、用户导入现有的项目经验,则通过llm转为JSON
 	 * @description 2、用户以表单提交项目经验,则直接就是JSON
 	 */
@@ -125,14 +117,6 @@ export class ChainService {
 
 		const chain = await this.createChain(llm, prompt, schema, saveProject);
 		return chain;
-	}
-
-	/**
-	 * 项目信息检查和补全。
-	 * @description -> 信息完整
-	 */
-	async infoCompletion(project: ProjectExperience) {
-		//* 返回转换后的数据给前端, 前端把表单展示给用户,通过必填项的方式让用户补全项目信息，然后上传
 	}
 
 	/**

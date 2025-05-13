@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ModelModule } from '../../model/model.module';
+import { ModelModule } from '../model/model.module';
 import { AgentService } from './agent.service';
 
 @Module({

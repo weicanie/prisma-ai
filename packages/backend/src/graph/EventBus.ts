@@ -1,5 +1,7 @@
+import { Injectable } from '@nestjs/common';
+
 /**
- * 事件处理函数类型定义，T为事件参数类型
+ * 事件处理函数类型定义，T为事件payload类型
  */
 type EventHandler<T = any> = (payload: T) => void;
 
@@ -12,21 +14,22 @@ interface Handler<T = any> {
 }
 
 /**
- * 泛型事件总线实现，支持自定义事件类型和参数类型
+ * 事件总线实现，支持自定义事件、payload类型
  * @template Events 事件名到参数类型的映射
  */
-export class HYEventBus<Events extends Record<string, any> = any> {
+@Injectable()
+export class EventBus<Events extends Record<string, any> = any> {
 	/**
 	 * 存储所有事件及其对应的处理器数组
 	 * key为事件名，value为处理器数组
 	 */
-	private eventBus: Record<string, Handler[]>;
+	private eventBus: Map<string, Handler[]>;
 
 	/**
 	 * 构造函数，初始化事件总线存储对象
 	 */
 	constructor() {
-		this.eventBus = {} as Record<string, Handler[]>;
+		this.eventBus = new Map<string, Handler[]>();
 	}
 
 	/**
@@ -117,16 +120,10 @@ export class HYEventBus<Events extends Record<string, any> = any> {
 		}
 		const handlers = this.eventBus[eventName as string];
 		if (handlers && eventCallback) {
-			// 拷贝一份，避免遍历时修改原数组
-			//?
-			const newHandlers = [...handlers];
-			for (let i = 0; i < newHandlers.length; i++) {
-				const handler = newHandlers[i];
-				if (handler.eventCallback === eventCallback) {
-					const index = handlers.indexOf(handler);
-					handlers.splice(index, 1);
-				}
-			}
+			// 直接过滤掉目标回调
+			this.eventBus[eventName as string] = handlers.filter(
+				handler => handler.eventCallback !== eventCallback
+			);
 		}
 		// 如果该事件已无监听器，删除该事件
 		if (handlers && handlers.length === 0) {
@@ -138,7 +135,7 @@ export class HYEventBus<Events extends Record<string, any> = any> {
 	 * 清空所有事件监听
 	 */
 	clear() {
-		this.eventBus = {} as Record<string, Handler[]>;
+		this.eventBus = {} as Map<string, Handler[]>;
 	}
 
 	/**
@@ -151,5 +148,4 @@ export class HYEventBus<Events extends Record<string, any> = any> {
 	}
 }
 
-// 默认导出，兼容import和require
-export default HYEventBus;
+export default EventBus;

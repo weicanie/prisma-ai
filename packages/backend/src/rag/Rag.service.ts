@@ -7,7 +7,7 @@ import { TextLoader } from 'langchain/document_loaders/fs/text';
 import { BufferMemory } from 'langchain/memory';
 import * as path from 'path';
 
-import { ModelService } from '../../model/model.service';
+import { ModelService } from '../model/model.service';
 import { VectorStoreService } from './vector-store/vector-store.service';
 
 @Injectable()
@@ -80,7 +80,7 @@ export class RagService {
 				}
 			}),
 			prompt,
-			this.modelService.LLM_openai,
+			this.modelService.getLLMOpenAIRaw(),
 			outParser,
 			RunnableLambda.from(async input => {
 				await memory.saveContext({ input: userInput }, { output: input });

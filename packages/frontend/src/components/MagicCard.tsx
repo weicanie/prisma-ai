@@ -11,7 +11,6 @@ type PropsType = PropsWithChildren<{
 }>;
 
 export function MagicCardWrapper({ cardTitle, children, contentPadding = 4 }: PropsType) {
-	//TODO 主题管理
 	const { theme } = useTheme();
 	return (
 		<Card className="p-0 max-w-lg w-full shadow-none border-none">
