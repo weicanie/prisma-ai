@@ -29,6 +29,7 @@ RUN npx prisma generate --no-engine
 
 # 构建后端项目
 WORKDIR /app/packages/backend
+RUN export NODE_ENV=production
 RUN pnpm build
 
 # 第二阶段：构建生产镜像

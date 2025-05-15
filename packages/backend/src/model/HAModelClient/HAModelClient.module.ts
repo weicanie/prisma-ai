@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ChatHistoryService } from '../chat_history.service';
-import { CircuitBreakerService } from './circuit-breaker.service';
-import { HAModelClientService } from './HAModelClient.service';
-import { RateLimiterService } from './rate-limiter.service';
-import { RequestQueueService } from './request-queue.service';
-import { RetryService } from './retry.service';
-
+import { CircuitBreakerService } from './services/circuit-breaker.service';
+import { HAModelClientService } from './services/HAModelClient.service';
+import { RateLimiterService } from './services/rate-limiter.service';
+import { RequestQueueService } from './services/request-queue.service';
+import { RetryService } from './services/retry.service';
 @Module({
 	controllers: [],
 	providers: [

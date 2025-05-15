@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styles from './Wall.module.less';
+import styled from 'styled-components';
 
 interface WallAProps {
 	play: boolean;
@@ -8,7 +8,31 @@ interface WallAProps {
 	width?: number;
 	height?: number;
 }
+const WallWrapper = styled.div`
+	.wallGrid {
+		display: grid;
+		width: 100%;
+		height: 100vh;
+		background-color: transparent;
+		position: absolute;
+		overflow: hidden;
+		z-index: -1;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
 
+		filter: url(#roughpaper);
+	}
+
+	.gridCell {
+		border-bottom: 2px solid rgb(151, 170, 184);
+	}
+
+	.withBorder {
+		border-right: 2px solid rgb(151, 170, 184);
+	}
+`;
 const Wall: React.FC<WallAProps> = ({ play, duration = 1500, delay = 1000 }) => {
 	const [rows, setRows] = useState(30);
 	const [cols, setCols] = useState(24);
@@ -66,10 +90,10 @@ const Wall: React.FC<WallAProps> = ({ play, duration = 1500, delay = 1000 }) => 
 		</svg>
 	);
 	return (
-		<>
+		<WallWrapper>
 			<SvgFilter />
 			<div
-				className={styles.wallGrid}
+				className="wallGrid"
 				style={{
 					gridTemplateRows: `repeat(${rows}, 1fr)`,
 					gridTemplateColumns: `repeat(${cols}, 1fr)`,
@@ -81,12 +105,10 @@ const Wall: React.FC<WallAProps> = ({ play, duration = 1500, delay = 1000 }) => 
 					const isEvenRow = Math.floor(index / getEvenCols()) % 2 === 0;
 					const isGap = isEvenRow ? index % 2 === 1 : index % 2 === 0;
 
-					return (
-						<div key={index} className={`${styles.gridCell} ${!isGap ? styles.withBorder : ''}`} />
-					);
+					return <div key={index} className={`gridCell ${!isGap ? 'withBorder' : ''}`} />;
 				})}
 			</div>
-		</>
+		</WallWrapper>
 	);
 };
 

@@ -2,7 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-import { useTheme } from 'next-themes';
+import { useTheme } from '@/utils/theme.tsx';
+
 import type { PropsWithChildren } from 'react';
 import { MagicCard } from './magicui/magic-card';
 type PropsType = PropsWithChildren<{

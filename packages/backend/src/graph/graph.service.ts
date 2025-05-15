@@ -35,6 +35,7 @@ export class GraphService {
 			projectPolished: {},
 			projectMined: {}
 		};
+
 		const stateSchema = z.object({
 			project: projectSchema,
 			projectPolished: projectPolishedSchema,

@@ -18,7 +18,7 @@ export class UserController {
 	async regist(@Body() registerUser: RegisterUserDto) {
 		return await this.userService.regist(registerUser);
 	}
-
+	//TODO 尤其需要高可用
 	@Get('register-captcha')
 	async captcha(@Query('address') address: string) {
 		if (!address) {

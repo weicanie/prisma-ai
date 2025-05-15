@@ -41,4 +41,9 @@ export class ProjectController {
 	 */
 	@Post('mined')
 	async uploadMined(@Body() project: ProjectDto) {}
+
+	@Post('query')
+	async query(@Body() query: string) {
+		return await this.projectService.query(query);
+	}
 }

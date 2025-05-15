@@ -14,18 +14,10 @@ instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 	}
 	return config;
 });
-interface ResponseData<T = any> {
-	code: number;
 
-	message: string;
-
-	data: T;
-
-	status?: number;
-}
 instance.interceptors.response.use((response: AxiosResponse) => {
-	const resdata: ResponseData = response.data;
-	resdata.status = resdata.code; //兼容
+	const resdata = response.data;
+	console.log('🚀 ~ instance.interceptors.response.use ~ resdata:', resdata);
 	return resdata as any;
 });
 

@@ -9,7 +9,7 @@ export class GlobalFilter implements ExceptionFilter {
 	catch(exception: Error, host: ArgumentsHost) {
 		const ctx = host.switchToHttp();
 		const response = ctx.getResponse<Response>();
-		let code = exception.message;
+		let code = exception.message; //FIXME 自己抛的错误才会用错误码
 		let message = errorMessage[code] || '服务器异常';
 		let status = HttpStatus.OK;
 		let data = null;

@@ -1,5 +1,4 @@
 import classNames from 'classnames';
-import { useTheme } from 'next-themes';
 import { useEffect, useRef, useState } from 'react';
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import { LoginForm } from '../../components/LoginForm';
@@ -13,9 +12,7 @@ function LoginRegist() {
 	const [isLoginCard, setIsLoginCard] = useState(true);
 	const [isLight, setIsLight] = useState(false);
 	const [isFormShow, setIsFormShow] = useState(false);
-	const { theme, setTheme } = useTheme();
-	// TODO 主题切换按钮
-	setTheme('dark');
+
 	const nodeRef = useRef(null);
 
 	useEffect(() => {
@@ -28,7 +25,7 @@ function LoginRegist() {
 	// TODO 暗色主题适配（wall、字体颜色太鲜艳）, 加一个白色背景不就行了
 	// TODO 歌词组件性能差,换
 	return (
-		<LoginRegistWrapper theme={theme}>
+		<LoginRegistWrapper>
 			<div className="card-prism ">
 				<Prism light={isLight} />
 			</div>

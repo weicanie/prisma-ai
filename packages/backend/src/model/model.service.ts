@@ -9,7 +9,11 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
 import { ChatHistoryService } from './chat_history.service';
-import { HAModelClientService } from './HAModelClient/HAModelClient.service';
+import {
+	HAModelClient,
+	HAModelClientService
+} from './HAModelClient/services/HAModelClient.service';
+import { ToolBinding } from './model.types';
 
 type EmbedOpenAIFields = Partial<OpenAIEmbeddingsParams> & {
 	verbose?: boolean;
@@ -206,6 +210,15 @@ export class ModelService {
 			return newModel;
 		}
 	}
+	/**
+	 * @description 返回绑定工具及其行为后的模型
+	 * @param toolBinding - 指定 llm 可用的 tools 和行为限制
+	 */
+	static bindTools(model: HAModelClient | ChatOpenAI, toolBinding: ToolBinding) {
+		const modelBindingTools = model.bind(toolBinding);
+		return modelBindingTools;
+	}
+
 	/**
 	 * @description 获取单例的嵌入模型实例
 	 */

@@ -51,7 +51,7 @@ export function RegistForm({ setIsLoginCard }: PropsType) {
 
 		try {
 			const res = await registerCaptcha(address);
-			if (res.status === 201 || res.status === 200) {
+			if (res.code === '0') {
 				message.success('发送成功');
 			}
 		} catch (e: any) {
@@ -65,14 +65,9 @@ export function RegistForm({ setIsLoginCard }: PropsType) {
 		try {
 			const res = await register(values, true);
 
-			if (res.status === 201 || res.status === 200) {
+			if (res.code === '0') {
 				message.success('注册成功');
-				setTimeout(() => {
-					//@ts-ignore
-					document.getElementById('regist_modal').close();
-					//@ts-ignore
-					document.getElementById('login_modal').showModal();
-				}, 1000);
+				setIsLoginCard(true);
 			}
 		} catch (e: any) {
 			message.error(e.response?.data?.message || '系统繁忙，请稍后再试');

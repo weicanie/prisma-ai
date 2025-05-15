@@ -14,8 +14,6 @@ import { ProjectService } from './project.service';
 })
 export class ProjectModule implements NestModule {
 	configure(consumer: MiddlewareConsumer) {
-		consumer
-			.apply(bodyParser.text({ type: 'text/plain' }))
-			.forRoutes('general-resume', 'general-resume/ask');
+		consumer.apply(bodyParser.text({ type: 'text/plain' })).forRoutes('project');
 	}
 }

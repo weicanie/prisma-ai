@@ -8,6 +8,7 @@ import { GraphModule } from './graph/graph.module';
 import { IsLoginGuard } from './isLogin.guard';
 import { ProjectModule } from './project/project.module';
 import { UserModule } from './user/user.module';
+
 @Module({
 	imports: [
 		UserModule,
@@ -18,7 +19,7 @@ import { UserModule } from './user/user.module';
 		ConfigModule.forRoot({
 			isGlobal: true,
 			envFilePath: [
-				process.env.NODE_ENVIRONMENT === 'production' ? '.env.production' : '.env.development',
+				process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development',
 				'.env'
 			]
 		}),

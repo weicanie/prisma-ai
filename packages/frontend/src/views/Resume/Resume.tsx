@@ -1,11 +1,14 @@
-import { ResumeWrapper } from './Resume.style';
+import MilkdownEditorWrapper from '../../components/EditorWrapper';
+import ResumeSidebarWrapper from '../../components/ResumeSidebarWrapper';
 
 function Resume() {
 	return (
-		<ResumeWrapper>
-			<h1>Resume</h1>
-			<p>This is the resume page.</p>
-		</ResumeWrapper>
+		<>
+			<ResumeSidebarWrapper>
+				<MilkdownEditorWrapper />
+			</ResumeSidebarWrapper>
+		</>
 	);
 }
+
 export default Resume;

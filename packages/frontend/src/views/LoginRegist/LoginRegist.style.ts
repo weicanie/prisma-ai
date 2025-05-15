@@ -7,6 +7,9 @@ const LoginRegistWrapper = styled.div`
 	align-items: center;
 	width: 100%;
 	height: 100vh;
+	/* 在wall之下 */
+	z-index: 0;
+	background-color: ${({ theme }) => theme.background};
 
 	@media screen and (min-width: 1024px) {
 		/* 1024px以上的屏幕 */
@@ -34,7 +37,7 @@ const LoginRegistWrapper = styled.div`
 			width: 100%;
 		}
 		.card-text {
-			font-size: 2.5rem;
+			font-size: 3rem;
 		}
 	}
 

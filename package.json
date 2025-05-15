@@ -5,7 +5,8 @@
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
     "husky": "^9.1.7",
-    "lerna": "^8.2.2"
+    "lerna": "^8.2.2",
+    "madge": "^8.0.0"
   },
   "scripts": {
     "prepare": "husky"

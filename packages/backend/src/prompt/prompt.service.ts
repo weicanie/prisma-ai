@@ -7,7 +7,8 @@ import * as path from 'path';
 export enum role {
 	SYSTEM = 'system',
 	ASSISTANT = 'assistant',
-	HUMAN = 'human'
+	HUMAN = 'human',
+	PLACEHOLDER = 'placeholder'
 }
 
 @Injectable()

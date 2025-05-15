@@ -1,6 +1,7 @@
+import { useTheme } from '@/utils/theme.tsx';
 import classNames from 'classnames';
 import { motion } from 'motion/react';
-import { useTheme } from 'next-themes';
+
 import React, { useEffect, useState } from 'react';
 
 interface PrismProps {

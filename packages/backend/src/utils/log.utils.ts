@@ -6,7 +6,19 @@ const baseLogsDir = path.join(__dirname, '../../logs');
 export enum logType {
 	Login = '[用户登录]',
 	Regist = '[用户注册]',
-	Error = '[错误]'
+	Error = '[错误]',
+
+	LLMRequest = '[LLM Request]',
+	LLMResponse = '[LLM Response]',
+	LLMStream = '[LLM Stream]',
+	LLMError = '[LLM Error]',
+
+	GetTools = '[GET Tools]',
+	GetToolsError = '[GET Tools Error]',
+	ConnectToServer = '[Connect To Server]',
+	ToolCall = '[Tool Call]',
+	ToolCallResponse = '[Tool Call Response]',
+	ToolCallError = '[Tool Call Error]'
 }
 
 export function setTodayDir(): string {

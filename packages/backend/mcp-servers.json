@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "mongodb": {
+      "command": "npx",
+      "args": [
+        "mcp-mongo-server",
+        "mongodb://localhost:27017/chainResume"
+      ]
+    },
+    "remoteExample": {
+      "url":"http://localhost:3011/mcp"
+    }
+  },
+  "defaultServer": "mongodb",
+  "system": "这里填写系统提示词"
+}

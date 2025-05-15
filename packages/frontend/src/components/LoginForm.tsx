@@ -14,6 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { message } from 'antd';
 import type { Dispatch, PropsWithChildren, SetStateAction } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { login } from '../services/login_regist';
 
 const formSchema = z.object({
@@ -37,17 +38,17 @@ export function LoginForm({ setIsLoginCard }: PropsType) {
 		}
 	});
 
+	const navigate = useNavigate();
+
 	async function onSubmit(values: z.infer<typeof formSchema>) {
 		try {
 			const res = await login({ username: values.username, password: values.password });
-			if (res.status === 201 || res.status === 200) {
+			if (res.code === '0') {
 				message.success('登录成功');
 				res.data.userId = res.data.id;
 				localStorage.setItem('token', res.data.token);
 				localStorage.setItem('userInfo', JSON.stringify(res.data));
-				// setTimeout(() => {
-				// 	document.getElementById('login_modal').close();
-				// }, 500);
+				navigate('/');
 			}
 		} catch (e: any) {
 			message.error(e.response?.data?.message || '系统繁忙，请稍后再试');
