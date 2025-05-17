@@ -19,5 +19,4 @@ export const routes = [
 		path: '/resume',
 		element: <Resume />
 	}
-	// 其他路由...
 ];

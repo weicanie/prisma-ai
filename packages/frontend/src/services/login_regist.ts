@@ -1,5 +1,5 @@
 import { instance } from './config';
-import type { ServerDataFormat } from './config/types';
+import type { ServerDataFormat as SDF } from './config/types';
 
 interface UserInfo {
 	username: string;
@@ -18,15 +18,12 @@ interface UserInfoResponse {
 }
 //注册
 async function register(userInfo: UserInfo) {
-	return await instance.post<UserInfo, ServerDataFormat<UserInfoResponse>>(
-		'/user/regist',
-		userInfo
-	);
+	return await instance.post<UserInfo, SDF<UserInfoResponse>>('/user/regist', userInfo);
 }
 
 //验证码发送到邮箱
 async function registerCaptcha(email: string) {
-	return await instance.get<ServerDataFormat<string>>(`/user/register-captcha?address=${email}`);
+	return await instance.get<SDF<string>>(`/user/register-captcha?address=${email}`);
 }
 
 interface LoginResponse {
@@ -40,7 +37,7 @@ interface LoginResponse {
 }
 //登录
 async function login(userInfo: UserInfo) {
-	return await instance.post<UserInfo, ServerDataFormat<LoginResponse>>('/user/login', userInfo);
+	return await instance.post<UserInfo, SDF<LoginResponse>>('/user/login', userInfo);
 }
 
 export { login, register, registerCaptcha };

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-/* schema 在 后端定义
+//schema 在 后端定义
 
 const infoSchema = z
 	.object({
@@ -49,7 +49,13 @@ const projectMinedSchema = z.object({
 			tech: z.array(z.string()).default([]).describe('涉及技术')
 		})
 	)
-}); */
+});
+
+//从zod的schema获取类型定义
+interface ProjectSchemaType extends z.infer<typeof projectSchema> {} // 满足开闭原则
+interface ProjectPolishedSchemaType extends z.infer<typeof projectPolishedSchema> {}
+interface ProjectMinedSchemaType extends z.infer<typeof projectMinedSchema> {}
+
 /* 
 shadcn-ui的 form 要求schema不能有optional()和default()
 前者不支持,后者通过defaultValues来实现
@@ -102,4 +108,11 @@ const projectMinedSchemaForm = z.object({
 	)
 });
 
-export { projectMinedSchemaForm, projectPolishedSchemaForm, projectSchemaForm };
+export {
+	projectMinedSchemaForm,
+	projectPolishedSchemaForm,
+	projectSchemaForm,
+	type ProjectMinedSchemaType,
+	type ProjectPolishedSchemaType,
+	type ProjectSchemaType
+};

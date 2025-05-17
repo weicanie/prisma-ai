@@ -34,13 +34,12 @@ export class GlobalFilter implements ExceptionFilter {
 			}
 		}
 
-		let status = HttpStatus.OK;
 		let data = null;
 		const result: ResponseData = {
 			code,
 			message,
 			data
 		};
-		response.status(status).json(result);
+		response.status(HttpStatus.OK).json(result);
 	}
 }

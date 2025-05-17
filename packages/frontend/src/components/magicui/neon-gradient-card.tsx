@@ -7,7 +7,7 @@ import {
 	type ReactNode
 } from 'react';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/lib/utils';
 
 interface NeonColorsProps {
 	firstColor: string;

@@ -2,7 +2,7 @@
 const theme = {
 	primary: '#0070f3',
 	secondary: '#1db954',
-	background: '#f0f0f0', //整个页面背景色
+	background: '#f0f0f0',
 	text: '#333',
 	border: '#ddd',
 	shadow: 'rgba(0, 0, 0, 0.1)'
