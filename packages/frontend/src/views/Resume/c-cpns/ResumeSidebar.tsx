@@ -123,7 +123,7 @@ export function ResumeSidebar() {
 				</SidebarMenu>
 			</SidebarHeader>
 
-			<SidebarContent>
+			<SidebarContent className="overflow-hidden">
 				<Collapsible defaultOpen className="group/collapsible">
 					<SidebarGroup>
 						<CollapsibleTrigger>

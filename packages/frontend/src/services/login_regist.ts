@@ -1,5 +1,5 @@
-import instance from '.';
-import type { ResponseData } from './types';
+import { instance } from './config';
+import type { ServerDataFormat } from './config/types';
 
 interface UserInfo {
 	username: string;
@@ -17,22 +17,16 @@ interface UserInfoResponse {
 	create_at: Date | null;
 }
 //注册
-async function register(
-	userInfo: UserInfo,
-	isCommit: boolean
-): Promise<ResponseData<UserInfoResponse>> {
-	let data;
-	if (isCommit) {
-		data = await instance.post('/user/regist', userInfo);
-	} else {
-		data = await instance.post('/user/login', userInfo);
-	}
-	return data as any;
+async function register(userInfo: UserInfo) {
+	return await instance.post<UserInfo, ServerDataFormat<UserInfoResponse>>(
+		'/user/regist',
+		userInfo
+	);
 }
 
 //验证码发送到邮箱
-async function registerCaptcha(email: string): Promise<ResponseData<string>> {
-	return await instance.get(`/user/register-captcha?address=${email}`);
+async function registerCaptcha(email: string) {
+	return await instance.get<ServerDataFormat<string>>(`/user/register-captcha?address=${email}`);
 }
 
 interface LoginResponse {
@@ -42,10 +36,11 @@ interface LoginResponse {
 	update_at: Date | null;
 	email: string;
 	token: string;
-	userId?: number;
+	userId?: number; //前端添加
 }
-async function login(userInfo: UserInfo): Promise<ResponseData<LoginResponse>> {
-	return await instance.post('/user/login', userInfo);
+//登录
+async function login(userInfo: UserInfo) {
+	return await instance.post<UserInfo, ServerDataFormat<LoginResponse>>('/user/login', userInfo);
 }
 
 export { login, register, registerCaptcha };

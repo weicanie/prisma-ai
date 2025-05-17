@@ -1,5 +1,6 @@
 import {
 	ChatOpenAI,
+	ChatOpenAICallOptions,
 	ChatOpenAIFields,
 	ClientOptions,
 	OpenAIEmbeddings,
@@ -9,11 +10,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
 import { ChatHistoryService } from './chat_history.service';
-import {
-	HAModelClient,
-	HAModelClientService
-} from './HAModelClient/services/HAModelClient.service';
-import { ToolBinding } from './model.types';
+import { HAModelClientService } from './HAModelClient/services/HAModelClient.service';
 
 type EmbedOpenAIFields = Partial<OpenAIEmbeddingsParams> & {
 	verbose?: boolean;
@@ -196,11 +193,22 @@ export class ModelService {
 		}
 	}
 
+	getLLMDeepSeekRaw(config?: typeof this.deepseek_config): ChatOpenAI<ChatOpenAICallOptions>;
+	getLLMDeepSeekRaw(
+		modelName: 'deepseek-reasoner' | 'deepseek-chat'
+	): ChatOpenAI<ChatOpenAICallOptions>;
+
 	/**
 	 * @description 直接获取模型实例,无熔断器和限流器和请求队列等高可用保护
 	 * @param [config] - 模型配置
 	 */
-	getLLMDeepSeekRaw(config = this.deepseek_config) {
+	getLLMDeepSeekRaw(config: any) {
+		if (config === 'deepseek-reasoner' || config === 'deepseek-chat') {
+			config = this.deepseek_config;
+			config.model = config;
+		} else if (config === undefined) {
+			config = this.deepseek_config;
+		}
 		const configKey = JSON.stringify(config);
 		if (this.rawModels.has(configKey)) {
 			return this.rawModels.get(configKey);
@@ -209,14 +217,6 @@ export class ModelService {
 			this.rawModels.set(JSON.stringify(config), newModel);
 			return newModel;
 		}
-	}
-	/**
-	 * @description 返回绑定工具及其行为后的模型
-	 * @param toolBinding - 指定 llm 可用的 tools 和行为限制
-	 */
-	static bindTools(model: HAModelClient | ChatOpenAI, toolBinding: ToolBinding) {
-		const modelBindingTools = model.bind(toolBinding);
-		return modelBindingTools;
 	}
 
 	/**

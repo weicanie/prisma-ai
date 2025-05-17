@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ChainService } from '../chain/chain.service';
-import { ProjectExperience, projectSchema } from '../types/project';
+import { ProjectExperience, projectSchema } from '../types/project.schema';
 import { Project } from './entities/project.entities';
 
 @Injectable()

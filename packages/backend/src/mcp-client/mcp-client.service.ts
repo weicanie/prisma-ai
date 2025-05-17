@@ -2,10 +2,10 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js'; //得手动�
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { Injectable } from '@nestjs/common';
-import { ModelService } from '../model/model.service';
+import { ErrorCode } from '../types/error';
 import { addLogs } from '../utils/log.utils';
-import { logType } from './mcp.type';
-import { AIToolService } from './tool.service';
+import { logType, OpenAITool } from './mcp.type';
+import { patchSchemaArrays } from './schemaPatch.util';
 
 interface LocalServerStartCmd {
 	command: string;
@@ -14,7 +14,7 @@ interface LocalServerStartCmd {
 }
 /**
  * MCPClientService
- * 负责连接MCP服务器、获取tools, 提供给llm使用
+ * 负责连接MCP服务器、getTools、callTool, 增加llm的tools
  */
 //TODO transport池（什么当key?）?、每次新连接新建一个Client实例（一个Client实例同一时间只能关联一个Transport、连接一个Server）
 @Injectable()
@@ -26,10 +26,7 @@ export class MCPClientService {
 
 	clientOptions = { capabilities: { tools: {} } };
 
-	constructor(
-		private readonly modelService: ModelService,
-		private readonly toolService: AIToolService
-	) {}
+	constructor() {}
 	/**
 	 * 连接到本地的MCP服务器（使用本地mcp服务器）
 	 * @caution 需要手动close Client实例
@@ -88,7 +85,8 @@ export class MCPClientService {
 					}
 				} catch (error) {
 					throw new Error(
-						`未能从配置文件 '${configPath}' 中加载服务器 '${serverIdentifier} ERROR: ${error}'`
+						ErrorCode.SERVER_NOT_FOUND +
+							`未能从配置文件 '${configPath}' 中加载服务器 '${serverIdentifier} ERROR: ${error}'`
 					);
 				}
 			} else {
@@ -102,7 +100,7 @@ export class MCPClientService {
 			return mcpClient;
 		} catch (error) {
 			addLogs(error, logType.ConnectToServer);
-			throw new Error(`连接失败: ${error instanceof Error ? error.message : String(error)}`);
+			throw new Error(ErrorCode.SERVER_CONNECTION_ERROR);
 		}
 	}
 
@@ -138,7 +136,10 @@ export class MCPClientService {
 				throw new Error(`在配置文件中未找到远程mcp服务器 ${serverIdentifier}`);
 			}
 		} catch (error) {
-			throw new Error(`未能从配置文件 '${configPath}' 中加载mcp服务器 '${serverIdentifier}'`);
+			throw new Error(
+				ErrorCode.SERVER_NOT_FOUND +
+					`未能从配置文件 '${configPath}' 中加载服务器 '${serverIdentifier} ERROR: ${error}'`
+			);
 		}
 		const transport = new StreamableHTTPClientTransport(new URL(transportOptions.url));
 		const mcpClient = new Client(this.clientInfo, this.clientOptions);
@@ -168,6 +169,65 @@ export class MCPClientService {
 			command,
 			args: [scriptPath]
 		};
+	}
+
+	/**
+	 * 获取MCP服务器提供的工具列表,并统一转为OpenAITool格式
+	 */
+	async getTools(client: Client): Promise<OpenAITool[]> {
+		try {
+			const toolsResult = await client.listTools();
+
+			addLogs(toolsResult, logType.GetTools);
+			const openaiToolResult: OpenAITool[] = toolsResult.tools.map(tool => ({
+				type: 'function' as const,
+				function: {
+					name: tool.name || '',
+					description: tool.description || '',
+					parameters: patchSchemaArrays(tool.inputSchema) || {}
+				}
+			}));
+			addLogs({ origin: toolsResult, ToOpenai: openaiToolResult }, logType.GetTools);
+			return openaiToolResult;
+		} catch (error) {
+			addLogs(error, logType.GetToolsError);
+			throw new Error(
+				ErrorCode.TOOL_GET_ERROR +
+					`获取工具列表失败: ${error instanceof Error ? error.message : String(error)}`
+			);
+		}
+	}
+
+	/**
+	 * 调用tool获取结果直接返回给llm,	需要自行处理格式
+	 * @param toolName 工具名称
+	 * @param toolArgs 工具参数
+	 * @returns 工具调用结果
+	 */
+	async callTool(client: Client, toolName: string, toolArgs: Record<string, unknown>) {
+		try {
+			addLogs(
+				{
+					name: toolName,
+					arguments: toolArgs
+				},
+				logType.ToolCall
+			);
+			const mcpResult = await client.callTool({
+				name: toolName,
+				arguments: toolArgs
+			});
+
+			addLogs(mcpResult, logType.ToolCallResponse);
+
+			return mcpResult;
+		} catch (error) {
+			addLogs(error, logType.ToolCallError);
+			throw new Error(
+				ErrorCode.TOOL_CALL_ERROR +
+					`调用工具 ${toolName} 失败: ${error instanceof Error ? error.message : String(error)}`
+			);
+		}
 	}
 
 	showUsage(): void {

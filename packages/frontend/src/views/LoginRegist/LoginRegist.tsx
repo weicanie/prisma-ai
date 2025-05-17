@@ -1,12 +1,12 @@
 import classNames from 'classnames';
 import { useEffect, useRef, useState } from 'react';
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
-import { LoginForm } from '../../components/LoginForm';
 import { MagicCardWrapper } from '../../components/MagicCard';
 import { MorphingText } from '../../components/magicui/morphing-text';
 import Prism from '../../components/Prism';
-import { RegistForm } from '../../components/RegistForm';
 import Wall from '../../components/Wall';
+import { LoginForm } from './c-cpns/LoginForm';
+import { RegistForm } from './c-cpns/RegistForm';
 import { comfortablyNumbLyrics, LoginRegistWrapper } from './LoginRegist.style';
 function LoginRegist() {
 	const [isLoginCard, setIsLoginCard] = useState(true);
@@ -22,7 +22,6 @@ function LoginRegist() {
 		}, 1000);
 	}, []);
 
-	// TODO 暗色主题适配（wall、字体颜色太鲜艳）, 加一个白色背景不就行了
 	// TODO 歌词组件性能差,换
 	return (
 		<LoginRegistWrapper>

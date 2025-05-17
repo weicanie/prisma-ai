@@ -7,14 +7,14 @@ import { useTheme } from '@/utils/theme.tsx';
 import type { PropsWithChildren } from 'react';
 import { MagicCard } from './magicui/magic-card';
 type PropsType = PropsWithChildren<{
-	cardTitle: string;
+	cardTitle?: string;
 	contentPadding?: number;
 }>;
 
-export function MagicCardWrapper({ cardTitle, children, contentPadding = 4 }: PropsType) {
+export function MagicCardWrapper({ cardTitle = '', children, contentPadding = 4 }: PropsType) {
 	const { theme } = useTheme();
 	return (
-		<Card className="p-0 max-w-lg w-full shadow-none border-none">
+		<Card className="p-0 w-full shadow-none border-none h-min">
 			<MagicCard gradientColor={theme === 'dark' ? '#262626' : '#D9D9D955'} className="p-0">
 				<CardHeader
 					className="border-b border-border p-4 [.border-b]:pb-4"

@@ -11,7 +11,6 @@ import * as path from 'path';
 import { z } from 'zod';
 import { AgentService } from '../agent/agent.service';
 import { MCPClientService } from '../mcp-client/mcp-client.service';
-import { AIToolService } from '../mcp-client/tool.service';
 import { ModelService } from '../model/model.service';
 import { PromptService, role } from '../prompt/prompt.service';
 import {
@@ -21,7 +20,7 @@ import {
 	projectMinedSchema,
 	projectPolishedSchema,
 	projectSchema
-} from '../types/project';
+} from '../types/project.schema';
 import { Project } from './entities/project.entities';
 
 @Injectable()
@@ -33,8 +32,7 @@ export class ChainService {
 		public modelService: ModelService,
 		public promptService: PromptService,
 		private agentService: AgentService,
-		public toolService: AIToolService,
-		public MCPClientService: MCPClientService,
+		public clientService: MCPClientService,
 		public configService: ConfigService
 	) {}
 
@@ -159,21 +157,13 @@ export class ChainService {
 	 */
 	async queryChain() {
 		try {
-			const llm = await this.modelService.getLLMDeepSeekRaw({
-				model: 'deepseek-chat',
-				configuration: {
-					apiKey: this.configService.get('API_KEY_DEEPSEEK'),
-					timeout: 6000,
-					baseURL: this.configService.get('BASE_URL_DEEPSEEK'),
-					maxRetries: 3
-				}
-			});
-			const client = await this.MCPClientService.connectToServerLocal(
+			const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+			const client = await this.clientService.connectToServerLocal(
 				'mongodb',
 				path.join(process.cwd(), './mcp-servers.json')
 			);
 
-			const tools = await this.toolService.getTools(client);
+			const tools = await this.clientService.getTools(client);
 
 			// 添加项目表结构信息到系统提示中
 			const prompt = ChatPromptTemplate.fromMessages([

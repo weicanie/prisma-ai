@@ -23,7 +23,7 @@ export default function ResumeSidebarWrapper({ children }: { children: React.Rea
 		>
 			<ResumeSidebar />
 			<SidebarTrigger />
-			{children}
+			<div className="flex flex-col w-full h-full pt-1 space-y-6">{children}</div>
 		</SidebarProvider>
 	);
 }

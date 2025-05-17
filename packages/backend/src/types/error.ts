@@ -1,5 +1,6 @@
 export enum ErrorCode {
 	SUCCESS = '0',
+	UNNAMED = '9999',
 	//通用错误
 	VALIDATION_ERROR = '1001',
 	AUTH_ERROR = '1002',
@@ -14,7 +15,13 @@ export enum ErrorCode {
 	CAPTCHAEXPIRED = '2004',
 	CAPTCHAWRONG = '2005',
 	USER_TOKEN_INVALID = '2006',
-	USER_TOKEN_NOT_CARRY = '2007'
+	USER_TOKEN_NOT_CARRY = '2007',
+
+	//2、mcp client
+	SERVER_NOT_FOUND = '3001',
+	SERVER_CONNECTION_ERROR = '3002',
+	TOOL_GET_ERROR = '3003',
+	TOOL_CALL_ERROR = '3004'
 }
 
 export const errorMessage = {
@@ -33,5 +40,11 @@ export const errorMessage = {
 	[ErrorCode.CAPTCHAEXPIRED]: '验证码已过期',
 	[ErrorCode.CAPTCHAWRONG]: '验证码错误',
 	[ErrorCode.USER_TOKEN_INVALID]: '用户token无效',
-	[ErrorCode.USER_TOKEN_NOT_CARRY]: '用户token未携带'
+	[ErrorCode.USER_TOKEN_NOT_CARRY]: '用户token未携带',
+
+	//2、mcp client
+	[ErrorCode.SERVER_NOT_FOUND]: 'MCP server未找到',
+	[ErrorCode.SERVER_CONNECTION_ERROR]: 'MCP server连接失败',
+	[ErrorCode.TOOL_GET_ERROR]: '获取mcp工具失败',
+	[ErrorCode.TOOL_CALL_ERROR]: '调用mcp工具失败'
 };

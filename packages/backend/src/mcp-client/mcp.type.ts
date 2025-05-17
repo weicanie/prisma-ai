@@ -14,12 +14,6 @@ export interface MCPTool {
 	inputSchema: Record<string, any>;
 }
 
-//tool调用结果
-export interface ToolCallResult {
-	content: string;
-	[key: string]: unknown;
-}
-
 //单个MCPServer的配置
 export interface MCPServerConfig {
 	command: string;
@@ -34,6 +28,16 @@ export interface MCPServersConfig {
 	};
 	defaultServer?: string;
 }
+
+interface ToolCallResult {
+	[key: string]: unknown;
+}
+
+//tool调用结果（mcp-mongo-server）
+export interface MongoToolResult extends ToolCallResult {
+	content: string;
+}
+
 //日志类型
 export enum logType {
 	LLMRequest = '[LLM Request]',

@@ -8,7 +8,7 @@ import {
 	projectMinedSchema,
 	projectPolishedSchema,
 	projectSchema
-} from '../types/project';
+} from '../types/project.schema';
 import { DiyStateGraph } from './DiyStateGraph';
 import EventBus from './EventBus';
 

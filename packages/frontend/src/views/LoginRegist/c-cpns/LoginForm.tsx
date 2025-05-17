@@ -15,24 +15,16 @@ import { Input } from '@/components/ui/input';
 import { message } from 'antd';
 import type { Dispatch, PropsWithChildren, SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../services/login_regist';
-
-const formSchema = z.object({
-	username: z.string().min(2, {
-		message: '用户名至少需要2个字符'
-	}),
-	password: z.string().min(6, {
-		message: '密码至少需要6个字符'
-	})
-});
+import { login } from '../../../services/login_regist';
+import { loginformSchema } from '../../../types/login_regist.schema';
 
 type PropsType = PropsWithChildren<{
 	setIsLoginCard: Dispatch<SetStateAction<boolean>>;
 }>;
 
 export function LoginForm({ setIsLoginCard }: PropsType) {
-	const form = useForm<z.infer<typeof formSchema>>({
-		resolver: zodResolver(formSchema),
+	const form = useForm<z.infer<typeof loginformSchema>>({
+		resolver: zodResolver(loginformSchema),
 		defaultValues: {
 			username: ''
 		}
@@ -40,13 +32,13 @@ export function LoginForm({ setIsLoginCard }: PropsType) {
 
 	const navigate = useNavigate();
 
-	async function onSubmit(values: z.infer<typeof formSchema>) {
+	async function onSubmit(values: z.infer<typeof loginformSchema>) {
 		try {
 			const res = await login({ username: values.username, password: values.password });
-			if (res.code === '0') {
+			if (res.data.code === '0') {
 				message.success('登录成功');
-				res.data.userId = res.data.id;
-				localStorage.setItem('token', res.data.token);
+				res.data.data.userId = res.data.data.id;
+				localStorage.setItem('token', res.data.data.token);
 				localStorage.setItem('userInfo', JSON.stringify(res.data));
 				navigate('/');
 			}
@@ -54,6 +46,14 @@ export function LoginForm({ setIsLoginCard }: PropsType) {
 			message.error(e.response?.data?.message || '系统繁忙，请稍后再试');
 		}
 	}
+
+	const items: Array<{
+		name: 'username' | 'password';
+		label: string;
+	}> = [
+		{ name: 'username', label: 'username' },
+		{ name: 'password', label: 'password' }
+	];
 
 	return (
 		<Form {...form}>
@@ -65,60 +65,36 @@ export function LoginForm({ setIsLoginCard }: PropsType) {
 					fontSize: '2rem'
 				}}
 			>
-				<FormField
-					control={form.control}
-					name="username"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel
-								style={{
-									fontSize: '1.5rem',
-									fontWeight: '600'
-								}}
-							>
-								username
-							</FormLabel>
-							<FormControl>
-								<Input
-									placeholder=""
-									{...field}
+				{items.map(item => (
+					<FormField
+						key={item.name}
+						control={form.control}
+						name={item.name}
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel
 									style={{
 										fontSize: '1.5rem',
 										fontWeight: '600'
 									}}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="password"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel
-								style={{
-									fontSize: '1.5rem',
-									fontWeight: '600'
-								}}
-							>
-								password
-							</FormLabel>
-							<FormControl>
-								<Input
-									placeholder=""
-									{...field}
-									style={{
-										fontSize: '1.5rem',
-										fontWeight: '600'
-									}}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
+								>
+									{item.label}
+								</FormLabel>
+								<FormControl>
+									<Input
+										placeholder=""
+										{...field}
+										style={{
+											fontSize: '1.5rem',
+											fontWeight: '600'
+										}}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				))}
 				<Button
 					type="submit"
 					style={{

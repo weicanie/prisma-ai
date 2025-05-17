@@ -85,7 +85,7 @@ export class DiyStateGraph<T extends ZodSchema> {
 	private waitEdges: Map<string, WaitEdge> = new Map();
 	private storeStateFn?: (state: any, node: string, progress?: string) => Promise<void>;
 	private channels: z.infer<T>;
-	private stateGraph: StateGraph<T, any, any, string>;
+	private stateGraph: StateGraph<T, any, any, string>; //中间两any是stategraph里节点的state和输出类型，会根据T（state 定义）自动推导
 
 	constructor(state: z.infer<T>, stateSchema: AnyZodObject) {
 		this.channels = state;

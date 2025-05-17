@@ -1,5 +1,3 @@
-//TODO 使用抽象工厂模式（抽象基类） 满足开闭原则
-
 import { z } from 'zod';
 
 const infoSchema = z
@@ -55,8 +53,6 @@ const projectMinedSchema = z.object({
 	)
 });
 
-//体操 递归地把从schema中获取的类型的属性约束 ?转为!
-type Required<T> = T extends object ? { [K in keyof T]-?: Required<T[K]> } : T;
 //从zod的schema获取类型定义
 interface ProjectSchemaType extends z.infer<typeof projectSchema> {} // 满足开闭原则
 interface ProjectPolishedSchemaType extends z.infer<typeof projectPolishedSchema> {}
