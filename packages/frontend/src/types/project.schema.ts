@@ -52,9 +52,9 @@ const projectMinedSchema = z.object({
 });
 
 //从zod的schema获取类型定义
-interface ProjectSchemaType extends z.infer<typeof projectSchema> {} // 满足开闭原则
-interface ProjectPolishedSchemaType extends z.infer<typeof projectPolishedSchema> {}
-interface ProjectMinedSchemaType extends z.infer<typeof projectMinedSchema> {}
+interface ProjectSchemaT extends z.infer<typeof projectSchema> {}
+interface ProjectPolishedSchemaT extends z.infer<typeof projectPolishedSchema> {}
+interface ProjectMinedSchemaT extends z.infer<typeof projectMinedSchema> {}
 
 /* 
 shadcn-ui的 form 要求schema不能有optional()和default()
@@ -112,7 +112,7 @@ export {
 	projectMinedSchemaForm,
 	projectPolishedSchemaForm,
 	projectSchemaForm,
-	type ProjectMinedSchemaType,
-	type ProjectPolishedSchemaType,
-	type ProjectSchemaType
+	type ProjectMinedSchemaT,
+	type ProjectPolishedSchemaT,
+	type ProjectSchemaT
 };

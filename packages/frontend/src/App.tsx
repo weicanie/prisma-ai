@@ -9,7 +9,7 @@ import { routes } from './router/router';
 const GlobalStyle = createGlobalStyle`
 	/* 编辑器 */
 	.milkdown {
-		height: 100vh;
+		height: 100%;
 		width: 100%;
 	}
 `;

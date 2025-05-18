@@ -1,5 +1,5 @@
 //服务器数据返回格式
-export interface ResponseData<T = any> {
+export interface ServerDataFormat<T = any> {
 	code: string;
 	message: string;
 	data: T;

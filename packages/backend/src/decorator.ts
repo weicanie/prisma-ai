@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext, SetMetadata } from '@nestjs/common';
-import { UserRequest } from './types/loginVerify';
+import { type UserRequest } from './types/loginVerify';
 
 // 标识某个 handler 需要登录才能执行。
 const RequireLogin = () =>

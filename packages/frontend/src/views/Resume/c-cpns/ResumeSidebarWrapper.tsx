@@ -1,4 +1,5 @@
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { BreadcrumbDemo } from './Breadcrumb';
 import { ResumeSidebar } from './ResumeSidebar';
 // export function CustomTrigger() {
 // 	const { toggleSidebar } = useSidebar();
@@ -22,8 +23,14 @@ export default function ResumeSidebarWrapper({ children }: { children: React.Rea
 			// open={open}
 		>
 			<ResumeSidebar />
-			<SidebarTrigger />
-			<div className="flex flex-col w-full h-full pt-1 space-y-6">{children}</div>
+
+			<div className="flex flex-col w-full h-full pt-1 space-y-3">
+				<div className="flex items-center ">
+					<SidebarTrigger />
+					<BreadcrumbDemo first="通用简历" second="项目经验上传"></BreadcrumbDemo>
+				</div>
+				{children}
+			</div>
 		</SidebarProvider>
 	);
 }

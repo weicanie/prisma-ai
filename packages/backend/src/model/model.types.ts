@@ -16,5 +16,3 @@ interface ToolBinding {
 	tools: ToolList;
 	tool_choice: ToolChoice;
 }
-
-export { ToolBinding };

@@ -1,13 +1,25 @@
 import { useCustomQuery } from '.';
 
 type ProjectFilters = {
+	name: string;
 	status?: string;
-	search?: string;
-	sortBy?: string;
-	sortOrder?: 'asc' | 'desc';
 };
 
-export function useProject<TResponseData>(filters?: ProjectFilters) {
+export function useGetProject<TResponseData>(filters?: ProjectFilters) {
+	return useCustomQuery<TResponseData>(
+		['projects', filters],
+		// axios 进行请求
+		(data: any) => {
+			return data;
+		},
+		{
+			select: data => {
+				return data;
+			}
+		}
+	);
+}
+export function useUploadProject<TResponseData>(filters?: ProjectFilters) {
 	return useCustomQuery<TResponseData>(
 		['projects', filters],
 		// axios 进行请求

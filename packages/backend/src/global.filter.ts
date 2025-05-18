@@ -3,7 +3,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import { ErrorCode, errorMessage } from './types/error';
-import { ResponseData } from './types/response-data';
+import { ServerDataFormat } from './types/serverDataFormat';
 
 @Catch()
 export class GlobalFilter implements ExceptionFilter {
@@ -35,7 +35,7 @@ export class GlobalFilter implements ExceptionFilter {
 		}
 
 		let data = null;
-		const result: ResponseData = {
+		const result: ServerDataFormat = {
 			code,
 			message,
 			data

@@ -1,48 +1,99 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { type Model } from 'mongoose';
 import { ChainService } from '../chain/chain.service';
-import { ProjectExperience, projectSchema } from '../types/project.schema';
-import { Project } from './entities/project.entities';
+import { type UserInfoFromToken } from '../types/loginVerify';
+import { type ProjectDto } from './dto/project.dto';
+import { type projectMinedDto } from './dto/projectMined.dto';
+import { type projectPolishedtDto } from './dto/projectPolished.dto';
+import { Project } from './entities/project.entity';
+import { ProjectMined } from './entities/projectMined.entity';
+import { ProjectPolished } from './entities/projectPolished.entity';
+import { projectMinedSchema, projectSchema } from './project.schema';
+
+export enum ProjectState {
+	uninit = 'uninit', //未补全
+	committed = 'committed', //已接受（信息完整）
+	polished = 'polished', //已打磨
+	mined = 'mined', //已挖掘
+	accepted = 'accepted' //已接受
+}
 
 @Injectable()
 export class ProjectService {
 	@InjectModel(Project.name)
 	private projectModel: Model<Project>;
-	constructor(public chainService: ChainService) {}
-	async callGraph() {}
 
+	@InjectModel(ProjectPolished.name)
+	private ProjectPolishedModel: Model<ProjectPolished>;
+
+	@InjectModel(ProjectMined.name)
+	private ProjectMinedModel: Model<ProjectMined>;
+
+	constructor(public chainService: ChainService) {}
+
+	async callGraph() {}
 	async responseToUserAndWait() {}
+
 	/**
-	 * 项目描述转换为json
+	 * 项目描述转换为json格式的对象并检查
 	 * @param project
 	 * @returns
 	 */
-	async transform(project: string) {
+	async transformAndCheckProject(projectText: string, userInfo: UserInfoFromToken) {
 		const chain = await this.chainService.tansformChain();
-		const project_json_obj = await chain.invoke(project);
-		//作为state传递,抽离
-		//增, 加上用户信息、进度(init、committed、polished、mined、accepted)以查询
-		const project_model = new this.projectModel(project_json_obj);
-		return await project_model.save();
+		const project_json_obj = await chain.invoke(projectText);
+		const checker = this.getChecker(project_json_obj, projectSchema, this.projectModel, userInfo);
+		return await checker();
+	}
+
+	async checkProject(project: ProjectDto, userInfo: UserInfoFromToken) {
+		const checker = this.getChecker(project, projectSchema, this.projectModel, userInfo);
+		return await checker();
+	}
+
+	async checkProjectPolished(project: projectPolishedtDto, userInfo: UserInfoFromToken) {
+		const checker = this.getChecker(
+			project,
+			projectMinedSchema,
+			this.ProjectPolishedModel,
+			userInfo
+		);
+		return await checker();
+	}
+
+	async checkProjectMined(project: projectMinedDto, userInfo: UserInfoFromToken) {
+		const checker = this.getChecker(project, projectMinedSchema, this.ProjectMinedModel, userInfo);
+		return await checker();
 	}
 
 	/**
-	 * 项目信息检查和让用户补全。
+	 * 项目信息检查后储存或者让用户补全。
 	 * @description -> 信息完整
 	 */
-	async check(project: ProjectExperience) {
-		try {
-			projectSchema.parse(project);
-		} catch (error) {
-			return {
-				code: 0,
-				message: '项目描述不完整，请补全',
-				data: project
-			};
-		}
-		return project;
+	getChecker(project: any, zodSchema: any, model: any, userInfo: UserInfoFromToken) {
+		return async function check() {
+			try {
+				zodSchema.parse(project);
+			} catch (error) {
+				const projectSave = { ...project, status: ProjectState.uninit, userId: userInfo.userId };
+				const project_model = new model(projectSave);
+				await project_model.save();
+				return '项目描述不完整，请补全';
+			}
+			//作为state传递,抽离
+			//增, 加上用户信息、进度(init、committed、polished、mined、accepted)以查询
+			const projectSave = { ...project, status: ProjectState.committed, userId: userInfo.userId };
+			const project_model = new model(projectSave);
+
+			return await project_model.save();
+		};
 	}
+	/**
+	 * mcp tool 查询数据库
+	 * @param query 查询语句
+	 * @returns 查询结果
+	 */
 	async query(query: string) {
 		try {
 			if (!query || typeof query !== 'string') {

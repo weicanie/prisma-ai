@@ -68,6 +68,11 @@ export function useCustomQuery<SD>( //SD: Response Data
  * @returns mutation对象
  */
 export function useCustomMutation<TData, TVariables, TContext = unknown>(
+	/* 
+		TData:服务器返回的data字段数据
+		TVariables：请求参数
+		TContext: onMutate 回调返回的对象
+	*/
 	mutationFn: MutationFunction<SDF<TData>, TVariables>,
 	options?: Partial<UseMutationOptions<SDF<TData>, unknown, TVariables, TContext>>
 ): UseMutationResult<SDF<TData>, unknown, TVariables, TContext> {

@@ -59,6 +59,7 @@
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/swagger": "^11.2.0",
     "@nestjs/testing": "^10.0.0",
+    "@types/body-parser": "^1.19.5",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.3.1",

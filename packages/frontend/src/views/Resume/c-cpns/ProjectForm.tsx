@@ -17,6 +17,7 @@ import { message } from 'antd';
 import { Plus, Trash2 } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AuroraText } from '../../../components/magicui/aurora-text';
 import { projectSchemaForm } from '../../../types/project.schema';
 
 type PropsType = PropsWithChildren<{}>;
@@ -76,7 +77,7 @@ export function ProjectForm({}: PropsType) {
 			message.error(e.response?.data?.message || '系统繁忙，请稍后再试');
 		}
 	}
-
+	//FIXME 动态数组项使用tooltip中的词会显示异常的白色背景且难以去除
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -87,7 +88,9 @@ export function ProjectForm({}: PropsType) {
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>
-								<h3 className="text-lg font-medium mb-2">项目名称：</h3>
+								<h3 className="text-2xl font-medium mb-2">
+									<AuroraText>项目名称</AuroraText>
+								</h3>
 							</FormLabel>
 							<FormControl>
 								<Input placeholder="请输入项目名称" {...field} />
@@ -99,14 +102,18 @@ export function ProjectForm({}: PropsType) {
 
 				{/* 项目描述 */}
 				<div className="mt-4">
-					<h3 className="text-lg font-medium mb-2">项目描述：</h3>
+					<h3 className="text-2xl font-medium mb-2">
+						<AuroraText>项目描述</AuroraText>
+					</h3>
 
 					<FormField
 						control={form.control}
 						name="info.desc.role"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>角色和职责</FormLabel>
+								<FormLabel>
+									<h3 className="text-lg font-medium mb-2">角色和职责</h3>
+								</FormLabel>
 								<FormControl>
 									<Textarea placeholder="请描述您在项目中担任的角色和职责" {...field} rows={3} />
 								</FormControl>
@@ -120,7 +127,9 @@ export function ProjectForm({}: PropsType) {
 						name="info.desc.contribute"
 						render={({ field }) => (
 							<FormItem className="mt-2">
-								<FormLabel>贡献和参与</FormLabel>
+								<FormLabel>
+									<h3 className="text-lg font-medium mb-2">贡献和参与</h3>
+								</FormLabel>
 								<FormControl>
 									<Textarea placeholder="请描述您对项目的主要贡献和参与" {...field} rows={3} />
 								</FormControl>
@@ -134,7 +143,9 @@ export function ProjectForm({}: PropsType) {
 						name="info.desc.bgAndTarget"
 						render={({ field }) => (
 							<FormItem className="mt-2">
-								<FormLabel>背景与目标</FormLabel>
+								<FormLabel>
+									<h3 className="text-lg font-medium mb-2">背景与目标</h3>
+								</FormLabel>
 								<FormControl>
 									<Textarea placeholder="请描述项目的背景与目标" {...field} rows={3} />
 								</FormControl>
@@ -147,7 +158,9 @@ export function ProjectForm({}: PropsType) {
 				{/* 技术栈 */}
 				<div className="mt-4">
 					<div className="flex justify-between items-center">
-						<h3 className="text-lg font-medium">项目技术栈：</h3>
+						<h3 className="text-2xl font-medium">
+							<AuroraText>项目技术栈</AuroraText>
+						</h3>
 						<Button
 							type="button"
 							variant="outline"
@@ -186,7 +199,9 @@ export function ProjectForm({}: PropsType) {
 					</div>
 				</div>
 
-				<h3 className="text-lg font-medium mb-2">项目亮点：</h3>
+				<h3 className="text-2xl font-medium mb-2">
+					<AuroraText>项目亮点</AuroraText>
+				</h3>
 				{/* 团队合作亮点 */}
 				<div className="mt-2">
 					<div className="flex justify-between items-center">

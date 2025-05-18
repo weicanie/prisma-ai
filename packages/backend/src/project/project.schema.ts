@@ -54,19 +54,15 @@ const projectMinedSchema = z.object({
 });
 
 //从zod的schema获取类型定义
-interface ProjectSchemaType extends z.infer<typeof projectSchema> {} // 满足开闭原则
-interface ProjectPolishedSchemaType extends z.infer<typeof projectPolishedSchema> {}
-interface ProjectMinedSchemaType extends z.infer<typeof projectMinedSchema> {}
-
-interface ProjectExperience extends ProjectSchemaType {}
-interface ProjectExperiencePolished extends ProjectPolishedSchemaType {}
-interface ProjectExperienceMined extends ProjectMinedSchemaType {}
+type ProjectExperience = z.infer<typeof projectSchema>;
+type ProjectExperiencePolished = z.infer<typeof projectPolishedSchema>;
+type ProjectExperienceMined = z.infer<typeof projectMinedSchema>;
 
 export {
-	ProjectExperience,
-	ProjectExperienceMined,
-	ProjectExperiencePolished,
 	projectMinedSchema,
 	projectPolishedSchema,
-	projectSchema
+	projectSchema,
+	type ProjectExperience,
+	type ProjectExperienceMined,
+	type ProjectExperiencePolished
 };

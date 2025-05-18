@@ -59,7 +59,7 @@ const itemsWelcome = [
 const itemsGeneral = [
 	{
 		title: '项目经验上传',
-		url: '#',
+		url: '/resume/upload',
 		icon: FileUp
 	},
 	{

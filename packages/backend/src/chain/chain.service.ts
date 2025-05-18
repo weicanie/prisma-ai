@@ -12,7 +12,6 @@ import { z } from 'zod';
 import { AgentService } from '../agent/agent.service';
 import { MCPClientService } from '../mcp-client/mcp-client.service';
 import { ModelService } from '../model/model.service';
-import { PromptService, role } from '../prompt/prompt.service';
 import {
 	ProjectExperience,
 	ProjectExperienceMined,
@@ -20,7 +19,8 @@ import {
 	projectMinedSchema,
 	projectPolishedSchema,
 	projectSchema
-} from '../types/project.schema';
+} from '../project/project.schema';
+import { PromptService, role } from '../prompt/prompt.service';
 import { Project } from './entities/project.entities';
 
 @Injectable()

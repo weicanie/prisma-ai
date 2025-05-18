@@ -29,6 +29,7 @@ export class AgentService {
 		tools: OpenAITool[],
 		prompt?: ChatPromptTemplate
 	) {
+		//TODO 兼容内置tool
 		// 注意: 非内置的tools需要转为langchain支持的tools格式, 以使用langchain的agent框架
 		const toolsLangChain = tools.map(tool => {
 			const schema = tool.function.parameters as JSONSchema7;
