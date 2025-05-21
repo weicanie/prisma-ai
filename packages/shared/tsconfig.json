@@ -11,6 +11,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*"],            
+  "include": ["src/**/*", "../backend/src/utils/zodToMongooseModel.ts", "../backend/src/utils/generate.ts"],            
   "exclude": ["node_modules", "dist", "**/*.test.ts"]
 }

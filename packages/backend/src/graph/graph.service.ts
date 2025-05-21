@@ -1,22 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { ChainService } from '../chain/chain.service';
+
 import {
 	ProjectExperience,
-	ProjectExperienceMined,
-	ProjectExperiencePolished,
 	projectMinedSchema,
 	projectPolishedSchema,
 	projectSchema
-} from '../project/project.schema';
+} from '@prism-ai/shared';
 import { DiyStateGraph } from './DiyStateGraph';
 import EventBus from './EventBus';
-
-interface ProjectGraphState {
-	project?: ProjectExperience;
-	projectPolished?: ProjectExperiencePolished;
-	projectMined?: ProjectExperienceMined;
-}
 
 @Injectable()
 export class GraphService {
@@ -30,17 +23,17 @@ export class GraphService {
 	 * @description 3、亮点挖掘、生成
 	 */
 	async projectGraph(project: ProjectExperience) {
-		const state: ProjectGraphState = {
-			project: {},
-			projectPolished: {},
-			projectMined: {}
-		};
-
 		const stateSchema = z.object({
 			project: projectSchema,
 			projectPolished: projectPolishedSchema,
 			projectMined: projectMinedSchema
 		});
+		const state: z.infer<typeof stateSchema> = {
+			project: {} as z.infer<typeof projectSchema>,
+			projectPolished: {} as z.infer<typeof projectPolishedSchema>,
+			projectMined: {} as z.infer<typeof projectMinedSchema>
+		};
+
 		/* 
 		涉及用户协作, 得是异步非阻塞架构, 且得考虑用户中止后的恢复。
 

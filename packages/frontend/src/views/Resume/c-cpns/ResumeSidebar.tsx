@@ -32,7 +32,8 @@ import {
 	Sunrise,
 	User2
 } from 'lucide-react';
-import { useState } from 'react';
+import { memo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 // menu item 和路由
 const itemsWelcome = [
 	{
@@ -59,7 +60,7 @@ const itemsWelcome = [
 const itemsGeneral = [
 	{
 		title: '项目经验上传',
-		url: '/resume/upload',
+		url: '/resume/upload', //! 坑: 使用a元素跳转会强制刷新页面,无法实现路由!
 		icon: FileUp
 	},
 	{
@@ -78,18 +79,22 @@ const itemsGeneral = [
 		icon: LibraryBig
 	}
 ];
-export function ResumeSidebar() {
+function ResumeSidebar() {
 	// const { state, open, setOpen, openMobile, setOpenMobile, isMobile, toggleSidebar } = useSidebar();
 	const [group, setGroup] = useState([itemsWelcome, itemsGeneral]);
 	const [selectedGroup, setSelectedGroup] = useState(0);
 	const [selectedIndex, setSelectedIndex] = useState(0);
+	const navigate = useNavigate();
 	function getClickHandler(index: number, groupIndex: number) {
 		//使用闭包追踪按钮点击
-		return () => {
+		return (e: any) => {
+			e.stopPropagation();
+			navigate(group[groupIndex][index].url);
 			setSelectedGroup(groupIndex);
 			setSelectedIndex(index);
 		};
 	}
+	console.log('ResumeSidebar', selectedGroup, selectedIndex);
 	return (
 		<Sidebar
 			// side="left | right"
@@ -143,10 +148,10 @@ export function ResumeSidebar() {
 													onClick={getClickHandler(index, group.indexOf(arr))}
 													isActive={index === selectedIndex && arr === group[selectedGroup]}
 												>
-													<a href={item.url}>
+													<span>
 														<item.icon />
 														<span>{item.title}</span>
-													</a>
+													</span>
 												</SidebarMenuButton>
 
 												{/* <SidebarMenuSub>
@@ -181,10 +186,10 @@ export function ResumeSidebar() {
 													onClick={getClickHandler(index, group.indexOf(arr))}
 													isActive={index === selectedIndex && arr === group[selectedGroup]}
 												>
-													<a href={item.url}>
+													<span>
 														<item.icon />
 														<span>{item.title}</span>
-													</a>
+													</span>
 												</SidebarMenuButton>
 
 												{/* <SidebarMenuSub>
@@ -244,3 +249,4 @@ export function ResumeSidebar() {
 		</Sidebar>
 	);
 }
+export default memo(ResumeSidebar);

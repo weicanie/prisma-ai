@@ -1,13 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { loginformSchema } from '@prism-ai/shared';
+import { createZodDto } from 'nestjs-zod';
 
-export class LoginUserDto {
-	@IsNotEmpty({
-		message: '用户名不能为空'
-	})
-	username: string;
-
-	@IsNotEmpty({
-		message: '密码不能为空'
-	})
-	password: string;
-}
+export class LoginUserDto extends createZodDto(loginformSchema) {}

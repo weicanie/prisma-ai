@@ -1,23 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { type UserInfoFromToken, projectMinedSchema, projectSchema } from '@prism-ai/shared';
 import { type Model } from 'mongoose';
 import { ChainService } from '../chain/chain.service';
-import { type UserInfoFromToken } from '../types/loginVerify';
 import { type ProjectDto } from './dto/project.dto';
 import { type projectMinedDto } from './dto/projectMined.dto';
 import { type projectPolishedtDto } from './dto/projectPolished.dto';
 import { Project } from './entities/project.entity';
 import { ProjectMined } from './entities/projectMined.entity';
 import { ProjectPolished } from './entities/projectPolished.entity';
-import { projectMinedSchema, projectSchema } from './project.schema';
 
 export enum ProjectState {
-	uninit = 'uninit', //未补全
+	uninit = 'uninit', //信息未完整
 	committed = 'committed', //已接受（信息完整）
 	polished = 'polished', //已打磨
 	mined = 'mined', //已挖掘
 	accepted = 'accepted' //已接受
 }
+type ExpandEnumValues<T> = T[keyof T];
 
 @Injectable()
 export class ProjectService {

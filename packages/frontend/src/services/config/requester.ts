@@ -23,7 +23,7 @@ export interface RequestConfig<RD, SD> extends AxiosRequestConfig<RD> {
 /**
  * axios 封装
  * 使用比axios更严格更清晰的类型要求：any爬~
- * 三级拦截器：支持全局、实例、单次请求响应的拦截器设置, 关注点分离
+ * 三级拦截器：支持全局、实例、单次请求响应的拦截器分层设置, 关注点分离~
  * 不锁死axios：方便渣~
  */
 class Requester<TRD, TSD> {

@@ -1,3 +1,4 @@
+import type { ServerDataFormat as SDF } from '@prism-ai/shared';
 import {
 	type MutationFunction,
 	type QueryFunction,
@@ -10,7 +11,6 @@ import {
 } from '@tanstack/react-query';
 import { message } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import type { ServerDataFormat as SDF } from '../services/config/types';
 /** 固定一些配置 并提供统一的错误处理
  *
  * @param queryKey
@@ -113,7 +113,7 @@ export function useCustomMutation<TData, TVariables, TContext = unknown>(
 
 		// 处理其它错误（如网络错误）
 		onError: (error, variables, context) => {
-			message.error('系统繁忙，请稍后再试');
+			message.error(`系统繁忙，请稍后再试${error}`);
 
 			if (outerOnError) {
 				outerOnError(error, variables, context);

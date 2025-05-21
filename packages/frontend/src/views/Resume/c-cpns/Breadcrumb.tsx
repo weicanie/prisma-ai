@@ -6,6 +6,7 @@ import {
 	BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
 import type { PropsWithChildren } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const routeMap: Record<string, string> = {
 	介绍: '/introduce',
@@ -26,15 +27,28 @@ type propsType = PropsWithChildren<{
 	second: string;
 }>;
 export function BreadcrumbDemo({ first, second }: propsType) {
+	const navigate = useNavigate();
 	return (
 		<Breadcrumb>
 			<BreadcrumbList>
 				<BreadcrumbItem>
-					<BreadcrumbLink href={routeMap[first]}>{first}</BreadcrumbLink>
+					<BreadcrumbLink
+						onClick={() => {
+							navigate(routeMap[first]);
+						}}
+					>
+						{first}
+					</BreadcrumbLink>
 				</BreadcrumbItem>
 				<BreadcrumbSeparator />
 				<BreadcrumbItem>
-					<BreadcrumbLink href={routeMap[second]}>{second}</BreadcrumbLink>
+					<BreadcrumbLink
+						onClick={() => {
+							navigate(routeMap[second]);
+						}}
+					>
+						{second}
+					</BreadcrumbLink>
 				</BreadcrumbItem>
 			</BreadcrumbList>
 		</Breadcrumb>

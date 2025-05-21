@@ -31,5 +31,5 @@
       ]
     }
   },
-  "include": ["src"]
+  "include": ["src", "../shared/src/types/login_regist.schema.ts"]
 }

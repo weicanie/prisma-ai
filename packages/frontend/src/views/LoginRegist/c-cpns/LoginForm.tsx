@@ -15,8 +15,8 @@ import { Input } from '@/components/ui/input';
 import { message } from 'antd';
 import type { Dispatch, PropsWithChildren, SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { loginformSchema } from '../../../../../shared/src/types/login_regist.schema';
 import { login } from '../../../services/login_regist';
-import { loginformSchema } from '../../../types/login_regist.schema';
 
 type PropsType = PropsWithChildren<{
 	setIsLoginCard: Dispatch<SetStateAction<boolean>>;

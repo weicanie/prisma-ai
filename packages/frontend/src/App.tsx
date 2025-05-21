@@ -1,6 +1,7 @@
 import { useTheme } from '@/utils/theme.tsx';
 import '@ant-design/v5-patch-for-react-19';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useRoutes } from 'react-router-dom';
 import { createGlobalStyle } from 'styled-components';
 import { AppWrapper } from './App.style';
@@ -43,6 +44,7 @@ function APP() {
 				<GlobalStyle></GlobalStyle>
 				{useRoutes(routes)}
 			</AppWrapper>
+			<ReactQueryDevtools initialIsOpen={false} />
 		</QueryClientProvider>
 	);
 }

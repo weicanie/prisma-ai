@@ -2,7 +2,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js'; //得手动�
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { Injectable } from '@nestjs/common';
-import { ErrorCode } from '../types/error';
+import { ErrorCode } from '@prism-ai/shared';
 import { addLogs } from '../utils/log.utils';
 import { logType, OpenAITool } from './mcp.type';
 import { patchSchemaArrays } from './schemaPatch.util';
@@ -20,7 +20,7 @@ interface LocalServerStartCmd {
 @Injectable()
 export class MCPClientService {
 	clientInfo = {
-		name: 'mcp-client-cli',
+		name: 'mcp-client',
 		version: '1.0.0'
 	};
 
@@ -231,10 +231,17 @@ export class MCPClientService {
 	}
 
 	showUsage(): void {
-		console.log('************************************');
+		console.log('_____                                         ___ ');
+		console.log('|  _ \\ _ __ (_) ___   __      __     ____    |_ _|');
+		console.log('| |_) |  __|| |/ __| |  \\   /   |   / /\\ \\    | |');
+		console.log('|  __/| |   | |\\__ \\ | |\\ \\/ /| |  /  __  \\   | |');
+		console.log('|_|   |_|   |_||___/_|_| \\__/ |_| /_/    \\_\\ |___|	');
+		console.log('');
 		console.log(`${this.clientInfo.name} - ${this.clientInfo.version}使用说明`);
-		console.log('************************************');
+		console.log('');
 		console.log('配置mcp server方式:');
+		console.log('');
+
 		console.log(`1、在mcp-servers.json配置文件中配置`);
 		console.log(`示例:
 "mongodb": {
@@ -244,6 +251,9 @@ export class MCPClientService {
 		"mongodb://localhost:27017/mcp-test"
 	]
 }`);
+		console.log('');
+
 		console.log('2、也可以安装mcp server到本地, 直接使用其脚本路径');
+		console.log('');
 	}
 }

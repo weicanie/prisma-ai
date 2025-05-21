@@ -4,29 +4,17 @@ import UploadProject from '../views/Resume/UploadProject';
 import PrivateRoute from './PrivateRoute';
 
 export const routes = [
-	// {
-	// 	path: '/',
-	// 	element: (
-	// 		<PrivateRoute>
-	// 			<Resume />
-	// 		</PrivateRoute>
-	// 	)
-	// },
-	{
-		path: '/resume',
-		element: (
-			<PrivateRoute>
-				<Resume />
-			</PrivateRoute>
-		)
-	},
 	{
 		path: '/login',
 		element: <LoginRegist />
 	},
 	{
 		path: '/resume',
-		element: <Resume />,
+		element: (
+			<PrivateRoute>
+				<Resume />
+			</PrivateRoute>
+		),
 		children: [
 			{
 				path: '/resume/upload',

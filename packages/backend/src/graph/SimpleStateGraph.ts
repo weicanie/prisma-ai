@@ -114,7 +114,7 @@ export class SimpleStateGraph<T = ChannelsConfig> {
 		if (!this.edges.has(source)) {
 			this.edges.set(source, []);
 		}
-		this.edges.get(source).push(target);
+		this.edges.get(source)?.push(target);
 		return this;
 	}
 
@@ -173,7 +173,7 @@ export class SimpleStateGraph<T = ChannelsConfig> {
 	 * @param eventBus 事件总线，用于等待边
 	 * @returns 可执行的Runnable对象
 	 */
-	compile(eventBus?: { on: Function; off: Function }): Runnable {
+	compile(eventBus: { on: Function; off: Function }): Runnable {
 		if (this.channels === null || typeof this.channels !== 'object') {
 			throw new Error('channelsConfig must be an object');
 		}
@@ -184,8 +184,8 @@ export class SimpleStateGraph<T = ChannelsConfig> {
 			this.waitEdges,
 			this.entryPoint,
 			this.channels,
-			this.storeStateFn,
-			eventBus
+			eventBus,
+			this.storeStateFn
 		);
 	}
 }
@@ -201,8 +201,8 @@ class CompiledGraph<T = ChannelsConfig> implements Runnable {
 		private waitEdges: Map<string, WaitEdge>,
 		private entryPoint: string,
 		private channelsConfig: T,
-		private storeStateFn?: (state: any, node: string, progress?: string) => Promise<void>,
-		private eventBus?: { on: Function; off: Function }
+		private eventBus: { on: Function; off: Function },
+		private storeStateFn?: (state: any, node: string, progress?: string) => Promise<void>
 	) {}
 
 	/**
@@ -317,7 +317,7 @@ class CompiledGraph<T = ChannelsConfig> implements Runnable {
 		const state: Record<string, any> = {};
 
 		// 设置state初始状态
-		for (const [channel, config] of Object.entries(this.channelsConfig)) {
+		for (const [channel, config] of Object.entries(this.channelsConfig as object)) {
 			state[channel] = config.default ? config.default() : config.value;
 		}
 		return this.mergeState(state, input);

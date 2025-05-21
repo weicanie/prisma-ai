@@ -1,9 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { UserInfoFromToken } from '../../types/loginVerify';
-import { ProjectState } from '../project.service';
-
-export type EnumValues<T> = T[keyof T];
 
 @Schema()
 export class ProjectDesc {
@@ -38,8 +34,18 @@ export class ProjectLightspot {
 	skill: string[]; // 技术亮点/难点
 
 	@Prop({ type: [String], required: false })
-	user: string[]; // 用户体验
+	user: string[]; // 用户体验/业务价值
 }
+
+@Schema()
+export class userInfo {
+	@Prop({ required: false })
+	userId: string;
+
+	@Prop({ required: false })
+	username: string;
+}
+
 @Schema()
 export class Project {
 	@Prop({ type: ProjectInfo, required: false })
@@ -49,10 +55,10 @@ export class Project {
 	lightspot: ProjectLightspot; //项目亮点
 
 	@Prop({ required: false })
-	status: EnumValues<ProjectState>; // 项目状态
+	status: string; // 项目状态
 
 	@Prop({ required: false })
-	userInfo: UserInfoFromToken; // 项目状态
+	userInfo: userInfo; // 项目状态
 }
 
 export type ProjectDocument = HydratedDocument<Project>;

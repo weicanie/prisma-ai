@@ -1,5 +1,5 @@
 import { FileTextIcon, UploadIcon } from '@radix-ui/react-icons';
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { MagicCardWrapper } from '../../components/MagicCard';
 import { BentoCard, BentoGrid } from '../../components/magicui/bento-grid';
 import MilkdownEditorWrapper from './c-cpns/EditorWrapper';
@@ -15,6 +15,8 @@ import { ProjectForm } from './c-cpns/ProjectForm';
 */
 
 function UploadProject() {
+	const [selected, setSelected] = useState('');
+
 	const features = [
 		{
 			Icon: FileTextIcon,
@@ -35,7 +37,7 @@ function UploadProject() {
 			className: 'lg:row-start-1 lg:row-end-3 lg:col-start-3 lg:col-end-5'
 		}
 	];
-	const [selected, setSelected] = useState('');
+
 	let show;
 	switch (selected) {
 		case '去上传':
@@ -73,4 +75,4 @@ function UploadProject() {
 		</>
 	);
 }
-export default UploadProject;
+export default memo(UploadProject);

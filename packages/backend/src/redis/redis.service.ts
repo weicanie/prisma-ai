@@ -17,4 +17,26 @@ export class RedisService {
 			await this.redisClient.expire(key, ttl);
 		}
 	}
+
+	async del(key: string): Promise<number> {
+		return await this.redisClient.del(key);
+	}
+
+	// 使用前缀获取多个键
+	async getKeysByPattern(pattern: string): Promise<string[]> {
+		return await this.redisClient.keys(pattern);
+	}
+
+	// 获取TTL
+	async ttl(key: string): Promise<number> {
+		return await this.redisClient.ttl(key);
+	}
+	//获取前缀匹配的所有key
+	async keys(pattern: string): Promise<string[]> {
+		return await this.redisClient.keys(pattern);
+	}
+
+	getClient(): RedisClientType {
+		return this.redisClient;
+	}
 }

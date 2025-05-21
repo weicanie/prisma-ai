@@ -1,32 +1,29 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { EnumValues } from 'zod';
-import { UserInfoFromToken } from '../../types/loginVerify';
-import { ProjectState } from '../project.service';
-import { ProjectInfo, ProjectLightspot } from './project.entity';
+import { ProjectInfo, ProjectLightspot, userInfo } from './project.entity';
 
 @Schema()
-export class ProjectLightspotMinedItem {
+export class LightspotAdded {
 	@Prop({ required: true })
 	content: string; // 亮点内容
 
-	@Prop({ required: false, default: 'NONE' })
+	@Prop({ required: true })
 	reason: string; // 亮点添加原因
 
-	@Prop({ type: [String], required: false, default: [] })
+	@Prop({ type: [String], required: true })
 	tech: string[]; // 涉及技术
 }
 
 @Schema()
-export class ProjectLightspotMined {
-	@Prop({ type: [ProjectLightspotMinedItem], required: false, default: [] })
-	team: ProjectLightspotMinedItem[]; // 团队贡献
+export class ProjectLightspotAdded {
+	@Prop({ type: [LightspotAdded], required: false })
+	team: LightspotAdded[]; // 团队贡献
 
-	@Prop({ type: [ProjectLightspotMinedItem], required: false, default: [] })
-	skill: ProjectLightspotMinedItem[]; // 技术亮点/难点
+	@Prop({ type: [LightspotAdded], required: false })
+	skill: LightspotAdded[]; // 技术亮点/难点
 
-	@Prop({ type: [ProjectLightspotMinedItem], required: false, default: [] })
-	user: ProjectLightspotMinedItem[]; // 用户体验
+	@Prop({ type: [LightspotAdded], required: false })
+	user: LightspotAdded[]; // 用户体验/业务价值
 }
 
 @Schema()
@@ -37,14 +34,14 @@ export class ProjectMined {
 	@Prop({ type: ProjectLightspot, required: false })
 	lightspot: ProjectLightspot; // 原始亮点
 
-	@Prop({ type: ProjectLightspotMined, required: false })
-	lightspotAdded: ProjectLightspotMined; // 额外挖掘的亮点
+	@Prop({ type: ProjectLightspotAdded, required: false })
+	lightspotAdded: ProjectLightspotAdded; // 额外挖掘的亮点
 
 	@Prop({ required: false })
-	status: EnumValues<ProjectState>;
+	status: string;
 
 	@Prop({ required: false })
-	userInfo: UserInfoFromToken;
+	userInfo: userInfo;
 }
 
 export type ProjectMinedDocument = HydratedDocument<ProjectMined>;

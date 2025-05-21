@@ -8,7 +8,7 @@ import { BufferMemory } from 'langchain/memory';
 import * as path from 'path';
 
 import { ModelService } from '../model/model.service';
-import { VectorStoreService } from './vector-store/vector-store.service';
+import { VectorStoreService } from '../vector-store/vector-store.service';
 
 @Injectable()
 export class RagService {

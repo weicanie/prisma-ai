@@ -14,8 +14,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { message } from 'antd';
 import type { Dispatch, PropsWithChildren, SetStateAction } from 'react';
+import { registformSchema } from '../../../../../shared/src/types/login_regist.schema';
 import { register, registerCaptcha } from '../../../services/login_regist';
-import { registformSchema } from '../../../types/login_regist.schema';
 
 type PropsType = PropsWithChildren<{
 	setIsLoginCard: Dispatch<SetStateAction<boolean>>;

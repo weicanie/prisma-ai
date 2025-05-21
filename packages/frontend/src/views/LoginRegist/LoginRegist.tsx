@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import { MagicCardWrapper } from '../../components/MagicCard';
 import { MorphingText } from '../../components/magicui/morphing-text';
@@ -60,4 +60,4 @@ function LoginRegist() {
 		</LoginRegistWrapper>
 	);
 }
-export default LoginRegist;
+export default memo(LoginRegist);

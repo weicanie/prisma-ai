@@ -1,5 +1,5 @@
+import type { ServerDataFormat } from '@prism-ai/shared';
 import { type RequestConfig, Requester } from './requester';
-import type { ServerDataFormat } from './types';
 
 const config: RequestConfig<unknown, ServerDataFormat> = {
 	baseURL: import.meta.env.VITE_API_BASE_URL || '/api',

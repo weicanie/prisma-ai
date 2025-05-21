@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
+import { UserInfoFromToken } from '@prism-ai/shared';
 import { RequireLogin, UserInfo } from '../decorator';
-import { type UserInfoFromToken } from '../types/loginVerify';
 import { ProjectDto } from './dto/project.dto';
 import { projectMinedDto } from './dto/projectMined.dto';
 import { projectPolishedtDto } from './dto/projectPolished.dto';

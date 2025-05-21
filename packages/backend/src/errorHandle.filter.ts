@@ -1,9 +1,8 @@
 //统一的异常处理
 //throw new Error('1001' + '错误信息') 1001为错误码，后面为错误信息
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
+import { ErrorCode, errorMessage, ServerDataFormat } from '@prism-ai/shared';
 import { Response } from 'express';
-import { ErrorCode, errorMessage } from './types/error';
-import { ServerDataFormat } from './types/serverDataFormat';
 
 @Catch()
 export class GlobalFilter implements ExceptionFilter {
@@ -11,15 +10,14 @@ export class GlobalFilter implements ExceptionFilter {
 		const ctx = host.switchToHttp();
 		const response = ctx.getResponse<Response>();
 
-		let code: string;
-		let message: string;
-		if (exception.message.length >= 4) {
+		let code = '';
+		let message = '';
+
+		const codeTry = exception.message.substring(0, 4);
+		if (ErrorCode.hasOwnProperty(codeTry)) {
 			//分配了错误码的错误
-			const numTry = parseInt(exception.message.substring(0, 4));
-			if (numTry > 0 && numTry < 9999) {
-				code = numTry.toString();
-				message = errorMessage[code] + ':' + exception.message.substring(4);
-			}
+			code = codeTry;
+			message += errorMessage[code] + ':' + exception.message.substring(4);
 		} else {
 			//没有分配错误码的错误
 			code = ErrorCode.UNNAMED;

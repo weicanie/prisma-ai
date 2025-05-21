@@ -1,21 +1,13 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-//X: import { DbService } from '../db/db.service';
+import { ErrorCode, RegistResponse } from '@prism-ai/shared';
 import { DbService } from '../DB/db.service';
 import { RedisService } from '../redis/redis.service';
-import { ErrorCode } from '../types/error';
 import { addLogs, logType } from '../utils/log.utils';
 import passwordEncrypt from '../utils/passwordEncrypt';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
-type UserInfo = {
-	id: number;
-	username: string;
-	password: string;
-	create_at: Date | null;
-	update_at: Date | null;
-	email: string;
-};
+type UserInfo = RegistResponse;
 @Injectable()
 export class UserService {
 	@Inject(RedisService)
@@ -89,10 +81,11 @@ export class UserService {
 				id: userInfo.id
 			}
 		});
-		delete userRes.password;
-		addLogs(userRes, logType.Login);
+		const { password, ...userWithoutPwd } = userRes!;
 
-		return { ...userRes, token };
+		addLogs(userWithoutPwd, logType.Login);
+
+		return { ...userWithoutPwd, token };
 	}
 
 	async logout(username: string) {
@@ -108,7 +101,7 @@ export class UserService {
 		return '已退出登录';
 	}
 
-	async pwdVerify(userInfo: UserInfo, password: string) {
+	async pwdVerify(userInfo: UserInfo & { password: string }, password: string) {
 		if (userInfo.password !== passwordEncrypt(password)) {
 			throw new Error(ErrorCode.USER_PASSWORD_WRONG);
 		}

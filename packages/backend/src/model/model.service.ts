@@ -185,7 +185,7 @@ export class ModelService {
 	getLLMOpenAIRaw(config = this.openai_config) {
 		const configKey = JSON.stringify(config);
 		if (this.rawModels.has(configKey)) {
-			return this.rawModels.get(configKey);
+			return this.rawModels.get(configKey)!;
 		} else {
 			const newModel = new ChatOpenAI(config);
 			this.rawModels.set(JSON.stringify(config), newModel);

@@ -27,4 +27,7 @@ const registformSchema = z.object({
 	})
 });
 
-export { loginformSchema, registformSchema };
+type LoginFormType = z.infer<typeof loginformSchema>;
+type RegistFormType = z.infer<typeof registformSchema>;
+
+export { loginformSchema, registformSchema, type LoginFormType, type RegistFormType };

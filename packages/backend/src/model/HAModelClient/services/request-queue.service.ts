@@ -34,6 +34,8 @@ export class RequestQueueService {
 		const item = this.queue.shift();
 		this.activeCount++;
 
+		if (!item) return;
+
 		// 执行请求
 		item
 			.fn()

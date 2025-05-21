@@ -1,35 +1,43 @@
-import {
-	type ProjectMinedSchemaT,
-	type ProjectPolishedSchemaT,
-	type ProjectSchemaT
-} from '../types/project.schema';
+import type {
+	ProjectExperience,
+	ProjectExperienceMined,
+	ProjectExperiencePolished,
+	ServerDataFormat as SDF
+} from '@prism-ai/shared';
 import { instance } from './config';
-import type { ServerDataFormat as SDF } from './config/types';
 
-async function uploadProjectRaw(project: ProjectSchemaT) {
-	return await instance.post<ProjectSchemaT, SDF<ProjectSchemaT>>('/project/raw', project);
+async function uploadProjectRaw(project: ProjectExperience) {
+	const res = await instance.post<ProjectExperience, SDF<ProjectExperience>>(
+		'/project/raw',
+		project
+	);
+	return res.data;
 }
 
-async function uploadProjectPolished(project: ProjectPolishedSchemaT) {
-	return await instance.post<ProjectPolishedSchemaT, SDF<ProjectPolishedSchemaT>>(
+async function uploadProjectPolished(project: ProjectExperiencePolished) {
+	const res = await instance.post<ProjectExperiencePolished, SDF<ProjectExperiencePolished>>(
 		'/project/polished',
 		project
 	);
+	return res.data;
 }
 
-async function uploadProjectMined(project: ProjectMinedSchemaT) {
-	return await instance.post<ProjectMinedSchemaT, SDF<ProjectMinedSchemaT>>(
+async function uploadProjectMined(project: ProjectExperienceMined) {
+	const res = await instance.post<ProjectExperienceMined, SDF<ProjectExperienceMined>>(
 		'/project/mined',
 		project
 	);
+	return res.data;
 }
 
 async function uploadProjectText(project: string) {
-	return await instance.post<string, SDF<ProjectSchemaT>>('/project/rawtext', project);
+	const res = await instance.post<string, SDF<ProjectExperience>>('/project/rawtext', project);
+	return res.data;
 }
 
 async function queryProject(query: string) {
-	return await instance.post<string, SDF<any>>('/project/query', query);
+	const res = await instance.post<string, SDF<any>>('/project/query', query);
+	return res.data;
 }
 
 export {

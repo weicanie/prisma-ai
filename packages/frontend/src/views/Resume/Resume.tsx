@@ -1,11 +1,12 @@
-import { Outlet } from 'react-router-dom';
 import ResumeSidebarWrapper from './c-cpns/ResumeSidebarWrapper';
+import { SSETest } from './SSETest';
 
 function Resume() {
 	return (
 		<>
 			<ResumeSidebarWrapper>
-				<Outlet />
+				{/* <Outlet /> */}
+				<SSETest></SSETest>
 			</ResumeSidebarWrapper>
 		</>
 	);

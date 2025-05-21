@@ -1,12 +1,14 @@
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { memo } from 'react';
 import { BreadcrumbDemo } from './Breadcrumb';
-import { ResumeSidebar } from './ResumeSidebar';
+import ResumeSidebar from './ResumeSidebar';
 // export function CustomTrigger() {
 // 	const { toggleSidebar } = useSidebar();
 
 // 	return <button onClick={toggleSidebar}>Toggle Sidebar</button>;
 // }
-export default function ResumeSidebarWrapper({ children }: { children: React.ReactNode }) {
+function ResumeSidebarWrapper({ children }: { children: React.ReactNode }) {
+	console.log('ResumeSidebarWrapper更新');
 	return (
 		<SidebarProvider
 			//宽度设置方式
@@ -34,3 +36,4 @@ export default function ResumeSidebarWrapper({ children }: { children: React.Rea
 		</SidebarProvider>
 	);
 }
+export default memo(ResumeSidebarWrapper);

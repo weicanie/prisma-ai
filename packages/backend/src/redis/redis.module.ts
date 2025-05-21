@@ -4,6 +4,7 @@ import { createClient } from 'redis';
 import { RedisService } from './redis.service';
 @Global()
 @Module({
+	controllers: [],
 	providers: [
 		RedisService,
 		{
@@ -28,6 +29,7 @@ import { RedisService } from './redis.service';
 			}
 		}
 	],
+	imports: [],
 	exports: [RedisService]
 })
 export class RedisModule {}

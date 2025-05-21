@@ -1,5 +1,5 @@
 {
-  "name": "@resume-to-offer/shared",
+  "name": "@prism-ai/shared",
   "version": "1.0.0",
   "description": "Shared types and utilities",
   "main": "dist/index.js",
@@ -23,5 +23,8 @@
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     }
+  },
+  "dependencies": {
+    "zod": "^3.24.3"
   }
 }

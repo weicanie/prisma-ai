@@ -3,10 +3,12 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ChainModule } from './chain/chain.module';
 import { DbModule } from './DB/db.module';
-import { GlobalFilter } from './global.filter';
+import { GlobalFilter } from './errorHandle.filter';
 import { GraphModule } from './graph/graph.module';
 import { IsLoginGuard } from './isLogin.guard';
 import { ProjectModule } from './project/project.module';
+import { SessionPoolModule } from './session/session-pool.module';
+import { SseModule } from './sse/sse.module';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -23,7 +25,10 @@ import { UserModule } from './user/user.module';
 				'.env'
 			]
 		}),
-		MongooseModule.forRoot('mongodb://localhost:27017/chainResume') //连接mongodb数据库
+		/* mongodb数据库 */
+		MongooseModule.forRoot('mongodb://localhost:27017/chainResume'),
+		SseModule,
+		SessionPoolModule
 	],
 	providers: [
 		{

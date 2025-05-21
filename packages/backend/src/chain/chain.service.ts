@@ -4,30 +4,26 @@ import { RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import type { ChatOpenAI } from '@langchain/openai';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectModel } from '@nestjs/mongoose';
 import { BufferMemory } from 'langchain/memory';
-import { Model } from 'mongoose';
 import * as path from 'path';
 import { z } from 'zod';
 import { AgentService } from '../agent/agent.service';
 import { MCPClientService } from '../mcp-client/mcp-client.service';
 import { ModelService } from '../model/model.service';
+
 import {
-	ProjectExperience,
-	ProjectExperienceMined,
-	ProjectExperiencePolished,
+	type ProjectExperience,
+	type ProjectExperienceMined,
+	type ProjectExperiencePolished,
 	projectMinedSchema,
 	projectPolishedSchema,
 	projectSchema
-} from '../project/project.schema';
+} from '@prism-ai/shared';
+import { Observable } from 'rxjs';
 import { PromptService, role } from '../prompt/prompt.service';
-import { Project } from './entities/project.entities';
 
 @Injectable()
 export class ChainService {
-	@InjectModel(Project.name)
-	private projectModel: Model<Project>;
-
 	constructor(
 		public modelService: ModelService,
 		public promptService: PromptService,
@@ -47,8 +43,7 @@ export class ChainService {
 	private async createChain<Input = any, Output = any>(
 		llm: ChatOpenAI,
 		prompt: ChatPromptTemplate,
-		schema: z.Schema,
-		saveFn?: (...args: any) => any
+		schema: z.Schema
 	) {
 		const outputParser = StructuredOutputParser.fromZodSchema(schema);
 
@@ -78,8 +73,7 @@ export class ChainService {
 				await memory.saveContext({ input: userInput }, { output: input });
 				// console.log('格式化后的模型输出', input);
 				return input;
-			}),
-			RunnableLambda.from(saveFn ? saveFn.bind(this) : () => {})
+			})
 		]);
 
 		return chain;
@@ -106,19 +100,7 @@ export class ChainService {
 
 		const llm = await this.modelService.getLLMDeepSeekRaw();
 
-		async function saveProject(this: ChainService, project: ProjectExperience) {
-			//增
-			const project_model = new this.projectModel(project);
-			await project_model.save();
-			return project;
-		}
-
-		const chain = await this.createChain<string, ProjectExperience>(
-			llm,
-			prompt,
-			schema,
-			saveProject
-		);
+		const chain = await this.createChain<string, ProjectExperience>(llm, prompt, schema);
 		return chain;
 	}
 
@@ -158,6 +140,8 @@ export class ChainService {
 	async queryChain() {
 		try {
 			const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+			// const llm = await this.modelService.getLLMOpenAIRaw();
+
 			const client = await this.clientService.connectToServerLocal(
 				'mongodb',
 				path.join(process.cwd(), './mcp-servers.json')
@@ -253,5 +237,64 @@ export class ChainService {
 			console.error('创建查询链失败:', error);
 			throw error;
 		}
+	}
+
+	sseMock(prompt: string) {
+		const data = new Observable<any>(subscriber => {
+			subscriber.next({
+				data: {
+					content: 'llm说:Hello, world!',
+					done: false
+				}
+			});
+			subscriber.next({
+				data: {
+					content: 'llm说:This is a test.',
+					done: false
+				}
+			});
+			setTimeout(() => {
+				subscriber.next({
+					data: {
+						content: 'llm说:5秒后.',
+						done: false
+					}
+				});
+			}, 5 * 1000);
+			setTimeout(() => {
+				subscriber.next({
+					data: {
+						content: 'llm说:10秒后.',
+						done: false
+					}
+				});
+			}, 10 * 1000);
+			setTimeout(() => {
+				subscriber.next({
+					data: {
+						content: 'llm说:15秒后.',
+						done: false
+					}
+				});
+			}, 15 * 1000);
+			setTimeout(() => {
+				subscriber.next({
+					data: {
+						content: 'llm说:20秒后.',
+						done: false
+					}
+				});
+			}, 20 * 1000);
+			setTimeout(() => {
+				subscriber.next({
+					data: {
+						content: 'llm说:25秒后.',
+						done: true
+					}
+				});
+				subscriber.complete();
+			}, 25 * 1000);
+		});
+		return data;
 	}
 }
