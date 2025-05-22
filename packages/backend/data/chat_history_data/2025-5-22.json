@@ -1,0 +1,38 @@
+[
+  {
+    "type": "human",
+    "data": {
+      "content": "数据库里有几条项目名称为Ul 组件库的项目描述?",
+      "additional_kwargs": {},
+      "response_metadata": {}
+    }
+  },
+  {
+    "type": "ai",
+    "data": {
+      "content": "数据库中有一条项目名称为“Ul 组件库”的项目描述，内容如下：\n\n- **角色**: 负责组件架构设计、核心功能开发及质量保障工作，主导技术选型与工程化建设。\n- **贡献**: 独立开发20+个基础组件，实现Monorepo多包管理架构，建立完整的代码规范体系与自动化测试方案。\n- **背景与目标**: 构建企业级UI组件库以统一产品设计语言，提供可复用的前端组件资产，提升跨团队协作效率。",
+      "tool_calls": [],
+      "invalid_tool_calls": [],
+      "additional_kwargs": {},
+      "response_metadata": {}
+    }
+  },
+  {
+    "type": "human",
+    "data": {
+      "content": "数据库里有几条项目名称为Ul 组件库的项目描述?",
+      "additional_kwargs": {},
+      "response_metadata": {}
+    }
+  },
+  {
+    "type": "ai",
+    "data": {
+      "content": "数据库中有一条项目名称为“Ul 组件库”的项目描述。",
+      "tool_calls": [],
+      "invalid_tool_calls": [],
+      "additional_kwargs": {},
+      "response_metadata": {}
+    }
+  }
+]

@@ -26,16 +26,3 @@ model user {
   update_at DateTime? @default(now()) @db.Timestamp(0)
   email     String    @db.VarChar(100)
 }
-
-//面试题
-model question {
-  id        Int       @id @default(autoincrement())
-  user_id   Int
-  create_at DateTime? @default(now()) @db.Timestamp(0)
-  update_at DateTime? @default(now()) @db.Timestamp(0)
-  title     String    @db.VarChar(255)
-  content   String    @db.LongText
-  gist      String    @db.LongText
-  type      String    @db.VarChar(255)
-  hard      Int
-}

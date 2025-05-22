@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ChainModule } from './chain/chain.module';
 import { DbModule } from './DB/db.module';
 import { GlobalFilter } from './errorHandle.filter';
+import { EventBusModule } from './EventBus/event-bus.module';
 import { GraphModule } from './graph/graph.module';
 import { IsLoginGuard } from './isLogin.guard';
 import { ProjectModule } from './project/project.module';
@@ -28,7 +29,8 @@ import { UserModule } from './user/user.module';
 		/* mongodb数据库 */
 		MongooseModule.forRoot('mongodb://localhost:27017/chainResume'),
 		SseModule,
-		SessionPoolModule
+		SessionPoolModule,
+		EventBusModule
 	],
 	providers: [
 		{

@@ -2,10 +2,10 @@ import { Controller, Query, Sse } from '@nestjs/common';
 import { DataChunk, UserInfoFromToken } from '@prism-ai/shared';
 import { Observable } from 'rxjs';
 import { RequireLogin, UserInfo } from '../decorator';
-import { RedisService } from '../redis/redis.service';
+import { EventBusService, EventList } from '../EventBus/event-bus.service';
 import { SessionPoolService } from '../session/session-pool.service';
-import { TaskQueueService } from '../task-queue/task-queue.service';
-import { SseEventData, SseService } from './sse.service';
+import { TaskQueueService, TaskStatus } from '../task-queue/task-queue.service';
+import { SseService } from './sse.service';
 
 //TODO 需要 llm 缓存层, 对于相同、极度相似的prompt（通过向量计算相似度）, 只返回第一次生成的结果
 //对于高度相似的prompt, 使用其回答作为上下文二次生成
@@ -17,7 +17,7 @@ export class SseController {
 		private readonly sessionPool: SessionPoolService,
 		private readonly taskQueueService: TaskQueueService,
 		private readonly sseService: SseService,
-		private readonly redisService: RedisService
+		private eventBusService: EventBusService
 	) {}
 
 	/* 启动llm生成
@@ -34,18 +34,25 @@ export class SseController {
 		if (!existingSession) {
 			return new Observable<DataChunk>(subscriber => {
 				subscriber.next({
-					data: { error: 'sse会话不存在，想空手套白狼?', done: true }
+					data: { error: '用户sse会话不存在，请先创建会话', done: true }
 				});
 				subscriber.complete();
 			});
 		}
+
 		if (curTaskId) {
-			return new Observable<DataChunk>(subscriber => {
-				subscriber.next({
-					data: { error: 'sse会话已存在，想吃回头草?', done: true }
+			const taskCheck = await this.taskQueueService.getTask(curTaskId);
+			if (
+				taskCheck &&
+				(taskCheck.status === TaskStatus.RUNNING || taskCheck.status === TaskStatus.PENDING)
+			) {
+				return new Observable<DataChunk>(subscriber => {
+					subscriber.next({
+						data: { error: '用户sse会话已存在,请请求断点续传接口', done: true }
+					});
+					subscriber.complete();
 				});
-				subscriber.complete();
-			});
+			}
 		}
 
 		/* 2、校验上下文是否完整,prompt即储存在上下文中 */
@@ -53,7 +60,7 @@ export class SseController {
 		if (!context || !context.prompt) {
 			return new Observable<DataChunk>(subscriber => {
 				subscriber.next({
-					data: { error: 'sse上下文不完整，想滥竽充数?', done: true }
+					data: { error: '用户sse上下文不完整', done: true }
 				});
 				subscriber.complete();
 			});
@@ -63,17 +70,23 @@ export class SseController {
 
 		/* 4、订阅任务的chunk生成事件并返回数据 */
 		return new Observable<DataChunk>(subscriber => {
-			this.taskQueueService.eventEmitter.on(
-				'chunkGenerated',
-				async (taskId: string, chunk: SseEventData) => {
-					if (taskId === task.id) {
+			this.eventBusService.on(EventList.chunkGenerated, async ({ taskId, eventData: chunk }) => {
+				if (taskId === task.id) {
+					if (chunk.done) {
+						subscriber.next({
+							data: { content: chunk.content, done: true }
+						});
+						subscriber.complete();
+					} else {
 						subscriber.next({
 							data: { content: chunk.content, done: false }
 						});
 					}
 				}
-			);
-			this.taskQueueService.eventEmitter.on('taskCompleted', async (taskId: string) => {
+			});
+			//结束逻辑在上面的回调中应该已被处理
+			this.eventBusService.on(EventList.taskCompleted, async ({ task }) => {
+				const taskId = task.id;
 				if (taskId === task.id) {
 					subscriber.complete();
 				}
@@ -93,7 +106,7 @@ export class SseController {
 		if (!existingSession) {
 			return new Observable<DataChunk>(subscriber => {
 				subscriber.next({
-					data: { error: 'sse会话不存在，请先创建会话', done: true }
+					data: { error: '用户sse会话不存在，请先创建会话', done: true }
 				});
 				subscriber.complete();
 			});
@@ -102,7 +115,7 @@ export class SseController {
 		if (!context || !context.prompt) {
 			return new Observable<DataChunk>(subscriber => {
 				subscriber.next({
-					data: { error: 'sse上下文不完整，想滥竽充数?', done: true }
+					data: { error: '用户sse上下文不完整', done: true }
 				});
 				subscriber.complete();
 			});
@@ -112,7 +125,7 @@ export class SseController {
 		if (!curTaskId) {
 			return new Observable<DataChunk>(subscriber => {
 				subscriber.next({
-					data: { error: 'sse任务不存在，请先创建会话', done: true }
+					data: { error: '用户sse任务不存在，请先创建会话', done: true }
 				});
 				subscriber.complete();
 			});
@@ -144,18 +157,24 @@ export class SseController {
 				data: { content: curContent, done: false }
 			});
 			/* 2、订阅内容并继续发送 */
-			this.taskQueueService.eventEmitter.on(
-				'chunkGenerated',
-				async (taskId: string, chunk: SseEventData) => {
-					if (taskId === curTaskId) {
+			this.eventBusService.on(EventList.chunkGenerated, async ({ taskId, eventData: chunk }) => {
+				if (taskId === curTaskId) {
+					if (chunk.done) {
+						subscriber.next({
+							data: { content: chunk.content, done: true }
+						});
+						subscriber.complete();
+					} else {
 						subscriber.next({
 							data: { content: chunk.content, done: false }
 						});
 					}
 				}
-			);
-			this.taskQueueService.eventEmitter.on('taskCompleted', async (taskId: string) => {
-				if (taskId === curTaskId) {
+			});
+			//结束逻辑在上面的回调中应该已被处理
+			this.eventBusService.on(EventList.taskCompleted, async ({ task }) => {
+				const taskId = task.id;
+				if (taskId === task.id) {
 					subscriber.complete();
 				}
 			});

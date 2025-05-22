@@ -16,6 +16,6 @@ interface LLMSessionResponse {
 }
 //查询会话状态
 interface LLMSessionStatusResponse {
-	status: 'notfound' | 'bothdone' | 'backdone' | 'running';
+	status: 'notfound' | 'bothdone' | 'backdone' | 'running' | 'tasknotfound';
 }
 export { DataChunk, LLMSessionRequest, LLMSessionResponse, LLMSessionStatusResponse };

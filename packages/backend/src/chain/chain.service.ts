@@ -178,7 +178,7 @@ export class ChainService {
       "$oid": "681b16119199e6ef8f1952d0"
     }}
 }}
-使用query工具来查询数据库。`
+使用提供的工具来查询数据库。`
 				], //优化：在system prompt里将表结构信息，和更明确的要求告诉模型（固定任务不应该让llm自己推理太多）
 				[`${role.PLACEHOLDER}`, `{chat_history}`],
 				[`${role.HUMAN}`, '{input}'],
@@ -243,57 +243,62 @@ export class ChainService {
 		const data = new Observable<any>(subscriber => {
 			subscriber.next({
 				data: {
-					content: 'llm说:Hello, world!',
+					content: 'llm说:Hello, world!\n',
 					done: false
 				}
 			});
 			subscriber.next({
 				data: {
-					content: 'llm说:This is a test.',
+					content: 'llm说:This is a test.\n',
 					done: false
 				}
 			});
 			setTimeout(() => {
 				subscriber.next({
 					data: {
-						content: 'llm说:5秒后.',
+						content:
+							'llm说:2秒后.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n',
 						done: false
 					}
 				});
-			}, 5 * 1000);
+			}, 2 * 1000);
 			setTimeout(() => {
 				subscriber.next({
 					data: {
-						content: 'llm说:10秒后.',
+						content:
+							'llm说:4秒后bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.\n',
 						done: false
 					}
 				});
-			}, 10 * 1000);
+			}, 4 * 1000);
 			setTimeout(() => {
 				subscriber.next({
 					data: {
-						content: 'llm说:15秒后.',
+						content:
+							'llm说:6秒后cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.\n',
 						done: false
 					}
 				});
-			}, 15 * 1000);
+			}, 6 * 1000);
 			setTimeout(() => {
 				subscriber.next({
 					data: {
-						content: 'llm说:20秒后.',
+						content:
+							'llm说:8秒后ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.\n',
 						done: false
 					}
 				});
-			}, 20 * 1000);
+			}, 8 * 1000);
 			setTimeout(() => {
 				subscriber.next({
 					data: {
-						content: 'llm说:25秒后.',
+						content:
+							'llm说:10秒后eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.\n',
 						done: true
 					}
 				});
 				subscriber.complete();
-			}, 25 * 1000);
+			}, 10 * 1000);
 		});
 		return data;
 	}

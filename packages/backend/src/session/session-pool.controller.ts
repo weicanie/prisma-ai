@@ -2,15 +2,18 @@ import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { LLMSessionRequest, UserInfoFromToken } from '@prism-ai/shared';
 import * as crypto from 'crypto';
 import { RequireLogin, UserInfo } from '../decorator';
+import { TaskQueueService } from '../task-queue/task-queue.service';
 import { SessionPoolService } from './session-pool.service';
-
 //TODO 需要 llm 缓存层, 对于相同、极度相似的prompt（通过向量计算相似度）, 只返回第一次生成的结果
 //对于高度相似的prompt, 使用其回答作为上下文二次生成
 //不仅可以节省token, 同时前端重复请求就算导致会话多次创建、也不会导致llm多次生成
 
 @Controller('session')
 export class SessionPoolController {
-	constructor(private readonly sessionPool: SessionPoolService) {}
+	constructor(
+		private readonly sessionPool: SessionPoolService,
+		private readonly taskQueueService: TaskQueueService
+	) {}
 
 	/* 创建新会话 */
 	@RequireLogin()
@@ -43,7 +46,9 @@ export class SessionPoolController {
       服务端完成但客户端没完成、会话缓存没了：'notfound' 前端应该新建会话
 			
       服务端完成但客户端没完成、会话缓存还在：'backdone' 前端应该请求断点续传
-      服务端和客户端都没完成：'running' 前端应该请求断点续传
+
+      服务端和客户端都没完成、创建了任务：'running' 前端应该请求断点续传
+			服务端和客户端都没完成、没创建任务：'tasknotfound' 前端应该请求sse/generate接口创建任务
 
       服务端和客户端都完成：'bothdone' 前端应该新建会话
 
@@ -58,14 +63,16 @@ export class SessionPoolController {
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
 		const existingSession = await this.sessionPool.getSession(sessionId);
+		const curTaskId = await this.taskQueueService.getSessionTaskId(sessionId);
+		console.log('🚀 ~ SessionPoolController ~ existingSession:', existingSession);
+		if (!existingSession) return { status: 'notfound' };
 
-		if (!existingSession) {
-			return { status: 'notfound' };
-		} else if (existingSession.fontendDone && existingSession.done) {
-			return { status: 'bothdone' };
-		} else if (existingSession.done) {
-			return { status: 'backdone' };
-		} else return { status: 'running' };
+		if (!curTaskId) return { status: 'tasknotfound' };
+		if (existingSession.fontendDone && existingSession.done) return { status: 'bothdone' };
+
+		if (existingSession.done) return { status: 'backdone' };
+
+		return { status: 'running' };
 	}
 
 	/* 前端在接收完SSE数据后时上报

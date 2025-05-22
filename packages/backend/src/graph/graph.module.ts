@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ChainModule } from '../chain/chain.module';
-import EventBus from './EventBus';
+import EventBus from '../EventBus/EventBus';
 import { GraphService } from './graph.service';
 @Module({
 	controllers: [],

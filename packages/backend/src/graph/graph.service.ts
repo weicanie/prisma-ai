@@ -8,8 +8,8 @@ import {
 	projectPolishedSchema,
 	projectSchema
 } from '@prism-ai/shared';
+import EventBus from '../EventBus/EventBus';
 import { DiyStateGraph } from './DiyStateGraph';
-import EventBus from './EventBus';
 
 @Injectable()
 export class GraphService {

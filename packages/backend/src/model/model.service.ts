@@ -204,8 +204,9 @@ export class ModelService {
 	 */
 	getLLMDeepSeekRaw(config: any) {
 		if (config === 'deepseek-reasoner' || config === 'deepseek-chat') {
+			const modelName = config;
 			config = this.deepseek_config;
-			config.model = config;
+			config.model = modelName;
 		} else if (config === undefined) {
 			config = this.deepseek_config;
 		}
@@ -228,7 +229,7 @@ export class ModelService {
 
 	getChatHistory(
 		sessionId = 'json_chat_history',
-		dir = path.join(process.cwd(), '/chat_history_data')
+		dir = path.join(process.cwd(), 'data/chat_history_data')
 	) {
 		return this.chatHistoryService.getChatHistory(sessionId, dir);
 	}

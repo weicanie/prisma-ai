@@ -70,6 +70,7 @@ class JSONChatHistory extends BaseListChatMessageHistory {
 	}
 
 	async saveMessagesToFile(messages: BaseMessage[]): Promise<void> {
+		console.log('🚀 ~ JSONChatHistory ~ saveMessagesToFile ~ messages:', messages);
 		const filePath = path.join(this.dir, `${this.sessionId}.json`);
 		//确保目录存在
 		if (!fs.existsSync(this.dir)) {

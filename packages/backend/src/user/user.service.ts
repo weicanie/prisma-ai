@@ -4,7 +4,7 @@ import { ErrorCode, RegistResponse } from '@prism-ai/shared';
 import { DbService } from '../DB/db.service';
 import { RedisService } from '../redis/redis.service';
 import { addLogs, logType } from '../utils/log.utils';
-import passwordEncrypt from '../utils/passwordEncrypt';
+import { createHashedPassword, verifyPassword } from '../utils/passwordEncrypt';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
 type UserInfo = RegistResponse;
@@ -41,7 +41,7 @@ export class UserService {
 		if (userInfo) {
 			throw new Error(ErrorCode.USER_ALREADY_EXISTS);
 		}
-		user.password = passwordEncrypt(user.password);
+		user.password = createHashedPassword(user.password);
 		try {
 			const userRes = await this.dbService.user.create({
 				data: {
@@ -102,11 +102,11 @@ export class UserService {
 	}
 
 	async pwdVerify(userInfo: UserInfo & { password: string }, password: string) {
-		if (userInfo.password !== passwordEncrypt(password)) {
+		if (!verifyPassword(password, userInfo.password)) {
 			throw new Error(ErrorCode.USER_PASSWORD_WRONG);
 		}
 	}
-
+	//TODO 使用双token方案? 前端再使用队列处理refresh token请求的并发（作为亮点挺不错）
 	async tokenDispatch(userInfo: UserInfo, userId: number) {
 		const { username } = userInfo;
 		const token = this.JwtService.sign(

@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import * as crypto from 'crypto';
-import { EventEmitter } from 'events';
+import { EventBusService, EventList } from '../EventBus/event-bus.service';
 import { RedisService } from '../redis/redis.service';
 
 /**
@@ -9,6 +9,7 @@ import { RedisService } from '../redis/redis.service';
 export enum TaskStatus {
 	PENDING = 'pending', // 等待执行
 	RUNNING = 'running', // 正在执行
+
 	COMPLETED = 'completed', // 执行完成
 	FAILED = 'failed', // 执行失败
 	ABORTED = 'aborted' // 被中止
@@ -42,27 +43,23 @@ export interface PersistentTask {
  *
  * 任务队列持久化和恢复逻辑
  * 	在内存中和Redis中都维护同一个任务队列
- * 	服务重启时从Redis中恢复任务队列,并重新调度服务挂掉时正在运行中的任务
+ * 	服务重启时从Redis中恢复任务队列,并重新运行服务挂掉时正在运行中和没运行的任务
  */
 @Injectable()
 export class TaskQueueService {
+	@Inject(EventBusService)
+	EventBusService: EventBusService;
+
 	private readonly logger = new Logger(TaskQueueService.name);
+
 	/* 任务队列（内存中）：储存任务id */
 	private queue: string[] = [];
-	/* 哈希表（内存中）：任务类型-> 要执行的函数 */
+	/* 任务处理器表（内存中）：任务类型-> 要执行的函数 */
 	private readonly taskHandlers: Map<string, (task: PersistentTask) => Promise<void>> = new Map();
 	/* 当前执行数 */
 	private activeCount = 0;
 	/* 最大并发数 */
-	private readonly maxConcurrent: number;
-	/* 事件总线 
-  'taskCompleted' 任务完成
-  'taskFailed' 任务失败
-  'taskAborted' 任务中止
-
-  'chunkGenerated' SSE事件生成
-  */
-	public readonly eventEmitter = new EventEmitter();
+	private readonly maxConcurrent = 5;
 
 	// redis键前缀
 	public readonly PREFIX = {
@@ -78,12 +75,7 @@ export class TaskQueueService {
 	// 任务过期时间（24小时）
 	public readonly TASK_TTL = 24 * 60 * 60;
 
-	constructor(
-		private readonly redisService: RedisService,
-		maxConcurrent = 5
-	) {
-		this.maxConcurrent = maxConcurrent;
-
+	constructor(private readonly redisService: RedisService) {
 		// 启动时恢复队列状态
 		this.initialize();
 
@@ -99,16 +91,18 @@ export class TaskQueueService {
 	 */
 	private async initialize() {
 		try {
-			// 恢复队列中的任务
+			// 从redis中获得所有任务
 			const queueKey = `${this.PREFIX.QUEUE}main`;
-			this.queue = await this.redisService.getClient().lRange(queueKey, 0, -1);
-
-			// 重新调度运行中任务
-			const runningTasks = await this.findTasksByStatus(TaskStatus.RUNNING);
-			for (const task of runningTasks) {
-				this.logger.log(`重新调度运行中任务: ${task.id}`);
-				// 将运行中任务重新加入队列
-				await this.requeueTask(task.id);
+			const queueAll = await this.redisService.getClient().lRange(queueKey, 0, -1);
+			this.queue = [];
+			// 仅重新入队未完成的任务（running、pending）
+			for (let i = 0; i < queueAll.length; i++) {
+				const taskId = queueAll[i];
+				const task = await this.getTask(taskId);
+				if (task && (task.status === TaskStatus.PENDING || task.status === TaskStatus.RUNNING)) {
+					this.logger.log(`重新入队未完成任务: ${task.id}`);
+					await this.requeueTask(task.id);
+				}
 			}
 
 			// 开始处理队列
@@ -116,6 +110,86 @@ export class TaskQueueService {
 		} catch (error) {
 			this.logger.error('初始化队列服务失败:', error);
 		}
+	}
+
+	/**
+	 * 处理队列中的任务
+	 */
+	private processQueue() {
+		if (this.queue.length === 0 || this.activeCount >= this.maxConcurrent) {
+			return;
+		}
+
+		// 从队列取出一个任务ID
+		const taskId = this.queue.shift();
+		if (!taskId) return;
+
+		this.activeCount++;
+
+		// 获取并执行任务
+		this.getTask(taskId)
+			.then(task => {
+				if (!task) {
+					this.logger.warn(`任务不存在: ${taskId}`);
+					this.activeCount--;
+					this.processQueue();
+					return;
+				}
+
+				// 更新任务状态
+				task.status = TaskStatus.RUNNING;
+				task.startedAt = Date.now();
+				this.saveTask(task)
+					.then(() => {
+						// 获取任务处理器
+						const handler = this.taskHandlers.get(task.type) || this.taskHandlers.get('default');
+						if (!handler) {
+							throw new Error(`未找到${task.type}任务类型的处理器 `);
+						}
+						this.logger.log(`任务执行: ${taskId}`, task);
+						// 执行任务
+						return handler(task)
+							.then(async () => {
+								// 任务成功完成
+								const updatedTask = await this.getTask(taskId);
+								if (updatedTask) {
+									updatedTask.status = TaskStatus.COMPLETED;
+									updatedTask.finishedAt = Date.now();
+									await this.saveTask(updatedTask);
+									console.log('任务完成:', updatedTask);
+									// 发出任务完成事件
+									this.EventBusService.emit(EventList.taskCompleted, { task: updatedTask });
+								}
+							})
+							.catch(async error => {
+								// 任务执行失败
+								this.logger.error(`任务执行失败: ${taskId}`, error);
+
+								const updatedTask = await this.getTask(taskId);
+								if (updatedTask) {
+									updatedTask.status = TaskStatus.FAILED;
+									updatedTask.error = error.message;
+									updatedTask.finishedAt = Date.now();
+									await this.saveTask(updatedTask);
+
+									// 发出任务失败事件
+									this.EventBusService.emit(EventList.taskFailed, { task: updatedTask, error });
+								}
+							});
+					})
+					.catch(error => {
+						this.logger.error(`更新任务状态失败: ${taskId}`, error);
+					})
+					.finally(() => {
+						this.activeCount--;
+						this.processQueue(); // 处理下一个任务
+					});
+			})
+			.catch(error => {
+				this.logger.error(`获取任务失败: ${taskId}`, error);
+				this.activeCount--;
+				this.processQueue();
+			});
 	}
 
 	/**
@@ -136,7 +210,7 @@ export class TaskQueueService {
 	 * @param metadata 任务元数据
 	 * @returns 任务对象
 	 */
-	async createTask(
+	async createAndEnqueueTask(
 		sessionId: string,
 		userId: string,
 		taskType: string,
@@ -186,7 +260,7 @@ export class TaskQueueService {
 	/**
 	 * 将任务ID加入Redis队列
 	 */
-	async enqueueTask(taskId: string): Promise<void> {
+	private async enqueueTask(taskId: string): Promise<void> {
 		// 内存队列
 		this.queue.push(taskId);
 
@@ -244,7 +318,7 @@ export class TaskQueueService {
 		await this.saveTask(task);
 
 		// 发出任务中止事件
-		this.eventEmitter.emit('taskAborted', task);
+		this.EventBusService.emit(EventList.taskAborted, { task });
 
 		return true;
 	}
@@ -261,86 +335,6 @@ export class TaskQueueService {
 
 		// 重新加入队列
 		await this.enqueueTask(taskId);
-	}
-
-	/**
-	 * 处理队列中的任务
-	 */
-	private processQueue() {
-		if (this.queue.length === 0 || this.activeCount >= this.maxConcurrent) {
-			return;
-		}
-
-		// 从队列取出一个任务ID
-		const taskId = this.queue.shift();
-		if (!taskId) return;
-
-		this.activeCount++;
-
-		// 获取并执行任务
-		this.getTask(taskId)
-			.then(task => {
-				if (!task) {
-					this.logger.warn(`任务不存在: ${taskId}`);
-					this.activeCount--;
-					this.processQueue();
-					return;
-				}
-
-				// 更新任务状态
-				task.status = TaskStatus.RUNNING;
-				task.startedAt = Date.now();
-				this.saveTask(task)
-					.then(() => {
-						// 获取任务处理器
-						const handler = this.taskHandlers.get(task.type) || this.taskHandlers.get('default');
-						if (!handler) {
-							throw new Error(`未找到${task.type}任务类型的处理器 `);
-						}
-
-						// 执行任务
-						return handler(task)
-							.then(async () => {
-								// 任务成功完成
-								const updatedTask = await this.getTask(taskId);
-								if (updatedTask) {
-									updatedTask.status = TaskStatus.COMPLETED;
-									updatedTask.finishedAt = Date.now();
-									await this.saveTask(updatedTask);
-
-									// 发出任务完成事件
-									this.eventEmitter.emit('taskCompleted', updatedTask);
-								}
-							})
-							.catch(async error => {
-								// 任务执行失败
-								this.logger.error(`任务执行失败: ${taskId}`, error);
-
-								const updatedTask = await this.getTask(taskId);
-								if (updatedTask) {
-									updatedTask.status = TaskStatus.FAILED;
-									updatedTask.error = error.message;
-									updatedTask.finishedAt = Date.now();
-									await this.saveTask(updatedTask);
-
-									// 发出任务失败事件
-									this.eventEmitter.emit('taskFailed', updatedTask, error);
-								}
-							});
-					})
-					.catch(error => {
-						this.logger.error(`更新任务状态失败: ${taskId}`, error);
-					})
-					.finally(() => {
-						this.activeCount--;
-						this.processQueue(); // 处理下一个任务
-					});
-			})
-			.catch(error => {
-				this.logger.error(`获取任务失败: ${taskId}`, error);
-				this.activeCount--;
-				this.processQueue();
-			});
 	}
 
 	/**

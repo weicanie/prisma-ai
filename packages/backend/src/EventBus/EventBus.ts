@@ -15,10 +15,10 @@ interface Handler<T = any> {
 
 /**
  * 事件总线实现，支持自定义事件、payload类型
- * @template Events 事件名到参数类型的映射
+ * @template Event_Payload 事件名到参数类型的映射
  */
 @Injectable()
-export class EventBus<Events extends Record<string, any> = any> {
+export class EventBus<Event_Payload extends Record<string, any> = any> {
 	/**
 	 * 存储所有事件及其对应的处理器数组
 	 * key为事件名，value为处理器数组
@@ -39,9 +39,9 @@ export class EventBus<Events extends Record<string, any> = any> {
 	 * @param thisArg 可选的this绑定
 	 * @returns this，支持链式调用
 	 */
-	on<K extends keyof Events>(
+	on<K extends keyof Event_Payload>(
 		eventName: K,
-		eventCallback: EventHandler<Events[K]>,
+		eventCallback: EventHandler<Event_Payload[K]>,
 		thisArg?: any
 	): this {
 		if (typeof eventName !== 'string') {
@@ -67,9 +67,9 @@ export class EventBus<Events extends Record<string, any> = any> {
 	 * @param thisArg 可选的this绑定
 	 * @returns this，支持链式调用
 	 */
-	once<K extends keyof Events>(
+	once<K extends keyof Event_Payload>(
 		eventName: K,
-		eventCallback: EventHandler<Events[K]>,
+		eventCallback: EventHandler<Event_Payload[K]>,
 		thisArg?: any
 	): this {
 		if (typeof eventName !== 'string') {
@@ -83,7 +83,7 @@ export class EventBus<Events extends Record<string, any> = any> {
 			this.off(eventName, tempCallback);
 			eventCallback.apply(thisArg, payload);
 		};
-		return this.on(eventName, tempCallback as EventHandler<Events[K]>, thisArg);
+		return this.on(eventName, tempCallback as EventHandler<Event_Payload[K]>, thisArg);
 	}
 
 	/**
@@ -92,9 +92,9 @@ export class EventBus<Events extends Record<string, any> = any> {
 	 * @param payload 事件参数
 	 * @returns this，支持链式调用
 	 */
-	emit<K extends keyof Events>(
+	emit<K extends keyof Event_Payload>(
 		eventName: K,
-		...payload: Events[K] extends any[] ? Events[K] : [Events[K]]
+		...payload: Event_Payload[K] extends any[] ? Event_Payload[K] : [Event_Payload[K]]
 	): this {
 		if (typeof eventName !== 'string') {
 			throw new TypeError('the event name must be string type');
@@ -111,7 +111,10 @@ export class EventBus<Events extends Record<string, any> = any> {
 	 * @param eventName 事件名
 	 * @param eventCallback 事件回调函数
 	 */
-	off<K extends keyof Events>(eventName: K, eventCallback: EventHandler<Events[K]>): void {
+	off<K extends keyof Event_Payload>(
+		eventName: K,
+		eventCallback: EventHandler<Event_Payload[K]>
+	): void {
 		if (typeof eventName !== 'string') {
 			throw new TypeError('the event name must be string type');
 		}

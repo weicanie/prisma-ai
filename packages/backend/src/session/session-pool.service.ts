@@ -27,7 +27,7 @@ userId -> sessionId -> session
 @Injectable()
 export class SessionPoolService implements OnModuleInit {
 	// Redis键前缀
-	private readonly KEY_PREFIX = 'llm:session:';
+	private readonly KEY_PREFIX = 'session:llm:';
 	// 会话过期时间(30分钟)
 	private readonly SESSION_TTL = 30 * 60;
 
@@ -61,8 +61,10 @@ export class SessionPoolService implements OnModuleInit {
 	}
 	/* 标记后端完成SSE数据生成 */
 	async setBackendDone(sessionId: string) {
+		console.log('🚀 ~ SessionPoolService ~ setBackendDone ~ sessionId:', sessionId);
 		const key = this.getKey(sessionId);
 		const session = await this.getSession(sessionId);
+		console.log('🚀 ~ SessionPoolService ~ setBackendDone ~ session:', session);
 
 		if (session) {
 			session.done = true;

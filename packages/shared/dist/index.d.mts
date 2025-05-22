@@ -382,7 +382,7 @@ interface LLMSessionResponse {
     sessionId: string;
 }
 interface LLMSessionStatusResponse {
-    status: 'notfound' | 'bothdone' | 'backdone' | 'running';
+    status: 'notfound' | 'bothdone' | 'backdone' | 'running' | 'tasknotfound';
 }
 
 export { type DataChunk, ErrorCode, type LLMSessionRequest, type LLMSessionResponse, type LLMSessionStatusResponse, type LoginFormType, type LoginResponse, type ProjectExperience, type ProjectExperienceMined, type ProjectExperiencePolished, type RegistFormType, type RegistResponse, type ServerDataFormat, type UserInfoFromToken, type VerifyMetaData, errorMessage, loginformSchema, projectMinedSchema, projectPolishedSchema, projectSchema, registformSchema };

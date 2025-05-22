@@ -34,7 +34,7 @@ export class LLMCacheService {
 				);
 			}
 			const logger = new Logger();
-			logger.log(`使用已有向量数据库索引:${this.CACHE_INDEX}`, 'LLMCacheService');
+			logger.log(`使用向量数据库索引:${this.CACHE_INDEX}`, 'LLMCacheService');
 		} catch (error) {
 			console.error('Failed to initialize cache index:', error);
 		}
