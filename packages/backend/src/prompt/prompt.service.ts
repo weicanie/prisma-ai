@@ -16,7 +16,7 @@ export class PromptService {
 	/**
 	 * prompt插槽: instructions
 	 */
-	private readonly polishT: PromptTemplate;
+	private readonly polishT: string;
 	private readonly mineFewShot: string;
 	/**
 	 * prompt插槽: fewShot、instructions
@@ -36,7 +36,7 @@ export class PromptService {
 			}
 		);
 
-		this.polishT = PromptTemplate.fromTemplate(polishStr);
+		this.polishT = polishStr;
 		this.mineT = PromptTemplate.fromTemplate(mineTStr);
 
 		this.mineFewShot = fs.readFileSync(
@@ -48,10 +48,10 @@ export class PromptService {
 	}
 
 	/**
-	 * 返回的prompt插槽：{chat_history}、{input}
+	 * 返回的prompt插槽：{instructions}、{chat_history}、{input}
 	 */
-	async minePrompt(instructions = '') {
-		const mine = await this.mineT.format({ fewShot: this.mineFewShot, instructions });
+	async minePrompt() {
+		const mine = await this.mineT.format({ fewShot: this.mineFewShot });
 
 		const prompt = ChatPromptTemplate.fromMessages([
 			[`${role.SYSTEM}`, mine],
@@ -63,12 +63,11 @@ export class PromptService {
 	}
 
 	/**
-	 * @param instructions 输出格式说明
-	 * @return prompt：{chat_history}、{input}
+	 * @return prompt：{instructions}、{chat_history}、{input}
 	 */
-	async polishPrompt(instructions = '') {
+	async polishPrompt(x) {
 		const prompt = ChatPromptTemplate.fromMessages([
-			[`${role.SYSTEM}`, await this.polishT.format({ instructions })],
+			[`${role.SYSTEM}`, this.polishT],
 			// [`${role.SYSTEM}`, `这是目前为止的聊天记录：{chat_history}`],
 			[`${role.HUMAN}`, '{input}']
 		]);

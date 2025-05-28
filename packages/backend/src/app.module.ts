@@ -1,13 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { JobModule } from './business/job/job.module';
+import { ProjectModule } from './business/project/project.module';
+import { ResumeModule } from './business/resume/resume.module';
+import { SkillModule } from './business/skill/skill.module';
 import { ChainModule } from './chain/chain.module';
 import { DbModule } from './DB/db.module';
 import { GlobalFilter } from './errorHandle.filter';
 import { EventBusModule } from './EventBus/event-bus.module';
 import { GraphModule } from './graph/graph.module';
 import { IsLoginGuard } from './isLogin.guard';
-import { ProjectModule } from './project/project.module';
 import { SessionPoolModule } from './session/session-pool.module';
 import { SseModule } from './sse/sse.module';
 import { UserModule } from './user/user.module';
@@ -22,15 +25,18 @@ import { UserModule } from './user/user.module';
 		ConfigModule.forRoot({
 			isGlobal: true,
 			envFilePath: [
-				process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development',
-				'.env'
+				'.env',
+				process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development'
 			]
 		}),
 		/* mongodb数据库 */
-		MongooseModule.forRoot('mongodb://localhost:27017/chainResume'),
+		MongooseModule.forRoot('mongodb://localhost:27017/prisma-ai'),
 		SseModule,
 		SessionPoolModule,
-		EventBusModule
+		EventBusModule,
+		SkillModule,
+		ResumeModule,
+		JobModule
 	],
 	providers: [
 		{

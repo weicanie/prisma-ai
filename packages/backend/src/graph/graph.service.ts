@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { ChainService } from '../chain/chain.service';
 
 import {
-	ProjectExperience,
+	ProjectDto,
 	projectMinedSchema,
 	projectPolishedSchema,
 	projectSchema
@@ -16,13 +16,16 @@ export class GraphService {
 	@Inject('EventBus')
 	public eventBus: EventBus;
 	constructor(private chainService: ChainService) {}
-
+	/* 
+	目前来看没必要上graph
+	agent网络倒是可以考虑上
+	*/
 	/** 通用的项目经验优化：专注于前端的项目经验优化, 强调ai和用户协作
 	 * @description 1、转换、检查、补全项目经验信息
 	 * @description 2、现有亮点评估、改进
 	 * @description 3、亮点挖掘、生成
 	 */
-	async projectGraph(project: ProjectExperience) {
+	async projectGraph(project: ProjectDto) {
 		const stateSchema = z.object({
 			project: projectSchema,
 			projectPolished: projectPolishedSchema,

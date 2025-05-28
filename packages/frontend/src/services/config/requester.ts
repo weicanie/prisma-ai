@@ -106,6 +106,32 @@ class Requester<TRD, TSD> {
 			...config
 		});
 	}
+
+	async put<RD, SD>(url: string, data: RD, config?: RequestConfig<RD, SD>) {
+		return await this.request<RD, SD>({
+			url,
+			method: 'PUT',
+			data,
+			...config
+		});
+	}
+
+	async delete<SD>(url: string, config?: RequestConfig<never, SD>) {
+		return await this.request<never, SD>({
+			url,
+			method: 'DELETE',
+			...config
+		});
+	}
+
+	async patch<RD, SD>(url: string, data: RD, config?: RequestConfig<RD, SD>) {
+		return await this.request<RD, SD>({
+			url,
+			method: 'PATCH',
+			data,
+			...config
+		});
+	}
 }
 
 export { Requester };

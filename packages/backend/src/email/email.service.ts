@@ -7,11 +7,11 @@ export class EmailService {
 
 	constructor(private configService: ConfigService) {
 		this.transporter = createTransport({
-			host: 'smtp.qq.com',
-			port: 587,
+			host: this.configService.get('EMAIL_HOST'),
+			port: this.configService.get('EMAIL_PROT'),
 			secure: false,
 			auth: {
-				user: '2042365244@qq.com',
+				user: this.configService.get('EMAIL_FROM'),
 				pass: this.configService.get('EMAIL_PASS')
 			}
 		});
@@ -20,8 +20,8 @@ export class EmailService {
 	async sendMail({ to, subject, html }) {
 		await this.transporter.sendMail({
 			from: {
-				name: '验证码',
-				address: '2042365244@qq.com'
+				name: 'prismaAI-验证码',
+				address: this.configService.get('EMAIL_FROM')
 			},
 			to,
 			subject,

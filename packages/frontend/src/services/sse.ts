@@ -10,22 +10,22 @@ import { instance } from './config';
 export const llmSessionKey = 'llmSessionId'; //会话id储存的key
 export const sessionStatusKey = 'llmSessionStatus'; //当前会话状态key（注意是当前会话的状态,新建的会话则需要新置状态）
 
-/* 当前会话状态 -> 决策 （ceateSession、useSseData）
+/* 当前会话状态 -> 决策 
 
 getSessionStatusAndDecide的行为
 	用户输入prompt（然后通过点击触发mutation.mutate、输入prompt调用）
 		当前没有会话、'notfound'、'bothdone'：上传prompt作为上下文新建会话、设置当前会话状态为'tasknotfound'
 		'backdone'、'running'、'tasknotfound' -> 什么都不做、提示当前会话正在进行中
 
-	断点续传副作用（组件挂载时输入''调用）：检查是否需要断点续传
-	  'backdone'、'running' -> 设置状态为'backdone'、'running'以通知useSseData进行断点续传
+	断点续传副作用（组件挂载时、输入''调用）：检查是否需要断点续传
+	  'backdone'、'running' -> 设置状态为'backdone'、'running'以通知getSseData进行断点续传
 		'notfound'、'tasknotfound'、'bothdone' -> 什么都不做
 		
 getSseData的行为
 	'notfound'、'bothdone' -> 什么都不做
-	'backdone'、'running' -> 请求sse/generate-recover 进行断点续传
 	'tasknotfound' -> 请求sse/generate 创建任务
-
+	'backdone'、'running' -> 请求sse/generate-recover 进行断点续传
+	
 */
 async function getSessionStatusAndDecide(prompt: string): Promise<SDF<string>> {
 	/* 仅仅为了满足类型约束 */
@@ -89,18 +89,11 @@ async function getSessionStatusAndDecide(prompt: string): Promise<SDF<string>> {
 		} else return forReturn;
 	}
 }
-/* 
-报告后端前端的SSE会话已完成
- */
-async function frontendOver(sessionId: string) {
-	//上报前端完成
-	const res = await instance.get<SDF<string>>(`session/frontend-over?sessionId=${sessionId}`);
-	return res;
-}
 
 /**
  * 通过EventSource请求特定接口获取SSE数据
  * @param setDone 设置完成状态的函数，标记SSE数据传输是否结束
+ * @param setAnswering 设置 useSseAnswer 是否可以进行下一次SSE回答推送
  * @returns 清理函数，用于关闭EventSource连接
  */
 function getSseData(
@@ -108,8 +101,9 @@ function getSseData(
 	setDone: (done: boolean) => void,
 	setError: (error: boolean) => void,
 	setErrorCode: (code: string) => void,
-	setErrorMsg: (msg: string) => void
-): () => void {
+	setErrorMsg: (msg: string) => void,
+	setAnswering?: (answering: boolean) => void
+) {
 	// 初始化状态
 	setData('');
 	setDone(false);
@@ -130,6 +124,9 @@ function getSseData(
 		if (eventSource) {
 			eventSource.close();
 			eventSource = null;
+			if (setAnswering) {
+				setAnswering(false);
+			}
 		}
 	};
 
@@ -137,13 +134,13 @@ function getSseData(
 	const token = localStorage.getItem('token');
 	if (!token) {
 		setTupError('2006', '登录已过期，请重新登录');
-		return cleanup;
+		return;
 	}
 
 	// 验证会话是否存在
 	const sessionId = localStorage.getItem(llmSessionKey);
 	if (!sessionId) {
-		return cleanup;
+		return;
 	}
 
 	// 根据当前会话状态决策
@@ -151,7 +148,7 @@ function getSseData(
 
 	// 如果会话已完成或不存在，不需要建立连接
 	if (status === 'notfound' || status === 'bothdone') {
-		return cleanup;
+		return;
 	}
 
 	// 根据会话状态确定要请求的接口
@@ -170,13 +167,10 @@ function getSseData(
 			baseUrl +
 			'/sse/generate' +
 			`?sessionId=${localStorage.getItem(llmSessionKey)}&token=${token}`;
-	} else {
-		// 状态不存在
-		return cleanup;
-	}
+	} else return;
 
 	try {
-		// 创建EventSource连接，附加token进行身份验证
+		// 创建连接
 		eventSource = new EventSource(url);
 
 		// 处理服务器推送的消息
@@ -206,7 +200,7 @@ function getSseData(
 			}
 		};
 
-		// 处理连接错误
+		// 数据推送阶段的错误处理
 		eventSource.onerror = event => {
 			setDone(true);
 			cleanup();
@@ -214,13 +208,20 @@ function getSseData(
 			console.error('SSE连接错误:', event);
 		};
 	} catch (error) {
-		// 处理连接创建失败
+		// 连接创建阶段的错误处理
 		setTupError('9999', `连接服务器失败，请稍后重试`);
 		console.error('创建EventSource失败:', error);
 		cleanup();
 	}
 
-	return cleanup;
+	return;
 }
-
-export { getSessionStatusAndDecide, getSseData };
+/* 
+报告后端前端的SSE会话已完成
+ */
+async function frontendOver(sessionId: string) {
+	//上报前端完成
+	const res = await instance.get<SDF<string>>(`session/frontend-over?sessionId=${sessionId}`);
+	return res;
+}
+export { frontendOver, getSessionStatusAndDecide, getSseData };

@@ -2,6 +2,17 @@
 @import "tw-animate-css";
 @custom-variant dark (&:is(.dark *));
 
+@layer utilities {
+  :root {
+  /* md编辑器背景色 */
+  --editor-bg-color: rgb(253,252,255);
+
+  }
+  .dark {
+    --editor-bg-color: rgb(26,26,26);
+  }
+}
+
 @theme inline {
   --radius-sm:
     calc(var(--radius) - 4px);

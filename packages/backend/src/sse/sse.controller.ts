@@ -130,7 +130,7 @@ export class SseController {
 				subscriber.complete();
 			});
 		}
-		/* 断点续传：服务端已生成完毕
+		/* 断点续传情况1：服务端已生成完毕
         直接返回 
       */
 		const curEvents = await this.sseService.getSseTaskEvents(curTaskId);
@@ -143,7 +143,7 @@ export class SseController {
 				subscriber.complete();
 			});
 		}
-		/* 断点续传：服务端还在生成
+		/* 断点续传情况2：服务端还在生成
 		
       一次性返回当前已生成的整体string,客户端进行整体替换而不是增量更新（大大简化）
 			（而不是LastEventId之前的, 这参考了deepseek官网的实现）

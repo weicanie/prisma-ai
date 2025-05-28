@@ -1,0 +1,251 @@
+.milkdown {
+  position: relative;
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  button,
+  input {
+    border: none;
+    background: none;
+    box-shadow: none;
+    &:focus {
+      outline: none;
+    }
+  }
+
+  :focus-visible {
+    outline: none;
+  }
+
+  font-family: var(--crepe-font-default);
+  color: var(--crepe-color-on-background);
+  background: var(--crepe-color-background);
+
+  .milkdown-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ProseMirror-focused {
+    outline: none;
+  }
+
+  .ProseMirror {
+    padding: 60px 120px;
+
+    *::selection {
+      background: var(--crepe-color-selected);
+    }
+
+    li.ProseMirror-selectednode {
+      background: var(--crepe-color-selected);
+      outline: none;
+      ::selection {
+        background: transparent;
+      }
+      &::selection {
+        background: transparent;
+      }
+    }
+    li.ProseMirror-selectednode:after {
+      all: unset;
+    }
+
+    .ProseMirror-selectednode {
+      background: var(--crepe-color-selected);
+      outline: none;
+      background: color-mix(
+        in srgb,
+        var(--crepe-color-selected),
+        transparent 60%
+      );
+      ::selection {
+        background: transparent;
+      }
+      &::selection {
+        background: transparent;
+      }
+    }
+
+    &[data-dragging='true'] {
+      .ProseMirror-selectednode,
+      &::selection,
+      *::selection {
+        background: transparent;
+      }
+
+      input::selection {
+        background: var(--crepe-color-selected);
+      }
+    }
+
+    img {
+      vertical-align: bottom;
+      max-width: 100%;
+
+      &.ProseMirror-selectednode {
+        background: none;
+        outline: 2px solid var(--crepe-color-primary);
+      }
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-family: var(--crepe-font-title);
+      font-weight: 400;
+      padding: 2px 0;
+    }
+
+    h1 {
+      font-size: 42px;
+      line-height: 50px;
+      margin-top: 32px;
+    }
+
+    h2 {
+      font-size: 36px;
+      line-height: 44px;
+      margin-top: 28px;
+    }
+
+    h3 {
+      font-size: 32px;
+      line-height: 40px;
+      margin-top: 24px;
+    }
+
+    h4 {
+      font-size: 28px;
+      line-height: 36px;
+      margin-top: 20px;
+    }
+
+    h5 {
+      font-size: 24px;
+      line-height: 32px;
+      margin-top: 16px;
+    }
+
+    h6 {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 28px;
+      margin-top: 16px;
+    }
+
+    p {
+      font-size: 16px;
+      line-height: 24px;
+      padding: 4px 0;
+    }
+
+    code {
+      color: var(--crepe-color-inline-code);
+      background: color-mix(
+        in srgb,
+        var(--crepe-color-inline-area),
+        transparent 40%
+      );
+      font-family: var(--crepe-font-code);
+      padding: 0 2px;
+      border-radius: 4px;
+      font-size: 87.5%;
+      display: inline-block;
+      line-height: 1.4286;
+    }
+
+    a {
+      color: var(--crepe-color-primary);
+      text-decoration: underline;
+    }
+
+    pre {
+      background: color-mix(
+        in srgb,
+        var(--crepe-color-inline-area),
+        transparent 40%
+      );
+      padding: 10px;
+      border-radius: 4px;
+      code {
+        padding: 0;
+        background: transparent;
+      }
+    }
+
+    blockquote {
+      position: relative;
+      padding-left: 40px;
+      padding-top: 0;
+      padding-bottom: 0;
+      box-sizing: content-box;
+      margin: 4px 0;
+
+      &::before {
+        content: '';
+        width: 4px;
+        left: 0;
+        top: 4px;
+        bottom: 4px;
+        position: absolute;
+        background: var(--crepe-color-selected);
+        border-radius: 100px;
+      }
+
+      hr {
+        margin-bottom: 16px;
+      }
+    }
+
+    hr {
+      border: none;
+      background-color: color-mix(
+        in srgb,
+        var(--crepe-color-outline),
+        transparent 80%
+      );
+      background-clip: content-box;
+      padding: 6px 0;
+      height: 13px;
+      position: relative;
+
+      &.ProseMirror-selectednode {
+        outline: none;
+        background-color: color-mix(
+          in srgb,
+          var(--crepe-color-outline),
+          transparent 20%
+        );
+        background-clip: content-box;
+        &::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          right: 0;
+          background-color: color-mix(
+            in srgb,
+            var(--crepe-color-outline),
+            transparent 80%
+          );
+          pointer-events: none;
+        }
+      }
+    }
+
+    ul,
+    ol {
+      padding: 0;
+    }
+  }
+}

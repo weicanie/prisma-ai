@@ -31,5 +31,5 @@
       ]
     }
   },
-  "include": ["src", "../shared/src/types/login_regist.schema.ts"]
+  "include": ["src", "../shared/src/types/login_regist.schema.ts", "../shared/src/utils/md_json.ts"]
 }

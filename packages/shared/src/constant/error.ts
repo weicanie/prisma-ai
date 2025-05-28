@@ -21,7 +21,12 @@ export enum ErrorCode {
 	SERVER_NOT_FOUND = '3001',
 	SERVER_CONNECTION_ERROR = '3002',
 	TOOL_GET_ERROR = '3003',
-	TOOL_CALL_ERROR = '3004'
+	TOOL_CALL_ERROR = '3004',
+
+	//3、项目经验
+
+	//4、mongodb钩子
+	FORMAT_ERROR = '4001'
 }
 
 export const errorMessage = {
@@ -46,5 +51,9 @@ export const errorMessage = {
 	[ErrorCode.SERVER_NOT_FOUND]: 'MCP server未找到',
 	[ErrorCode.SERVER_CONNECTION_ERROR]: 'MCP server连接失败',
 	[ErrorCode.TOOL_GET_ERROR]: '获取mcp工具失败',
-	[ErrorCode.TOOL_CALL_ERROR]: '调用mcp工具失败'
+	[ErrorCode.TOOL_CALL_ERROR]: '调用mcp工具失败',
+	//3、项目经验
+
+	//4、mongodb钩子
+	[ErrorCode.FORMAT_ERROR]: '错误的数据格式'
 };

@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import { memo, useEffect, useRef, useState } from 'react';
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
-import { MagicCardWrapper } from '../../components/MagicCard';
+import { MagicCardWrapper } from '../../components/MagicCardWrapper';
 import { MorphingText } from '../../components/magicui/morphing-text';
 import Prism from '../../components/Prism';
 import Wall from '../../components/Wall';

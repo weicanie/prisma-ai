@@ -21,7 +21,6 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@prism-ai/shared": "workspace:*",
     "@langchain/community": "^0.3.42",
     "@langchain/core": "^0.3.55",
     "@langchain/langgraph": "^0.2.72",
@@ -37,6 +36,7 @@
     "@nestjs/mongoose": "^11.0.3",
     "@nestjs/platform-express": "^10.0.0",
     "@pinecone-database/pinecone": "^5.1.1",
+    "@prism-ai/shared": "workspace:*",
     "@prisma/client": "^6.7.0",
     "body-parser": "^2.2.0",
     "class-transformer": "^0.5.1",
@@ -51,6 +51,7 @@
     "openai": "^4.98.0",
     "opossum": "^8.4.0",
     "prisma": "^6.7.0",
+    "puppeteer": "^24.9.0",
     "redis": "^5.0.1",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",

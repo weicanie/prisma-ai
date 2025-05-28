@@ -1,0 +1,137 @@
+import { z } from 'zod';
+import { projectSchemaForm } from '../types/project.schema-form';
+/**
+ * 将项目的Markdown格式文本转换为符合projectSchemaForm的结构化数据
+ * @param markdown 项目的Markdown格式文本
+ * @returns 符合projectSchemaForm的结构化数据
+ */
+export function markdownToProjectSchema(markdown: string): z.infer<typeof projectSchemaForm> {
+	// 初始化结果对象
+	const result: z.infer<typeof projectSchemaForm> = {
+		info: {
+			name: '',
+			desc: {
+				role: '',
+				contribute: '',
+				bgAndTarget: ''
+			},
+			techStack: []
+		},
+		lightspot: {
+			team: [],
+			skill: [],
+			user: []
+		}
+	};
+	//移除所有注释
+	markdown = markdown.replace(/^\s*>\s*(.+?)$/gm, '');
+
+	// 处理项目名称
+	const nameMatch = markdown.match(/名称：(.+?)(?:\n|$)/);
+	if (nameMatch && nameMatch[1]) {
+		result.info.name = nameMatch[1].trim();
+	}
+
+	// 处理角色和职责
+	const roleMatch = markdown.match(/角色和职责：(.+?)(?:\n|$)/);
+	if (roleMatch && roleMatch[1]) {
+		result.info.desc.role = roleMatch[1].trim();
+	}
+
+	// 处理核心贡献
+	const contributeMatch = markdown.match(/核心贡献和参与程度：(.+?)(?:\n|$)/);
+	if (contributeMatch && contributeMatch[1]) {
+		result.info.desc.contribute = contributeMatch[1].trim();
+	}
+
+	// 处理项目背景和目的
+	const bgMatch = markdown.match(/背景和目的：(.+?)(?:\n|$)/);
+	if (bgMatch && bgMatch[1]) {
+		result.info.desc.bgAndTarget = bgMatch[1].trim();
+	}
+
+	// 处理技术栈
+	const techStackSection = markdown.match(/#### 1\.3 项目技术栈\s*\n([\s\S]*?)(?=\n###|\n####|$)/);
+	if (techStackSection && techStackSection[1]) {
+		const techStackText = techStackSection[1].trim();
+		// 将逗号、顿号分隔的技术栈转为数组
+		result.info.techStack = techStackText.split(/[、,，\s]+/).filter(Boolean);
+	}
+
+	// 处理团队贡献亮点
+	const teamSection = markdown.match(/#### 2\.1 团队贡献\s*([\s\S]*?)(?=\n####|$)/);
+	if (teamSection && teamSection[1]) {
+		//! crepe编辑器中无序列表项 - 会转为 *: 统一用*
+		// 提取所有以 "*" 或 " * " 开头的行
+		const teamPoints = teamSection[1].match(/^\s*\*\s*(.+?)$/gm);
+		if (teamPoints) {
+			result.lightspot.team = teamPoints.map(point => point.replace(/^\s*\*\s*/, '').trim());
+		}
+	}
+
+	// 处理技术亮点/难点
+	const skillSection = markdown.match(/#### 2\.2 技术亮点\/难点\s*([\s\S]*?)(?=\n####|$)/);
+	if (skillSection && skillSection[1]) {
+		const skillPoints = skillSection[1].match(/^\s*\*\s*(.+?)$/gm);
+		if (skillPoints) {
+			result.lightspot.skill = skillPoints.map(point => point.replace(/^\s*\*\s*/, '').trim());
+		}
+	}
+
+	// 处理用户体验/业务价值
+	const userSection = markdown.match(/#### 2\.3 用户体验\/业务价值\s*([\s\S]*?)(?=\n####|$)/);
+	if (userSection && userSection[1]) {
+		const userPoints = userSection[1].match(/^\s*\*\s*(.+?)$/gm);
+		if (userPoints) {
+			result.lightspot.user = userPoints.map(point => point.replace(/^\s*\*\s*/, '').trim());
+		}
+	}
+
+	return result;
+}
+
+/**
+ * 将项目schema对象转换回Markdown格式
+ * @param project 项目结构化数据
+ * @returns Markdown格式文本
+ */
+export function projectSchemaToMarkdown(project: z.infer<typeof projectSchemaForm>): string {
+	let markdown = `### 1、项目信息\n\n`;
+
+	// 基本信息
+	markdown += `#### 1.1 基本信息\n\n`;
+	markdown += `* 名称：${project.info.name}\n\n`;
+
+	// 项目介绍
+	markdown += `#### 1.2 项目介绍\n\n`;
+	markdown += `* 角色和职责：${project.info.desc.role}\n`;
+	markdown += `* 核心贡献和参与程度：${project.info.desc.contribute}\n`;
+	markdown += `* 背景和目的：${project.info.desc.bgAndTarget}\n\n`;
+
+	// 技术栈
+	markdown += `#### 1.3 项目技术栈\n\n`;
+	markdown += `${project.info.techStack.join('、')}\n\n`;
+
+	// 亮点
+	markdown += `### 2、亮点\n\n`;
+
+	// 团队贡献
+	markdown += `#### 2.1 团队贡献\n`;
+	project.lightspot.team.forEach(item => {
+		markdown += `  * ${item}\n`;
+	});
+
+	// 技术亮点
+	markdown += `#### 2.2 技术亮点/难点\n`;
+	project.lightspot.skill.forEach(item => {
+		markdown += `  * ${item}\n`;
+	});
+
+	// 用户体验
+	markdown += `#### 2.3 用户体验/业务价值\n`;
+	project.lightspot.user.forEach(item => {
+		markdown += `  * ${item}\n`;
+	});
+
+	return markdown;
+}

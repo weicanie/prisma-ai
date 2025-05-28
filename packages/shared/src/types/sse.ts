@@ -18,4 +18,4 @@ interface LLMSessionResponse {
 interface LLMSessionStatusResponse {
 	status: 'notfound' | 'bothdone' | 'backdone' | 'running' | 'tasknotfound';
 }
-export { DataChunk, LLMSessionRequest, LLMSessionResponse, LLMSessionStatusResponse };
+export type { DataChunk, LLMSessionRequest, LLMSessionResponse, LLMSessionStatusResponse };

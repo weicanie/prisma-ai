@@ -1,49 +1,78 @@
-import type {
-	ProjectExperience,
-	ProjectExperienceMined,
-	ProjectExperiencePolished,
-	ServerDataFormat as SDF
+import {
+	projectSchema,
+	type ProjectDto,
+	type ProjectVo,
+	type ServerDataFormat as SDF
 } from '@prism-ai/shared';
+import { ZodError } from 'zod';
 import { instance } from './config';
+/**
+ * 上传JSON新建项目经验
+ * @param project JSON格式的项目经验对象
+ * @return 返回创建的项目经验数据
+ */
+export async function createProject(project: ProjectDto) {
+	try {
+		projectSchema.parse(project);
+	} catch (error) {
+		if (error instanceof ZodError) {
+			console.error('验证失败:', error);
+		}
+		return {
+			code: '9999',
+			message: '项目数据格式错误',
+			data: null
+		};
+	}
+	const res = await instance.post<ProjectDto, SDF<ProjectVo>>('/project/raw', project);
+	return res.data;
+}
+/**
+ * 上传项目经验文本创建项目经验
+ * 使用llm改写格式
+ * @param projectText 项目经验文本
+ */
+export async function createFrommText(projectText: string) {
+	const res = await instance.post<string, SDF<ProjectVo>>('/project/text', projectText);
+	return res.data;
+}
 
-async function uploadProjectRaw(project: ProjectExperience) {
-	const res = await instance.post<ProjectExperience, SDF<ProjectExperience>>(
-		'/project/raw',
-		project
+/**
+ * 获取用户的所有项目经验
+ */
+export async function findAllProjects() {
+	const res = await instance.get<SDF<ProjectVo[]>>('/project/all');
+	return res.data;
+}
+
+/**
+ * 获取指定状态的项目经验
+ * @param name 项目名称
+ * @param status 项目状态
+ */
+export async function findByNameAndStatus(name: string, status: string) {
+	const res = await instance.get<SDF<ProjectVo>>(`/project/one?name=${name}&status=${status}`);
+	return res.data;
+}
+
+/**
+ * 更新项目经验
+ * @param id 项目ID
+ * @param projectUpdateDto 更新的项目信息
+ */
+export async function updateProject(id: string, projectUpdateDto: Partial<ProjectDto>) {
+	const res = await instance.put<Partial<ProjectDto>, SDF<ProjectVo>>(
+		`/project/${id}`,
+		projectUpdateDto
 	);
 	return res.data;
 }
 
-async function uploadProjectPolished(project: ProjectExperiencePolished) {
-	const res = await instance.post<ProjectExperiencePolished, SDF<ProjectExperiencePolished>>(
-		'/project/polished',
-		project
-	);
+/**
+ * 删除项目经验
+ * @param id 项目ID
+ */
+export async function deleteProject(id: string) {
+	const res = await instance.delete<SDF<null>>(`/project/${id}`);
 	return res.data;
 }
-
-async function uploadProjectMined(project: ProjectExperienceMined) {
-	const res = await instance.post<ProjectExperienceMined, SDF<ProjectExperienceMined>>(
-		'/project/mined',
-		project
-	);
-	return res.data;
-}
-
-async function uploadProjectText(project: string) {
-	const res = await instance.post<string, SDF<ProjectExperience>>('/project/rawtext', project);
-	return res.data;
-}
-
-async function queryProject(query: string) {
-	const res = await instance.post<string, SDF<any>>('/project/query', query);
-	return res.data;
-}
-
-export {
-	queryProject,
-	uploadProjectMined,
-	uploadProjectPolished,
-	uploadProjectRaw,
-	uploadProjectText
-};

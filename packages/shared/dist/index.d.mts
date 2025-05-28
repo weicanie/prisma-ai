@@ -18,7 +18,8 @@ declare enum ErrorCode {
     SERVER_NOT_FOUND = "3001",
     SERVER_CONNECTION_ERROR = "3002",
     TOOL_GET_ERROR = "3003",
-    TOOL_CALL_ERROR = "3004"
+    TOOL_CALL_ERROR = "3004",
+    FORMAT_ERROR = "4001"
 }
 declare const errorMessage: {
     "0": string;
@@ -38,7 +39,48 @@ declare const errorMessage: {
     "3002": string;
     "3003": string;
     "3004": string;
+    "4001": string;
 };
+
+/**
+ * 创建招聘信息的 DTO
+ */
+interface CreateJobDto {
+    readonly jobName: string;
+    readonly companyName: string;
+    readonly description: string;
+    readonly location?: string;
+    readonly salary?: string;
+    readonly link?: string;
+}
+/**
+ * 更新招聘信息的 DTO (CreateJobDto 的部分属性)
+ */
+type UpdateJobDto = Partial<CreateJobDto>;
+/**
+ * 招聘信息的 VO (View Object)
+ * 用于API响应和前端展示
+ */
+interface JobVo {
+    _id: string;
+    jobName: string;
+    companyName: string;
+    description: string;
+    location?: string;
+    salary?: string;
+    link?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+/**
+ * 分页后的招聘信息列表结果
+ */
+interface PaginatedJobsResult {
+    data: JobVo[];
+    total: number;
+    page: number;
+    limit: number;
+}
 
 interface RegistResponse {
     id: number;
@@ -99,29 +141,46 @@ type VerifyMetaData = {
     resourceId?: string;
 };
 
+/**
+ * @param item 每个亮点的类型
+ * @returns
+ */
+declare function getLightspotSchema(item?: any): z.ZodObject<{
+    team: z.ZodDefault<z.ZodArray<any, "many">>;
+    skill: z.ZodDefault<z.ZodArray<any, "many">>;
+    user: z.ZodDefault<z.ZodArray<any, "many">>;
+}, "strip", z.ZodTypeAny, {
+    team: any[];
+    skill: any[];
+    user: any[];
+}, {
+    team?: any[] | undefined;
+    skill?: any[] | undefined;
+    user?: any[] | undefined;
+}>;
 declare const projectSchema: z.ZodObject<{
     info: z.ZodObject<{
         name: z.ZodString;
         desc: z.ZodObject<{
-            role: z.ZodOptional<z.ZodString>;
-            contribute: z.ZodOptional<z.ZodString>;
-            bgAndTarget: z.ZodOptional<z.ZodString>;
+            role: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+            contribute: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+            bgAndTarget: z.ZodDefault<z.ZodOptional<z.ZodString>>;
         }, "strip", z.ZodTypeAny, {
-            role?: string | undefined;
-            contribute?: string | undefined;
-            bgAndTarget?: string | undefined;
+            role: string;
+            contribute: string;
+            bgAndTarget: string;
         }, {
             role?: string | undefined;
             contribute?: string | undefined;
             bgAndTarget?: string | undefined;
         }>;
-        techStack: z.ZodDefault<z.ZodOptional<z.ZodArray<z.ZodString, "many">>>;
+        techStack: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
         name: string;
         desc: {
-            role?: string | undefined;
-            contribute?: string | undefined;
-            bgAndTarget?: string | undefined;
+            role: string;
+            contribute: string;
+            bgAndTarget: string;
         };
         techStack: string[];
     }, {
@@ -150,9 +209,9 @@ declare const projectSchema: z.ZodObject<{
     info: {
         name: string;
         desc: {
-            role?: string | undefined;
-            contribute?: string | undefined;
-            bgAndTarget?: string | undefined;
+            role: string;
+            contribute: string;
+            bgAndTarget: string;
         };
         techStack: string[];
     };
@@ -181,25 +240,25 @@ declare const projectPolishedSchema: z.ZodObject<{
     info: z.ZodObject<{
         name: z.ZodString;
         desc: z.ZodObject<{
-            role: z.ZodOptional<z.ZodString>;
-            contribute: z.ZodOptional<z.ZodString>;
-            bgAndTarget: z.ZodOptional<z.ZodString>;
+            role: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+            contribute: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+            bgAndTarget: z.ZodDefault<z.ZodOptional<z.ZodString>>;
         }, "strip", z.ZodTypeAny, {
-            role?: string | undefined;
-            contribute?: string | undefined;
-            bgAndTarget?: string | undefined;
+            role: string;
+            contribute: string;
+            bgAndTarget: string;
         }, {
             role?: string | undefined;
             contribute?: string | undefined;
             bgAndTarget?: string | undefined;
         }>;
-        techStack: z.ZodDefault<z.ZodOptional<z.ZodArray<z.ZodString, "many">>>;
+        techStack: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
         name: string;
         desc: {
-            role?: string | undefined;
-            contribute?: string | undefined;
-            bgAndTarget?: string | undefined;
+            role: string;
+            contribute: string;
+            bgAndTarget: string;
         };
         techStack: string[];
     }, {
@@ -228,9 +287,9 @@ declare const projectPolishedSchema: z.ZodObject<{
     info: {
         name: string;
         desc: {
-            role?: string | undefined;
-            contribute?: string | undefined;
-            bgAndTarget?: string | undefined;
+            role: string;
+            contribute: string;
+            bgAndTarget: string;
         };
         techStack: string[];
     };
@@ -259,25 +318,25 @@ declare const projectMinedSchema: z.ZodObject<{
     info: z.ZodObject<{
         name: z.ZodString;
         desc: z.ZodObject<{
-            role: z.ZodOptional<z.ZodString>;
-            contribute: z.ZodOptional<z.ZodString>;
-            bgAndTarget: z.ZodOptional<z.ZodString>;
+            role: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+            contribute: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+            bgAndTarget: z.ZodDefault<z.ZodOptional<z.ZodString>>;
         }, "strip", z.ZodTypeAny, {
-            role?: string | undefined;
-            contribute?: string | undefined;
-            bgAndTarget?: string | undefined;
+            role: string;
+            contribute: string;
+            bgAndTarget: string;
         }, {
             role?: string | undefined;
             contribute?: string | undefined;
             bgAndTarget?: string | undefined;
         }>;
-        techStack: z.ZodDefault<z.ZodOptional<z.ZodArray<z.ZodString, "many">>>;
+        techStack: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
         name: string;
         desc: {
-            role?: string | undefined;
-            contribute?: string | undefined;
-            bgAndTarget?: string | undefined;
+            role: string;
+            contribute: string;
+            bgAndTarget: string;
         };
         techStack: string[];
     }, {
@@ -319,9 +378,9 @@ declare const projectMinedSchema: z.ZodObject<{
     info: {
         name: string;
         desc: {
-            role?: string | undefined;
-            contribute?: string | undefined;
-            bgAndTarget?: string | undefined;
+            role: string;
+            contribute: string;
+            bgAndTarget: string;
         };
         techStack: string[];
     };
@@ -356,9 +415,201 @@ declare const projectMinedSchema: z.ZodObject<{
         user?: any[] | undefined;
     };
 }>;
-type ProjectExperience = z.infer<typeof projectSchema>;
-type ProjectExperiencePolished = z.infer<typeof projectPolishedSchema>;
-type ProjectExperienceMined = z.infer<typeof projectMinedSchema>;
+declare const lookupResultSchema: z.ZodObject<{
+    problem: z.ZodDefault<z.ZodArray<z.ZodObject<{
+        name: z.ZodString;
+        desc: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        name: string;
+        desc: string;
+    }, {
+        name: string;
+        desc: string;
+    }>, "many">>;
+    solution: z.ZodDefault<z.ZodArray<z.ZodObject<{
+        name: z.ZodString;
+        desc: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        name: string;
+        desc: string;
+    }, {
+        name: string;
+        desc: string;
+    }>, "many">>;
+    score: z.ZodDefault<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    problem: {
+        name: string;
+        desc: string;
+    }[];
+    solution: {
+        name: string;
+        desc: string;
+    }[];
+    score: number;
+}, {
+    problem?: {
+        name: string;
+        desc: string;
+    }[] | undefined;
+    solution?: {
+        name: string;
+        desc: string;
+    }[] | undefined;
+    score?: number | undefined;
+}>;
+
+declare enum ProjectStatus {
+    refuse = "refuse",//信息未完整
+    committed = "committed",//信息完整
+    polishing = "polishing",//llm已打磨
+    polished = "polished",//用户已合并打磨
+    mining = "mining",//llm已挖掘
+    mined = "mined",//用户已合并挖掘
+    accepted = "accepted"
+}
+type ProjectDto = z.infer<typeof projectSchema>;
+type ProjectPolishedDto = z.infer<typeof projectPolishedSchema>;
+type ProjectMinedDto = z.infer<typeof projectMinedSchema>;
+interface ProjectVo extends z.infer<typeof projectSchema> {
+    id: string;
+    status: ProjectStatus;
+    createdAt?: string;
+    updatedAt?: string;
+    lookupResult: z.infer<typeof lookupResultSchema>;
+}
+interface ProjectPolishedVo extends z.infer<typeof projectPolishedSchema> {
+}
+interface ProjectMineddVo extends z.infer<typeof projectMinedSchema> {
+}
+
+declare const projectSchemaForm: z.ZodObject<{
+    info: z.ZodObject<{
+        name: z.ZodString;
+        desc: z.ZodObject<{
+            role: z.ZodString;
+            contribute: z.ZodString;
+            bgAndTarget: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            role: string;
+            contribute: string;
+            bgAndTarget: string;
+        }, {
+            role: string;
+            contribute: string;
+            bgAndTarget: string;
+        }>;
+        techStack: z.ZodArray<z.ZodString, "many">;
+    }, "strip", z.ZodTypeAny, {
+        name: string;
+        desc: {
+            role: string;
+            contribute: string;
+            bgAndTarget: string;
+        };
+        techStack: string[];
+    }, {
+        name: string;
+        desc: {
+            role: string;
+            contribute: string;
+            bgAndTarget: string;
+        };
+        techStack: string[];
+    }>;
+    lightspot: z.ZodObject<{
+        team: z.ZodArray<any, "many">;
+        skill: z.ZodArray<any, "many">;
+        user: z.ZodArray<any, "many">;
+    }, "strip", z.ZodTypeAny, {
+        team: any[];
+        skill: any[];
+        user: any[];
+    }, {
+        team: any[];
+        skill: any[];
+        user: any[];
+    }>;
+}, "strip", z.ZodTypeAny, {
+    info: {
+        name: string;
+        desc: {
+            role: string;
+            contribute: string;
+            bgAndTarget: string;
+        };
+        techStack: string[];
+    };
+    lightspot: {
+        team: any[];
+        skill: any[];
+        user: any[];
+    };
+}, {
+    info: {
+        name: string;
+        desc: {
+            role: string;
+            contribute: string;
+            bgAndTarget: string;
+        };
+        techStack: string[];
+    };
+    lightspot: {
+        team: any[];
+        skill: any[];
+        user: any[];
+    };
+}>;
+
+interface SkillItem {
+    type?: string;
+    content?: string[];
+}
+interface CreateSkillDto {
+    readonly content: SkillItem[];
+}
+type UpdateSkillDto = Partial<CreateSkillDto>;
+interface SkillVo {
+    _id: string;
+    content: SkillItem[];
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+/**
+ * 创建简历的 DTO
+ */
+interface CreateResumeDto {
+    readonly name: string;
+    readonly skills?: string[];
+    readonly projects?: string[];
+}
+/**
+ * 更新简历的 DTO
+ */
+type UpdateResumeDto = Partial<CreateResumeDto>;
+/**
+ * 简历的 VO (View Object)
+ * 用于API响应和前端展示
+ */
+interface ResumeVo {
+    id: string;
+    name: string;
+    skill: SkillVo;
+    projects: z.infer<typeof projectSchema>[];
+    createdAt?: string;
+    updatedAt?: string;
+}
+/**
+ * 分页后的简历列表结果
+ */
+interface PaginatedResumesResult {
+    data: ResumeVo[];
+    total: number;
+    page: number;
+    limit: number;
+}
 
 interface ServerDataFormat<TData = unknown> {
     code: string;
@@ -385,4 +636,17 @@ interface LLMSessionStatusResponse {
     status: 'notfound' | 'bothdone' | 'backdone' | 'running' | 'tasknotfound';
 }
 
-export { type DataChunk, ErrorCode, type LLMSessionRequest, type LLMSessionResponse, type LLMSessionStatusResponse, type LoginFormType, type LoginResponse, type ProjectExperience, type ProjectExperienceMined, type ProjectExperiencePolished, type RegistFormType, type RegistResponse, type ServerDataFormat, type UserInfoFromToken, type VerifyMetaData, errorMessage, loginformSchema, projectMinedSchema, projectPolishedSchema, projectSchema, registformSchema };
+/**
+ * 将项目的Markdown格式文本转换为符合projectSchemaForm的结构化数据
+ * @param markdown 项目的Markdown格式文本
+ * @returns 符合projectSchemaForm的结构化数据
+ */
+declare function markdownToProjectSchema(markdown: string): z.infer<typeof projectSchemaForm>;
+/**
+ * 将项目schema对象转换回Markdown格式
+ * @param project 项目结构化数据
+ * @returns Markdown格式文本
+ */
+declare function projectSchemaToMarkdown(project: z.infer<typeof projectSchemaForm>): string;
+
+export { type CreateJobDto, type CreateResumeDto, type CreateSkillDto, type DataChunk, ErrorCode, type JobVo, type LLMSessionRequest, type LLMSessionResponse, type LLMSessionStatusResponse, type LoginFormType, type LoginResponse, type PaginatedJobsResult, type PaginatedResumesResult, type ProjectDto, type ProjectMinedDto, type ProjectMineddVo, type ProjectPolishedDto, type ProjectPolishedVo, ProjectStatus, type ProjectVo, type RegistFormType, type RegistResponse, type ResumeVo, type ServerDataFormat, type SkillItem, type SkillVo, type UpdateJobDto, type UpdateResumeDto, type UpdateSkillDto, type UserInfoFromToken, type VerifyMetaData, errorMessage, getLightspotSchema, loginformSchema, lookupResultSchema, markdownToProjectSchema, projectMinedSchema, projectPolishedSchema, projectSchema, projectSchemaForm, projectSchemaToMarkdown, registformSchema };

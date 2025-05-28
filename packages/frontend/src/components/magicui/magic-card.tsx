@@ -19,10 +19,10 @@ export function MagicCard({
 	children,
 	className,
 	gradientSize = 200,
-	gradientColor = '#262626',
+	gradientColor = '#262626', //光斑颜色
 	gradientOpacity = 0.8,
-	gradientFrom = '#9E7AFF',
-	gradientTo = 'rgb(191,31,38)'
+	gradientFrom = '#9E7AFF', //边框颜色
+	gradientTo = 'rgb(191,31,38)' //边框颜色
 }: MagicCardProps) {
 	const cardRef = useRef<HTMLDivElement>(null);
 	const mouseX = useMotionValue(-gradientSize);

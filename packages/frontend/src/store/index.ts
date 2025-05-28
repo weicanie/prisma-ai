@@ -1,7 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
+import { breadRouterReducer } from './bread-router';
 
 const store = configureStore({
-	reducer: {}
+	reducer: {
+		breadRouter: breadRouterReducer
+	}
 });
 
 export default store;
