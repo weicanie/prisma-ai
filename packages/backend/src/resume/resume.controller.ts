@@ -10,7 +10,7 @@ import {
 	ValidationPipe
 } from '@nestjs/common';
 import { UserInfoFromToken } from '@prism-ai/shared';
-import { RequireLogin, UserInfo } from '../../decorator';
+import { RequireLogin, UserInfo } from '../decorator';
 import { CreateResumeDto } from './dto/create-resume.dto';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import { ResumeService } from './resume.service';
@@ -18,6 +18,7 @@ import { ResumeService } from './resume.service';
 @Controller('resume')
 export class ResumeController {
 	constructor(private readonly resumeService: ResumeService) {}
+
 	@RequireLogin()
 	@Post()
 	create(

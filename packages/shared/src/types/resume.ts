@@ -23,7 +23,7 @@ export type UpdateResumeDto = Partial<CreateResumeDto>;
  * 用于API响应和前端展示
  */
 export interface ResumeVo {
-	id: string; // 数据库中的ID
+	id?: string; // 数据库中的ID
 
 	name: string;
 	skill: SkillVo; // 关联的技能详细信息 (populated)

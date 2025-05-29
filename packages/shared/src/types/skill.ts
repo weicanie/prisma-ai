@@ -13,7 +13,7 @@ export interface CreateSkillDto {
 export type UpdateSkillDto = Partial<CreateSkillDto>;
 
 export interface SkillVo {
-	_id: string;
+	id?: string;
 	content: SkillItem[];
 
 	createdAt?: string;

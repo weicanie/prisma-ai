@@ -12,17 +12,17 @@ export function UploadProject() {
 	//TODO 实现上传文本（格式转换）和上传文件（提取文本,然后格式转换）的功能
 	return (
 		<>
-			<Tabs defaultValue="md">
+			<Tabs defaultValue="text">
 				<TabsList className="w-full grid grid-cols-4">
-					<TabsTrigger value="md" className="col-start-1 col-end-3 lg:col-start-2 lg:col-end-3">
+					<TabsTrigger value="text" className="col-start-1 col-end-3 lg:col-start-2 lg:col-end-3">
 						上传文本
 					</TabsTrigger>
-					<TabsTrigger value="form" className="col-start-3  col-end-5 lg:col-start-3 lg:col-end-4">
+					<TabsTrigger value="file" className="col-start-3  col-end-5 lg:col-start-3 lg:col-end-4">
 						上传文件
 					</TabsTrigger>
 				</TabsList>
-				<TabsContent value="md"></TabsContent>
-				<TabsContent value="form"></TabsContent>
+				<TabsContent value="text">在这里上传文本</TabsContent>
+				<TabsContent value="file">在这里上传文件</TabsContent>
 			</Tabs>
 		</>
 	);

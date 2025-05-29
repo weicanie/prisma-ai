@@ -1,5 +1,6 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ChainModule } from '../chain/chain.module';
+import { EventBusModule } from '../EventBus/event-bus.module';
 import { RedisModule } from '../redis/redis.module';
 import { SessionPoolModule } from '../session/session-pool.module';
 import { TaskQueueModule } from '../task-queue/task-queue.module';
@@ -10,6 +11,13 @@ import { SseService } from './sse.service';
 @Module({
 	controllers: [SseController],
 	providers: [SseService, LLMCacheService],
-	imports: [ChainModule, RedisModule, SessionPoolModule, TaskQueueModule, VectorStoreModule]
+	imports: [
+		ChainModule,
+		RedisModule,
+		SessionPoolModule,
+		TaskQueueModule,
+		VectorStoreModule,
+		forwardRef(() => EventBusModule)
+	]
 })
 export class SseModule {}

@@ -1,10 +1,14 @@
-import { Global, Module } from '@nestjs/common';
+import { forwardRef, Global, Module } from '@nestjs/common';
+import { SseModule } from '../sse/sse.module';
+import { TaskQueueModule } from '../task-queue/task-queue.module';
 import { EventBusService } from './event-bus.service';
 
 @Global()
 @Module({
 	controllers: [],
 	providers: [EventBusService],
-	exports: [EventBusService]
+	exports: [EventBusService],
+	imports: [forwardRef(() => SseModule), forwardRef(() => TaskQueueModule)]
+	// 这里使用 forwardRef 是为了避免循环依赖问题
 })
 export class EventBusModule {}

@@ -7,11 +7,10 @@ import {
 	Patch,
 	Post,
 	Query,
-	UseGuards,
 	ValidationPipe
 } from '@nestjs/common';
 import { UserInfoFromToken } from '@prism-ai/shared';
-import { RequireLogin, UserInfo } from '../../decorator';
+import { RequireLogin, UserInfo } from '../decorator';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { JobService } from './job.service';
@@ -20,7 +19,7 @@ import { JobService } from './job.service';
 export class JobController {
 	constructor(private readonly jobService: JobService) {}
 
-	@UseGuards(RequireLogin)
+	@RequireLogin()
 	@Post()
 	create(
 		@Body(new ValidationPipe()) createJobDto: CreateJobDto,
@@ -29,7 +28,7 @@ export class JobController {
 		return this.jobService.create(createJobDto, userInfo);
 	}
 
-	@UseGuards(RequireLogin)
+	@RequireLogin()
 	@Get('all')
 	findAllUserJobs(
 		@UserInfo() userInfo: UserInfoFromToken,
@@ -41,13 +40,13 @@ export class JobController {
 		return this.jobService.findAll(userInfo, pageNumber, limitNumber);
 	}
 
-	@UseGuards(RequireLogin)
+	@RequireLogin()
 	@Get('one/:id')
 	findOneUserJob(@Param('id') id: string, @UserInfo() userInfo: UserInfoFromToken) {
 		return this.jobService.findOne(id, userInfo);
 	}
 
-	@UseGuards(RequireLogin)
+	@RequireLogin()
 	@Patch(':id')
 	update(
 		@Param('id') id: string,
@@ -57,7 +56,7 @@ export class JobController {
 		return this.jobService.update(id, updateJobDto, userInfo);
 	}
 
-	@UseGuards(RequireLogin)
+	@RequireLogin()
 	@Delete(':id')
 	remove(@Param('id') id: string, @UserInfo() userInfo: UserInfoFromToken) {
 		return this.jobService.remove(id, userInfo);

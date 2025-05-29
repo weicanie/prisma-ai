@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { ResumeVo, UserInfoFromToken } from '@prism-ai/shared';
+import { UserInfoFromToken } from '@prism-ai/shared';
 import { Model, Types } from 'mongoose';
 import { CreateResumeDto } from './dto/create-resume.dto';
 import { UpdateResumeDto } from './dto/update-resume.dto';
@@ -54,8 +54,8 @@ export class ResumeService {
 			limit
 		};
 	}
-
-	async findOne(id: string, userInfo: UserInfoFromToken): Promise<ResumeVo> {
+	//FIXME : Promise<ResumeVo> 类型异常
+	async findOne(id: string, userInfo: UserInfoFromToken) {
 		if (!Types.ObjectId.isValid(id)) {
 			throw new NotFoundException(`Invalid ID format: "${id}"`);
 		}
@@ -67,16 +67,11 @@ export class ResumeService {
 		if (!resume) {
 			throw new NotFoundException(`Resume with ID "${id}" not found or access denied`);
 		}
-		//@ts-expect-error
 		//运行时id必定存在
 		return resume;
 	}
-
-	async update(
-		id: string,
-		updateResumeDto: UpdateResumeDto,
-		userInfo: UserInfoFromToken
-	): Promise<ResumeVo> {
+	//FIXME : Promise<ResumeVo> 类型异常
+	async update(id: string, updateResumeDto: UpdateResumeDto, userInfo: UserInfoFromToken) {
 		if (!Types.ObjectId.isValid(id)) {
 			throw new NotFoundException(`Invalid ID format: "${id}"`);
 		}
@@ -96,14 +91,13 @@ export class ResumeService {
 				updateData,
 				{ new: true }
 			)
-			.populate('skills')
+			.populate('skill')
 			.populate('projects')
 			.exec();
 
 		if (!existingResume) {
 			throw new NotFoundException(`Resume with ID "${id}" not found or access denied`);
 		}
-		//@ts-expect-error
 		//运行时id必定存在
 		return existingResume;
 	}

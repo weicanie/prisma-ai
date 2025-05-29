@@ -22,4 +22,13 @@ export class Skill {
 
 export type SkillDocument = HydratedDocument<Skill>;
 export const SkillSchema = SchemaFactory.createForClass(Skill);
+
+SkillSchema.set('toJSON', {
+	versionKey: false,
+	transform: function (doc, ret) {
+		ret.id = ret._id.toString(); // Convert _id to id string
+		delete ret._id;
+	}
+});
+
 SkillSchema.index({ 'userInfo.userId': 1 });

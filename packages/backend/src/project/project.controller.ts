@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { ProjectStatus, UserInfoFromToken } from '@prism-ai/shared';
-import { RequireLogin, UserInfo } from '../../decorator';
+import { RequireLogin, UserInfo } from '../decorator';
 import { ProjectDto } from './dto/project.dto';
 import { ProjectService } from './project.service';
 

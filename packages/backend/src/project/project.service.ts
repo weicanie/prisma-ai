@@ -12,7 +12,7 @@ import {
 } from '@prism-ai/shared';
 import { Model } from 'mongoose';
 import { ZodError } from 'zod';
-import { ChainService } from '../../chain/chain.service';
+import { ChainService } from '../chain/chain.service';
 import { ProjectDto } from './dto/project.dto';
 import { LookupResult, LookupResultDocument } from './entities/lookupResult.entity';
 import { Project, ProjectDocument } from './entities/project.entity';
@@ -211,8 +211,7 @@ export class ProjectService {
 		name: string | undefined,
 		status: `${ProjectStatus}`,
 		userInfo: UserInfoFromToken
-		//@ts-expect-error
-	): Promise<ProjectVo> {
+	): Promise<ProjectVo | undefined> {
 		const query: any = { 'userInfo.userId': userInfo.userId, status };
 		if (name) {
 			query['info.name'] = { $regex: name, $options: 'i' }; // 不区分大小写

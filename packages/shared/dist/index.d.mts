@@ -62,7 +62,7 @@ type UpdateJobDto = Partial<CreateJobDto>;
  * 用于API响应和前端展示
  */
 interface JobVo {
-    _id: string;
+    id?: string;
     jobName: string;
     companyName: string;
     description: string;
@@ -472,7 +472,7 @@ type ProjectDto = z.infer<typeof projectSchema>;
 type ProjectPolishedDto = z.infer<typeof projectPolishedSchema>;
 type ProjectMinedDto = z.infer<typeof projectMinedSchema>;
 interface ProjectVo extends z.infer<typeof projectSchema> {
-    id: string;
+    id?: string;
     status: ProjectStatus;
     createdAt?: string;
     updatedAt?: string;
@@ -571,7 +571,7 @@ interface CreateSkillDto {
 }
 type UpdateSkillDto = Partial<CreateSkillDto>;
 interface SkillVo {
-    _id: string;
+    id?: string;
     content: SkillItem[];
     createdAt?: string;
     updatedAt?: string;
@@ -594,7 +594,7 @@ type UpdateResumeDto = Partial<CreateResumeDto>;
  * 用于API响应和前端展示
  */
 interface ResumeVo {
-    id: string;
+    id?: string;
     name: string;
     skill: SkillVo;
     projects: z.infer<typeof projectSchema>[];

@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { GlobalInterceptor } from './dataFormat.interceptor';
-import { GlobalFilter } from './errorHandle.filter';
 import { MCPClientService } from './mcp-client/mcp-client.service';
 
 //TODO 统一的错误处理,采用全局的exceptionFilter,{code,message,data}
@@ -10,7 +9,6 @@ import { MCPClientService } from './mcp-client/mcp-client.service';
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
-	app.useGlobalFilters(new GlobalFilter());
 	app.useGlobalInterceptors(new GlobalInterceptor());
 
 	// if (process.env.NODE_ENV === 'development')

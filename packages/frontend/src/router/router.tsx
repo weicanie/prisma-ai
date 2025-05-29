@@ -2,6 +2,8 @@ import { Outlet } from 'react-router-dom';
 import LoginRegist from '../views/LoginRegist/LoginRegist';
 import { Main } from '../views/Main';
 import { ProjectCreate } from '../views/Main/Projects/ProjectCreate';
+import { UploadProject } from '../views/Main/Projects/UploadProject';
+import { WriteProject } from '../views/Main/Projects/WriteProject';
 import { Test } from '../views/MyTest/Test';
 import PrivateRoute from './PrivateRoute';
 import UpdateBreadRouter from './UpdateBreadRouter';
@@ -100,7 +102,11 @@ export const routes = [
 									<ProjectCreate></ProjectCreate>
 								</>
 							</UpdateBreadRouter>
-						)
+						),
+						children: [
+							{ path: 'create', element: <WriteProject /> },
+							{ path: 'upload', element: <UploadProject /> }
+						]
 					},
 					{
 						path: 'list',
@@ -238,6 +244,8 @@ export const path_name: Record<string, string> = {
 
 	'/main/projects': '项目经验',
 	'/main/projects/new': '项目经验-新建项目经验',
+	'/main/projects/new/create': '项目经验-新建项目经验-新建',
+	'/main/projects/new/upload': '项目经验-新建项目经验-上传',
 	'/main/projects/list': '项目经验-我的项目经验',
 
 	'/main/resume': '简历',

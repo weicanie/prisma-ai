@@ -27,7 +27,7 @@ export type ProjectPolishedDto = z.infer<typeof projectPolishedSchema>;
 export type ProjectMinedDto = z.infer<typeof projectMinedSchema>;
 
 export interface ProjectVo extends z.infer<typeof projectSchema> {
-	id: string;
+	id?: string;
 	status: ProjectStatus; //项目状态
 	createdAt?: string;
 	updatedAt?: string;

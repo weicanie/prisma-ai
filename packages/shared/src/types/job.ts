@@ -22,7 +22,7 @@ export type UpdateJobDto = Partial<CreateJobDto>;
  * 用于API响应和前端展示
  */
 export interface JobVo {
-	_id: string; // 数据库中的ID
+	id?: string; // 数据库中的ID
 	jobName: string;
 	companyName: string;
 	description: string;

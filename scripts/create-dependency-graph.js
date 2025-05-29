@@ -15,7 +15,7 @@ try {
 } catch (error) {}
 
 madge(entryFile, {
-	excludeRegExp: ['.*\.(dto|d|controller|service|gateway)\.ts$', 'utils.ts', 'decorator.ts']
+	// excludeRegExp: ['.*\.(dto|d|controller|service|gateway)\.ts$', 'utils.ts', 'decorator.ts']
 })
 	.then(res => res.image(writtenImagePath))
 	.then(writtenPath => {

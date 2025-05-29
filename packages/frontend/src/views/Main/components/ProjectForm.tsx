@@ -17,7 +17,6 @@ import { projectSchemaForm } from '@prism-ai/shared';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@radix-ui/react-collapsible';
 import { CheckIcon, ChevronDown, ChevronRightIcon, Plus, Trash2 } from 'lucide-react';
 import { memo, type PropsWithChildren } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { AnimatedSubscribeButton } from '../../../components/magicui/animated-subscribe-button';
 import { useCustomMutation } from '../../../query/config';
 import { createProject } from '../../../services/project';
@@ -67,8 +66,6 @@ export const ProjectForm = memo(({}: PropsType) => {
 		control: form.control,
 		name: 'lightspot.user'
 	});
-
-	const navigate = useNavigate();
 
 	// 项目描述字段配置
 	const descriptionFields = [

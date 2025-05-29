@@ -1,7 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as bodyParser from 'body-parser';
-import { ChainModule } from '../../chain/chain.module';
+import { ChainModule } from '../chain/chain.module';
 import { LookupResult, LookupResultSchema } from './entities/lookupResult.entity';
 import { Project, ProjectSchema } from './entities/project.entity';
 import { ProjectMined, ProjectMinedSchema } from './entities/projectMined.entity';

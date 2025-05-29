@@ -1,30 +1,34 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { UserInfoFromToken } from '@prism-ai/shared'; // Assuming this type is available
-import { RequireLogin, UserInfo } from '../../decorator'; // Assuming these decorators are available
+import { RequireLogin, UserInfo } from '../decorator'; // Assuming these decorators are available
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import { SkillService } from './skill.service';
 
 @Controller('skill')
-@UseGuards(RequireLogin) // Apply to all routes in this controller
+// @UseGuards(RequireLogin) //! 傻逼幻觉害我d半天bug
 export class SkillController {
 	constructor(private readonly skillService: SkillService) {}
 
+	@RequireLogin()
 	@Post()
 	create(@Body() createSkillDto: CreateSkillDto, @UserInfo() userInfo: UserInfoFromToken) {
 		return this.skillService.create(createSkillDto, userInfo);
 	}
 
+	@RequireLogin()
 	@Get(':id')
 	findOne(@Param('id') id: string, @UserInfo() userInfo: UserInfoFromToken) {
 		return this.skillService.findOne(id, userInfo);
 	}
 
+	@RequireLogin()
 	@Get()
 	findAll(@UserInfo() userInfo: UserInfoFromToken) {
 		return this.skillService.findAll(userInfo);
 	}
 
+	@RequireLogin()
 	@Patch(':id')
 	update(
 		@Param('id') id: string,
@@ -34,6 +38,7 @@ export class SkillController {
 		return this.skillService.update(id, updateSkillDto, userInfo);
 	}
 
+	@RequireLogin()
 	@Delete(':id')
 	remove(@Param('id') id: string, @UserInfo() userInfo: UserInfoFromToken) {
 		return this.skillService.remove(id, userInfo);

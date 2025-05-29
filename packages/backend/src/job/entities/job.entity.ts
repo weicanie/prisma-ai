@@ -52,6 +52,14 @@ export class Job {
 export type JobDocument = HydratedDocument<Job>; //Job & Document
 export const JobSchema = SchemaFactory.createForClass(Job);
 
+JobSchema.set('toJSON', {
+	versionKey: false,
+	transform: function (doc, ret) {
+		ret.id = ret._id.toString(); // Convert _id to id string
+		delete ret._id;
+	}
+});
+
 JobSchema.index({ 'userInfo.userId': 1 });
 JobSchema.index({ location: 1 });
 JobSchema.index({ companyName: 1 });
