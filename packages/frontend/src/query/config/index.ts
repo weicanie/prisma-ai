@@ -32,7 +32,7 @@ export function useCustomQuery<SD>( //SD: Response Data
 	return useQuery({
 		queryKey,
 		queryFn,
-		staleTime: 5 * 60 * 1000,
+		staleTime: 1 * 60 * 1000, //1分钟后过时
 		retry: (failureCount, error) => {
 			return failureCount < 3;
 		},
@@ -52,7 +52,9 @@ export function useCustomQuery<SD>( //SD: Response Data
 					message.error(data.message || '系统繁忙，请稍后再试');
 				}
 			}
-			message.success(data.message || '操作成功');
+			if (data.message && data.message !== 'ok') {
+				message.success(data.message);
+			}
 			if (outerSelect) {
 				return outerSelect(data);
 			}
@@ -85,7 +87,7 @@ export function useCustomMutation<TData, TVariables, TContext = unknown>(
 	return useMutation({
 		// 重试逻辑
 		retry: (failureCount, error) => {
-			return failureCount < 2; // 最多重试2次
+			return failureCount < 2; // 最多试2次
 		},
 		retryDelay: attemptCount => {
 			return Math.min(1000 * 2 ** attemptCount, 30000); // 最长延迟30秒
@@ -107,7 +109,9 @@ export function useCustomMutation<TData, TVariables, TContext = unknown>(
 					message.error(data.message || '系统繁忙，请稍后再试');
 				}
 			} else {
-				message.success(data.message || '操作成功');
+				if (data.message && data.message !== 'ok') {
+					message.success(data.message);
+				}
 				if (outerOnSuccess) {
 					outerOnSuccess(data, variables, context);
 				}

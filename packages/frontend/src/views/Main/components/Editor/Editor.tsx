@@ -1,87 +1,61 @@
 import { useTheme } from '@/utils/theme.tsx';
-import { useEffect, useState, type FC } from 'react';
-
 import { Crepe } from '@milkdown/crepe';
-import { Milkdown, useEditor } from '@milkdown/react';
-
 import '@milkdown/crepe/theme/common/style.css'; //编辑器基础样式
 import type { Ctx } from '@milkdown/ctx';
+import { Milkdown, useEditor } from '@milkdown/react';
+import { replaceAll } from '@milkdown/utils';
 import { markdownToProjectSchema } from '@prism-ai/shared';
-import { CheckIcon, ChevronRightIcon } from 'lucide-react';
-import { AnimatedSubscribeButton } from '../../../../components/magicui/animated-subscribe-button';
+import { debounce, throttle } from 'lodash';
+import { CheckIcon } from 'lucide-react';
+import { useEffect, useRef, type FC } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Button } from '../../../../components/ui/button';
+import { cn } from '../../../../lib/utils';
 import { useCustomMutation } from '../../../../query/config';
 import { createProject } from '../../../../services/project';
+import { selectProjectMd, setDataFromMd } from '../../../../store/projects';
 import './theme.css'; //编辑器主题样式
 
-const defaultMd = `### 1、项目信息
+interface EditorProps {
+	type?: 'edit' | 'show'; //编辑模式、展示模式(只读)
+}
 
-#### 1.1 项目名称
-
-* 名称：
-
-<br />
-
-#### 1.2 项目介绍
-* 角色和职责：
-
-> 说明你在项目中的角色和职责
->
-
-<br />
-
-* 核心贡献和参与程度：
-
-> 突出你的核心贡献和参与程度 
->
-
-<br />
-
-* 背景和目的：
-
-> 简要介绍项目的背景和目的
-
-<br />
-
-#### 1.3 项目技术栈
-
-<br />
-
-> 在上方写下以逗号或顿号分隔的技术栈列表
->
-> 例如：React、TypeScript、Tailwind CSS
-### 2、项目亮点
-
-#### 2.1 团队贡献
-  * 
-#### 2.2 技术亮点/难点
-  * 
-#### 2.3 用户体验/业务价值
-  * `;
-
-export const MilkdownEditor: FC = () => {
-	const [md, setMd] = useState(defaultMd);
-	const [schema, setSchema] = useState(() => markdownToProjectSchema(md));
-	const { theme, resolvedTheme } = useTheme();
+export const Editor: FC<EditorProps> = ({ type }) => {
+	const isShwoMode = type === 'show';
+	const md = useSelector(selectProjectMd);
+	const { resolvedTheme } = useTheme();
 
 	let crepe: Crepe;
-	const onMarkdownUpdated = (ctx: Ctx, markdown: string, prevMarkdown: string) => {
-		setMd(markdown);
-	};
+	const crepeRef = useRef<Crepe | null>(null);
+	/* 
+	由于replaceAll默认增量更新且异步, 因此即使md为字符串值也会引发循环更新。
+	方案一、防止外部更新触发内部更新,且设置一个足够长的延时来确保内部更新完成后,再重置标记接受下一次更新。
+	方案二、设置replaceAll的flush参数为true来同步（见源码）、全量更新。但这样md为对象时还是会引发循环更新。
 
-	const onFocus = () => {
-		console.log('Editor focused');
-	};
-	const onBlur = () => {
-		console.log('Editor blurred');
-	};
+	完整的方案：同步全量更新且防止外部更新触发内部更新。
+	*/
+	const isInternalUpdate = useRef(false); // 防止循环更新
+
+	const dispatch = useDispatch();
+	/* 防抖来防止正常编辑产生闪动、输入体验差问题 */
+	const onMarkdownUpdated = debounce((ctx: Ctx, markdown: string, prevMarkdown: string) => {
+		//防止外部更新触发内部更新
+		if (!isInternalUpdate.current) {
+			!isShwoMode && dispatch(setDataFromMd(markdown));
+		}
+	}, 500);
+
+	const onFocus = () => {};
+	const onBlur = () => {};
 
 	useEditor(root => {
 		crepe = new Crepe({
 			root,
 			defaultValue: md
 		});
-		const themeClassName = theme === 'dark' ? 'milkdown-theme-frame-dark' : 'milkdown-theme-nord';
-		root.classList.add(themeClassName);
+		crepeRef.current = crepe;
+		isShwoMode && crepe.setReadonly(true);
+
 		//事件监听（以进行数据处理）
 		crepe.on(listener => {
 			listener.markdownUpdated(onMarkdownUpdated);
@@ -91,10 +65,24 @@ export const MilkdownEditor: FC = () => {
 		return crepe;
 	}, []);
 
-	/* 获取编辑器实例	
-	const [, getEditor] = useInstance();
-	const crepeInstance = getEditor(); 
-	*/
+	// 监听外部 md 变化，更新编辑器内容
+	useEffect(
+		throttle(() => {
+			if (crepeRef.current) {
+				const currentContent = crepeRef.current.getMarkdown();
+				if (currentContent !== md) {
+					isInternalUpdate.current = true; // 标记为内部更新
+					// 使用 replaceAll 命令更新编辑器内容
+					crepeRef.current.editor.action(replaceAll(md, true));
+					// 确保内部更新完成再重置标记
+					Promise.resolve().then(() => {
+						isInternalUpdate.current = false; // 重置标记
+					});
+				}
+			}
+		}, 500),
+		[md]
+	);
 
 	//卸载时清理编辑器（释放DOM和其它资源）
 	useEffect(() => {
@@ -106,28 +94,29 @@ export const MilkdownEditor: FC = () => {
 	const uploadProjectMutation = useCustomMutation(createProject);
 
 	return (
-		<div className={theme === 'dark' ? 'theme-frame-dark' : 'theme-nord'}>
+		<div
+			className={cn(
+				resolvedTheme === 'dark' ? 'theme-frame-dark' : 'theme-nord',
+				isShwoMode ? 'editor-small' : '',
+				'w-full'
+			)}
+		>
 			<Milkdown />
 			{/* 提交按钮 */}
-			<div className="flex justify-start items-center pl-30">
-				<AnimatedSubscribeButton
-					className="w-36"
-					onClick={() => {
-						const projectMd = markdownToProjectSchema(md);
-						console.log('提交的项目经验:', markdownToProjectSchema(md));
-						uploadProjectMutation.mutate(projectMd);
-					}}
-				>
-					<span className="group inline-flex items-center">
-						提交
-						<ChevronRightIcon className="ml-1 size-4 transition-transform duration-300 group-hover:translate-x-1" />
-					</span>
-					<span className="group inline-flex items-center">
-						<CheckIcon className="mr-2 size-4" />
-						提交成功
-					</span>
-				</AnimatedSubscribeButton>
-			</div>
+			{!isShwoMode && (
+				<div className="flex justify-start items-center pl-30">
+					<Button
+						onClick={() => {
+							const projectMd = markdownToProjectSchema(md);
+							console.log('提交的项目经验:', markdownToProjectSchema(md));
+							uploadProjectMutation.mutate(projectMd);
+						}}
+					>
+						<CheckIcon className="h-4 w-4 mr-2" />
+						提交项目
+					</Button>
+				</div>
+			)}
 		</div>
 	);
 };

@@ -1,7 +1,6 @@
 // 定义简历相关的 DTO 和 VO
 
-import { z } from 'zod';
-import type { projectSchema } from '../index';
+import type { ProjectVo } from '../index';
 import type { SkillVo } from './skill';
 
 /**
@@ -27,7 +26,7 @@ export interface ResumeVo {
 
 	name: string;
 	skill: SkillVo; // 关联的技能详细信息 (populated)
-	projects: z.infer<typeof projectSchema>[]; // 关联的项目经验详细信息 (populated)
+	projects: ProjectVo[]; // 关联的项目经验详细信息 (populated)
 
 	createdAt?: string; // 创建时间
 	updatedAt?: string; // 最后更新时间

@@ -1,0 +1,149 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { PaginatedResumesResult, ProjectVo, ResumeVo, UserInfoFromToken } from '@prism-ai/shared';
+import { Model, Types } from 'mongoose';
+import { PopulateFields } from '../../utils/type';
+import { LookupResult, LookupResultDocument } from '../project/entities/lookupResult.entity';
+import { ProjectDocument } from '../project/entities/project.entity';
+import { SkillDocument } from '../skill/entities/skill.entity';
+import { CreateResumeDto } from './dto/create-resume.dto';
+import { UpdateResumeDto } from './dto/update-resume.dto';
+import { Resume, ResumeDocument } from './entities/resume.entity';
+
+@Injectable()
+export class ResumeService {
+	@InjectModel(Resume.name)
+	private resumeModel: Model<ResumeDocument>;
+
+	@InjectModel(LookupResult.name)
+	private LookupResultModel: Model<LookupResultDocument>;
+
+	constructor() {}
+
+	async create(createResumeDto: CreateResumeDto, userInfo: UserInfoFromToken): Promise<Resume> {
+		const createdResume = new this.resumeModel({
+			...createResumeDto,
+			skills: createResumeDto.skills?.map(id => new Types.ObjectId(id)),
+			projects: createResumeDto.projects?.map(id => new Types.ObjectId(id)),
+			userInfo
+		});
+		return createdResume.save();
+	}
+
+	async findAll(
+		userInfo: UserInfoFromToken,
+		page: number = 1,
+		limit: number = 10
+	): Promise<PaginatedResumesResult> {
+		const skip = (page - 1) * limit;
+		const query = { 'userInfo.userId': userInfo.userId };
+
+		const [result, total] = await Promise.all([
+			this.resumeModel.find(query).skip(skip).limit(limit).sort({ createdAt: -1 }).exec(),
+			this.resumeModel.countDocuments(query).exec()
+		]);
+
+		const promises = result.map(resume => this.findOne(resume._id.toString(), userInfo));
+		const data = await Promise.all(promises);
+
+		return {
+			data,
+			total,
+			page,
+			limit
+		};
+	}
+	async findOne(id: string, userInfo: UserInfoFromToken): Promise<ResumeVo> {
+		if (!Types.ObjectId.isValid(id)) {
+			throw new NotFoundException(`Invalid ID format: "${id}"`);
+		}
+		const resume = (await this.resumeModel
+			.findOne({ _id: new Types.ObjectId(id), 'userInfo.userId': userInfo.userId })
+			.populate('skill')
+			.populate('projects')
+			.exec()) as PopulateFields<
+			ResumeDocument,
+			'projects' | 'skill',
+			{
+				projects: ProjectDocument[];
+				skill: SkillDocument;
+			}
+		> | null;
+
+		if (!resume) {
+			throw new NotFoundException(`Resume with ID "${id}" not found or access denied`);
+		}
+
+		//查询各项目经验的分析结果
+		const projects = resume.projects;
+		const promises = projects.map(project => {
+			return this.LookupResultModel.findOne({
+				'userInfo.userId': userInfo.userId,
+				projectName: project.info.name
+			}).exec();
+		});
+
+		const LookupResults = await Promise.allSettled(promises);
+		const projectDatas = projects.map(project => {
+			const lookupResult = LookupResults.find(
+				result => result.status === 'fulfilled' && result.value?.projectName === project.info.name
+			);
+			if (lookupResult && lookupResult.status === 'fulfilled') {
+				return { ...project.toObject(), lookupResult: lookupResult.value };
+			}
+			return { ...project.toObject(), lookupResult: {} };
+		});
+
+		const result = { ...resume, projects: projectDatas as ProjectVo[] };
+
+		return result as PopulateFields<ResumeDocument, 'projects' | 'skill', ResumeVo>;
+	}
+
+	async update(
+		id: string,
+		updateResumeDto: UpdateResumeDto,
+		userInfo: UserInfoFromToken
+	): Promise<ResumeVo> {
+		if (!Types.ObjectId.isValid(id)) {
+			throw new NotFoundException(`Invalid ID format: "${id}"`);
+		}
+		const updateData: any = { ...updateResumeDto };
+		if (updateResumeDto.skills) {
+			updateData.skills = updateResumeDto.skills.map(skillId => new Types.ObjectId(skillId));
+		}
+		if (updateResumeDto.projects) {
+			updateData.projects = updateResumeDto.projects.map(
+				projectId => new Types.ObjectId(projectId)
+			);
+		}
+
+		const existingResume = await this.resumeModel
+			.findOneAndUpdate(
+				{ _id: new Types.ObjectId(id), 'userInfo.userId': userInfo.userId },
+				updateData,
+				{ new: true }
+			)
+			.exec();
+
+		if (!existingResume) {
+			throw new NotFoundException(`Resume with ID "${id}" not found or access denied`);
+		}
+
+		const newResume = this.findOne(id, userInfo);
+
+		return newResume;
+	}
+
+	async remove(id: string, userInfo: UserInfoFromToken): Promise<{ message: string }> {
+		if (!Types.ObjectId.isValid(id)) {
+			throw new NotFoundException(`Invalid ID format: "${id}"`);
+		}
+		const result = await this.resumeModel
+			.deleteOne({ _id: new Types.ObjectId(id), 'userInfo.userId': userInfo.userId })
+			.exec();
+		if (result.deletedCount === 0) {
+			throw new NotFoundException(`Resume with ID "${id}" not found or access denied`);
+		}
+		return { message: `Resume with ID "${id}" deleted successfully` };
+	}
+}

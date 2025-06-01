@@ -1,9 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import LoginRegist from '../views/LoginRegist/LoginRegist';
 import { Main } from '../views/Main';
-import { ProjectCreate } from '../views/Main/Projects/ProjectCreate';
-import { UploadProject } from '../views/Main/Projects/UploadProject';
-import { WriteProject } from '../views/Main/Projects/WriteProject';
+import { Projects } from '../views/Main/Projects';
 import { Test } from '../views/MyTest/Test';
 import PrivateRoute from './PrivateRoute';
 import UpdateBreadRouter from './UpdateBreadRouter';
@@ -47,146 +45,36 @@ export const routes = [
 				path: '/main/skills',
 				element: (
 					<UpdateBreadRouter>
-						<Outlet />
+						<>职业技能</>
 					</UpdateBreadRouter>
-				),
-				children: [
-					{
-						path: '',
-						element: (
-							<UpdateBreadRouter>
-								<>我的职业技能</>
-							</UpdateBreadRouter>
-						)
-					},
-					{
-						path: 'upload',
-						element: (
-							<UpdateBreadRouter>
-								<>新建职业技能</>
-							</UpdateBreadRouter>
-						)
-					},
-					{
-						path: 'list',
-						element: (
-							<UpdateBreadRouter>
-								<>我的职业技能</>
-							</UpdateBreadRouter>
-						)
-					}
-				]
+				)
 			},
 			// 项目经验
 			{
 				path: '/main/projects',
 				element: (
 					<UpdateBreadRouter>
-						<Outlet />
+						<Projects />
 					</UpdateBreadRouter>
-				),
-				children: [
-					{
-						path: '',
-						element: (
-							<UpdateBreadRouter>
-								<>我的项目经验</>
-							</UpdateBreadRouter>
-						)
-					},
-					{
-						path: 'new',
-						element: (
-							<UpdateBreadRouter>
-								<>
-									<ProjectCreate></ProjectCreate>
-								</>
-							</UpdateBreadRouter>
-						),
-						children: [
-							{ path: 'create', element: <WriteProject /> },
-							{ path: 'upload', element: <UploadProject /> }
-						]
-					},
-					{
-						path: 'list',
-						element: (
-							<UpdateBreadRouter>
-								<>我的项目经验</>
-							</UpdateBreadRouter>
-						)
-					}
-				]
+				)
 			},
 			// 简历
 			{
 				path: '/main/resume',
 				element: (
 					<UpdateBreadRouter>
-						<Outlet />
+						<>简历</>
 					</UpdateBreadRouter>
-				),
-				children: [
-					{
-						path: '',
-						element: (
-							<UpdateBreadRouter>
-								<>我的简历</>
-							</UpdateBreadRouter>
-						)
-					},
-					{
-						path: 'new',
-						element: (
-							<UpdateBreadRouter>
-								<>简历组装</>
-							</UpdateBreadRouter>
-						)
-					},
-					{
-						path: 'list',
-						element: (
-							<UpdateBreadRouter>
-								<>我的简历</>
-							</UpdateBreadRouter>
-						)
-					},
-					{
-						path: '',
-						element: (
-							<UpdateBreadRouter>
-								<>我的简历</>
-							</UpdateBreadRouter>
-						)
-					}
-				]
+				)
 			},
 			// 岗位
 			{
 				path: '/main/job',
 				element: (
 					<UpdateBreadRouter>
-						<Outlet />
+						<>岗位</>
 					</UpdateBreadRouter>
-				),
-				children: [
-					{
-						path: 'match',
-						element: (
-							<UpdateBreadRouter>
-								<>简历匹配岗位</>
-							</UpdateBreadRouter>
-						)
-					},
-					{
-						path: 'list',
-						element: (
-							<UpdateBreadRouter>
-								<>我的岗位专用简历</>
-							</UpdateBreadRouter>
-						)
-					}
-				]
+				)
 			},
 			// 面向offer学习
 			{
@@ -239,22 +127,22 @@ export const path_name: Record<string, string> = {
 	'/main/home': '首页',
 
 	'/main/skills': '职业技能',
-	'/main/skills/upload': '职业技能-新建职业技能',
-	'/main/skills/list': '职业技能-我的职业技能',
+	// '/main/skills/upload': '职业技能-新建职业技能',
+	// '/main/skills/list': '职业技能-我的职业技能',
 
 	'/main/projects': '项目经验',
-	'/main/projects/new': '项目经验-新建项目经验',
-	'/main/projects/new/create': '项目经验-新建项目经验-新建',
-	'/main/projects/new/upload': '项目经验-新建项目经验-上传',
-	'/main/projects/list': '项目经验-我的项目经验',
+	// '/main/projects/new': '项目经验-新建项目经验',
+	// '/main/projects/new/create': '项目经验-新建项目经验-新建',
+	// '/main/projects/new/upload': '项目经验-新建项目经验-上传',
+	// '/main/projects/list': '项目经验-我的项目经验',
 
 	'/main/resume': '简历',
-	'/main/resume/new': '简历-简历组装',
-	'/main/resume/list': '简历-我的简历',
+	// '/main/resume/new': '简历-简历组装',
+	// '/main/resume/list': '简历-我的简历',
 
 	'/main/job': '岗位',
-	'/main/job/match': '岗位-简历匹配',
-	'/main/job/list': '岗位-我的岗位专用简历',
+	// '/main/job/match': '岗位-简历匹配',
+	// '/main/job/list': '岗位-我的岗位专用简历',
 
 	'/main/offer': '面向offer学习',
 	'/main/offer/road': '面向offer学习-学习路线',

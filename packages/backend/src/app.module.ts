@@ -1,16 +1,19 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
+import { JobModule } from './business/job/job.module';
+import { ProjectModule } from './business/project/project.module';
+import { ResumeModule } from './business/resume/resume.module';
+import { SkillModule } from './business/skill/skill.module';
 import { ChainModule } from './chain/chain.module';
+import { GlobalInterceptor } from './dataFormat.interceptor';
 import { DbModule } from './DB/db.module';
 import { GlobalFilter } from './errorHandle.filter';
 import { EventBusModule } from './EventBus/event-bus.module';
 import { GraphModule } from './graph/graph.module';
-import { JobModule } from './job/job.module';
-import { ProjectModule } from './project/project.module';
-import { ResumeModule } from './resume/resume.module';
+import { IsLoginGuard } from './isLogin.guard';
 import { SessionPoolModule } from './session/session-pool.module';
-import { SkillModule } from './skill/skill.module';
 import { SseModule } from './sse/sse.module';
 import { UserModule } from './user/user.module';
 
@@ -39,13 +42,17 @@ import { UserModule } from './user/user.module';
 	],
 	providers: [
 		{
-			provide: 'APP_EXCEPTION_FILTER',
+			provide: APP_FILTER,
 			useClass: GlobalFilter
+		},
+		{
+			provide: APP_GUARD,
+			useClass: IsLoginGuard
+		},
+		{
+			provide: APP_INTERCEPTOR,
+			useClass: GlobalInterceptor
 		}
-		// {
-		// 	provide: 'APP_GUARD',
-		// 	useClass: IsLoginGuard
-		// }
 	]
 })
 export class AppModule {}

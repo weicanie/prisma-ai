@@ -34,7 +34,7 @@
   .ProseMirror-focused {
     outline: none;
   }
-
+  /* 编辑区样式 */
   .ProseMirror {
     padding: 60px 120px;
 

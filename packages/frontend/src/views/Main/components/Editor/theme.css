@@ -1,4 +1,5 @@
 @import './common.css';
+@import './common-small.css';
 
 /* 官方提供的主题列表：frame、nord、frame*dark、classic*dark、nord*dark  */
 .theme-nord .milkdown {

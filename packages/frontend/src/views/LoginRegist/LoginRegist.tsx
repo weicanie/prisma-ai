@@ -1,13 +1,11 @@
 import classNames from 'classnames';
 import { memo, useEffect, useRef, useState } from 'react';
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
-import { MagicCardWrapper } from '../../components/MagicCardWrapper';
-import { MorphingText } from '../../components/magicui/morphing-text';
 import Prism from '../../components/Prism';
 import Wall from '../../components/Wall';
 import { LoginForm } from './c-cpns/LoginForm';
 import { RegistForm } from './c-cpns/RegistForm';
-import { comfortablyNumbLyrics, LoginRegistWrapper } from './LoginRegist.style';
+import { LoginRegistWrapper } from './LoginRegist.style';
 function LoginRegist() {
 	const [isLoginCard, setIsLoginCard] = useState(true);
 	const [isLight, setIsLight] = useState(false);
@@ -22,7 +20,6 @@ function LoginRegist() {
 		}, 1000);
 	}, []);
 
-	// TODO 歌词组件性能差,换
 	return (
 		<LoginRegistWrapper>
 			<div className="card-prism ">
@@ -42,19 +39,17 @@ function LoginRegist() {
 						unmountOnExit
 					>
 						<div ref={nodeRef}>
-							<MagicCardWrapper cardTitle={isLoginCard ? 'Login' : 'Register'}>
-								{isLoginCard ? (
-									<LoginForm setIsLoginCard={setIsLoginCard} />
-								) : (
-									<RegistForm setIsLoginCard={setIsLoginCard} />
-								)}
-							</MagicCardWrapper>
+							{isLoginCard ? (
+								<LoginForm setIsLoginCard={setIsLoginCard} />
+							) : (
+								<RegistForm setIsLoginCard={setIsLoginCard} />
+							)}
 						</div>
 					</CSSTransition>
 				</SwitchTransition>
 			</div>
 			<div className={classNames('card-text', { 'card-show': isFormShow })}>
-				<MorphingText texts={comfortablyNumbLyrics} />
+				{/* <MorphingText texts={comfortablyNumbLyrics} /> */}
 			</div>
 			<Wall play={isLight} duration={1500} delay={2500}></Wall>
 		</LoginRegistWrapper>

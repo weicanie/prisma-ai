@@ -1,3 +1,4 @@
 node_modules/
 ai_prompts/
 **/*.prompts.md
+packages/backend/generated

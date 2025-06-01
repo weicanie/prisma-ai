@@ -8,7 +8,7 @@ import {
 import { Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
-//TODO 自定义memory
+
 interface JSONChatHistoryInput {
 	sessionId: string;
 	dir: string;
@@ -29,7 +29,7 @@ class JSONChatHistory extends BaseListChatMessageHistory {
 		this.sessionId = fields.sessionId;
 		this.dir = fields.dir;
 	}
-
+	/* memory调用 */
 	async getMessages(): Promise<BaseMessage[]> {
 		const filePath = path.join(this.dir, `${this.sessionId}.json`);
 		try {
@@ -48,16 +48,17 @@ class JSONChatHistory extends BaseListChatMessageHistory {
 		}
 	}
 
-	async addMessage(message: BaseMessage): Promise<void> {
-		const messages = await this.getMessages();
-		messages.push(message);
-		await this.saveMessagesToFile(messages);
-	}
-
+	/* memory调用 */
 	async addMessages(messages: BaseMessage[]): Promise<void> {
 		const existingMessages = await this.getMessages();
 		const allMessages = existingMessages.concat(messages);
 		await this.saveMessagesToFile(allMessages);
+	}
+
+	async addMessage(message: BaseMessage): Promise<void> {
+		const messages = await this.getMessages();
+		messages.push(message);
+		await this.saveMessagesToFile(messages);
 	}
 
 	async clear(): Promise<void> {
@@ -70,7 +71,6 @@ class JSONChatHistory extends BaseListChatMessageHistory {
 	}
 
 	async saveMessagesToFile(messages: BaseMessage[]): Promise<void> {
-		console.log('🚀 ~ JSONChatHistory ~ saveMessagesToFile ~ messages:', messages);
 		const filePath = path.join(this.dir, `${this.sessionId}.json`);
 		//确保目录存在
 		if (!fs.existsSync(this.dir)) {
@@ -92,7 +92,7 @@ class JSONChatHistory extends BaseListChatMessageHistory {
 export class ChatHistoryService {
 	getChatHistory(
 		sessionId = 'json_chat_history',
-		dir = path.join(process.cwd(), 'data/chat_history_data')
+		dir = path.join(process.cwd(), 'ai_data/chat_history_data')
 	) {
 		return new JSONChatHistory({
 			sessionId,

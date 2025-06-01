@@ -48,7 +48,9 @@ export class ChainService {
 		const outputParser = StructuredOutputParser.fromZodSchema(schema);
 
 		const memory = new BufferMemory({
-			chatHistory: this.modelService.getChatHistory(`${new Date().toLocaleDateString()}`)
+			chatHistory: this.modelService.getChatHistory(
+				`${new Date().toLocaleDateString().replace(/\//g, '-')}`
+			)
 		});
 
 		let userInput = '';
@@ -94,13 +96,17 @@ export class ChainService {
 				如果信息缺失,就留空。
 				注意不要修改任何信息。
 				你需要对亮点进行分类,但不要修改亮点的任何信息。
-				格式说明:${outputParser.getFormatInstructions()}` // 内部的prompt会教JSON schema、给输入的JSON schema给llm
+				格式说明:{instructions}` // 内部的prompt会教JSON schema、给输入的JSON schema给llm
 			],
 			[`${role.HUMAN}`, '{input}']
 		]);
 
 		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-chat');
 		const chain = RunnableSequence.from<{ input: string }, z.infer<typeof projectSchema>>([
+			{
+				input: input => input.input,
+				instructions: () => outputParser.getFormatInstructions()
+			},
 			prompt,
 			llm,
 			outputParser
@@ -125,12 +131,22 @@ export class ChainService {
 				用户将输入格式错误的项目经验描述。
 				根据以下格式说明和错误信息修复格式错误。
 				注意不要修改任何信息。
-				格式说明:${outputParser.getFormatInstructions()}
-				${errMsg ? `错误信息:${errMsg}` : ''}`
+				格式说明:{instructions}
+				错误信息:{errMsg}
+				`
 			],
 			[`${role.HUMAN}`, '{input}']
 		]);
-		const chain = RunnableSequence.from<{ input: string }, T>([prompt, llm, outputParser]);
+		const chain = RunnableSequence.from<{ input: string }, T>([
+			{
+				input: input => input.input,
+				instructions: () => outputParser.getFormatInstructions(),
+				errMsg: () => errMsg
+			},
+			prompt,
+			llm,
+			outputParser
+		]);
 		return chain;
 	}
 
@@ -169,6 +185,7 @@ export class ChainService {
 	async lookupChain() {
 		const schema = lookupResultSchema;
 		const outputParser = StructuredOutputParser.fromZodSchema(schema);
+		console.log(outputParser.getFormatInstructions());
 		const prompt = ChatPromptTemplate.fromMessages([
 			[
 				`${role.SYSTEM}`,
@@ -184,7 +201,7 @@ export class ChainService {
 				问题描述: 罗列<常见技术的使用>和<普通业务的实现>。
 				c. 
 				问题名称: 项目缺乏亮点
-				问题描述: <项目亮点的3个方面中的某一方面亮点缺乏>（即数量不足3个）。
+				问题描述: <团队贡献、技术亮点/难点、用户体验/业务价值方面亮点缺乏>（即某一方面的亮点数量不足3个）。
 
 				再然后根据不同问题给出解决方案：
 				对于a问题: 
@@ -195,7 +212,7 @@ export class ChainService {
 				解决方案描述：评估并改进当前的项目亮点部分,避免罗列太多常见技术的使用和普通业务的实现。
 				对于c问题: 
 				解决方案名称：挖掘项目亮点
-				解决方案描述: 挖掘<项目亮点的3个方面中的缺乏的某些方面>的亮点。
+				解决方案描述: 挖掘<团队贡献、技术亮点/难点、用户体验/业务价值方面>的亮点。
 
 				你应该在理解用户输入的项目经验描述的基础上,分析出存在的问题和解决方案,应该尽量符合上述格式,且"<>"中的内容应该按照项目实际情况确定。
 
@@ -204,7 +221,7 @@ export class ChainService {
 
 				如果没有问题,则输出空数组。
 				如果没有解决方案,则输出空数组。
-				输出格式说明:${outputParser.getFormatInstructions()}
+				输出格式说明:{instructions}
 				`
 			],
 			[`${role.HUMAN}`, '{input}']

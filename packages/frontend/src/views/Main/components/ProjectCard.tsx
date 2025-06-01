@@ -12,17 +12,23 @@ import React, { useEffect, useState } from 'react';
 
 interface ProjectCardProps {
 	data: {
-		name: string; //项目名称
-		createdAt: string; //创建时间
-		updatedAt: string; //更新时间
-		score: number; //得分
-		problem: string[]; //存在的问题
-		solution: string[]; //解决方案
+		info: {
+			name: string; // 项目名称
+		};
+		createdAt?: string; //创建时间
+		updatedAt?: string; //更新时间
+		lookupResult: {
+			score: number; //得分
+			problem: { name: string; desc: string }[]; //存在的问题
+			solution: { name: string; desc: string }[]; //解决方案
+		};
 	};
 }
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({ data }) => {
-	const { name, createdAt, updatedAt, score, problem, solution } = data;
+	const { createdAt, updatedAt } = data;
+	const { score, problem, solution } = data.lookupResult;
+	const { name } = data.info;
 	const [animatedScore, setAnimatedScore] = useState(0);
 
 	useEffect(() => {
@@ -43,7 +49,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ data }) => {
 		gaugePrimaryColor = 'green'; // 80-100分显示绿色
 	}
 	return (
-		<Card className="w-full max-w-md mx-auto shadow-lg">
+		<Card className="w-md bg-zinc-800">
 			{/* 卡片上部：显示得分 */}
 			<CardHeader className="flex justify-center items-center text-center">
 				<AnimatedCircularProgressBar
@@ -60,7 +66,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ data }) => {
 			<CardContent className="text-center">
 				<CardTitle className="text-xl font-bold">{name}</CardTitle>
 				<CardDescription className="text-sm text-gray-500">
-					创建于: {createdAt} | 更新于: {updatedAt}
+					{new Date(updatedAt!).toLocaleDateString()}
 				</CardDescription>
 			</CardContent>
 
@@ -68,15 +74,16 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ data }) => {
 			<CardFooter className="flex flex-col gap-4 pt-4">
 				{/* 问题列表 */}
 				<div className="w-full">
-					<h3 className=" text-md font-semibold mb-2 text-red-700">存在的问题</h3>
-					<ul className="list-none pl-0 space-y-1">
+					<h3 className="text-center text-md font-semibold mb-2 text-red-700">存在的问题</h3>
+					<ul className="list-none space-y-1 pl-[35%]">
 						{problem.map((item, index) => (
 							<li
 								key={`problem-${index}`}
 								className="flex justify-start items-center text-sm space-x-3"
 							>
 								<CircleAlert className="text-red-700 ml-2 size-4" />
-								<span>{item}</span>
+								<span className="text-red-700 font-semibold">{item.name}</span>
+								{/* <span>{item.desc}</span> */}
 							</li>
 						))}
 					</ul>
@@ -84,15 +91,16 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ data }) => {
 
 				{/* 解决方案列表 */}
 				<div className="w-full">
-					<h3 className=" text-md font-semibold mb-2 text-green-700">解决方案</h3>
-					<ul className="list-none pl-0 space-y-1">
+					<h3 className="text-center text-md font-semibold mb-2 text-green-700">解决方案</h3>
+					<ul className="list-none  space-y-1  pl-[35%]">
 						{solution.map((item, index) => (
 							<li
 								key={`solution-${index}`}
 								className="flex justify-start items-center text-sm space-x-3"
 							>
 								<ArrowRight className="text-green-700 ml-2 size-4" />
-								<span>{item}</span>
+								<span className="text-green-700 font-semibold">{item.name}</span>
+								{/* <span>{item.desc}</span> */}
 							</li>
 						))}
 					</ul>

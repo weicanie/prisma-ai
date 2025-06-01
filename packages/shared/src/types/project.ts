@@ -10,12 +10,12 @@ export enum ProjectStatus {
 	refuse = 'refuse', //信息未完整
 	committed = 'committed', //信息完整
 
-	/* ProjectPolishedSchema 中只会有此状态的项目描述*/
+	/* 仅在 ProjectPolishedSchema 中*/
 	polishing = 'polishing', //llm已打磨
 
 	polished = 'polished', //用户已合并打磨
 
-	/* ProjectMinedSchema 中只会有此状态的项目描述*/
+	/* 仅在 ProjectMinedSchema 中*/
 	mining = 'mining', //llm已挖掘
 
 	mined = 'mined', //用户已合并挖掘
@@ -27,8 +27,10 @@ export type ProjectPolishedDto = z.infer<typeof projectPolishedSchema>;
 export type ProjectMinedDto = z.infer<typeof projectMinedSchema>;
 
 export interface ProjectVo extends z.infer<typeof projectSchema> {
-	id?: string;
+	id?: string; // 数据库中的ID
+	name?: string; //项目名称
 	status: ProjectStatus; //项目状态
+
 	createdAt?: string;
 	updatedAt?: string;
 

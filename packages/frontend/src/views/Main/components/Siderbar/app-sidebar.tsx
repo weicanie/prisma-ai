@@ -1,14 +1,6 @@
 'use client';
 
-import {
-	Briefcase,
-	FileText,
-	GalleryVerticalEnd,
-	House,
-	ListChecks,
-	Rocket,
-	ScanSearch
-} from 'lucide-react';
+import { FileText, House, ListChecks, Pyramid, Rocket, ScanSearch, Sparkles } from 'lucide-react';
 import * as React from 'react';
 
 import {
@@ -32,9 +24,9 @@ const data = {
 	},
 	teams: [
 		{
-			name: '个人版',
-			logo: GalleryVerticalEnd,
-			plan: '基础版'
+			name: '简历灵感菇',
+			logo: Pyramid,
+			plan: '从简历到offer'
 		}
 	],
 	navMain: [
@@ -47,39 +39,39 @@ const data = {
 			title: '职业技能',
 			url: '/main/skills',
 			isOpen: true,
-			icon: ListChecks,
-			items: [
-				{ title: '新建职业技能', url: '/main/skills/upload' },
-				{ title: '我的职业技能', url: '/main/skills/list' }
-			]
+			icon: ListChecks
+			// items: [
+			// 	{ title: '新建职业技能', url: '/main/skills/upload' },
+			// 	{ title: '我的职业技能', url: '/main/skills/list' }
+			// ]
 		},
 		{
 			title: '项目经验',
 			url: '/main/projects',
-			icon: Briefcase,
-			isOpen: true,
-			items: [
-				{ title: '新建项目经验', url: '/main/projects/new' },
-				{ title: '我的项目经验', url: '/main/projects/list' }
-			]
+			icon: Sparkles,
+			isOpen: true
+			// items: [
+			// 	{ title: '新建项目经验', url: '/main/projects/new' },
+			// 	{ title: '我的项目经验', url: '/main/projects/list' }
+			// ]
 		},
 		{
 			title: '简历',
 			icon: FileText,
-			url: '/main/resume',
-			items: [
-				{ title: '简历组装', url: '/main/resume/new' },
-				{ title: '我的简历', url: '/main/resume/list' }
-			]
+			url: '/main/resume'
+			// items: [
+			// 	{ title: '简历组装', url: '/main/resume/new' },
+			// 	{ title: '我的简历', url: '/main/resume/list' }
+			// ]
 		},
 		{
 			title: '岗位',
 			icon: ScanSearch,
-			url: '/main/job',
-			items: [
-				{ title: '简历匹配', url: '/main/job/match' },
-				{ title: '我的岗位专用简历', url: '/main/job/list' }
-			]
+			url: '/main/job'
+			// items: [
+			// 	{ title: '简历匹配', url: '/main/job/match' },
+			// 	{ title: '我的岗位专用简历', url: '/main/job/list' }
+			// ]
 		},
 		{
 			title: '面向offer学习',

@@ -7,6 +7,7 @@ import { Response } from 'express';
 @Catch()
 export class GlobalFilter implements ExceptionFilter {
 	catch(exception: Error, host: ArgumentsHost) {
+		console.error(exception);
 		const ctx = host.switchToHttp();
 		const response = ctx.getResponse<Response>();
 

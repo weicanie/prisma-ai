@@ -473,6 +473,7 @@ type ProjectPolishedDto = z.infer<typeof projectPolishedSchema>;
 type ProjectMinedDto = z.infer<typeof projectMinedSchema>;
 interface ProjectVo extends z.infer<typeof projectSchema> {
     id?: string;
+    name?: string;
     status: ProjectStatus;
     createdAt?: string;
     updatedAt?: string;
@@ -597,7 +598,7 @@ interface ResumeVo {
     id?: string;
     name: string;
     skill: SkillVo;
-    projects: z.infer<typeof projectSchema>[];
+    projects: ProjectVo[];
     createdAt?: string;
     updatedAt?: string;
 }

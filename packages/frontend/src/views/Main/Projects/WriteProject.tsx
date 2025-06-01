@@ -1,12 +1,11 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import React from 'react';
-import MilkdownEditorWrapper from '../components/Editor/EditorWrapper';
+import MilkdownEditor from '../components/Editor';
 import { ProjectForm } from '../components/ProjectForm';
 
 interface WriteProjectProps {}
 
 export const WriteProject: React.FC<WriteProjectProps> = props => {
-	//FIXME magic ui 导致tabs默认样式异常?
 	return (
 		<>
 			<Tabs defaultValue="md" className="flex items-center">
@@ -23,7 +22,7 @@ export const WriteProject: React.FC<WriteProjectProps> = props => {
 				</TabsList>
 				<TabsContent value="md" className="w-full h-full">
 					{/* md编辑器 */}
-					<MilkdownEditorWrapper />
+					<MilkdownEditor />
 				</TabsContent>
 				<TabsContent value="form" className="mt-20 w-full h-full">
 					{/* 表单 */}

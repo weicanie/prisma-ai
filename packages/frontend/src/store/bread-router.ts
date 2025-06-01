@@ -32,9 +32,9 @@ const slice = createSlice({
 	}
 });
 
-const selectBreadRouterList = (state: { breadRouter: BreadRouterState }) => state.breadRouter.list;
+export const { updateAction } = slice.actions;
 
-const { updateAction } = slice.actions;
+export const selectBreadRouterList = (state: { breadRouter: BreadRouterState }) =>
+	state.breadRouter.list;
 
-const breadRouterReducer = slice.reducer;
-export { breadRouterReducer, selectBreadRouterList, updateAction };
+export const breadRouterReducer = slice.reducer;

@@ -2,7 +2,6 @@
 /dist
 /node_modules
 /build
-
 # Logs
 logs
 *.log
@@ -11,7 +10,7 @@ pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
-data/
+
 # OS
 .DS_Store
 
@@ -41,8 +40,6 @@ data/
 .env.test.local
 .env.production.local
 .env.local
-.env.development
-.env.production
 
 # temp directory
 .temp
@@ -56,3 +53,9 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+#custom
+/ai_data
+.env.development
+.env.production
+/generated

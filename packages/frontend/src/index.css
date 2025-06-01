@@ -1,19 +1,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+
+/* 自定义变体
+具有dark类名的元素的后代激活dark变体
+用于按类名的主题切换
+*/
 @custom-variant dark (&:is(.dark *));
 
-@layer utilities {
-  :root {
-  /* md编辑器背景色 */
-  --editor-bg-color: rgb(253,252,255);
-
-  }
-  .dark {
-    --editor-bg-color: rgb(26,26,26);
-  }
-}
-
-@theme inline {
+@theme {
   --radius-sm:
     calc(var(--radius) - 4px);
   --radius-md:
@@ -84,47 +78,7 @@
     var(--sidebar-border);
   --color-sidebar-ring:
     var(--sidebar-ring);
-  --animate-background-position-spin:
-    background-position-spin 3000ms infinite alternate;
-  @keyframes background-position-spin {
-  0% {
-    background-position:
-    top center;
-    }
-  100% {
-    background-position:
-    bottom center;
-    }
-  }
-  --animate-aurora:
-    aurora 8s ease-in-out infinite alternate
-;
-  @keyframes aurora {
-  0% {
-    background-position:
-    0% 50%;
-    transform:
-    rotate(-5deg) scale(0.9);}
-  25% {
-    background-position:
-    50% 100%;
-    transform:
-    rotate(5deg) scale(1.1);}
-  50% {
-    background-position:
-    100% 50%;
-    transform:
-    rotate(-3deg) scale(0.95);}
-  75% {
-    background-position:
-    50% 0%;
-    transform:
-    rotate(3deg) scale(1.05);}
-  100% {
-    background-position:
-    0% 50%;
-    transform:
-    rotate(-5deg) scale(0.9);}}}
+ }
 
 :root {
   --radius:
@@ -288,4 +242,42 @@
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+}
+
+
+/* 自定义 */
+
+:root {
+/* md编辑器背景色 */
+--editor-bg-color: rgb(253,252,255);
+}
+.dark {
+--editor-bg-color: rgb(26,26,26);
+}
+
+@theme {
+--blue-prisma:rgb(28,160,188);
+--purple-prisma:rgb(109,90,139);
+--green-prisma:rgb(34,179,71);
+--yellow-prisma:rgb(247,230,0);
+--orange-prisma:rgb(245,101,34);
+--red-prisma:rgb(242,30,56);
+
+--color-primary: var(--sidebar-primary);
+--color-secondary: var(--sidebar-secondary);
+
+}
+/* 侧边栏自定义 */
+:root {
+--sidebar-primary:var(--blue-prisma);
+--sidebar-secondary:var(--green-prisma);
+}
+.dark {
+--sidebar-primary:var(--purple-prisma);
+--sidebar-secondary:var(--orange-prisma);
+
+}
+
+@utility bg-editor {
+  background-color: var(--editor-bg-color);
 }

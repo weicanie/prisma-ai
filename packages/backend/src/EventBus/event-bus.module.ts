@@ -9,6 +9,5 @@ import { EventBusService } from './event-bus.service';
 	providers: [EventBusService],
 	exports: [EventBusService],
 	imports: [forwardRef(() => SseModule), forwardRef(() => TaskQueueModule)]
-	// 这里使用 forwardRef 是为了避免循环依赖问题
 })
 export class EventBusModule {}

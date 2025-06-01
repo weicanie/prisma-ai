@@ -23,8 +23,8 @@ export function markdownToProjectSchema(markdown: string): z.infer<typeof projec
 			user: []
 		}
 	};
-	//移除所有注释
-	markdown = markdown.replace(/^\s*>\s*(.+?)$/gm, '');
+	//移除所有注释和空行
+	markdown = markdown.replace('<br />', '').replace(/^\s*>\s*(.+?)$/gm, '');
 
 	// 处理项目名称
 	const nameMatch = markdown.match(/名称：(.+?)(?:\n|$)/);
@@ -49,9 +49,10 @@ export function markdownToProjectSchema(markdown: string): z.infer<typeof projec
 	if (bgMatch && bgMatch[1]) {
 		result.info.desc.bgAndTarget = bgMatch[1].trim();
 	}
-
 	// 处理技术栈
-	const techStackSection = markdown.match(/#### 1\.3 项目技术栈\s*\n([\s\S]*?)(?=\n###|\n####|$)/);
+	//FIXME 为什么"项目技术栈\s*"会匹配到断言内容,而"项目技术栈\s*?"不会 ???
+	const techStackSection = markdown.match(/#### 1\.3 项目技术栈\s*?\n([\s\S]*?)(?=\n###|$)/);
+	console.log('markdownToProjectSchema ~ techStackSection:', techStackSection);
 	if (techStackSection && techStackSection[1]) {
 		const techStackText = techStackSection[1].trim();
 		// 将逗号、顿号分隔的技术栈转为数组
@@ -61,11 +62,16 @@ export function markdownToProjectSchema(markdown: string): z.infer<typeof projec
 	// 处理团队贡献亮点
 	const teamSection = markdown.match(/#### 2\.1 团队贡献\s*([\s\S]*?)(?=\n####|$)/);
 	if (teamSection && teamSection[1]) {
-		//! crepe编辑器中无序列表项 - 会转为 *: 统一用*
+		//! crepe编辑器中无序列表项 - 会转为 *: 统一用*,且会跟<br />
 		// 提取所有以 "*" 或 " * " 开头的行
 		const teamPoints = teamSection[1].match(/^\s*\*\s*(.+?)$/gm);
 		if (teamPoints) {
-			result.lightspot.team = teamPoints.map(point => point.replace(/^\s*\*\s*/, '').trim());
+			result.lightspot.team = teamPoints.map(point =>
+				point
+					.replace('<br />', '')
+					.replace(/^\s*\*\s*/, '')
+					.trim()
+			);
 		}
 	}
 
@@ -74,7 +80,12 @@ export function markdownToProjectSchema(markdown: string): z.infer<typeof projec
 	if (skillSection && skillSection[1]) {
 		const skillPoints = skillSection[1].match(/^\s*\*\s*(.+?)$/gm);
 		if (skillPoints) {
-			result.lightspot.skill = skillPoints.map(point => point.replace(/^\s*\*\s*/, '').trim());
+			result.lightspot.skill = skillPoints.map(point =>
+				point
+					.replace('<br />', '')
+					.replace(/^\s*\*\s*/, '')
+					.trim()
+			);
 		}
 	}
 
@@ -83,7 +94,12 @@ export function markdownToProjectSchema(markdown: string): z.infer<typeof projec
 	if (userSection && userSection[1]) {
 		const userPoints = userSection[1].match(/^\s*\*\s*(.+?)$/gm);
 		if (userPoints) {
-			result.lightspot.user = userPoints.map(point => point.replace(/^\s*\*\s*/, '').trim());
+			result.lightspot.user = userPoints.map(point =>
+				point
+					.replace('<br />', '')
+					.replace(/^\s*\*\s*/, '')
+					.trim()
+			);
 		}
 	}
 

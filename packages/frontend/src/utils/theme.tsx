@@ -60,8 +60,8 @@ export const ThemeProviderDiy: React.FC<{ children: React.ReactNode }> = ({ chil
 			value={{
 				theme,
 				setTheme,
-				resolvedTheme, //优先级: theme > systemTheme
-				systemTheme,
+				resolvedTheme, //实际主题, theme==='system'? systemTheme : theme
+				systemTheme, // 用户浏览器的偏好设置,'light' | 'dark'
 				themes: ['light', 'dark', 'system']
 			}}
 		>

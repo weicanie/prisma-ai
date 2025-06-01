@@ -24,13 +24,13 @@ export class PromptService {
 	private readonly mineT: PromptTemplate;
 	constructor() {
 		const polishStr = fs.readFileSync(
-			path.join(process.cwd(), 'data/prompt/project_frontend/polish-T.md'),
+			path.join(process.cwd(), 'ai_data/prompt/project_frontend/polish-T.md'),
 			{
 				encoding: 'utf-8'
 			}
 		);
 		const mineTStr = fs.readFileSync(
-			path.join(process.cwd(), 'data/prompt/project_frontend/mine-T.md'),
+			path.join(process.cwd(), 'ai_data/prompt/project_frontend/mine-T.md'),
 			{
 				encoding: 'utf-8'
 			}
@@ -40,7 +40,7 @@ export class PromptService {
 		this.mineT = PromptTemplate.fromTemplate(mineTStr);
 
 		this.mineFewShot = fs.readFileSync(
-			path.join(process.cwd(), 'data/prompt/project_frontend/mine-fewshot.md'),
+			path.join(process.cwd(), 'ai_data/prompt/project_frontend/mine-fewshot.md'),
 			{
 				encoding: 'utf-8'
 			}

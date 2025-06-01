@@ -225,7 +225,7 @@ function markdownToProjectSchema(markdown) {
       user: []
     }
   };
-  markdown = markdown.replace(/^\s*>\s*(.+?)$/gm, "");
+  markdown = markdown.replace("<br />", "").replace(/^\s*>\s*(.+?)$/gm, "");
   const nameMatch = markdown.match(/名称：(.+?)(?:\n|$)/);
   if (nameMatch && nameMatch[1]) {
     result.info.name = nameMatch[1].trim();
@@ -242,7 +242,8 @@ function markdownToProjectSchema(markdown) {
   if (bgMatch && bgMatch[1]) {
     result.info.desc.bgAndTarget = bgMatch[1].trim();
   }
-  const techStackSection = markdown.match(/#### 1\.3 项目技术栈\s*\n([\s\S]*?)(?=\n###|\n####|$)/);
+  const techStackSection = markdown.match(/#### 1\.3 项目技术栈\s*?\n([\s\S]*?)(?=\n###|$)/);
+  console.log("markdownToProjectSchema ~ techStackSection:", techStackSection);
   if (techStackSection && techStackSection[1]) {
     const techStackText = techStackSection[1].trim();
     result.info.techStack = techStackText.split(/[、,，\s]+/).filter(Boolean);
@@ -251,21 +252,27 @@ function markdownToProjectSchema(markdown) {
   if (teamSection && teamSection[1]) {
     const teamPoints = teamSection[1].match(/^\s*\*\s*(.+?)$/gm);
     if (teamPoints) {
-      result.lightspot.team = teamPoints.map((point) => point.replace(/^\s*\*\s*/, "").trim());
+      result.lightspot.team = teamPoints.map(
+        (point) => point.replace("<br />", "").replace(/^\s*\*\s*/, "").trim()
+      );
     }
   }
   const skillSection = markdown.match(/#### 2\.2 技术亮点\/难点\s*([\s\S]*?)(?=\n####|$)/);
   if (skillSection && skillSection[1]) {
     const skillPoints = skillSection[1].match(/^\s*\*\s*(.+?)$/gm);
     if (skillPoints) {
-      result.lightspot.skill = skillPoints.map((point) => point.replace(/^\s*\*\s*/, "").trim());
+      result.lightspot.skill = skillPoints.map(
+        (point) => point.replace("<br />", "").replace(/^\s*\*\s*/, "").trim()
+      );
     }
   }
   const userSection = markdown.match(/#### 2\.3 用户体验\/业务价值\s*([\s\S]*?)(?=\n####|$)/);
   if (userSection && userSection[1]) {
     const userPoints = userSection[1].match(/^\s*\*\s*(.+?)$/gm);
     if (userPoints) {
-      result.lightspot.user = userPoints.map((point) => point.replace(/^\s*\*\s*/, "").trim());
+      result.lightspot.user = userPoints.map(
+        (point) => point.replace("<br />", "").replace(/^\s*\*\s*/, "").trim()
+      );
     }
   }
   return result;
@@ -335,5 +342,5 @@ function projectSchemaToMarkdown(project) {
   projectSchemaToMarkdown,
   registformSchema
 });
-//! crepe编辑器中无序列表项 - 会转为 *: 统一用*
+//! crepe编辑器中无序列表项 - 会转为 *: 统一用*,且会跟<br />
 //# sourceMappingURL=index.js.map

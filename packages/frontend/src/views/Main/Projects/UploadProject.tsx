@@ -12,8 +12,8 @@ export function UploadProject() {
 	//TODO 实现上传文本（格式转换）和上传文件（提取文本,然后格式转换）的功能
 	return (
 		<>
-			<Tabs defaultValue="text">
-				<TabsList className="w-full grid grid-cols-4">
+			<Tabs defaultValue="text" className="flex items-center">
+				<TabsList className="w-3/4 grid grid-cols-4 bg-transparent">
 					<TabsTrigger value="text" className="col-start-1 col-end-3 lg:col-start-2 lg:col-end-3">
 						上传文本
 					</TabsTrigger>

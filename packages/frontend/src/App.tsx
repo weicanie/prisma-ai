@@ -1,4 +1,3 @@
-import { useTheme } from '@/utils/theme.tsx';
 import '@ant-design/v5-patch-for-react-19';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -34,10 +33,6 @@ const queryClient = new QueryClient({
 });
 
 function APP() {
-	const { theme, setTheme } = useTheme();
-	// TODO 主题切换按钮
-	setTheme('dark');
-	document.documentElement.setAttribute('class', theme); //tailwind相关组件消费
 	return (
 		<QueryClientProvider client={queryClient}>
 			<AppWrapper>

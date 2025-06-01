@@ -12,6 +12,7 @@ import { instance } from './config';
  * @return 返回创建的项目经验数据
  */
 export async function createProject(project: ProjectDto) {
+	console.log('🚀 ~ createProject ~ createProject:', '执行');
 	try {
 		projectSchema.parse(project);
 	} catch (error) {
