@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { userInfo } from '../../project/entities/project.entity';
+import { UserInfo } from '../../project/entities/project.entity';
 
 @Schema({ timestamps: true })
 export class Resume {
@@ -13,14 +13,22 @@ export class Resume {
 	@Prop({ type: [{ type: Types.ObjectId, ref: 'Project' }] })
 	projects: Types.ObjectId[];
 
-	@Prop({ type: userInfo, required: true })
-	userInfo: userInfo;
+	@Prop({ type: UserInfo, required: true })
+	userInfo: UserInfo;
 }
 
 export type ResumeDocument = HydratedDocument<Resume>;
 export const ResumeSchema = SchemaFactory.createForClass(Resume);
 
 ResumeSchema.set('toJSON', {
+	versionKey: false,
+	transform: function (doc, ret) {
+		ret.id = ret._id.toString();
+		delete ret._id;
+		return ret;
+	}
+});
+ResumeSchema.set('toObject', {
 	versionKey: false,
 	transform: function (doc, ret) {
 		ret.id = ret._id.toString();

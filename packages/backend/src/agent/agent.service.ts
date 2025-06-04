@@ -1,5 +1,6 @@
 import { ChatPromptTemplate, PromptTemplate } from '@langchain/core/prompts';
 import { DynamicStructuredTool } from '@langchain/core/tools';
+import { ChatDeepSeek } from '@langchain/deepseek';
 import { ChatOpenAI } from '@langchain/openai';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'; //得手动引入,插件自动引入有问题
 import { Injectable } from '@nestjs/common';
@@ -25,7 +26,7 @@ export class AgentService {
 	 * @returns agentExecutor
 	 */
 	async createOpenAIToolsAgent(
-		llm: ChatOpenAI,
+		llm: ChatOpenAI | ChatDeepSeek,
 		client: Client,
 		tools: OpenAITool[],
 		prompt?: ChatPromptTemplate

@@ -1,26 +1,70 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
 	ErrorCode,
+	jsonMd_obj,
 	lookupResultSchema,
 	projectMinedSchema,
 	projectPolishedSchema,
 	projectSchema,
 	ProjectStatus,
 	ProjectVo,
+	RequestTargetMap,
+	StreamingChunk,
 	UserInfoFromToken
 } from '@prism-ai/shared';
 import { Model } from 'mongoose';
-import { ZodError } from 'zod';
+import { from, mergeMap, Observable } from 'rxjs';
+import { ZodError, ZodSchema } from 'zod';
 import { ChainService } from '../../chain/chain.service';
+import { EventBusService, EventList } from '../../EventBus/event-bus.service';
+import { redisStoreResult } from '../../sse/sse.service';
+import { RedisService } from './../../redis/redis.service';
 import { ProjectDto } from './dto/project.dto';
 import { LookupResult, LookupResultDocument } from './entities/lookupResult.entity';
 import { Project, ProjectDocument } from './entities/project.entity';
 import { ProjectMined, ProjectMinedDocument } from './entities/projectMined.entity';
 import { ProjectPolished, ProjectPolishedDocument } from './entities/projectPolished.entity';
-/* 
-用户id 项目名称 -> 不同状态的项目经验
-*/
+
+//FIXME 用validation pipe 结合 zodSchema生成的 dto验证用户上传的数据格式
+// 其它用于验证llm生成的数据格式和指定数据格式
+
+interface DeepSeekStreamChunk {
+	id: string;
+	content: string | ''; //生成内容
+	additional_kwargs: {
+		reasoning_content: string | null; //推理内容
+	};
+	tool_calls: [];
+	tool_call_chunks: [];
+	invalid_tool_calls: [];
+}
+
+interface DeepSeekStreamChunkEnd {
+	id: string;
+	content: '';
+	additional_kwargs: {
+		reasoning_content: null;
+	};
+	response_metadata: {
+		/* token消耗详情 */
+		usage: {
+			prompt_tokens: number;
+			completion_tokens: number;
+			total_tokens: number;
+			prompt_tokens_details: {
+				cached_tokens: number;
+			};
+			completion_tokens_details: {
+				reasoning_tokens: number;
+			};
+		};
+	};
+	tool_calls: [];
+	tool_call_chunks: [];
+	invalid_tool_calls: [];
+}
+
 @Injectable()
 export class ProjectService {
 	@InjectModel(Project.name)
@@ -35,7 +79,52 @@ export class ProjectService {
 	@InjectModel(LookupResult.name)
 	private LookupResultModel: Model<LookupResultDocument>;
 
-	constructor(public chainService: ChainService) {}
+	logger = new Logger(ProjectService.name);
+
+	/* 用于llm任务处理器根据上下文中的type字段调用指定方法 */
+	public target_method: Record<keyof typeof RequestTargetMap, string> = {
+		polish: 'polishProject',
+		mine: 'mineProject'
+	};
+
+	constructor(
+		public chainService: ChainService,
+		public eventBusService: EventBusService,
+		public redisService: RedisService
+	) {}
+
+	/**
+	 * 在生成任务结束时检查、储存结果到数据库
+	 * @param schema 验证用的 zod schema
+	 * @param model 存储用的 mongoose 模型
+	 * @param userInfo 用户信息
+	 * @param status 结果应处于的状态
+	 * @returns 返回一个处理函数，接收redis存储的结果将其存储到数据库
+	 */
+	private async resultHandlerCreater(
+		schema: ZodSchema,
+		model: typeof Model,
+		userInfo: UserInfoFromToken,
+		status: `${ProjectStatus}`
+	) {
+		//格式验证及修复、数据库存储
+		return async (resultRedis: redisStoreResult) => {
+			let result = jsonMd_obj(resultRedis.content);
+			const validationResult = schema.safeParse(result);
+
+			if (!validationResult.success) {
+				const errorMessage = JSON.stringify(validationResult.error.format());
+				const fomartFixChain = await this.chainService.fomartFixChain(schema, errorMessage);
+				const projectPolishedStr = JSON.stringify(result);
+				result = await fomartFixChain.invoke({ input: projectPolishedStr });
+			}
+
+			const resultSave = { ...result, status, userInfo };
+			const resultSave_model = new model(resultSave);
+
+			await resultSave_model.save();
+		};
+	}
 
 	/**
 	 * 项目经验转换为json格式对象并提交
@@ -51,6 +140,7 @@ export class ProjectService {
 
 		return await this.checkoutProject(project, userInfo);
 	}
+
 	/**
 	 * 验证数据格式
 	 * 	若通过验证则将数据储存到数据库
@@ -121,42 +211,85 @@ export class ProjectService {
 		await lookupResult_model.save();
 		return lookupResult_model;
 	}
+
 	/**
 	 * 项目经验 -> 打磨后的项目经验
 	 * @param project 项目经验
+	 * @param userInfo 用户信息
+	 * @param taskId 任务ID
 	 */
-	async polishProject(project: ProjectDto, userInfo: UserInfoFromToken) {
-		const chain = await this.chainService.polishChain();
-		const projectStr = JSON.stringify(project);
-		let projectPolished = await chain.invoke(projectStr);
-		//格式验证
-		const validationResult = projectPolishedSchema.safeParse(projectPolished);
+	async polishProject(
+		project: ProjectDto,
+		userInfo: UserInfoFromToken,
+		taskId: string
+	): Promise<Observable<StreamingChunk | undefined>> {
+		const existingProject = await this.ProjectPolishedModel.findOne({
+			'info.name': project.info.name,
+			'userInfo.userId': userInfo.userId
+		}).exec();
 
-		if (!validationResult.success) {
-			const errorMessage = JSON.stringify(validationResult.error.format());
-			const fomartFixChain = await this.chainService.fomartFixChain(
-				projectPolishedSchema,
-				errorMessage
+		if (existingProject) {
+			return from(
+				Promise.resolve({
+					content: JSON.stringify(existingProject),
+					done: true,
+					isReasoning: false
+				})
 			);
-			const projectPolishedStr = JSON.stringify(projectPolished);
-			projectPolished = await fomartFixChain.invoke({ input: projectPolishedStr });
 		}
-		//储存
-		const projectPolishedSave = { ...projectPolished, status: ProjectStatus.polishing, userInfo };
-		const projectPolished_model = new this.ProjectPolishedModel(projectPolishedSave);
 
-		await projectPolished_model.save();
-		return projectPolished_model;
+		const resultHandler = await this.resultHandlerCreater(
+			projectPolishedSchema,
+			this.ProjectPolishedModel,
+			userInfo,
+			ProjectStatus.polishing
+		);
+
+		this.eventBusService.once(EventList.taskCompleted, ({ task }) => {
+			//取出redis中的结果进行处理
+
+			if (!task.resultKey) {
+				this.logger.error(`${task.id}任务结果键不存在,数据库储存失败`);
+			}
+
+			this.redisService
+				.get(task.resultKey!)
+				.then(redisStoreResult => {
+					if (!redisStoreResult) {
+						throw '任务结果不存在或已过期被清除';
+					}
+					return JSON.parse(redisStoreResult);
+				})
+				.then(result => resultHandler(result))
+				.catch(error => {
+					this.logger.error(`任务${task.resultKey}处理结果失败: ${error}`);
+				});
+		});
+
+		const chain = await this.chainService.polishChain(true);
+		const projectStr = JSON.stringify(project);
+		let projectPolished = await chain.stream(projectStr);
+		return from(projectPolished).pipe(
+			mergeMap(async (chunk: DeepSeekStreamChunk) => {
+				const done = !chunk.content && chunk.additional_kwargs.reasoning_content === null;
+				const isReasoning = chunk.additional_kwargs.reasoning_content !== null;
+				return {
+					content: !isReasoning ? chunk.content : '',
+					reasonContent: isReasoning ? chunk.additional_kwargs?.reasoning_content! : '',
+					done,
+					isReasoning
+				};
+			})
+		);
 	}
+
 	/**
 	 * 项目经验 -> 挖掘后的项目经验
 	 * @param project 项目经验
+	 * @param userInfo 用户信息
+	 * @param taskId 任务ID
 	 */
-	/**
-	 * 项目经验 -> 挖掘后的项目经验
-	 * @param project 项目经验
-	 */
-	async mineProject(project: ProjectDto, userInfo: UserInfoFromToken) {
+	async mineProject(project: ProjectDto, userInfo: UserInfoFromToken, taskId: string) {
 		const chain = await this.chainService.mineChain();
 		const projectStr = JSON.stringify(project);
 		let projectMined = await chain.invoke(projectStr);
@@ -178,6 +311,7 @@ export class ProjectService {
 		const projectMined_model = new this.ProjectMinedModel(projectMinedSave);
 
 		await projectMined_model.save();
+		return projectMined_model;
 	}
 
 	async findAllProjects(userInfo: UserInfoFromToken): Promise<ProjectVo[]> {
@@ -206,9 +340,36 @@ export class ProjectService {
 	}
 
 	/**
+	 * 根据ID获取项目经验, 只查询 projectModel
+	 * @param id 项目ID
+	 * @returns 查询结果
+	 */
+	async findProjectById(id: string, userInfo: UserInfoFromToken): Promise<ProjectVo> {
+		const query = { _id: id, 'userInfo.userId': userInfo.userId };
+		const project = await this.projectModel.findOne(query).exec();
+
+		if (!project) {
+			throw new Error(`ID为${id}的项目经验不存在`);
+		} else {
+			const lookupResult = await this.LookupResultModel.findOne({
+				'userInfo.userId': userInfo.userId,
+				projectName: project.info.name
+			}).exec();
+			return {
+				...project.toObject(),
+				lookupResult: {
+					problem: lookupResult!.problem,
+					solution: lookupResult!.solution,
+					score: lookupResult!.score
+				}
+			} as ProjectVo;
+		}
+	}
+
+	/**
 	 * 获取指定状态的项目经验
 	 * @param status 项目状态
-	 * @param name 项目名称 (可选)
+	 * @param name 项目名称
 	 * @returns 查询结果
 	 */
 	async findByNameAndStatus(

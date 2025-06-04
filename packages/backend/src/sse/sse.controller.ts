@@ -7,9 +7,18 @@ import { SessionPoolService } from '../session/session-pool.service';
 import { TaskQueueService, TaskStatus } from '../task-queue/task-queue.service';
 import { SseService } from './sse.service';
 
+/* 在前端由于错误被优先处理因此和DataChunk兼容 */
+interface ErrorChunk {
+	data: {
+		error?: string; // 错误信息
+		done: boolean; // 是否完成
+	};
+}
+
 //TODO 需要 llm 缓存层, 对于相同、极度相似的prompt（通过向量计算相似度）, 只返回第一次生成的结果
 //对于高度相似的prompt, 使用其回答作为上下文二次生成
 //不仅可以节省token, 同时前端重复请求就算导致会话多次创建、也不会导致llm多次生成
+//FIXME 但是deepseek 本身就有缓存
 
 @Controller('sse')
 export class SseController {
@@ -25,14 +34,14 @@ export class SseController {
     这是为了避免llm重复生成
   */
 	@RequireLogin()
-	@Sse('generate')
+	@Sse('project-generate')
 	async generate(@Query('sessionId') sessionId: string, @UserInfo() userInfo: UserInfoFromToken) {
 		const curTaskId = await this.taskQueueService.getSessionTaskId(sessionId);
 		/* 1、检查是否是新建的会话 */
 		const existingSession = await this.sessionPool.getSession(sessionId);
 
 		if (!existingSession) {
-			return new Observable<DataChunk>(subscriber => {
+			return new Observable<ErrorChunk>(subscriber => {
 				subscriber.next({
 					data: { error: '用户sse会话不存在，请先创建会话', done: true }
 				});
@@ -46,7 +55,7 @@ export class SseController {
 				taskCheck &&
 				(taskCheck.status === TaskStatus.RUNNING || taskCheck.status === TaskStatus.PENDING)
 			) {
-				return new Observable<DataChunk>(subscriber => {
+				return new Observable<ErrorChunk>(subscriber => {
 					subscriber.next({
 						data: { error: '用户sse会话已存在,请请求断点续传接口', done: true }
 					});
@@ -57,16 +66,17 @@ export class SseController {
 
 		/* 2、校验上下文是否完整,prompt即储存在上下文中 */
 		const context = await this.sessionPool.getContext(sessionId);
-		if (!context || !context.prompt) {
-			return new Observable<DataChunk>(subscriber => {
+		if (!context || !context.input) {
+			return new Observable<ErrorChunk>(subscriber => {
 				subscriber.next({
 					data: { error: '用户sse上下文不完整', done: true }
 				});
 				subscriber.complete();
 			});
 		}
+
 		/* 3、创建task并入队 */
-		const task = await this.sseService.createAndEnqueueTask(sessionId, userInfo);
+		const task = await this.sseService.createAndEnqueueTaskProject(sessionId, userInfo);
 
 		/* 4、订阅任务的chunk生成事件并返回数据 */
 		return new Observable<DataChunk>(subscriber => {
@@ -74,12 +84,12 @@ export class SseController {
 				if (taskId === task.id) {
 					if (chunk.done) {
 						subscriber.next({
-							data: { content: chunk.content, done: true }
+							data: { ...chunk }
 						});
 						subscriber.complete();
 					} else {
 						subscriber.next({
-							data: { content: chunk.content, done: false }
+							data: { ...chunk }
 						});
 					}
 				}
@@ -104,7 +114,7 @@ export class SseController {
 		const existingSession = await this.sessionPool.getSession(sessionId);
 
 		if (!existingSession) {
-			return new Observable<DataChunk>(subscriber => {
+			return new Observable<ErrorChunk>(subscriber => {
 				subscriber.next({
 					data: { error: '用户sse会话不存在，请先创建会话', done: true }
 				});
@@ -112,8 +122,8 @@ export class SseController {
 			});
 		}
 		const context = await this.sessionPool.getContext(sessionId);
-		if (!context || !context.prompt) {
-			return new Observable<DataChunk>(subscriber => {
+		if (!context || !context.input) {
+			return new Observable<ErrorChunk>(subscriber => {
 				subscriber.next({
 					data: { error: '用户sse上下文不完整', done: true }
 				});
@@ -123,7 +133,7 @@ export class SseController {
 		/* 校验任务是否已存在 */
 		const curTaskId = await this.taskQueueService.getSessionTaskId(sessionId);
 		if (!curTaskId) {
-			return new Observable<DataChunk>(subscriber => {
+			return new Observable<ErrorChunk>(subscriber => {
 				subscriber.next({
 					data: { error: '用户sse任务不存在，请先创建会话', done: true }
 				});
@@ -133,12 +143,11 @@ export class SseController {
 		/* 断点续传情况1：服务端已生成完毕
         直接返回 
       */
-		const curEvents = await this.sseService.getSseTaskEvents(curTaskId);
-		const curContent = curEvents.reduce((acc, event) => acc + event.content, '');
+		const curResult = await this.sseService.getSseTaskEvents(curTaskId);
 		if (existingSession && existingSession.done) {
 			return new Observable<DataChunk>(subscriber => {
 				subscriber.next({
-					data: { content: curContent, done: true }
+					data: { ...curResult }
 				});
 				subscriber.complete();
 			});
@@ -154,19 +163,19 @@ export class SseController {
 		return new Observable<DataChunk>(subscriber => {
 			/* 1、发送当前已生成的内容 */
 			subscriber.next({
-				data: { content: curContent, done: false }
+				data: { ...curResult }
 			});
 			/* 2、订阅内容并继续发送 */
 			this.eventBusService.on(EventList.chunkGenerated, async ({ taskId, eventData: chunk }) => {
 				if (taskId === curTaskId) {
 					if (chunk.done) {
 						subscriber.next({
-							data: { content: chunk.content, done: true }
+							data: { ...chunk }
 						});
 						subscriber.complete();
 					} else {
 						subscriber.next({
-							data: { content: chunk.content, done: false }
+							data: { ...chunk }
 						});
 					}
 				}

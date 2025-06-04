@@ -3,10 +3,12 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JobModule } from './business/job/job.module';
+import { KnowledgebaseModule } from './business/knowledge-base/knowledge-base.module';
 import { ProjectModule } from './business/project/project.module';
 import { ResumeModule } from './business/resume/resume.module';
 import { SkillModule } from './business/skill/skill.module';
 import { ChainModule } from './chain/chain.module';
+import { CopilotModule } from './copilot/copilot.module';
 import { GlobalInterceptor } from './dataFormat.interceptor';
 import { DbModule } from './DB/db.module';
 import { GlobalFilter } from './errorHandle.filter';
@@ -38,7 +40,9 @@ import { UserModule } from './user/user.module';
 		EventBusModule,
 		SkillModule,
 		ResumeModule,
-		JobModule
+		JobModule,
+		CopilotModule,
+		KnowledgebaseModule
 	],
 	providers: [
 		{

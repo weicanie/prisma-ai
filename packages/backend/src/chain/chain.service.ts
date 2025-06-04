@@ -1,16 +1,10 @@
 import { StructuredOutputParser } from '@langchain/core/output_parsers';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
+import { ChatDeepSeek } from '@langchain/deepseek';
 import type { ChatOpenAI } from '@langchain/openai';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BufferMemory } from 'langchain/memory';
-import * as path from 'path';
-import { z } from 'zod';
-import { AgentService } from '../agent/agent.service';
-import { MCPClientService } from '../mcp-client/mcp-client.service';
-import { ModelService } from '../model/model.service';
-
 import {
 	lookupResultSchema,
 	ProjectMinedDto,
@@ -19,7 +13,12 @@ import {
 	projectPolishedSchema,
 	projectSchema
 } from '@prism-ai/shared';
-import { Observable } from 'rxjs';
+import { BufferMemory } from 'langchain/memory';
+import * as path from 'path';
+import { z } from 'zod';
+import { AgentService } from '../agent/agent.service';
+import { MCPClientService } from '../mcp-client/mcp-client.service';
+import { ModelService } from '../model/model.service';
 import { PromptService, role } from '../prompt/prompt.service';
 
 @Injectable()
@@ -41,7 +40,7 @@ export class ChainService {
 	 * @param saveFn 结果保存函数,保存到mongodb数据库
 	 */
 	private async createChain<Input = string, Output = unknown>(
-		llm: ChatOpenAI,
+		llm: ChatOpenAI | ChatDeepSeek,
 		prompt: ChatPromptTemplate,
 		schema: z.Schema
 	): Promise<RunnableSequence<Input, Output>> {
@@ -73,9 +72,42 @@ export class ChainService {
 			outputParser,
 			RunnableLambda.from(async input => {
 				await memory.saveContext({ input: userInput }, { output: input });
-				// console.log('格式化后的模型输出', input);
 				return input;
 			})
+		]);
+
+		return chain;
+	}
+
+	/**
+	 * 创建流式链（不包含保存逻辑）
+	 */
+	private async createStreamChain<Input = string>(
+		llm: ChatOpenAI | ChatDeepSeek,
+		prompt: ChatPromptTemplate,
+		schema: z.Schema
+	): Promise<RunnableSequence<Input, any>> {
+		const memory = new BufferMemory({
+			chatHistory: this.modelService.getChatHistory(
+				`${new Date().toLocaleDateString().replace(/\//g, '-')}`
+			)
+		});
+
+		const chain = RunnableSequence.from<Input, any>([
+			{
+				input: input => input,
+				chat_history: async (input: any) => {
+					const vars = await memory.loadMemoryVariables({ input });
+					return vars.history || vars.summary || '';
+				},
+				instructions: async () => {
+					const outputParser = StructuredOutputParser.fromZodSchema(schema);
+					return outputParser.getFormatInstructions();
+				}
+			},
+			prompt,
+			llm
+			// 不添加会阻截流式输出的Runnable
 		]);
 
 		return chain;
@@ -154,14 +186,18 @@ export class ChainService {
 	 * 现有亮点评估、改进。
 	 * @description -> 亮点突出
 	 */
-	async polishChain() {
+	async polishChain(stream = false) {
 		const schema = projectPolishedSchema;
 		const outputParser = StructuredOutputParser.fromZodSchema(schema);
 		const prompt = await this.promptService.polishPrompt(outputParser.getFormatInstructions());
 
-		const llm = await this.modelService.getLLMDeepSeekRaw();
+		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
 
 		const chain = await this.createChain<string, ProjectPolishedDto>(llm, prompt, schema);
+		const streamChain = await this.createStreamChain<string>(llm, prompt, schema);
+		if (stream) {
+			return streamChain;
+		}
 		return chain;
 	}
 
@@ -169,16 +205,21 @@ export class ChainService {
 	 * 项目亮点挖掘。
 	 * @description -> 亮点充足
 	 */
-	async mineChain() {
+	async mineChain(stream = false) {
 		const schema = projectMinedSchema;
 		const outputParser = StructuredOutputParser.fromZodSchema(schema);
 		const prompt = await this.promptService.polishPrompt(outputParser.getFormatInstructions());
 
-		const llm = await this.modelService.getLLMDeepSeekRaw();
+		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
 
 		const chain = await this.createChain<string, ProjectMinedDto>(llm, prompt, schema);
+		const streamChain = await this.createStreamChain<string>(llm, prompt, schema);
+		if (stream) {
+			return streamChain;
+		}
 		return chain;
 	}
+
 	/**
 	 * 分析项目经验的问题和解决方案
 	 */
@@ -227,7 +268,7 @@ export class ChainService {
 			[`${role.HUMAN}`, '{input}']
 		]);
 
-		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
 
 		const chain = await this.createChain<string, z.infer<typeof schema>>(llm, prompt, schema);
 		return chain;
@@ -239,7 +280,7 @@ export class ChainService {
 	 */
 	async queryChain() {
 		try {
-			const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+			const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
 			// const llm = await this.modelService.getLLMOpenAIRaw();
 
 			const client = await this.clientService.connectToServerLocal(
@@ -337,69 +378,5 @@ export class ChainService {
 			console.error('创建查询链失败:', error);
 			throw error;
 		}
-	}
-
-	sseMock(prompt: string) {
-		const data = new Observable<any>(subscriber => {
-			subscriber.next({
-				data: {
-					content: 'llm说:Hello, world!\n',
-					done: false
-				}
-			});
-			subscriber.next({
-				data: {
-					content: 'llm说:This is a test.\n',
-					done: false
-				}
-			});
-			setTimeout(() => {
-				subscriber.next({
-					data: {
-						content:
-							'llm说:2秒后.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n',
-						done: false
-					}
-				});
-			}, 2 * 1000);
-			setTimeout(() => {
-				subscriber.next({
-					data: {
-						content:
-							'llm说:4秒后bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.\n',
-						done: false
-					}
-				});
-			}, 4 * 1000);
-			setTimeout(() => {
-				subscriber.next({
-					data: {
-						content:
-							'llm说:6秒后cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.\n',
-						done: false
-					}
-				});
-			}, 6 * 1000);
-			setTimeout(() => {
-				subscriber.next({
-					data: {
-						content:
-							'llm说:8秒后ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.\n',
-						done: false
-					}
-				});
-			}, 8 * 1000);
-			setTimeout(() => {
-				subscriber.next({
-					data: {
-						content:
-							'llm说:10秒后eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.\n',
-						done: true
-					}
-				});
-				subscriber.complete();
-			}, 10 * 1000);
-		});
-		return data;
 	}
 }

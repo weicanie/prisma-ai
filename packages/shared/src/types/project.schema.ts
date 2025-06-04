@@ -16,7 +16,25 @@ const infoSchema = z
  * @param item 每个亮点的类型
  * @returns
  */
-export function getLightspotSchema(item: any = z.string()) {
+export function getLightspotSchema(item: any = z.string(), polish = false) {
+	if (polish) {
+		return z
+			.object({
+				team: z.array(item).describe('团队贡献方面的亮点').default([]),
+				skill: z.array(item).describe('技术亮点/难点方面的亮点').default([]),
+				user: z.array(item).describe('用户体验/业务价值方面的亮点').default([]),
+				delete: z
+					.array(
+						z.object({
+							content: z.string().describe('亮点内容'),
+							reason: z.string().describe('亮点删除原因').default('NONE')
+						})
+					)
+					.describe('删除的亮点')
+					.default([])
+			})
+			.describe('项目亮点的结构化描述');
+	}
 	return z
 		.object({
 			team: z.array(item).describe('团队贡献方面的亮点').default([]),
@@ -37,7 +55,8 @@ const projectPolishedSchema = z.object({
 		z.object({
 			content: z.string().describe('亮点内容'),
 			advice: z.string().describe('亮点改进建议').default('NONE')
-		})
+		}),
+		true
 	)
 });
 

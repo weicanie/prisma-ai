@@ -1,5 +1,6 @@
 export * from './constant/error';
 export * from './types/job';
+export * from './types/knowBase';
 export * from './types/login_regist';
 export * from './types/login_regist.schema';
 export * from './types/loginVerify';
@@ -10,4 +11,5 @@ export * from './types/resume';
 export * from './types/serverDataFormat';
 export * from './types/skill';
 export * from './types/sse';
+export * from './utils/jsonMd_obj';
 export * from './utils/md_json';

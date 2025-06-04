@@ -22,6 +22,7 @@ export interface PersistentTask {
 	id: string; // 任务唯一标识
 	sessionId: string; // 关联的会话ID
 	userId: string; // 关联的用户ID
+	resultKey?: string; // 任务结果的Redis键
 
 	type: string; // 任务类型
 
@@ -39,7 +40,7 @@ export interface PersistentTask {
  *
  * 任务添加和运行逻辑：
  * 	先添加具体任务类型的处理函数,再添加任务到队列
- * 	任务处理函数（需要是异步函数）会在任务被取出时执行：handler(task)
+ * 	任务处理函数（得是异步函数!）会在任务被取出时执行：handler(task)
  *
  * 任务队列持久化和恢复逻辑
  * 	在内存中和Redis中都维护同一个任务队列
@@ -66,7 +67,7 @@ export class TaskQueueService {
 		/* 任务队列（redis中） */
 		QUEUE: 'task_queue:',
 		TASK: 'task:', // 任务详情
-		EVENTS: 'task_events:', // 任务事件列表
+		RESULT: 'task_result:', // 任务结果
 
 		USER_TASKS: 'user_tasks:', // 用户任务映射
 		SESSION_TASK: 'session_task:' // 会话任务映射
@@ -86,6 +87,7 @@ export class TaskQueueService {
 		});
 	}
 
+	//FIXME llm生成任务恢复时会重新生成,但redis中的状态存在污染,需要在启动时清空
 	/**
 	 * 服务初始化，从redis恢复队列状态
 	 */

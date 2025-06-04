@@ -19,7 +19,7 @@ declare enum ErrorCode {
     SERVER_CONNECTION_ERROR = "3002",
     TOOL_GET_ERROR = "3003",
     TOOL_CALL_ERROR = "3004",
-    FORMAT_ERROR = "4001"
+    FORMAT_ERROR = "4005"
 }
 declare const errorMessage: {
     "0": string;
@@ -39,19 +39,20 @@ declare const errorMessage: {
     "3002": string;
     "3003": string;
     "3004": string;
-    "4001": string;
+    "4005": string;
 };
 
 /**
  * 创建招聘信息的 DTO
  */
 interface CreateJobDto {
-    readonly jobName: string;
-    readonly companyName: string;
-    readonly description: string;
-    readonly location?: string;
-    readonly salary?: string;
-    readonly link?: string;
+    jobName: string;
+    companyName: string;
+    description: string;
+    location?: string;
+    salary?: string;
+    link?: string;
+    status?: string;
 }
 /**
  * 更新招聘信息的 DTO (CreateJobDto 的部分属性)
@@ -69,6 +70,7 @@ interface JobVo {
     location?: string;
     salary?: string;
     link?: string;
+    status?: string;
     createdAt: string;
     updatedAt: string;
 }
@@ -77,6 +79,35 @@ interface JobVo {
  */
 interface PaginatedJobsResult {
     data: JobVo[];
+    total: number;
+    page: number;
+    limit: number;
+}
+
+declare const typeMap: Record<string, string>;
+interface CreateKnowledgeDto {
+    name: string;
+    fileType: string;
+    tag: string[];
+    type: keyof typeof typeMap;
+    content: string;
+}
+type UpdateKnowledgeDto = Partial<CreateKnowledgeDto>;
+interface KnowledgeVo {
+    id: string;
+    name: string;
+    type: keyof typeof typeMap;
+    createdAt: Date;
+    updatedAt: Date;
+    fileType: string;
+    tag: string[];
+    content: string;
+}
+/**
+ * 分页后的知识库列表结果
+ */
+interface PaginatedKnsResult {
+    data: KnowledgeVo[];
     total: number;
     page: number;
     limit: number;
@@ -145,7 +176,7 @@ type VerifyMetaData = {
  * @param item 每个亮点的类型
  * @returns
  */
-declare function getLightspotSchema(item?: any): z.ZodObject<{
+declare function getLightspotSchema(item?: any, polish?: boolean): z.ZodObject<{
     team: z.ZodDefault<z.ZodArray<any, "many">>;
     skill: z.ZodDefault<z.ZodArray<any, "many">>;
     user: z.ZodDefault<z.ZodArray<any, "many">>;
@@ -568,7 +599,7 @@ interface SkillItem {
     content?: string[];
 }
 interface CreateSkillDto {
-    readonly content: SkillItem[];
+    content: SkillItem[];
 }
 type UpdateSkillDto = Partial<CreateSkillDto>;
 interface SkillVo {
@@ -582,9 +613,9 @@ interface SkillVo {
  * 创建简历的 DTO
  */
 interface CreateResumeDto {
-    readonly name: string;
-    readonly skills?: string[];
-    readonly projects?: string[];
+    name: string;
+    skill?: string;
+    projects?: string[];
 }
 /**
  * 更新简历的 DTO
@@ -618,17 +649,37 @@ interface ServerDataFormat<TData = unknown> {
     data: TData;
 }
 
+interface StreamingChunk {
+    content: string;
+    reasonContent?: string;
+    done: boolean;
+    isReasoning?: boolean;
+}
 interface DataChunk {
-    data: {
-        content?: string;
+    data: StreamingChunk & {
         error?: string;
-        done: boolean;
         cached?: boolean;
         exact?: boolean;
     };
 }
+interface TRequestParams {
+    polish: {
+        input: ProjectDto;
+        target: 'polish';
+    };
+    mine: {
+        input: ProjectDto;
+        target: 'mine';
+    };
+}
+declare const RequestTargetMap: {
+    polish: string;
+    mine: string;
+};
 interface LLMSessionRequest {
-    prompt: string;
+    input: any;
+    target: keyof typeof RequestTargetMap;
+    userInfo?: UserInfoFromToken;
 }
 interface LLMSessionResponse {
     sessionId: string;
@@ -636,6 +687,8 @@ interface LLMSessionResponse {
 interface LLMSessionStatusResponse {
     status: 'notfound' | 'bothdone' | 'backdone' | 'running' | 'tasknotfound';
 }
+
+declare function jsonMd_obj(content: string): any;
 
 /**
  * 将项目的Markdown格式文本转换为符合projectSchemaForm的结构化数据
@@ -649,5 +702,7 @@ declare function markdownToProjectSchema(markdown: string): z.infer<typeof proje
  * @returns Markdown格式文本
  */
 declare function projectSchemaToMarkdown(project: z.infer<typeof projectSchemaForm>): string;
+declare const skillsToMarkdown: (data: CreateSkillDto) => string;
+declare const markdownToSkills: (markdown: string) => CreateSkillDto;
 
-export { type CreateJobDto, type CreateResumeDto, type CreateSkillDto, type DataChunk, ErrorCode, type JobVo, type LLMSessionRequest, type LLMSessionResponse, type LLMSessionStatusResponse, type LoginFormType, type LoginResponse, type PaginatedJobsResult, type PaginatedResumesResult, type ProjectDto, type ProjectMinedDto, type ProjectMineddVo, type ProjectPolishedDto, type ProjectPolishedVo, ProjectStatus, type ProjectVo, type RegistFormType, type RegistResponse, type ResumeVo, type ServerDataFormat, type SkillItem, type SkillVo, type UpdateJobDto, type UpdateResumeDto, type UpdateSkillDto, type UserInfoFromToken, type VerifyMetaData, errorMessage, getLightspotSchema, loginformSchema, lookupResultSchema, markdownToProjectSchema, projectMinedSchema, projectPolishedSchema, projectSchema, projectSchemaForm, projectSchemaToMarkdown, registformSchema };
+export { type CreateJobDto, type CreateKnowledgeDto, type CreateResumeDto, type CreateSkillDto, type DataChunk, ErrorCode, type JobVo, type KnowledgeVo, type LLMSessionRequest, type LLMSessionResponse, type LLMSessionStatusResponse, type LoginFormType, type LoginResponse, type PaginatedJobsResult, type PaginatedKnsResult, type PaginatedResumesResult, type ProjectDto, type ProjectMinedDto, type ProjectMineddVo, type ProjectPolishedDto, type ProjectPolishedVo, ProjectStatus, type ProjectVo, type RegistFormType, type RegistResponse, RequestTargetMap, type ResumeVo, type ServerDataFormat, type SkillItem, type SkillVo, type StreamingChunk, type TRequestParams, type UpdateJobDto, type UpdateKnowledgeDto, type UpdateResumeDto, type UpdateSkillDto, type UserInfoFromToken, type VerifyMetaData, errorMessage, getLightspotSchema, jsonMd_obj, loginformSchema, lookupResultSchema, markdownToProjectSchema, markdownToSkills, projectMinedSchema, projectPolishedSchema, projectSchema, projectSchemaForm, projectSchemaToMarkdown, registformSchema, skillsToMarkdown, typeMap };

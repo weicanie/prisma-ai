@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { userInfo } from '../../project/entities/project.entity';
+import { UserInfo } from '../../project/entities/project.entity';
 
 @Schema({ timestamps: true })
 export class Job {
@@ -45,12 +45,27 @@ export class Job {
 	})
 	link?: string; //详情页链接
 
-	@Prop({ type: userInfo, required: true })
-	userInfo: userInfo; //用户信息
+	@Prop({ type: UserInfo, required: true })
+	userInfo: UserInfo; //用户信息
+
+	@Prop({
+		type: String,
+		trim: true
+	})
+	status?: string; //职位状态， "open", "closed"
 }
 
 export type JobDocument = HydratedDocument<Job>; //Job & Document
 export const JobSchema = SchemaFactory.createForClass(Job);
+
+JobSchema.pre('save', async function (this: JobDocument) {
+	if (this.status && this.status !== 'open' && this.status !== 'closed') {
+		throw new Error('Invalid status value. Must be "open" or "closed".');
+	}
+	if (!this.status) {
+		this.status = 'open';
+	}
+});
 
 JobSchema.set('toJSON', {
 	versionKey: false,

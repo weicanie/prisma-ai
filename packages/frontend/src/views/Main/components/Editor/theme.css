@@ -3,7 +3,7 @@
 
 /* 官方提供的主题列表：frame、nord、frame*dark、classic*dark、nord*dark  */
 .theme-nord .milkdown {
-  --crepe-color-background: #fdfcff;
+  --crepe-color-background: var(--editor-bg-color);
   --crepe-color-on-background: #1b1c1d;
   --crepe-color-surface: #f8f9ff;
   --crepe-color-surface-low: #f2f3fa;
@@ -33,7 +33,7 @@
 }
 
 .theme-frame-dark .milkdown {
-  --crepe-color-background: #1a1a1a;
+  --crepe-color-background: var(--editor-bg-color);
   --crepe-color-on-background: #e6e6e6;
   --crepe-color-surface: #121212;
   --crepe-color-surface-low: #1c1c1c;

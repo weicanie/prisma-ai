@@ -13,7 +13,12 @@ interface UpdateBreadRouterProps {
 const UpdateBreadRouter: React.FC<UpdateBreadRouterProps> = ({ children }) => {
 	const location = useLocation();
 	const dispatch = useDispatch();
-	const path = location.pathname;
+	let path = location.pathname;
+
+	//去除路由参数
+	if (location.state && location.state.param !== undefined) {
+		path = path.replace('/' + location.state.param, '');
+	}
 
 	useEffect(() => {
 		dispatch(updateAction(path));

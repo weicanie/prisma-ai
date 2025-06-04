@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SseEventData } from '../sse/sse.service';
+import { StreamingChunk } from '@prism-ai/shared';
 import { PersistentTask } from '../task-queue/task-queue.service';
 import { EventBus } from './EventBus';
 /* 事件名列表 */
@@ -24,9 +24,10 @@ export interface Event_Payload {
 	/* sse */
 	[EventList.chunkGenerated]: {
 		taskId: string;
-		eventData: SseEventData;
+		eventData: StreamingChunk;
 	};
 }
+
 /**
  * 事件总线服务，提供全局事件发布订阅功能
  * 实现模块间解耦、通信

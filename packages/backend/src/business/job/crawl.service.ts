@@ -7,7 +7,9 @@ import { Job, JobDocument } from './entities/job.entity';
 //answer部分：点击按钮，获取整个答案的innerhtml，然后使用 llm 解析为md
 //图片直接提取链接放入md中即可
 //! 使用ai爬虫平台直接开爬！
+
 //TODO 使用爬虫爬取boss直聘的职位信息?这个功能还得进一步设计
+
 @Injectable()
 export class CrawlService {
 	@InjectModel(Job.name) private jobModel: Model<JobDocument>;

@@ -116,11 +116,10 @@ const projectSlice = createSlice({
 		},
 		setDataFromMd: (state, { payload }: PayloadAction<string>) => {
 			const dataMd = payload;
-			console.log('🚀 ~ dataMd:', JSON.stringify(dataMd));
 			state.dataMd = dataMd;
 			state.data = markdownToProjectSchema(dataMd);
 		},
-		clear: () => {
+		resetProjectData: () => {
 			/* state = initialState;不会产生副作用、无法重置state对象。
 			因为代理对象没有被操作,因此真正的state对象也不会通过immer修改。
 
@@ -133,7 +132,7 @@ const projectSlice = createSlice({
 });
 
 // Actions
-export const { setDataFromDto, setDataFromMd, clear } = projectSlice.actions;
+export const { setDataFromDto, setDataFromMd, resetProjectData } = projectSlice.actions;
 
 // Selectors
 export const selectProjectData = (state: { project: ProjectState }) => state.project.data;

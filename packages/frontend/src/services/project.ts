@@ -12,7 +12,6 @@ import { instance } from './config';
  * @return 返回创建的项目经验数据
  */
 export async function createProject(project: ProjectDto) {
-	console.log('🚀 ~ createProject ~ createProject:', '执行');
 	try {
 		projectSchema.parse(project);
 	} catch (error) {
@@ -57,6 +56,17 @@ export async function findByNameAndStatus(name: string, status: string) {
 }
 
 /**
+ *
+ * @param id 项目ID
+ * @description 根据项目ID获取项目经验
+ * @returns
+ */
+export async function findById(id: string) {
+	const res = await instance.get<SDF<ProjectVo>>(`/project/${id}`);
+	return res.data;
+}
+
+/**
  * 更新项目经验
  * @param id 项目ID
  * @param projectUpdateDto 更新的项目信息
@@ -75,5 +85,25 @@ export async function updateProject(id: string, projectUpdateDto: Partial<Projec
  */
 export async function deleteProject(id: string) {
 	const res = await instance.delete<SDF<null>>(`/project/${id}`);
+	return res.data;
+}
+
+/**
+ * 打磨项目经验 - 使用AI对项目经验进行优化和改进
+ * @param project 原始项目经验数据
+ * @returns 返回打磨后的项目经验数据
+ */
+export async function polishProject(project: ProjectDto) {
+	const res = await instance.post<ProjectDto, SDF<any>>('/project/polish', project);
+	return res.data;
+}
+
+/**
+ * 挖掘项目经验 - 使用AI深度挖掘项目经验中的亮点和价值
+ * @param project 原始项目经验数据
+ * @returns 返回挖掘后的项目经验数据
+ */
+export async function mineProject(project: ProjectDto) {
+	const res = await instance.post<ProjectDto, SDF<any>>('/project/mine', project);
 	return res.data;
 }

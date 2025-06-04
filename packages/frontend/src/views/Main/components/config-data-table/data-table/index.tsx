@@ -22,31 +22,38 @@ import {
 	TableHeader,
 	TableRow
 } from '@/components/ui/table';
-import type { DataColWithFilter } from '../config.type';
+import type { DataColWithFilter, DataTableConfig } from '../config.type';
 import { DataTablePagination } from './pagination';
 import { DataTableToolbar } from './toolbar';
 
-interface DataTableProps<TData, TValue> {
+type DataTableProps<TData, TValue> = Omit<DataTableConfig<TData>, 'columns'> & {
 	columns: ColumnDef<TData, TValue>[]; // 列定义
 	filterDataCols?: DataColWithFilter<any>[]; // 支持过滤功能的列的定义
 	data: TData[]; // 表格数据源
-	options: {
-		toolbar: {
-			enable: boolean; //是否启用工具栏
-			searchColId: string; //用于搜索的列ID
-		};
-		pagination: boolean; //是否启用分页
-	};
-}
+};
 
 export function DataTable<TData, TValue>({
 	columns,
 	data,
 	filterDataCols,
-	options
+	options,
+	onRowClick,
+	createBtn,
+	selectionHandler
 }: DataTableProps<TData, TValue>) {
 	/* rowSelection的key储存当前选中行在data中的原始index, 其不随排序的变化而变化 */
 	const [rowSelection, setRowSelection] = React.useState({});
+
+	// 处理行选择变化事件
+	React.useEffect(() => {
+		selectionHandler &&
+			selectionHandler(
+				[...Object.getOwnPropertyNames(rowSelection)]
+					.map((key: string) => parseInt(key))
+					.map((index: number) => data[index])
+			);
+	}, [rowSelection]);
+
 	const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
 	//FIXME UI搜索不出来UI 组件库
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -82,6 +89,7 @@ export function DataTable<TData, TValue>({
 					table={table}
 					filterDataCols={filterDataCols}
 					searchColId={options.toolbar.searchColId}
+					createBtn={createBtn}
 				/>
 			)}
 			{/* 表格 */}
@@ -104,10 +112,19 @@ export function DataTable<TData, TValue>({
 					</TableHeader>
 					<TableBody>
 						{table.getRowModel().rows?.length ? (
-							table.getRowModel().rows.map(row => (
-								<TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+							table.getRowModel().rows.map((row, index) => (
+								<TableRow
+									key={row.id}
+									data-state={row.getIsSelected() && 'selected'}
+									onClick={onRowClick ? onRowClick(index) : undefined}
+									className="cursor-pointer hover:bg-muted/50"
+								>
 									{row.getVisibleCells().map(cell => (
-										<TableCell key={cell.id}>
+										<TableCell
+											key={cell.id}
+											// 如果是选择列,防止点击checkbox后跳转详情页
+											onClick={cell.id.includes('_select') ? e => e.stopPropagation() : undefined}
+										>
 											{flexRender(cell.column.columnDef.cell, cell.getContext())}
 										</TableCell>
 									))}

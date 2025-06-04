@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { userInfo } from '../../project/entities/project.entity';
+import { UserInfo } from '../../project/entities/project.entity';
 
 @Schema()
 export class SkillItem {
@@ -16,8 +16,8 @@ export class Skill {
 	@Prop({ type: [SkillItem], required: true })
 	content: SkillItem[]; // 职业技能描述
 
-	@Prop({ type: userInfo, required: true })
-	userInfo: userInfo; // 用户信息
+	@Prop({ type: UserInfo, required: true })
+	userInfo: UserInfo; // 用户信息
 }
 
 export type SkillDocument = HydratedDocument<Skill>;

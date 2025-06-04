@@ -30,7 +30,7 @@ export class SessionPoolController {
 			/* 创建会话、存储上下文 */
 			const sessionId = crypto.randomUUID();
 			await this.sessionPool.createSession(sessionId);
-			await this.sessionPool.setContext(sessionId, contextData);
+			await this.sessionPool.setContext(sessionId, { ...contextData, userInfo });
 			await this.sessionPool.setUserSessionId(userInfo.userId, sessionId);
 			return { sessionId };
 		} catch (error) {
@@ -64,7 +64,6 @@ export class SessionPoolController {
 	) {
 		const existingSession = await this.sessionPool.getSession(sessionId);
 		const curTaskId = await this.taskQueueService.getSessionTaskId(sessionId);
-		console.log('🚀 ~ SessionPoolController ~ existingSession:', existingSession);
 		if (!existingSession) return { status: 'notfound' };
 
 		if (!curTaskId) return { status: 'tasknotfound' };

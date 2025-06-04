@@ -41,7 +41,7 @@ type DeepPartial<T> = {
  * @description 增强的ChatOpenAI, 继承自langchain的ChatOpenAI
  * @description 拦截invoke方法, 添加熔断器、限流器、指数退避重试、请求队列,实现模型服务的高可用
  */
-//TODO 不如组合?
+//TODO 改为组合ChatOpenAI、ChatDeepSeek,根据modelname区分,ChatDeepSeek需要打平config参数（和ChatOpenAI的差异性）
 export class HAModelClient extends ChatOpenAI {
 	//模型参数
 	private modelConfig: ChatOpenAIFields;

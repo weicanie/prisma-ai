@@ -4,12 +4,13 @@
  * 创建招聘信息的 DTO
  */
 export interface CreateJobDto {
-	readonly jobName: string; // 职位名称
-	readonly companyName: string; // 公司名称
-	readonly description: string; // 职位描述
-	readonly location?: string; // 工作地点
-	readonly salary?: string; // 薪资范围
-	readonly link?: string; // 职位链接
+	jobName: string; // 职位名称
+	companyName: string; // 公司名称
+	description: string; // 职位描述
+	location?: string; // 工作地点
+	salary?: string; // 薪资范围
+	link?: string; // 职位链接
+	status?: string; // 职位状态， "open", "closed"
 }
 
 /**
@@ -29,6 +30,7 @@ export interface JobVo {
 	location?: string;
 	salary?: string;
 	link?: string;
+	status?: string; // 职位状态， "open", "closed"
 	createdAt: string;
 	updatedAt: string;
 }

@@ -23,13 +23,13 @@ export class EventBus<Event_Payload extends Record<string, any> = any> {
 	 * 存储所有事件及其对应的处理器数组
 	 * key为事件名，value为处理器数组
 	 */
-	private eventBus: Map<string, Handler[]>;
+	private eventBus: Record<string, Handler[]>;
 
 	/**
 	 * 构造函数，初始化事件总线存储对象
 	 */
 	constructor() {
-		this.eventBus = new Map<string, Handler[]>();
+		this.eventBus = {};
 	}
 
 	/**
@@ -53,8 +53,7 @@ export class EventBus<Event_Payload extends Record<string, any> = any> {
 		let handlers = this.eventBus[eventName as string];
 		if (!handlers) {
 			handlers = [];
-			// 这里用any规避TS索引类型限制
-			(this.eventBus as any)[eventName as string] = handlers;
+			this.eventBus[eventName as string] = handlers;
 		}
 		handlers.push({ eventCallback, thisArg });
 		return this;
@@ -138,16 +137,17 @@ export class EventBus<Event_Payload extends Record<string, any> = any> {
 	 * 清空所有事件监听
 	 */
 	clear() {
-		this.eventBus = {} as Map<string, Handler[]>;
+		this.eventBus = {};
 	}
 
 	/**
 	 * 判断是否有某个事件的监听器
 	 * @param eventName 事件名
 	 * @returns 是否存在
+	 * @description 事件监听器个数为0时会移除事件键
 	 */
 	hasEvent(eventName: string): boolean {
-		return Object.prototype.hasOwnProperty.call(this.eventBus, eventName);
+		return this.eventBus.hasOwnProperty(eventName);
 	}
 }
 

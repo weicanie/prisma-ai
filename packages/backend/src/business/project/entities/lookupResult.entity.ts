@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { userInfo } from './project.entity';
+import { UserInfo } from './project.entity';
 
 @Schema()
 export class Problem {
@@ -32,7 +32,7 @@ export class LookupResult {
 	score: number; // 项目描述评分, 0-100分
 
 	@Prop({ required: true })
-	userInfo: userInfo; // 用户信息
+	userInfo: UserInfo; // 用户信息
 
 	@Prop({ required: true })
 	projectName: string;

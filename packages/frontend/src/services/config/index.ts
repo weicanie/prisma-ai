@@ -3,7 +3,7 @@ import { type RequestConfig, Requester } from './requester';
 
 const config: RequestConfig<unknown, ServerDataFormat> = {
 	baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
-	timeout: 10000,
+	timeout: 100000,
 	//这里设置实例拦截器
 	reqOKFn: [
 		config => {

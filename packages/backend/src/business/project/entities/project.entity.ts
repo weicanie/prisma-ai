@@ -38,7 +38,7 @@ export class ProjectLightspot {
 }
 
 @Schema()
-export class userInfo {
+export class UserInfo {
 	@Prop({ required: true })
 	userId: string;
 
@@ -58,7 +58,7 @@ export class Project {
 	status: string; // 项目状态
 
 	@Prop({ required: true })
-	userInfo: userInfo; // 用户信息
+	userInfo: UserInfo; // 用户信息
 }
 
 export type ProjectDocument = HydratedDocument<Project>;

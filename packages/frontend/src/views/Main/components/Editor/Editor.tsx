@@ -4,25 +4,26 @@ import '@milkdown/crepe/theme/common/style.css'; //编辑器基础样式
 import type { Ctx } from '@milkdown/ctx';
 import { Milkdown, useEditor } from '@milkdown/react';
 import { replaceAll } from '@milkdown/utils';
-import { markdownToProjectSchema } from '@prism-ai/shared';
+import type { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import { debounce, throttle } from 'lodash';
 import { CheckIcon } from 'lucide-react';
 import { useEffect, useRef, type FC } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button } from '../../../../components/ui/button';
 import { cn } from '../../../../lib/utils';
-import { useCustomMutation } from '../../../../query/config';
-import { createProject } from '../../../../services/project';
-import { selectProjectMd, setDataFromMd } from '../../../../store/projects';
+import { selectProjectMd } from '../../../../store/projects';
 import './theme.css'; //编辑器主题样式
 
 interface EditorProps {
 	type?: 'edit' | 'show'; //编辑模式、展示模式(只读)
+	submitHandler?: (md: string) => (...args: any) => void; //提交按钮回调
+	updateAction?: ActionCreatorWithPayload<any>; //编辑后更新store的action
+	mdSelector?: (state: any) => string; //同步store中的md
 }
 
-export const Editor: FC<EditorProps> = ({ type }) => {
+export const Editor: FC<EditorProps> = ({ type, updateAction, submitHandler, mdSelector }) => {
 	const isShwoMode = type === 'show';
-	const md = useSelector(selectProjectMd);
+	const md = useSelector(mdSelector ? mdSelector : selectProjectMd); //获取编辑器内容，默认为项目经验的md
 	const { resolvedTheme } = useTheme();
 
 	let crepe: Crepe;
@@ -41,7 +42,7 @@ export const Editor: FC<EditorProps> = ({ type }) => {
 	const onMarkdownUpdated = debounce((ctx: Ctx, markdown: string, prevMarkdown: string) => {
 		//防止外部更新触发内部更新
 		if (!isInternalUpdate.current) {
-			!isShwoMode && dispatch(setDataFromMd(markdown));
+			!isShwoMode && updateAction && dispatch(updateAction(markdown));
 		}
 	}, 500);
 
@@ -65,10 +66,10 @@ export const Editor: FC<EditorProps> = ({ type }) => {
 		return crepe;
 	}, []);
 
-	// 监听外部 md 变化，更新编辑器内容
+	// 展示模式：监听外部 md 变化，更新编辑器内容
 	useEffect(
 		throttle(() => {
-			if (crepeRef.current) {
+			if (isShwoMode && crepeRef.current) {
 				const currentContent = crepeRef.current.getMarkdown();
 				if (currentContent !== md) {
 					isInternalUpdate.current = true; // 标记为内部更新
@@ -91,8 +92,6 @@ export const Editor: FC<EditorProps> = ({ type }) => {
 		};
 	}, []);
 
-	const uploadProjectMutation = useCustomMutation(createProject);
-
 	return (
 		<div
 			className={cn(
@@ -105,13 +104,7 @@ export const Editor: FC<EditorProps> = ({ type }) => {
 			{/* 提交按钮 */}
 			{!isShwoMode && (
 				<div className="flex justify-start items-center pl-30">
-					<Button
-						onClick={() => {
-							const projectMd = markdownToProjectSchema(md);
-							console.log('提交的项目经验:', markdownToProjectSchema(md));
-							uploadProjectMutation.mutate(projectMd);
-						}}
-					>
+					<Button onClick={submitHandler && submitHandler(md)}>
 						<CheckIcon className="h-4 w-4 mr-2" />
 						提交项目
 					</Button>

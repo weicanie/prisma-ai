@@ -10,13 +10,15 @@ interface ConfigDataTableProps<TData> {
 export function ConfigDataTable<TData>({ dataTableConfig, data }: ConfigDataTableProps<TData>) {
 	const { dataCols, selectCol, rowActionsCol } = dataTableConfig.columns;
 	const columns = [...selectCol, ...dataCols, ...rowActionsCol] as ColumnDef<TData>[];
-	const filterDataCols = dataTableConfig.columns.dataCols.filter(col => col.filterFn !== undefined);
+	const filterDataCols = dataTableConfig.columns.dataCols.filter(
+		col => col.filterFn !== undefined && typeof col.filterFn === 'function'
+	);
 	return (
 		<DataTable<TData, any>
+			{...dataTableConfig}
 			data={data}
 			columns={columns}
 			filterDataCols={filterDataCols}
-			options={dataTableConfig.options}
 		/>
 	);
 }

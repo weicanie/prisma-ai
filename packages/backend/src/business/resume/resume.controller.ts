@@ -29,7 +29,7 @@ export class ResumeController {
 	}
 
 	@RequireLogin()
-	@Get()
+	@Get('all')
 	findAll(
 		@UserInfo() userInfo: UserInfoFromToken,
 		@Query('page') page?: string,

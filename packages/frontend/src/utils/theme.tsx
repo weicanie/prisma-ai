@@ -55,6 +55,14 @@ export const ThemeProviderDiy: React.FC<{ children: React.ReactNode }> = ({ chil
 	const resolvedTheme = theme === 'system' ? systemTheme : theme; //不设置时默认使用系统主题
 	const themeObject = resolvedTheme === 'dark' ? darkTheme : lightTheme;
 
+	//页面刷新后重新设置主题
+	useEffect(() => {
+		//即给html设置class
+		const root = window.document.documentElement;
+		root.classList.remove('light', 'dark');
+		root.classList.add(resolvedTheme);
+	}, [resolvedTheme]);
+
 	return (
 		<ThemeContext.Provider
 			value={{

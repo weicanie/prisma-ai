@@ -18,7 +18,9 @@ export function BreadcrumbNav() {
 			<BreadcrumbList>
 				{list.map((item, index) => (
 					<Fragment key={item.path}>
-						<BreadcrumbItem className="cursor-pointer">
+						<BreadcrumbItem
+							className={`cursor-pointer ${index === list.length - 1 ? 'text-zinc-900 dark:text-zinc-200' : ''}`}
+						>
 							<BreadcrumbLink
 								onClick={() => {
 									navigate(item.path);

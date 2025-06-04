@@ -21,8 +21,10 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@copilotkit/runtime": "^1.8.13",
     "@langchain/community": "^0.3.42",
     "@langchain/core": "^0.3.55",
+    "@langchain/deepseek": "^0.0.1",
     "@langchain/langgraph": "^0.2.72",
     "@langchain/openai": "^0.5.5",
     "@langchain/pinecone": "^0.2.0",

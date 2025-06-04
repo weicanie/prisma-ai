@@ -16,6 +16,9 @@ const slice = createSlice({
 	reducers: {
 		/* 路由跳转后,根据当前路由更新面包屑导航 */
 		updateAction: (state, { payload: path }: { payload: string }) => {
+			if (!path || !path_name[path]) {
+				return;
+			}
 			const names = path_name[path].split('-');
 			const paths = path.split('/');
 

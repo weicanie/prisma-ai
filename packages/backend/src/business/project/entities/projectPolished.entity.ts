@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { type HydratedDocument } from 'mongoose';
-import { ProjectInfo, userInfo } from './project.entity';
+import { ProjectInfo, UserInfo } from './project.entity';
 
 @Schema()
 export class LightspotFixed {
@@ -47,7 +47,7 @@ export class ProjectPolished {
 	status: 'polishing'; //llm已打磨
 
 	@Prop({ required: true })
-	userInfo: userInfo;
+	userInfo: UserInfo;
 }
 
 export type ProjectPolishedDocument = HydratedDocument<ProjectPolished>;

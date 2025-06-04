@@ -46,7 +46,7 @@ export interface DataTableConfig<TRow = unknown> {
 		//操作列
 		rowActionsCol: RowActionsCol<TRow>[];
 		//选择列
-		selectCol: SelectCol<TRow>[];
+		selectCol: (SelectCol<TRow> & { id: '_select' })[]; //id固定为'_select' ,因为内部需要特殊处理
 	};
 	options: {
 		toolbar: {
@@ -55,4 +55,7 @@ export interface DataTableConfig<TRow = unknown> {
 		};
 		pagination: boolean; //是否启用分页
 	};
+	onRowClick?: (...args: any) => any; //行点击事件处理函数
+	createBtn?: React.ReactNode; //带创建弹窗的创建按钮
+	selectionHandler?: (selectedRows: TRow[]) => void; //行选择变化事件处理函数
 }

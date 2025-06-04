@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { projectSchemaForm } from '../types/project.schema-form';
+import { CreateSkillDto, SkillItem } from '../types/skill';
 /**
  * 将项目的Markdown格式文本转换为符合projectSchemaForm的结构化数据
  * @param markdown 项目的Markdown格式文本
@@ -151,3 +152,73 @@ export function projectSchemaToMarkdown(project: z.infer<typeof projectSchemaFor
 
 	return markdown;
 }
+
+// 将技能数据转换为 Markdown
+export const skillsToMarkdown = (data: CreateSkillDto): string => {
+	let markdown = '## 职业技能\n\n';
+
+	data.content.forEach(skillGroup => {
+		if (skillGroup.type) {
+			markdown += `* ${skillGroup.type}:`;
+			if (skillGroup.content && skillGroup.content.length > 0) {
+				markdown += ` ${skillGroup.content.join('、')}\n`;
+			} else {
+				markdown += '\n';
+			}
+		}
+	});
+
+	return markdown;
+};
+
+// 将 Markdown 转换为技能数据
+export const markdownToSkills = (markdown: string): CreateSkillDto => {
+	const content: SkillItem[] = [];
+
+	// 使用正则表达式匹配所有技能块，从 * 开始到下一个 * 或字符串结尾
+	const skillBlockRegex = /\*\s*([^*]+?)(?=\*|$)/gs;
+	const matches = markdown.matchAll(skillBlockRegex);
+
+	for (const match of matches) {
+		const blockContent = match[1];
+		if (!blockContent) continue;
+
+		// 移除所有换行符
+		const cleanedContent = blockContent.replace(/\n+/g, '').trim();
+
+		const colonMatch = cleanedContent.match(/^([^:：]+)[：:](.*)$/);
+
+		if (colonMatch) {
+			const type = colonMatch[1].trim();
+			const skillsString = colonMatch[2].trim();
+
+			if (type) {
+				// 解析技能列表，支持多种分隔符
+				const skills = skillsString
+					? skillsString
+							.split(/[、，,]/)
+							.map(skill => skill.trim())
+							.filter(skill => skill.length > 0)
+					: [];
+
+				content.push({
+					type,
+					content: skills
+				});
+			}
+		}
+	}
+
+	// 如果没有解析到任何内容，返回默认结构
+	if (content.length === 0) {
+		return {
+			content: [
+				{ type: '前端', content: [] },
+				{ type: '后端', content: [] },
+				{ type: '数据库', content: [] }
+			]
+		};
+	}
+
+	return { content };
+};

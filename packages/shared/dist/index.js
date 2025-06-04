@@ -22,17 +22,22 @@ var index_exports = {};
 __export(index_exports, {
   ErrorCode: () => ErrorCode,
   ProjectStatus: () => ProjectStatus,
+  RequestTargetMap: () => RequestTargetMap,
   errorMessage: () => errorMessage,
   getLightspotSchema: () => getLightspotSchema,
+  jsonMd_obj: () => jsonMd_obj,
   loginformSchema: () => loginformSchema,
   lookupResultSchema: () => lookupResultSchema,
   markdownToProjectSchema: () => markdownToProjectSchema,
+  markdownToSkills: () => markdownToSkills,
   projectMinedSchema: () => projectMinedSchema,
   projectPolishedSchema: () => projectPolishedSchema,
   projectSchema: () => projectSchema,
   projectSchemaForm: () => projectSchemaForm,
   projectSchemaToMarkdown: () => projectSchemaToMarkdown,
-  registformSchema: () => registformSchema
+  registformSchema: () => registformSchema,
+  skillsToMarkdown: () => skillsToMarkdown,
+  typeMap: () => typeMap
 });
 module.exports = __toCommonJS(index_exports);
 
@@ -56,7 +61,7 @@ var ErrorCode = /* @__PURE__ */ ((ErrorCode2) => {
   ErrorCode2["SERVER_CONNECTION_ERROR"] = "3002";
   ErrorCode2["TOOL_GET_ERROR"] = "3003";
   ErrorCode2["TOOL_CALL_ERROR"] = "3004";
-  ErrorCode2["FORMAT_ERROR"] = "4001";
+  ErrorCode2["FORMAT_ERROR"] = "4005";
   return ErrorCode2;
 })(ErrorCode || {});
 var errorMessage = {
@@ -82,8 +87,18 @@ var errorMessage = {
   ["3003" /* TOOL_GET_ERROR */]: "\u83B7\u53D6mcp\u5DE5\u5177\u5931\u8D25",
   ["3004" /* TOOL_CALL_ERROR */]: "\u8C03\u7528mcp\u5DE5\u5177\u5931\u8D25",
   //3、项目经验
-  //4、mongodb钩子
-  ["4001" /* FORMAT_ERROR */]: "\u9519\u8BEF\u7684\u6570\u636E\u683C\u5F0F"
+  ["4005" /* FORMAT_ERROR */]: "\u9519\u8BEF\u7684\u6570\u636E\u683C\u5F0F"
+};
+
+// src/types/knowBase.ts
+var typeMap = {
+  userProjectDoc: "\u6211\u7684\u9879\u76EE\u6587\u6863",
+  userProjectRepo: "\u6211\u7684\u9879\u76EEgithub\u4ED3\u5E93\u5730\u5740",
+  openSourceProjectDoc: "\u5F00\u6E90\u9879\u76EE\u6587\u6863",
+  openSourceProjectRepo: "\u5F00\u6E90\u9879\u76EEgithub\u4ED3\u5E93\u5730\u5740",
+  techDoc: "\u6280\u672F\u6587\u6863",
+  interviewQuestion: "\u9762\u8BD5\u9898",
+  other: "\u5176\u4ED6"
 };
 
 // src/types/login_regist.schema.ts
@@ -137,7 +152,20 @@ var infoSchema = import_zod2.z.object({
   }),
   techStack: import_zod2.z.array(import_zod2.z.string()).describe("\u9879\u76EE\u7684\u6280\u672F\u6808").default([])
 }).describe("\u9879\u76EE\u4FE1\u606F\u7684\u7ED3\u6784\u5316\u63CF\u8FF0");
-function getLightspotSchema(item = import_zod2.z.string()) {
+function getLightspotSchema(item = import_zod2.z.string(), polish = false) {
+  if (polish) {
+    return import_zod2.z.object({
+      team: import_zod2.z.array(item).describe("\u56E2\u961F\u8D21\u732E\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
+      skill: import_zod2.z.array(item).describe("\u6280\u672F\u4EAE\u70B9/\u96BE\u70B9\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
+      user: import_zod2.z.array(item).describe("\u7528\u6237\u4F53\u9A8C/\u4E1A\u52A1\u4EF7\u503C\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
+      delete: import_zod2.z.array(
+        import_zod2.z.object({
+          content: import_zod2.z.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
+          reason: import_zod2.z.string().describe("\u4EAE\u70B9\u5220\u9664\u539F\u56E0").default("NONE")
+        })
+      ).describe("\u5220\u9664\u7684\u4EAE\u70B9").default([])
+    }).describe("\u9879\u76EE\u4EAE\u70B9\u7684\u7ED3\u6784\u5316\u63CF\u8FF0");
+  }
   return import_zod2.z.object({
     team: import_zod2.z.array(item).describe("\u56E2\u961F\u8D21\u732E\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
     skill: import_zod2.z.array(item).describe("\u6280\u672F\u4EAE\u70B9/\u96BE\u70B9\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
@@ -154,7 +182,8 @@ var projectPolishedSchema = import_zod2.z.object({
     import_zod2.z.object({
       content: import_zod2.z.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
       advice: import_zod2.z.string().describe("\u4EAE\u70B9\u6539\u8FDB\u5EFA\u8BAE").default("NONE")
-    })
+    }),
+    true
   )
 });
 var projectMinedSchema = import_zod2.z.object({
@@ -206,6 +235,30 @@ var projectSchemaForm = import_zod3.z.object({
   info: infoSchemaForm,
   lightspot: getLightspotSchemaForm()
 });
+
+// src/types/sse.ts
+var RequestTargetMap = {
+  polish: "/sse/project-generate",
+  //类型占位符
+  mine: "/sse/project-generate"
+};
+
+// src/utils/jsonMd_obj.ts
+function jsonMd_obj(content) {
+  let jsonMd = content.match(/(?<=```json)(.*)(?=```)/gs)?.[0];
+  if (!jsonMd) {
+    console.error(`No JSON content found in the provided string: ${content}`);
+    return;
+  }
+  let obj;
+  try {
+    obj = JSON.parse(jsonMd);
+  } catch (error) {
+    console.error("JSON parsing error:", error);
+    console.error("when parsing:", jsonMd);
+  }
+  return obj;
+}
 
 // src/utils/md_json.ts
 function markdownToProjectSchema(markdown) {
@@ -326,21 +379,73 @@ function projectSchemaToMarkdown(project) {
   });
   return markdown;
 }
+var skillsToMarkdown = (data) => {
+  let markdown = "## \u804C\u4E1A\u6280\u80FD\n\n";
+  data.content.forEach((skillGroup) => {
+    if (skillGroup.type) {
+      markdown += `* ${skillGroup.type}:`;
+      if (skillGroup.content && skillGroup.content.length > 0) {
+        markdown += ` ${skillGroup.content.join("\u3001")}
+`;
+      } else {
+        markdown += "\n";
+      }
+    }
+  });
+  return markdown;
+};
+var markdownToSkills = (markdown) => {
+  const content = [];
+  const skillBlockRegex = /\*\s*([^*]+?)(?=\*|$)/gs;
+  const matches = markdown.matchAll(skillBlockRegex);
+  for (const match of matches) {
+    const blockContent = match[1];
+    if (!blockContent) continue;
+    const cleanedContent = blockContent.replace(/\n+/g, "").trim();
+    const colonMatch = cleanedContent.match(/^([^:：]+)[：:](.*)$/);
+    if (colonMatch) {
+      const type = colonMatch[1].trim();
+      const skillsString = colonMatch[2].trim();
+      if (type) {
+        const skills = skillsString ? skillsString.split(/[、，,]/).map((skill) => skill.trim()).filter((skill) => skill.length > 0) : [];
+        content.push({
+          type,
+          content: skills
+        });
+      }
+    }
+  }
+  if (content.length === 0) {
+    return {
+      content: [
+        { type: "\u524D\u7AEF", content: [] },
+        { type: "\u540E\u7AEF", content: [] },
+        { type: "\u6570\u636E\u5E93", content: [] }
+      ]
+    };
+  }
+  return { content };
+};
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   ErrorCode,
   ProjectStatus,
+  RequestTargetMap,
   errorMessage,
   getLightspotSchema,
+  jsonMd_obj,
   loginformSchema,
   lookupResultSchema,
   markdownToProjectSchema,
+  markdownToSkills,
   projectMinedSchema,
   projectPolishedSchema,
   projectSchema,
   projectSchemaForm,
   projectSchemaToMarkdown,
-  registformSchema
+  registformSchema,
+  skillsToMarkdown,
+  typeMap
 });
 //! crepe编辑器中无序列表项 - 会转为 *: 统一用*,且会跟<br />
 //# sourceMappingURL=index.js.map

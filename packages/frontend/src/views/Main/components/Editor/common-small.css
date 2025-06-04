@@ -33,13 +33,15 @@
     align-items: center;
     justify-content: center;
   }
+  
+  border-radius: 9px;
 
   .ProseMirror-focused {
     outline: none;
   }
   /* 编辑区样式 */
   .ProseMirror {
-    padding: 30px 50px 10px 85px;
+    padding: 30px 50px 50px 85px;
 
     *::selection {
       background: var(--crepe-color-selected);
@@ -55,6 +57,7 @@
         background: transparent;
       }
     }
+
     li.ProseMirror-selectednode:after {
       all: unset;
     }
@@ -121,19 +124,19 @@
     }
 
     h3 {
-      font-size: 24px;
-      line-height: 20px;
+      font-size: 20px;
+      line-height: 28px;
       margin-top: 16px;
     }
 
     h4 {
-      font-size: 20px;
-      line-height: 16px;
+      font-size: 18px;
+      line-height: 24px;
       margin-top: 12px;
     }
 
     h5 {
-      font-size: 18px;
+      font-size: 16px;
       line-height: 12px;
       margin-top: 10px;
     }
@@ -146,7 +149,7 @@
     }
 
     p {
-      font-size: 16px;
+      font-size: 14px;
       line-height: 24px;
       padding: 4px 0;
     }

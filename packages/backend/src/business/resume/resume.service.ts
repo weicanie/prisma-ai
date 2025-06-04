@@ -23,7 +23,7 @@ export class ResumeService {
 	async create(createResumeDto: CreateResumeDto, userInfo: UserInfoFromToken): Promise<Resume> {
 		const createdResume = new this.resumeModel({
 			...createResumeDto,
-			skills: createResumeDto.skills?.map(id => new Types.ObjectId(id)),
+			skill: new Types.ObjectId(createResumeDto.skill),
 			projects: createResumeDto.projects?.map(id => new Types.ObjectId(id)),
 			userInfo
 		});
@@ -44,8 +44,7 @@ export class ResumeService {
 		]);
 
 		const promises = result.map(resume => this.findOne(resume._id.toString(), userInfo));
-		const data = await Promise.all(promises);
-
+		let data = await Promise.all(promises);
 		return {
 			data,
 			total,
@@ -94,9 +93,9 @@ export class ResumeService {
 			return { ...project.toObject(), lookupResult: {} };
 		});
 
-		const result = { ...resume, projects: projectDatas as ProjectVo[] };
+		const result = { ...resume.toObject(), projects: projectDatas as ProjectVo[] };
 
-		return result as PopulateFields<ResumeDocument, 'projects' | 'skill', ResumeVo>;
+		return result as unknown as PopulateFields<ResumeDocument, 'projects' | 'skill', ResumeVo>;
 	}
 
 	async update(
@@ -108,8 +107,8 @@ export class ResumeService {
 			throw new NotFoundException(`Invalid ID format: "${id}"`);
 		}
 		const updateData: any = { ...updateResumeDto };
-		if (updateResumeDto.skills) {
-			updateData.skills = updateResumeDto.skills.map(skillId => new Types.ObjectId(skillId));
+		if (updateResumeDto.skill) {
+			updateData.skill = new Types.ObjectId(updateResumeDto.skill);
 		}
 		if (updateResumeDto.projects) {
 			updateData.projects = updateResumeDto.projects.map(

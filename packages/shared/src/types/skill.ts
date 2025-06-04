@@ -7,7 +7,7 @@ export interface SkillItem {
 }
 
 export interface CreateSkillDto {
-	readonly content: SkillItem[];
+	content: SkillItem[];
 }
 
 export type UpdateSkillDto = Partial<CreateSkillDto>;

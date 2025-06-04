@@ -1,14 +1,24 @@
 import { Outlet } from 'react-router-dom';
 import LoginRegist from '../views/LoginRegist/LoginRegist';
 import { Main } from '../views/Main';
+import { Jobs } from '../views/Main/Jobs';
+import { JobRead } from '../views/Main/Jobs/JobRead';
+import { Knowledges } from '../views/Main/knowbase';
+import { KnowledgeRead } from '../views/Main/knowbase/KnowledgeRead';
 import { Projects } from '../views/Main/Projects';
+import { Action } from '../views/Main/Projects/Action';
+import { Read } from '../views/Main/Projects/Read';
+import { Resumes } from '../views/Main/Resumes';
+import { ResumeRead } from '../views/Main/Resumes/ResumeRead';
+import { Skills } from '../views/Main/Skills';
+import { SkillRead } from '../views/Main/Skills/SkillRead';
 import { Test } from '../views/MyTest/Test';
 import PrivateRoute from './PrivateRoute';
 import UpdateBreadRouter from './UpdateBreadRouter';
 
 export const routes = [
 	{
-		path: '/',
+		path: '',
 		element: (
 			<PrivateRoute>
 				<Main />
@@ -45,36 +55,152 @@ export const routes = [
 				path: '/main/skills',
 				element: (
 					<UpdateBreadRouter>
-						<>职业技能</>
+						<Outlet />
 					</UpdateBreadRouter>
-				)
+				),
+				children: [
+					{
+						path: '',
+						element: (
+							<UpdateBreadRouter>
+								<>
+									<Skills />
+								</>
+							</UpdateBreadRouter>
+						)
+					},
+					{
+						path: 'detail/:skillIndex',
+						element: (
+							<UpdateBreadRouter>
+								<SkillRead></SkillRead>
+							</UpdateBreadRouter>
+						)
+					}
+				]
 			},
 			// 项目经验
 			{
 				path: '/main/projects',
 				element: (
 					<UpdateBreadRouter>
-						<Projects />
+						<Outlet />
 					</UpdateBreadRouter>
-				)
+				),
+				children: [
+					{
+						path: '',
+						element: (
+							<UpdateBreadRouter>
+								<>
+									<Projects />
+								</>
+							</UpdateBreadRouter>
+						)
+					},
+					{
+						path: 'detail/:projectIndex',
+						element: (
+							<UpdateBreadRouter>
+								<Read></Read>
+							</UpdateBreadRouter>
+						)
+					},
+					{
+						path: 'action/:projectIndex',
+						element: (
+							<UpdateBreadRouter>
+								<Action></Action>
+							</UpdateBreadRouter>
+						)
+					}
+				]
 			},
 			// 简历
 			{
-				path: '/main/resume',
+				path: '/main/resumes',
 				element: (
 					<UpdateBreadRouter>
-						<>简历</>
+						<Outlet />
 					</UpdateBreadRouter>
-				)
+				),
+				children: [
+					{
+						path: '',
+						element: (
+							<UpdateBreadRouter>
+								<>
+									<Resumes />
+								</>
+							</UpdateBreadRouter>
+						)
+					},
+					{
+						path: 'detail/:resumeIndex',
+						element: (
+							<UpdateBreadRouter>
+								<ResumeRead></ResumeRead>
+							</UpdateBreadRouter>
+						)
+					}
+				]
 			},
 			// 岗位
 			{
 				path: '/main/job',
 				element: (
 					<UpdateBreadRouter>
-						<>岗位</>
+						<Outlet />
 					</UpdateBreadRouter>
-				)
+				),
+				children: [
+					{
+						path: '',
+						element: (
+							<UpdateBreadRouter>
+								<>
+									<Jobs />
+								</>
+							</UpdateBreadRouter>
+						)
+					},
+					{
+						path: '/main/job/detail/:jobIndex',
+						element: (
+							<UpdateBreadRouter>
+								<JobRead></JobRead>
+							</UpdateBreadRouter>
+						)
+					}
+				]
+			}, // 知识库
+			{
+				path: '/main/knowledge',
+				element: (
+					<UpdateBreadRouter>
+						<Outlet />
+					</UpdateBreadRouter>
+				),
+				children: [
+					{
+						path: '',
+						element: (
+							<UpdateBreadRouter>
+								<>
+									<Knowledges />
+								</>
+							</UpdateBreadRouter>
+						)
+					},
+					{
+						path: 'detail/:knowledgeIndex',
+						element: (
+							<UpdateBreadRouter>
+								<KnowledgeRead></KnowledgeRead>
+							</UpdateBreadRouter>
+						)
+					}
+				]
 			},
 			// 面向offer学习
 			{
@@ -127,26 +253,22 @@ export const path_name: Record<string, string> = {
 	'/main/home': '首页',
 
 	'/main/skills': '职业技能',
-	// '/main/skills/upload': '职业技能-新建职业技能',
-	// '/main/skills/list': '职业技能-我的职业技能',
-
+	'/main/skills/detail': '职业技能-详情',
 	'/main/projects': '项目经验',
-	// '/main/projects/new': '项目经验-新建项目经验',
-	// '/main/projects/new/create': '项目经验-新建项目经验-新建',
-	// '/main/projects/new/upload': '项目经验-新建项目经验-上传',
-	// '/main/projects/list': '项目经验-我的项目经验',
+	'/main/projects/detail': '项目经验-详情',
+	'/main/projects/action': '项目经验-AI优化',
 
-	'/main/resume': '简历',
-	// '/main/resume/new': '简历-简历组装',
-	// '/main/resume/list': '简历-我的简历',
+	'/main/resumes': '简历',
+	'/main/resumes/detail': '简历-详情',
 
 	'/main/job': '岗位',
-	// '/main/job/match': '岗位-简历匹配',
-	// '/main/job/list': '岗位-我的岗位专用简历',
+	'/main/job/detail': '岗位-详情',
+
+	'/main/knowledge': '知识库',
+	'/main/knowledge/detail': '知识库-详情',
 
 	'/main/offer': '面向offer学习',
 	'/main/offer/road': '面向offer学习-学习路线',
 	'/main/offer/questions': '面向offer学习-简历延申八股',
 	'/main/offer/mock-interview': '面向offer学习-模拟面试'
 };
-//TODO 代码从上面这个表自动生成路由?

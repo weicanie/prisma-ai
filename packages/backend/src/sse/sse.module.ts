@@ -1,4 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
+import { ProjectModule } from '../business/project/project.module';
 import { ChainModule } from '../chain/chain.module';
 import { EventBusModule } from '../EventBus/event-bus.module';
 import { RedisModule } from '../redis/redis.module';
@@ -13,6 +14,7 @@ import { SseService } from './sse.service';
 	providers: [SseService, LLMCacheService],
 	imports: [
 		ChainModule,
+		forwardRef(() => ProjectModule),
 		RedisModule,
 		SessionPoolModule,
 		TaskQueueModule,

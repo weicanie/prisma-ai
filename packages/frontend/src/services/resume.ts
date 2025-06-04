@@ -1,5 +1,6 @@
 import type {
 	CreateResumeDto,
+	PaginatedResumesResult,
 	ResumeVo,
 	ServerDataFormat as SDF,
 	UpdateResumeDto
@@ -23,9 +24,9 @@ export async function createResume(resumeData: CreateResumeDto) {
  * @returns 返回简历列表数据
  */
 export async function findAllUserResumes(page?: number, limit?: number) {
-	const res = await instance.get<SDF<ResumeVo[]>>('/resume', {
-		params: { page, limit }
-	});
+	const res = await instance.get<SDF<PaginatedResumesResult>>(
+		`/resume/all?page=${page}&limit=${limit}`
+	);
 	return res.data;
 }
 

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { ProjectInfo, ProjectLightspot, userInfo } from './project.entity';
+import { ProjectInfo, ProjectLightspot, UserInfo } from './project.entity';
 
 @Schema()
 export class LightspotAdded {
@@ -41,7 +41,7 @@ export class ProjectMined {
 	status: 'mining'; //llm已挖掘
 
 	@Prop({ required: true })
-	userInfo: userInfo;
+	userInfo: UserInfo;
 }
 
 export type ProjectMinedDocument = HydratedDocument<ProjectMined>;

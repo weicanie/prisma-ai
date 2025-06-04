@@ -1,12 +1,11 @@
 import React from 'react';
-import { WriteProject } from '../Main/Projects/WriteProject';
 
 interface TestProps {}
 
 export const Test: React.FC<TestProps> = props => {
 	return (
 		<>
-			<WriteProject></WriteProject>
+			<div className="tab-17/3 size-10 bg-amber-400"></div>
 		</>
 	);
 };

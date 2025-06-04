@@ -1,6 +1,6 @@
+import { ChatDeepSeek } from '@langchain/deepseek';
 import {
 	ChatOpenAI,
-	ChatOpenAICallOptions,
 	ChatOpenAIFields,
 	ClientOptions,
 	OpenAIEmbeddings,
@@ -25,13 +25,14 @@ export class ModelService {
 	 * @description 模型池: config -> HAModelClient模型实例 的哈希表
 	 * @description config 相同则复用模型实例,否则创建新的模型实例
 	 */
-	private models: Map<string, ChatOpenAI> = new Map();
+	private models: Map<string, ChatOpenAI | ChatDeepSeek> = new Map();
 
 	/**
 	 * @description 模型池: config -> ChatOpenAI模型实例 的哈希表
 	 * @description config 相同则复用模型实例,否则创建新的模型实例
 	 */
-	private rawModels: Map<string, ChatOpenAI> = new Map();
+	private rawModels: Map<string, ChatOpenAI | ChatDeepSeek> = new Map();
+
 	/**
 	 * @description 单例的嵌入模型实例
 	 */
@@ -47,6 +48,7 @@ export class ModelService {
 			maxRetries: 3
 		}
 	};
+
 	deepseek_config: ChatOpenAIFields = {
 		model: 'deepseek-reasoner',
 		configuration: {
@@ -60,13 +62,21 @@ export class ModelService {
 	constructor(
 		public chatHistoryService: ChatHistoryService,
 		public HAModelClientService: HAModelClientService,
-		// @Inject(ConfigService)
 		public configService: ConfigService
 	) {
 		//初始化模型池
 
+		/* 
+		ChatDeepSeek、ChatOpenAI：基本无差异、因为模型是对齐的
+		 */
 		this.rawModels.set(JSON.stringify(this.openai_config), new ChatOpenAI(this.openai_config));
-		this.rawModels.set(JSON.stringify(this.deepseek_config), new ChatOpenAI(this.deepseek_config));
+		/* ChatOpenAI格式转为ChatDeepSeek格式,配置和键统一保持为ChatOpenAI格式 */
+		const deepseekConfig = {
+			...this.deepseek_config,
+			...this.deepseek_config.configuration,
+			configuration: undefined
+		};
+		this.rawModels.set(JSON.stringify(this.deepseek_config), new ChatDeepSeek(deepseekConfig));
 		//TODO 这样能行? 不行就放onMuduleInit里
 		const LLM_openai = this.HAModelClientService.createClient({ modelConfig: this.openai_config });
 		const LLM_deepseek = this.HAModelClientService.createClient({
@@ -187,16 +197,14 @@ export class ModelService {
 		if (this.rawModels.has(configKey)) {
 			return this.rawModels.get(configKey)!;
 		} else {
-			const newModel = new ChatOpenAI(config);
+			const newModel = new ChatDeepSeek(config);
 			this.rawModels.set(JSON.stringify(config), newModel);
 			return newModel;
 		}
 	}
 
-	getLLMDeepSeekRaw(config?: typeof this.deepseek_config): ChatOpenAI<ChatOpenAICallOptions>;
-	getLLMDeepSeekRaw(
-		modelName: 'deepseek-reasoner' | 'deepseek-chat'
-	): ChatOpenAI<ChatOpenAICallOptions>;
+	getLLMDeepSeekRaw(config?: typeof this.deepseek_config): ChatDeepSeek | ChatOpenAI;
+	getLLMDeepSeekRaw(modelName: 'deepseek-reasoner' | 'deepseek-chat'): ChatDeepSeek | ChatOpenAI;
 
 	/**
 	 * @description 直接获取模型实例,无熔断器和限流器和请求队列等高可用保护

@@ -98,14 +98,14 @@ export class LLMCacheService {
 
 	// 从上下文中提取提示文本
 	private getPromptText(context: Record<string, any>): string {
-		// 假设context.prompt包含主要提示文本
-		if (typeof context.prompt === 'string') {
-			return context.prompt;
+		// 假设context.input包含主要提示文本
+		if (typeof context.input === 'string') {
+			return context.input;
 		}
 
 		// 如果是复杂结构，尝试序列化关键部分
 		return JSON.stringify({
-			prompt: context.prompt,
+			prompt: context.input,
 			query: context.query,
 			input: context.input
 		});

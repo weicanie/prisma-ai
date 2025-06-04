@@ -24,9 +24,7 @@ export enum ErrorCode {
 	TOOL_CALL_ERROR = '3004',
 
 	//3、项目经验
-
-	//4、mongodb钩子
-	FORMAT_ERROR = '4001'
+	FORMAT_ERROR = '4005'
 }
 
 export const errorMessage = {
@@ -53,7 +51,5 @@ export const errorMessage = {
 	[ErrorCode.TOOL_GET_ERROR]: '获取mcp工具失败',
 	[ErrorCode.TOOL_CALL_ERROR]: '调用mcp工具失败',
 	//3、项目经验
-
-	//4、mongodb钩子
 	[ErrorCode.FORMAT_ERROR]: '错误的数据格式'
 };

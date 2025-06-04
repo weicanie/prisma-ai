@@ -1,6 +1,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-
+/* 
+scrollbar-hide:隐藏滚动条
+scrollbar-default:隐藏后显示滚动条 用于断点
+  webkit浏览器不支持从hide变default,只支持default变hide
+    所以得使用max-width断点系统
+*/
+@import 'tailwind-scrollbar-hide/v4';
+@plugin 'tailwind-scrollbar';
 /* 自定义变体
 具有dark类名的元素的后代激活dark变体
 用于按类名的主题切换
@@ -253,6 +260,7 @@
 }
 .dark {
 --editor-bg-color: rgb(26,26,26);
+
 }
 
 @theme {
@@ -280,4 +288,16 @@
 
 @utility bg-editor {
   background-color: var(--editor-bg-color);
+}
+
+/* 背景色 */
+@utility bg-global {
+  @apply bg-gray-50;
+  @variant dark {
+      @apply bg-gray-900;
+  } 
+}
+
+@utility scb-thin {
+  @apply scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent;
 }

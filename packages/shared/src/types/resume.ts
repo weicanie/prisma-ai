@@ -7,9 +7,9 @@ import type { SkillVo } from './skill';
  * 创建简历的 DTO
  */
 export interface CreateResumeDto {
-	readonly name: string; // 简历名称
-	readonly skills?: string[]; // 关联的技能ID列表
-	readonly projects?: string[]; // 关联的项目经验ID列表
+	name: string; // 简历名称
+	skill?: string; // 关联的技能ID
+	projects?: string[]; // 关联的项目经验ID列表
 }
 
 /**

@@ -11,8 +11,10 @@ import {
 	SidebarMenuItem,
 	SidebarMenuSub,
 	SidebarMenuSubButton,
-	SidebarMenuSubItem
+	SidebarMenuSubItem,
+	SidebarSeparator
 } from '@/components/ui/sidebar';
+import { Fragment } from 'react/jsx-runtime';
 
 type NavMainProps = {
 	items: {
@@ -67,42 +69,47 @@ export function NavMain({
 
 					//如果有子项，渲染为可折叠的菜单项
 					return (
-						<Collapsible
-							key={item.title}
-							asChild
-							defaultOpen={item.isOpen || selectedGroupIndex === groupIdx}
-							className="group/collapsible"
-						>
-							<SidebarMenuItem>
-								<CollapsibleTrigger asChild>
-									<SidebarMenuButton
-										tooltip={item.title}
-										isActive={isMainItemActive}
-										className="cursor-pointer"
-									>
-										{item.icon && <item.icon />}
-										<span>{item.title}</span>
-										<ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-									</SidebarMenuButton>
-								</CollapsibleTrigger>
-								<CollapsibleContent>
-									<SidebarMenuSub>
-										{item.items?.map((subItem, subIdx) => (
-											<SidebarMenuSubItem key={subItem.title}>
-												<SidebarMenuSubButton
-													asChild
-													isActive={selectedGroupIndex === groupIdx && selectedItemIndex === subIdx}
-													onClick={() => onItemClick(groupIdx, subIdx, subItem.url)}
-													className="cursor-pointer"
-												>
-													<span>{subItem.title}</span>
-												</SidebarMenuSubButton>
-											</SidebarMenuSubItem>
-										))}
-									</SidebarMenuSub>
-								</CollapsibleContent>
-							</SidebarMenuItem>
-						</Collapsible>
+						<Fragment key={item.title}>
+							<SidebarSeparator />
+							<Collapsible
+								key={item.title}
+								asChild
+								defaultOpen={item.isOpen || selectedGroupIndex === groupIdx}
+								className="group/collapsible"
+							>
+								<SidebarMenuItem>
+									<CollapsibleTrigger asChild>
+										<SidebarMenuButton
+											tooltip={item.title}
+											isActive={isMainItemActive}
+											className="cursor-pointer"
+										>
+											{item.icon && <item.icon />}
+											<span>{item.title}</span>
+											<ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+										</SidebarMenuButton>
+									</CollapsibleTrigger>
+									<CollapsibleContent>
+										<SidebarMenuSub>
+											{item.items?.map((subItem, subIdx) => (
+												<SidebarMenuSubItem key={subItem.title}>
+													<SidebarMenuSubButton
+														asChild
+														isActive={
+															selectedGroupIndex === groupIdx && selectedItemIndex === subIdx
+														}
+														onClick={() => onItemClick(groupIdx, subIdx, subItem.url)}
+														className="cursor-pointer"
+													>
+														<span>{subItem.title}</span>
+													</SidebarMenuSubButton>
+												</SidebarMenuSubItem>
+											))}
+										</SidebarMenuSub>
+									</CollapsibleContent>
+								</SidebarMenuItem>
+							</Collapsible>
+						</Fragment>
 					);
 				})}
 			</SidebarMenu>
