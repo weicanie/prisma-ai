@@ -107,8 +107,8 @@ export class ProjectController {
 	}
 
 	/* mcp tools 测试 */
-	/* 	@Post('tool-query')
+	@Post('tool-query')
 	async toolQuery(@Body() query: string) {
 		return await this.projectService.toolQuery(query);
-	} */
+	}
 }

@@ -110,7 +110,7 @@ export const Projects: React.FC<ProjectsProps> = ({
 					header: ({ column }) => <DataTableColumnHeader column={column} title="评分" />,
 					cell: ({ row }) => (
 						<div className="flex space-x-2">
-							<Badge variant="secondary">{row.original.lookupResult.score}</Badge>
+							<Badge variant="secondary">{row.original.lookupResult?.score ?? '待分析'}</Badge>
 						</div>
 					)
 				}
@@ -149,7 +149,7 @@ export const Projects: React.FC<ProjectsProps> = ({
 				title={title ?? '项目经验'}
 				description={
 					description ??
-					'项目经验决定能否拿到面试、面试表现。点击查看 Prisma 的分析结果、借助 Prisma 彻底优化你的项目经验'
+					'项目经验决定面试机会、面试表现。点击项目让 Prisma 深入分析你的项目、彻底优化你的项目经验'
 				}
 			></PageHeader>
 			<div className="pl-10 pr-10 ">

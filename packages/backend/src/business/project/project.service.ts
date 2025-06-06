@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
-	ErrorCode,
 	jsonMd_obj,
 	lookupResultSchema,
 	projectMinedSchema,
@@ -15,7 +14,7 @@ import {
 } from '@prism-ai/shared';
 import { Model } from 'mongoose';
 import { from, mergeMap, Observable } from 'rxjs';
-import { ZodError, ZodSchema } from 'zod';
+import { ZodSchema } from 'zod';
 import { ChainService } from '../../chain/chain.service';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { redisStoreResult } from '../../sse/sse.service';
@@ -71,20 +70,21 @@ export class ProjectService {
 	private projectModel: Model<ProjectDocument>;
 
 	@InjectModel(ProjectPolished.name)
-	private ProjectPolishedModel: Model<ProjectPolishedDocument>;
+	private projectPolishedModel: Model<ProjectPolishedDocument>;
 
 	@InjectModel(ProjectMined.name)
-	private ProjectMinedModel: Model<ProjectMinedDocument>;
+	private projectMinedModel: Model<ProjectMinedDocument>;
 
 	@InjectModel(LookupResult.name)
-	private LookupResultModel: Model<LookupResultDocument>;
+	private lookupResultModel: Model<LookupResultDocument>;
 
 	logger = new Logger(ProjectService.name);
 
 	/* 用于llm任务处理器根据上下文中的type字段调用指定方法 */
 	public target_method: Record<keyof typeof RequestTargetMap, string> = {
 		polish: 'polishProject',
-		mine: 'mineProject'
+		mine: 'mineProject',
+		lookup: 'lookupProject'
 	};
 
 	constructor(
@@ -99,19 +99,25 @@ export class ProjectService {
 	 * @param model 存储用的 mongoose 模型
 	 * @param userInfo 用户信息
 	 * @param status 结果应处于的状态
+	 * @param statusMerged 合并后的结果应处于的状态
+	 * @param inputSchema 输入数据的 zod schema
 	 * @returns 返回一个处理函数，接收redis存储的结果将其存储到数据库
 	 */
 	private async resultHandlerCreater(
 		schema: ZodSchema,
 		model: typeof Model,
 		userInfo: UserInfoFromToken,
-		status: `${ProjectStatus}`
+		status: `${ProjectStatus}`,
+		statusMerged: `${ProjectStatus}`,
+		inputSchema = projectSchema,
+		existingProjectId: ProjectDocument
 	) {
 		//格式验证及修复、数据库存储
 		return async (resultRedis: redisStoreResult) => {
-			let result = jsonMd_obj(resultRedis.content);
-			const validationResult = schema.safeParse(result);
+			let results = jsonMd_obj(resultRedis.content); //[合并前,合并后]
 
+			let result = results[0];
+			const validationResult = schema.safeParse(result);
 			if (!validationResult.success) {
 				const errorMessage = JSON.stringify(validationResult.error.format());
 				const fomartFixChain = await this.chainService.fomartFixChain(schema, errorMessage);
@@ -122,6 +128,19 @@ export class ProjectService {
 			const resultSave = { ...result, status, userInfo };
 			const resultSave_model = new model(resultSave);
 
+			let resultAfterMerge = results[1];
+			const inputValidationResult = inputSchema.safeParse(resultAfterMerge);
+			if (!inputValidationResult.success) {
+				const errorMessage = JSON.stringify(inputValidationResult.error.format());
+				const fomartFixChain = await this.chainService.fomartFixChain(inputSchema, errorMessage);
+				const projectPolishedStr = JSON.stringify(resultAfterMerge);
+				resultAfterMerge = await fomartFixChain.invoke({ input: projectPolishedStr });
+			}
+
+			const resultSaveAfterMerge = { ...resultAfterMerge, status: statusMerged };
+			/* 更新项目,包括评分 */
+			//TODO 提醒用户评分更新会有有延迟
+			this.updateProject(existingProjectId.id, resultSaveAfterMerge, userInfo);
 			await resultSave_model.save();
 		};
 	}
@@ -168,13 +187,13 @@ export class ProjectService {
 		try {
 			zodSchema.parse(project);
 		} catch (error) {
-			const dataToSave = { ...data, status: ProjectStatus.refuse, userInfo };
-			await new model(dataToSave).save();
+			// const dataToSave = { ...data, status: ProjectStatus.refuse, userInfo };
+			// await new model(dataToSave).save();
 
-			if (error instanceof ZodError) {
-				const errorMessage = JSON.stringify(error.format());
-				throw new Error(ErrorCode.FORMAT_ERROR + `${errorMessage}`);
-			}
+			// if (error instanceof ZodError) {
+			// 	const errorMessage = JSON.stringify(error.format());
+			// 	throw new Error(ErrorCode.FORMAT_ERROR + `${errorMessage}`);
+			// }
 			console.error('zod schema验证失败:', error);
 			throw error;
 		}
@@ -182,34 +201,94 @@ export class ProjectService {
 		const dataToSave = { ...project, status: ProjectStatus.committed, userInfo };
 		const newModel = new model(dataToSave);
 		await newModel.save();
-		this.lookupProject(project, userInfo);
-		return { ...newModel.toObject(), lookupResult: {} } as Omit<ProjectVo, 'lookupResult'>;
+		return { ...newModel.toObject() } as Omit<ProjectVo, 'lookupResult'>;
 	}
 
+	//TODO 从deepseek模型sse返回数据代码抽取封装
 	/**
 	 * 分析项目经验存在的问题和解决方案
 	 */
-	async lookupProject(project: ProjectDto, userInfo: UserInfoFromToken) {
-		const chain = await this.chainService.lookupChain();
+	async lookupProject(
+		project: ProjectDto,
+		userInfo: UserInfoFromToken,
+		taskId: string
+	): Promise<Observable<StreamingChunk | undefined>> {
+		const existingLookupResult = await this.lookupResultModel
+			.findOne({
+				'userInfo.userId': userInfo.userId,
+				projectName: project.info.name
+			})
+			.exec();
+
+		//储存：新建或更新
+		const handler = async (resultRedis: redisStoreResult) => {
+			let lookupResult = jsonMd_obj(resultRedis.content); //分析的思考结果、结果
+			const validationResult = lookupResultSchema.safeParse(lookupResult);
+			if (!validationResult.success) {
+				const errorMessage = JSON.stringify(validationResult.error.format());
+				const fomartFixChain = await this.chainService.fomartFixChain(
+					lookupResultSchema,
+					errorMessage
+				);
+				const projectPolishedStr = JSON.stringify(lookupResult);
+				lookupResult = await fomartFixChain.invoke({ input: projectPolishedStr });
+			}
+			const lookupResultSave = { ...lookupResult, userInfo, projectName: project.info.name };
+			if (existingLookupResult) {
+				// 更新
+				await this.lookupResultModel.updateOne({ _id: existingLookupResult._id }, lookupResultSave);
+			} else {
+				// 新建
+				const lookupResult_model = new this.lookupResultModel(lookupResultSave);
+				//更新项目状态
+				await this.projectModel.updateOne(
+					{ 'info.name': project.info.name, 'userInfo.userId': userInfo.userId },
+					{ $set: { status: ProjectStatus.lookuped } }
+				);
+				await lookupResult_model.save();
+			}
+		};
+
+		this.eventBusService.once(EventList.taskCompleted, ({ task }) => {
+			if (task.id !== taskId) {
+				return; // 确保只接收当前任务的结果
+			}
+			//取出redis中的结果进行处理
+
+			if (!task.resultKey) {
+				this.logger.error(`${task.id}任务结果键不存在,数据库储存失败`);
+			}
+
+			this.redisService
+				.get(task.resultKey!)
+				.then(redisStoreResult => {
+					if (!redisStoreResult) {
+						throw '任务结果不存在或已过期被清除';
+					}
+					return JSON.parse(redisStoreResult);
+				})
+				.then(result => handler.bind(this)(result))
+				.catch(error => {
+					this.logger.error(`任务${task.resultKey}处理结果失败: ${error}`);
+				});
+		});
+
+		const chain = await this.chainService.lookupChain(true);
 		const projectStr = JSON.stringify(project);
-		let result = await chain.invoke(projectStr);
-		let lookupResult: LookupResult = { ...result, userInfo, projectName: project.info.name };
-		// 格式验证
-		const validationResult = lookupResultSchema.safeParse(lookupResult);
-		if (!validationResult.success) {
-			const errorMessage = JSON.stringify(validationResult.error.format());
-			const fomartFixChain = await this.chainService.fomartFixChain(
-				lookupResultSchema,
-				errorMessage
-			);
-			const lookupResultStr = JSON.stringify(lookupResult);
-			lookupResult = await fomartFixChain.invoke({ input: lookupResultStr });
-		}
-		//储存
-		const lookupResultSave = { ...lookupResult, userInfo, projectName: project.info.name };
-		const lookupResult_model = new this.LookupResultModel(lookupResultSave);
-		await lookupResult_model.save();
-		return lookupResult_model;
+		const lookupStream = await chain.stream(projectStr);
+
+		return from(lookupStream).pipe(
+			mergeMap(async (chunk: DeepSeekStreamChunk) => {
+				const done = !chunk.content && chunk.additional_kwargs.reasoning_content === null;
+				const isReasoning = chunk.additional_kwargs.reasoning_content !== null;
+				return {
+					content: !isReasoning ? chunk.content : '',
+					reasonContent: isReasoning ? chunk.additional_kwargs?.reasoning_content! : '',
+					done,
+					isReasoning
+				};
+			})
+		);
 	}
 
 	/**
@@ -223,15 +302,24 @@ export class ProjectService {
 		userInfo: UserInfoFromToken,
 		taskId: string
 	): Promise<Observable<StreamingChunk | undefined>> {
-		const existingProject = await this.ProjectPolishedModel.findOne({
-			'info.name': project.info.name,
-			'userInfo.userId': userInfo.userId
-		}).exec();
+		const existingPolishingProject = await this.projectPolishedModel
+			.findOne({
+				'info.name': project.info.name,
+				'userInfo.userId': userInfo.userId
+			})
+			.exec();
 
-		if (existingProject) {
+		const existingProject: ProjectDocument | null = await this.projectModel
+			.findOne({
+				'info.name': project.info.name,
+				'userInfo.userId': userInfo.userId
+			})
+			.exec();
+
+		if (existingPolishingProject) {
 			return from(
 				Promise.resolve({
-					content: JSON.stringify(existingProject),
+					content: `\`\`\`json\n[${JSON.stringify(existingProject)},${JSON.stringify(existingPolishingProject)}]\n\`\`\``, //与llm返回格式保持一致,前端统一解析
 					done: true,
 					isReasoning: false
 				})
@@ -240,12 +328,18 @@ export class ProjectService {
 
 		const resultHandler = await this.resultHandlerCreater(
 			projectPolishedSchema,
-			this.ProjectPolishedModel,
+			this.projectPolishedModel,
 			userInfo,
-			ProjectStatus.polishing
+			ProjectStatus.polishing,
+			ProjectStatus.polished,
+			projectSchema,
+			existingProject!
 		);
 
 		this.eventBusService.once(EventList.taskCompleted, ({ task }) => {
+			if (task.id !== taskId) {
+				return; // 确保只接收当前任务的结果
+			}
 			//取出redis中的结果进行处理
 
 			if (!task.resultKey) {
@@ -289,29 +383,84 @@ export class ProjectService {
 	 * @param userInfo 用户信息
 	 * @param taskId 任务ID
 	 */
-	async mineProject(project: ProjectDto, userInfo: UserInfoFromToken, taskId: string) {
-		const chain = await this.chainService.mineChain();
-		const projectStr = JSON.stringify(project);
-		let projectMined = await chain.invoke(projectStr);
+	async mineProject(
+		project: ProjectDto,
+		userInfo: UserInfoFromToken,
+		taskId: string
+	): Promise<Observable<StreamingChunk | undefined>> {
+		const existingMiningProject = await this.projectMinedModel
+			.findOne({
+				'info.name': project.info.name,
+				'userInfo.userId': userInfo.userId
+			})
+			.exec();
 
-		// 格式验证
-		const validationResult = projectMinedSchema.safeParse(projectMined);
+		const existingProject = await this.projectModel
+			.findOne({
+				'info.name': project.info.name,
+				'userInfo.userId': userInfo.userId
+			})
+			.exec();
 
-		if (!validationResult.success) {
-			const errorMessage = JSON.stringify(validationResult.error.format());
-			const fomartFixChain = await this.chainService.fomartFixChain(
-				projectMinedSchema,
-				errorMessage
+		if (existingMiningProject) {
+			return from(
+				Promise.resolve({
+					content: `\`\`\`json\n[${JSON.stringify(existingProject)},${JSON.stringify(existingMiningProject)}]\n\`\`\``, //与llm返回格式保持一致,前端统一解析
+					done: true,
+					isReasoning: false
+				})
 			);
-			const projectMinedStr = JSON.stringify(projectMined);
-			projectMined = await fomartFixChain.invoke({ input: projectMinedStr });
 		}
 
-		const projectMinedSave = { ...projectMined, status: ProjectStatus.mining, userInfo };
-		const projectMined_model = new this.ProjectMinedModel(projectMinedSave);
+		const resultHandler = await this.resultHandlerCreater(
+			projectMinedSchema,
+			this.projectMinedModel,
+			userInfo,
+			ProjectStatus.mining,
+			ProjectStatus.mined,
+			projectSchema,
+			existingProject!
+		);
 
-		await projectMined_model.save();
-		return projectMined_model;
+		this.eventBusService.once(EventList.taskCompleted, ({ task }) => {
+			if (task.id !== taskId) {
+				return; // 确保只接收当前任务的结果
+			}
+			//取出redis中的结果进行处理
+
+			if (!task.resultKey) {
+				this.logger.error(`${task.id}任务结果键不存在,数据库储存失败`);
+			}
+
+			this.redisService
+				.get(task.resultKey!)
+				.then(redisStoreResult => {
+					if (!redisStoreResult) {
+						throw '任务结果不存在或已过期被清除';
+					}
+					return JSON.parse(redisStoreResult);
+				})
+				.then(result => resultHandler(result))
+				.catch(error => {
+					this.logger.error(`任务${task.resultKey}处理结果失败: ${error}`);
+				});
+		});
+
+		const chain = await this.chainService.mineChain(true);
+		const projectStr = JSON.stringify(project);
+		let projectMined = await chain.stream(projectStr);
+		return from(projectMined).pipe(
+			mergeMap(async (chunk: DeepSeekStreamChunk) => {
+				const done = !chunk.content && chunk.additional_kwargs.reasoning_content === null;
+				const isReasoning = chunk.additional_kwargs.reasoning_content !== null;
+				return {
+					content: !isReasoning ? chunk.content : '',
+					reasonContent: isReasoning ? chunk.additional_kwargs?.reasoning_content! : '',
+					done,
+					isReasoning
+				};
+			})
+		);
 	}
 
 	async findAllProjects(userInfo: UserInfoFromToken): Promise<ProjectVo[]> {
@@ -321,10 +470,12 @@ export class ProjectService {
 			return [];
 		}
 		const promises = projects.map(project => {
-			return this.LookupResultModel.findOne({
-				'userInfo.userId': userInfo.userId,
-				projectName: project.info.name
-			}).exec();
+			return this.lookupResultModel
+				.findOne({
+					'userInfo.userId': userInfo.userId,
+					projectName: project.info.name
+				})
+				.exec();
 		});
 		const LookupResults = await Promise.allSettled(promises);
 		const projectDatas = projects.map(project => {
@@ -351,10 +502,12 @@ export class ProjectService {
 		if (!project) {
 			throw new Error(`ID为${id}的项目经验不存在`);
 		} else {
-			const lookupResult = await this.LookupResultModel.findOne({
-				'userInfo.userId': userInfo.userId,
-				projectName: project.info.name
-			}).exec();
+			const lookupResult = await this.lookupResultModel
+				.findOne({
+					'userInfo.userId': userInfo.userId,
+					projectName: project.info.name
+				})
+				.exec();
 			return {
 				...project.toObject(),
 				lookupResult: {
@@ -381,11 +534,11 @@ export class ProjectService {
 		if (name) {
 			query['info.name'] = { $regex: name, $options: 'i' }; // 不区分大小写
 		}
-		//ProjectPolishedModel里只有状态为polishing的项目
-		//ProjectMinedModel里只有状态为mining的项目
+		//projectPolishedModel里只有状态为polishing的项目
+		//projectMinedModel里只有状态为mining的项目
 		const promises = [
-			this.ProjectMinedModel.findOne(query).exec(),
-			this.ProjectPolishedModel.findOne(query).exec(),
+			this.projectMinedModel.findOne(query).exec(),
+			this.projectPolishedModel.findOne(query).exec(),
 			this.projectModel.findOne(query).exec()
 		];
 
@@ -394,10 +547,12 @@ export class ProjectService {
 		if (!project) {
 			throw new Error(`名为${name}状态为${status}的项目经验不存在`);
 		} else if (project.status === 'fulfilled') {
-			const lookupResult = await this.LookupResultModel.findOne({
-				'userInfo.userId': userInfo.userId,
-				projectName: project.value!.info.name
-			}).exec();
+			const lookupResult = await this.lookupResultModel
+				.findOne({
+					'userInfo.userId': userInfo.userId,
+					projectName: project.value!.info.name
+				})
+				.exec();
 			return {
 				...project.value,
 				lookupResult: {
@@ -410,17 +565,59 @@ export class ProjectService {
 	}
 
 	/**
+	 * 非流式分析项目
+	 */
+	async lookupProjectUnStream(project: ProjectDto, userInfo: UserInfoFromToken) {
+		const chain = await this.chainService.lookupChain();
+		const projectStr = JSON.stringify(project);
+		let result = await chain.invoke(projectStr);
+		let lookupResult: LookupResult = { ...result, userInfo, projectName: project.info.name };
+		// 格式验证
+		const validationResult = lookupResultSchema.safeParse(lookupResult);
+		if (!validationResult.success) {
+			const errorMessage = JSON.stringify(validationResult.error.format());
+			const fomartFixChain = await this.chainService.fomartFixChain(
+				lookupResultSchema,
+				errorMessage
+			);
+			const lookupResultStr = JSON.stringify(lookupResult);
+			lookupResult = await fomartFixChain.invoke({ input: lookupResultStr });
+		}
+		const existingLookupResult = await this.lookupResultModel
+			.findOne({
+				'userInfo.userId': userInfo.userId,
+				projectName: project.info.name
+			})
+			.exec();
+		const lookupResultSave = { ...lookupResult, userInfo, projectName: project.info.name };
+
+		if (existingLookupResult) {
+			// 更新
+			await this.lookupResultModel.updateOne({ _id: existingLookupResult._id }, lookupResultSave);
+		} else {
+			// 新建
+			const lookupResult_model = new this.lookupResultModel(lookupResultSave);
+			//更新可能需要更新的项目状态
+			await this.projectModel.updateOne(
+				{ 'info.name': project.info.name, 'userInfo.userId': userInfo.userId },
+				{ $set: { status: ProjectStatus.lookuped } }
+			);
+			await lookupResult_model.save();
+		}
+	}
+
+	/**
 	 * 更新项目经验
 	 */
 	async updateProject(
 		id: string,
-		projectDto: Partial<ProjectDto>,
+		updateProjectDto: Partial<ProjectDto>,
 		userInfo: UserInfoFromToken
 	): Promise<ProjectVo> {
 		const existingProject = await this.projectModel
 			.findOneAndUpdate(
 				{ _id: id, 'userInfo.userId': userInfo.userId },
-				{ $set: projectDto },
+				{ $set: updateProjectDto },
 				{ new: true }
 			)
 			.exec();
@@ -431,11 +628,9 @@ export class ProjectService {
 			info: existingProject.info,
 			lightspot: existingProject.lightspot
 		};
-		await this.lookupProject(projectToLookup as ProjectDto, userInfo);
-		const lookupResult = await this.LookupResultModel.findOne({
-			'userInfo.userId': userInfo.userId,
-			projectName: existingProject.info.name
-		}).exec();
+
+		const lookupResult = await this.lookupProjectUnStream(projectToLookup as ProjectDto, userInfo);
+
 		return { ...existingProject, lookupResult } as ProjectVo;
 	}
 

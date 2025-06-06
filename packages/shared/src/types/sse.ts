@@ -12,7 +12,7 @@ export interface StreamingChunk {
 }
 
 /* 前端收到的数据格式 */
-export interface DataChunk {
+export interface DataChunkVO {
 	data: StreamingChunk & {
 		error?: string; // 错误信息
 		cached?: boolean; //是否命中llm缓存
@@ -30,12 +30,18 @@ export interface TRequestParams {
 		input: ProjectDto;
 		target: 'mine';
 	};
+	lookup: {
+		input: ProjectDto;
+		target: 'lookup';
+	};
 }
 
 export const RequestTargetMap = {
 	polish: '/sse/project-generate', //类型占位符
-	mine: '/sse/project-generate'
+	mine: '/sse/project-generate',
+	lookup: '/sse/project-generate'
 };
+
 //用于创建sse会话的context类型
 export interface LLMSessionRequest {
 	input: any; //传入目标方法的输入

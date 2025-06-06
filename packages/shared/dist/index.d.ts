@@ -491,8 +491,8 @@ declare const lookupResultSchema: z.ZodObject<{
 }>;
 
 declare enum ProjectStatus {
-    refuse = "refuse",//信息未完整
-    committed = "committed",//信息完整
+    committed = "committed",//初提交
+    lookuped = "lookuped",//llm分析完毕
     polishing = "polishing",//llm已打磨
     polished = "polished",//用户已合并打磨
     mining = "mining",//llm已挖掘
@@ -508,11 +508,13 @@ interface ProjectVo extends z.infer<typeof projectSchema> {
     status: ProjectStatus;
     createdAt?: string;
     updatedAt?: string;
-    lookupResult: z.infer<typeof lookupResultSchema>;
+    lookupResult?: z.infer<typeof lookupResultSchema>;
 }
 interface ProjectPolishedVo extends z.infer<typeof projectPolishedSchema> {
+    reasonContent?: string;
 }
 interface ProjectMineddVo extends z.infer<typeof projectMinedSchema> {
+    reasonContent?: string;
 }
 
 declare const projectSchemaForm: z.ZodObject<{
@@ -655,7 +657,7 @@ interface StreamingChunk {
     done: boolean;
     isReasoning?: boolean;
 }
-interface DataChunk {
+interface DataChunkVO {
     data: StreamingChunk & {
         error?: string;
         cached?: boolean;
@@ -671,10 +673,15 @@ interface TRequestParams {
         input: ProjectDto;
         target: 'mine';
     };
+    lookup: {
+        input: ProjectDto;
+        target: 'lookup';
+    };
 }
 declare const RequestTargetMap: {
     polish: string;
     mine: string;
+    lookup: string;
 };
 interface LLMSessionRequest {
     input: any;
@@ -688,6 +695,9 @@ interface LLMSessionStatusResponse {
     status: 'notfound' | 'bothdone' | 'backdone' | 'running' | 'tasknotfound';
 }
 
+/**
+ * 将llm返回的内容解析为JSON格式的对象
+ */
 declare function jsonMd_obj(content: string): any;
 
 /**
@@ -705,4 +715,4 @@ declare function projectSchemaToMarkdown(project: z.infer<typeof projectSchemaFo
 declare const skillsToMarkdown: (data: CreateSkillDto) => string;
 declare const markdownToSkills: (markdown: string) => CreateSkillDto;
 
-export { type CreateJobDto, type CreateKnowledgeDto, type CreateResumeDto, type CreateSkillDto, type DataChunk, ErrorCode, type JobVo, type KnowledgeVo, type LLMSessionRequest, type LLMSessionResponse, type LLMSessionStatusResponse, type LoginFormType, type LoginResponse, type PaginatedJobsResult, type PaginatedKnsResult, type PaginatedResumesResult, type ProjectDto, type ProjectMinedDto, type ProjectMineddVo, type ProjectPolishedDto, type ProjectPolishedVo, ProjectStatus, type ProjectVo, type RegistFormType, type RegistResponse, RequestTargetMap, type ResumeVo, type ServerDataFormat, type SkillItem, type SkillVo, type StreamingChunk, type TRequestParams, type UpdateJobDto, type UpdateKnowledgeDto, type UpdateResumeDto, type UpdateSkillDto, type UserInfoFromToken, type VerifyMetaData, errorMessage, getLightspotSchema, jsonMd_obj, loginformSchema, lookupResultSchema, markdownToProjectSchema, markdownToSkills, projectMinedSchema, projectPolishedSchema, projectSchema, projectSchemaForm, projectSchemaToMarkdown, registformSchema, skillsToMarkdown, typeMap };
+export { type CreateJobDto, type CreateKnowledgeDto, type CreateResumeDto, type CreateSkillDto, type DataChunkVO, ErrorCode, type JobVo, type KnowledgeVo, type LLMSessionRequest, type LLMSessionResponse, type LLMSessionStatusResponse, type LoginFormType, type LoginResponse, type PaginatedJobsResult, type PaginatedKnsResult, type PaginatedResumesResult, type ProjectDto, type ProjectMinedDto, type ProjectMineddVo, type ProjectPolishedDto, type ProjectPolishedVo, ProjectStatus, type ProjectVo, type RegistFormType, type RegistResponse, RequestTargetMap, type ResumeVo, type ServerDataFormat, type SkillItem, type SkillVo, type StreamingChunk, type TRequestParams, type UpdateJobDto, type UpdateKnowledgeDto, type UpdateResumeDto, type UpdateSkillDto, type UserInfoFromToken, type VerifyMetaData, errorMessage, getLightspotSchema, jsonMd_obj, loginformSchema, lookupResultSchema, markdownToProjectSchema, markdownToSkills, projectMinedSchema, projectPolishedSchema, projectSchema, projectSchemaForm, projectSchemaToMarkdown, registformSchema, skillsToMarkdown, typeMap };

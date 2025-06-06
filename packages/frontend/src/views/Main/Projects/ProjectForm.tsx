@@ -23,9 +23,12 @@ import { useCustomMutation } from '../../../query/config';
 import { ProjectQueryKey } from '../../../query/keys';
 import { createProject } from '../../../services/project';
 import { resetProjectData, selectProjectData, setDataFromDto } from '../../../store/projects';
-type PropsType = PropsWithChildren<{}>;
+type PropsType = PropsWithChildren<{
+	isUseMdEditor: boolean;
+	setIsUseMdEditor: React.Dispatch<React.SetStateAction<boolean>>;
+}>;
 
-export const ProjectForm = memo(({}: PropsType) => {
+export const ProjectForm = memo(({ isUseMdEditor, setIsUseMdEditor }: PropsType) => {
 	const [currentStep, setCurrentStep] = useState(0);
 	const totalSteps = 3;
 	const stepTitles = ['项目信息', '技术栈', '项目亮点'];
@@ -347,6 +350,17 @@ export const ProjectForm = memo(({}: PropsType) => {
 						{/* 导航按钮 */}
 						<div className="flex justify-between items-center pt-8 border-t">
 							<div>
+								{currentStep === 0 && (
+									<Button
+										type="button"
+										variant="outline"
+										onClick={() => setIsUseMdEditor(true)}
+										className="group flex items-center"
+									>
+										使用md编辑器
+										<ChevronRight className="h-4 w-4 ml-2  transition-transform duration-300 group-hover:translate-x-1" />
+									</Button>
+								)}
 								{currentStep > 0 && (
 									<Button
 										type="button"

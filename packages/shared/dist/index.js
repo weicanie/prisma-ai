@@ -131,8 +131,8 @@ var registformSchema = import_zod.z.object({
 
 // src/types/project.ts
 var ProjectStatus = /* @__PURE__ */ ((ProjectStatus2) => {
-  ProjectStatus2["refuse"] = "refuse";
   ProjectStatus2["committed"] = "committed";
+  ProjectStatus2["lookuped"] = "lookuped";
   ProjectStatus2["polishing"] = "polishing";
   ProjectStatus2["polished"] = "polished";
   ProjectStatus2["mining"] = "mining";
@@ -240,22 +240,23 @@ var projectSchemaForm = import_zod3.z.object({
 var RequestTargetMap = {
   polish: "/sse/project-generate",
   //类型占位符
-  mine: "/sse/project-generate"
+  mine: "/sse/project-generate",
+  lookup: "/sse/project-generate"
 };
 
 // src/utils/jsonMd_obj.ts
 function jsonMd_obj(content) {
   let jsonMd = content.match(/(?<=```json)(.*)(?=```)/gs)?.[0];
   if (!jsonMd) {
-    console.error(`No JSON content found in the provided string: ${content}`);
+    console.error(`jsonMd_obj\u6CA1\u627E\u5230json\u5185\u5BB9\u5757,\u8F93\u5165: ${content}`);
     return;
   }
   let obj;
   try {
     obj = JSON.parse(jsonMd);
   } catch (error) {
-    console.error("JSON parsing error:", error);
-    console.error("when parsing:", jsonMd);
+    console.error("jsonMd_obj JSON parsing error:", error);
+    console.error("jsonMd_obj when parsing:", jsonMd);
   }
   return obj;
 }

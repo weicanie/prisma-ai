@@ -1,5 +1,5 @@
 import type {
-	DataChunk,
+	DataChunkVO,
 	LLMSessionRequest,
 	LLMSessionResponse,
 	LLMSessionStatusResponse,
@@ -116,7 +116,7 @@ function getSseData(
 	setErrorMsg: (msg: string) => void,
 	setAnswering?: (answering: boolean) => void
 ) {
-	// 初始化状态
+	// 每次前sse重置useSseAnswer状态
 	setData('');
 	setReasonContent('');
 	setDone(false);
@@ -142,6 +142,11 @@ function getSseData(
 			if (setAnswering) {
 				setAnswering(false);
 			}
+			/* 
+			 让外部组件处理useSseAnswer状态的重置
+			 因为外部组件会依赖useSseAnswer状态控制流程
+			 不重置也ok,每次新的sse此组件会在一开始重置
+			*/
 		}
 	};
 
@@ -174,7 +179,7 @@ function getSseData(
 		// 断点续传 - 从上次中断的地方继续
 		url =
 			baseUrl +
-			'sse/generate-recover' +
+			'/sse/generate-recover' +
 			`?sessionId=${localStorage.getItem(llmSessionKey)}&token=${token}`;
 	} else if (status === 'tasknotfound') {
 		// 创建新任务 - 开始新的生成
@@ -187,7 +192,7 @@ function getSseData(
 
 		// 处理服务器推送的消息
 		eventSource.onmessage = event => {
-			const messageObj: DataChunk = JSON.parse(event.data as unknown as string);
+			const messageObj: DataChunkVO = JSON.parse(event.data as unknown as string);
 			const chunk = messageObj.data;
 
 			if (chunk.error) {

@@ -6,6 +6,7 @@ import {
 	ProjectStatus,
 	RequestTargetMap
 } from '@prism-ai/shared';
+import { useQueryClient } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCustomQuery } from '../../../query/config';
@@ -28,13 +29,17 @@ export const Action: React.FC<ActionProps> = () => {
 	const [optimizedData, setOptimizedData] = useState<ProjectMinedDto | ProjectMinedDto | null>(
 		null
 	);
+	const [mergedData, setMergedData] = useState<ProjectMinedDto | null>(null);
+
+	const queryClient = useQueryClient();
 
 	/* 使用SSE获取AI生成结果 */
 	const { content, reasonContent, done, isReasoning } = useSseAnswer(input, target);
 	const [optimizationType, setOptimizationType] = useState<'polish' | 'mine' | null>(null);
 	useEffect(() => {
 		if (done) {
-			const optimizedData = jsonMd_obj(content);
+			const [mergedData, optimizedData] = jsonMd_obj(content);
+			setMergedData(mergedData);
 			setOptimizedData(optimizedData);
 			setInput({}); // 清空输入防止sse重复请求
 		}
@@ -58,7 +63,7 @@ export const Action: React.FC<ActionProps> = () => {
 	// 根据项目状态确定可用操作
 	const getAvailableActions = (status: ProjectStatus) => {
 		switch (status) {
-			case ProjectStatus.committed:
+			case ProjectStatus.lookuped:
 			case ProjectStatus.polishing:
 				return ['polish'];
 			case ProjectStatus.polished:
@@ -102,13 +107,25 @@ export const Action: React.FC<ActionProps> = () => {
 		console.log('启动与AI agent的协作');
 	};
 
+	/* 用户点击完成优化后更新左侧的项目经验,并清理所有状态 */
+	const handleMerge = () => {
+		queryClient.invalidateQueries({ queryKey: [ProjectQueryKey.Projects] });
+		setInput({});
+		setOptimizedData(null);
+		setMergedData(null);
+		setOptimizationType(null);
+		setTarget('polish');
+	};
+
 	const ProjectResultProps = {
 		optimizedData,
+		mergedData,
 		optimizationType,
 		availableActions,
 		handlePolish,
 		handleMine,
 		handleCollaborate,
+		handleMerge,
 		content,
 		reasonContent,
 		done,
@@ -122,10 +139,14 @@ export const Action: React.FC<ActionProps> = () => {
 				{/* <PageHeader title="项目经验优化" description="让 Prisma 深度优化您的项目经验"></PageHeader> */}
 
 				{/* 两栏布局 */}
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-200px)]">
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 ">
 					{/* 左栏：原始项目信息 */}
 					<div className="overflow-y-auto">
-						<OriginalProject projectData={projectData} isDark={isDark} />
+						<OriginalProject
+							projectData={projectData}
+							projectIndex={projectIndex}
+							isDark={isDark}
+						/>
 					</div>
 
 					{/* 右栏：AI优化结果 */}
@@ -137,3 +158,4 @@ export const Action: React.FC<ActionProps> = () => {
 		</div>
 	);
 };
+export default Action;

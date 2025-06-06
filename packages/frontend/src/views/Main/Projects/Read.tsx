@@ -1,338 +1,192 @@
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
+import { useSseAnswer } from '@/services/sse/useSseAnswer';
 import { useTheme } from '@/utils/theme';
-import { ProjectStatus } from '@prism-ai/shared';
-import { ArrowRight, Code, Sparkles, Target, Users } from 'lucide-react';
-import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { jsonMd_obj, lookupResultSchema, type ProjectDto } from '@prism-ai/shared';
+import { useQueryClient } from '@tanstack/react-query';
+import { Wand2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { z } from 'zod';
 import { useCustomQuery } from '../../../query/config';
 import { ProjectQueryKey } from '../../../query/keys';
 import { findAllProjects } from '../../../services/project';
-import { ProjectCard } from './ProjectCard';
+import { ProjectAnalysisResultView } from './components/ProjectAnalysisResultView';
+import { ProjectDetailActions } from './components/ProjectDetailActions';
+import { StreamingDisplayCard } from './components/StreamingDisplayCard';
+import { OriginalProject } from './Result/OriginalProject';
 
 interface ReadProps {}
 
+/**
+ * 项目经验详情页面
+ *
+ * 页面布局：
+ * - 左侧：项目原始信息展示 (ProjectInfoDisplay)
+ * - 右侧：
+ *    - 初始状态：显示 "使用AI分析项目" 按钮。
+ *    - 点击分析后：
+ *        1. 显示思维链 (StreamingContentDisplay for reasonContent)
+ *        2. 显示AI生成的分析内容 (StreamingContentDisplay for content)
+ *        3. 显示格式化的分析结果卡片 (ProjectAnalysisResultView)
+ *        4. 在分析结果卡片下方，显示原有的两个操作按钮（“AI打磨”、“AI挖掘”），通过 ProjectDetailActions 组件渲染。
+ */
 export const Read: React.FC<ReadProps> = ({}) => {
-	const { projectIndex } = useParams();
+	const { projectIndex } = useParams<{ projectIndex: string }>();
 	const { data, status } = useCustomQuery([ProjectQueryKey.Projects], findAllProjects);
-	const navigate = useNavigate();
 
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
 
+	// AI分析相关状态
+	const [input, setInput] = useState<ProjectDto | {}>({});
+	// target 固定为 'lookup'，因为此页面只做分析不做打磨或挖掘
+	const [target, setTarget] = useState<'lookup'>('lookup');
+	const [analysisResult, setAnalysisResult] = useState<z.infer<typeof lookupResultSchema> | null>(
+		null
+	);
+	const [showAnalysisButton, setShowAnalysisButton] = useState(true); // 控制AI分析按钮的显示
+
+	// 从SSE获取AI分析结果
+	const { content, reasonContent, done, isReasoning, error, errorCode, errorMsg } = useSseAnswer(
+		input,
+		target
+	);
+
+	const queryClient = useQueryClient();
+	// 当SSE完成时，解析content为分析结果
+	useEffect(() => {
+		if (done && content) {
+			const parsedResult = jsonMd_obj(content);
+			setAnalysisResult(parsedResult);
+			queryClient.invalidateQueries({ queryKey: [ProjectQueryKey.Projects] });
+		}
+	}, [done, content]);
+
+	// 处理错误状态
+	useEffect(() => {
+		if (error) {
+			console.error(`AI分析错误 (编码: ${errorCode}): ${errorMsg}`);
+			// 可以在UI上显示更友好的错误提示
+			setAnalysisResult({
+				problem: [
+					{
+						name: 'AI分析出错',
+						desc: `分析过程中发生错误: ${errorMsg || '未知错误'} (代码: ${errorCode || 'N/A'})`
+					}
+				],
+				solution: [],
+				score: 0
+			});
+		}
+	}, [error, errorCode, errorMsg]);
+
 	if (status === 'pending') {
-		return <div>Loading...</div>;
+		return <div className="flex justify-center items-center min-h-screen">加载中...</div>;
 	}
-	if (status === 'error') {
-		return <div>错误:{data?.message}</div>;
+	if (status === 'error' || !data?.data) {
+		return (
+			<div className="flex justify-center items-center min-h-screen">
+				错误：无法加载项目数据。{data?.message}
+			</div>
+		);
 	}
+
 	const projectDatas = data.data;
 	const projectData = projectDatas?.[+projectIndex!];
 
 	if (!projectData || projectIndex === undefined) {
-		return <div className="text-center text-gray-500">没有找到项目经验数据</div>;
+		return <div className="text-center text-gray-500 py-10">没有找到指定的项目经验数据。</div>;
 	}
 
-	/* 项目状态徽标样式 */
-	const getStatusText = (status: ProjectStatus) => {
-		const statusMap = {
-			[ProjectStatus.refuse]: '初来乍到',
-			[ProjectStatus.committed]: '大橘未定',
-			[ProjectStatus.polishing]: '初露锋芒',
-			[ProjectStatus.polished]: '原初异音',
-			[ProjectStatus.mining]: '雪花沉睡',
-			[ProjectStatus.mined]: '寒气练成',
-			[ProjectStatus.accepted]: '黄金奖杯'
+	// 点击 "使用AI分析项目" 按钮的处理器
+	const handleStartAnalysis = () => {
+		const projectDto: ProjectDto = {
+			info: projectData.info,
+			lightspot: projectData.lightspot
 		};
-		return statusMap[status] || '未知状态';
+		setInput(projectDto);
+		setTarget('lookup'); // 确保target是lookup
+		setShowAnalysisButton(false); // 隐藏按钮，开始显示SSE内容
+		setAnalysisResult(null); // 清空旧的分析结果
 	};
-	const getStatusColor = (status: ProjectStatus) => {
-		if (status === ProjectStatus.refuse) return 'outline';
-		if (status === ProjectStatus.accepted) return 'secondary';
-		return 'default';
-	};
-	/* 是否展示AI改进卡片 */
-	const canImprove = [
-		ProjectStatus.committed,
-		ProjectStatus.polished,
-		ProjectStatus.mined
-	].includes(projectData.status);
 
 	return (
-		<div className={`py-8 min-h-screen transition-colors duration-200 bg-global`}>
-			{/* 页面头部 */}
-			{/* <PageHeader title="项目经验详情" description="查看和改进您的项目经验描述" /> */}
-
+		<div
+			className={`py-8 min-h-screen transition-colors duration-200 ${isDark ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'}`}
+		>
 			<div className="container mx-auto px-4 pb-8">
-				{/* 项目基本信息 */}
-				<Card
-					className={`mb-6 ${
-						isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-					} transition-colors duration-200`}
-				>
-					<CardHeader>
-						<div className="flex items-center justify-between">
-							<CardTitle className={`text-xl ${isDark ? 'text-white' : 'text-gray-900'}`}>
-								{projectData.info.name}
-							</CardTitle>
-							<Badge variant={getStatusColor(projectData.status)} className="text-foreground">
-								{getStatusText(projectData.status)}
-							</Badge>
-						</div>
-						<CardDescription className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-							创建于{' '}
-							{projectData.createdAt
-								? new Date(projectData.createdAt).toLocaleDateString()
-								: '未知'}
-							{projectData.updatedAt && (
-								<> · 更新于 {new Date(projectData.updatedAt).toLocaleDateString()}</>
-							)}
-						</CardDescription>
-					</CardHeader>
-				</Card>
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-					{/* 左侧：项目概要卡片、下一步行动 */}
-					<div className="lg:col-span-1">
-						<ProjectCard data={projectData} />
-						{/* 下一步行动 */}
-						{canImprove && (
-							<Card
-								className={`mt-6 ${
-									isDark
-										? 'bg-gradient-to-r from-blue-900/50 to-purple-700/50 border-blue-700'
-										: 'bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200'
-								} transition-colors duration-200`}
-							>
-								<CardHeader>
-									<CardTitle
-										className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
-									>
-										<Sparkles className="w-5 h-5" />
-										AI 智能优化
-									</CardTitle>
-									<CardDescription className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-										让 AI 帮助您优化项目经验，提升简历竞争力
-									</CardDescription>
-								</CardHeader>{' '}
-								<CardContent>
-									<div className="flex flex-col gap-3">
-										<Button
-											onClick={() =>
-												navigate(`/main/projects/action/${projectIndex}`, {
-													state: { param: projectIndex }
-												})
-											}
-											className="flex-1 min-h-10 bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
-											size="lg"
-										>
-											<Sparkles className="w-4 h-4 mr-2" />
-											AI 智能优化
-										</Button>
-										<Button
-											onClick={() =>
-												navigate(`/main/projects/action/${projectIndex}`, {
-													state: { param: projectIndex }
-												})
-											}
-											variant="outline"
-											className={`flex-1 min-h-10 ${
-												isDark
-													? 'border-gray-600 text-gray-200 hover:bg-gray-700'
-													: 'border-gray-300 text-gray-700 hover:bg-gray-50'
-											} cursor-pointer`}
-											size="lg"
-										>
-											<Target className="w-4 h-4 mr-2" />
-											深度挖掘亮点
-										</Button>
-									</div>
-								</CardContent>
-							</Card>
-						)}
+				{/* <PageHeader title="项目经验详情与分析" description="查看您的项目经验，并使用AI进行深度分析" /> */}
+
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 ">
+					{/* 左侧：项目原始信息 */}
+					<div className="overflow-y-auto scb-thin">
+						<OriginalProject
+							projectData={projectData}
+							projectIndex={projectIndex}
+							isDark={isDark}
+						/>
 					</div>
 
-					{/* 右侧：详细信息 */}
-					<div className="lg:col-span-2 space-y-6">
-						{/* 项目描述 */}
-						<Card
-							className={`${
-								isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-							} transition-colors duration-200`}
-						>
-							<CardHeader>
-								<CardTitle
-									className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
-								>
-									<Target className="w-5 h-5" />
-									项目信息
-								</CardTitle>
-							</CardHeader>
-							<CardContent className="space-y-4">
-								{projectData.info.desc.role && (
-									<div>
-										<h4
-											className={`font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}
-										>
-											角色职责
-										</h4>
-										<p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-											{projectData.info.desc.role}
-										</p>
-									</div>
-								)}
-
-								{projectData.info.desc.contribute && (
-									<div>
-										<h4
-											className={`font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}
-										>
-											核心贡献
-										</h4>
-										<p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-											{projectData.info.desc.contribute}
-										</p>
-									</div>
-								)}
-
-								{projectData.info.desc.bgAndTarget && (
-									<div>
-										<h4
-											className={`font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}
-										>
-											项目背景
-										</h4>
-										<p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-											{projectData.info.desc.bgAndTarget}
-										</p>
-									</div>
-								)}
-
-								{projectData.info.techStack?.length > 0 && (
-									<div>
-										<h4
-											className={`font-semibold mb-2 flex items-center gap-2 ${
-												isDark ? 'text-gray-200' : 'text-gray-700'
-											}`}
-										>
-											<Code className="w-4 h-4" />
-											技术栈
-										</h4>
-										<div className="flex flex-wrap gap-2">
-											{projectData.info.techStack.map((tech, index) => (
-												<Badge
-													key={index}
-													variant="outline"
-													className={`${
-														isDark
-															? 'border-gray-600 text-gray-300'
-															: 'border-gray-300 text-gray-700'
-													}`}
-												>
-													{tech}
-												</Badge>
-											))}
-										</div>
-									</div>
-								)}
-							</CardContent>
-						</Card>
-
-						{/* 项目亮点 */}
-						{projectData.lightspot && (
+					{/* 右侧：AI分析区域 */}
+					<div className=" h-full overflow-y-auto scb-thin">
+						{/* 分析按钮卡片 */}
+						{showAnalysisButton && !isReasoning && !content && !analysisResult && (
 							<Card
-								className={`${
-									isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-								} transition-colors duration-200`}
+								className={`flex flex-col items-center justify-center text-center ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
 							>
-								<CardHeader>
-									<CardTitle
-										className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
-									>
-										<Sparkles className="w-5 h-5" />
-										项目亮点
-									</CardTitle>
-								</CardHeader>
-								<CardContent className="space-y-6">
-									{projectData.lightspot.team?.length > 0 && (
-										<div>
-											<h4
-												className={`font-semibold mb-3 flex items-center gap-2 ${
-													isDark ? 'text-blue-400' : 'text-blue-600'
-												}`}
-											>
-												<Users className="w-4 h-4" />
-												团队贡献
-											</h4>
-											<ul className="space-y-2">
-												{projectData.lightspot.team.map((item, index) => (
-													<li
-														key={index}
-														className={`flex items-start gap-2 ${
-															isDark ? 'text-gray-400' : 'text-gray-600'
-														}`}
-													>
-														<ArrowRight className="w-4 h-4 mt-0.5 text-blue-500 flex-shrink-0" />
-														<span>{typeof item === 'string' ? item : item.content}</span>
-													</li>
-												))}
-											</ul>
-										</div>
-									)}
-
-									{projectData.lightspot.skill?.length > 0 && (
-										<div>
-											<h4
-												className={`font-semibold mb-3 flex items-center gap-2 ${
-													isDark ? 'text-green-400' : 'text-green-600'
-												}`}
-											>
-												<Code className="w-4 h-4" />
-												技术亮点
-											</h4>
-											<ul className="space-y-2">
-												{projectData.lightspot.skill.map((item, index) => (
-													<li
-														key={index}
-														className={`flex items-start gap-2 ${
-															isDark ? 'text-gray-400' : 'text-gray-600'
-														}`}
-													>
-														<ArrowRight className="w-4 h-4 mt-0.5 text-green-500 flex-shrink-0" />
-														<span>{typeof item === 'string' ? item : item.content}</span>
-													</li>
-												))}
-											</ul>
-										</div>
-									)}
-
-									{projectData.lightspot.user?.length > 0 && (
-										<div>
-											<h4
-												className={`font-semibold mb-3 flex items-center gap-2 ${
-													isDark ? 'text-purple-400' : 'text-purple-600'
-												}`}
-											>
-												<Target className="w-4 h-4" />
-												用户价值
-											</h4>
-											<ul className="space-y-2">
-												{projectData.lightspot.user.map((item, index) => (
-													<li
-														key={index}
-														className={`flex items-start gap-2 ${
-															isDark ? 'text-gray-400' : 'text-gray-600'
-														}`}
-													>
-														<ArrowRight className="w-4 h-4 mt-0.5 text-purple-500 flex-shrink-0" />
-														<span>{typeof item === 'string' ? item : item.content}</span>
-													</li>
-												))}
-											</ul>
-										</div>
-									)}
-								</CardContent>
+								<Wand2 className={`w-12 h-12 mb-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+								<h3
+									className={`text-xl font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
+								>
+									项目深度分析
+								</h3>
+								<p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+									让 Prisma 帮助您分析项目的潜在问题和改进方向。
+								</p>
+								<Button
+									onClick={handleStartAnalysis}
+									size="lg"
+									className={`${isDark ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600'} text-white`}
+								>
+									<Wand2 className="mr-2 h-5 w-5" /> 使用 Prisma 分析项目
+								</Button>
 							</Card>
+						)}
+
+						{/* 思维链内容展示卡片 */}
+						{isReasoning && reasonContent && !done && (
+							<StreamingDisplayCard
+								title="Prisma 分析项目中..."
+								currentContent={reasonContent}
+								isDark={isDark}
+								isStreamingDone={done}
+							/>
+						)}
+
+						{/* AI生成内容流式展示卡片 (在done之前，且非reasoning阶段) */}
+						{!isReasoning && content && !done && (
+							<StreamingDisplayCard
+								title="Prisma 正在生成分析报告..."
+								currentContent={content}
+								isDark={isDark}
+								isStreamingDone={done}
+							/>
+						)}
+
+						{/* 分析结果卡片 */}
+						{analysisResult && done && (
+							<>
+								<ProjectAnalysisResultView result={analysisResult} isDark={isDark} />
+								{/* 在分析结果下方展示后续操作按钮 */}
+								{projectIndex !== undefined && (
+									<ProjectDetailActions
+										projectData={projectData}
+										projectIndex={projectIndex}
+										isDark={isDark}
+									/>
+								)}
+							</>
 						)}
 					</div>
 				</div>
@@ -340,3 +194,4 @@ export const Read: React.FC<ReadProps> = ({}) => {
 		</div>
 	);
 };
+export default Read;

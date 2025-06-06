@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { DataChunk } from '@prism-ai/shared';
+import type { DataChunkVO } from '@prism-ai/shared';
 import { createHash } from 'crypto';
 import { Document } from 'langchain/document';
 import { Observable } from 'rxjs';
@@ -159,8 +159,8 @@ export class LLMCacheService {
 	}
 
 	// 创建SSE流式响应（从缓存）
-	createCachedResponse(result: string, exact = false): Observable<DataChunk> {
-		return new Observable<DataChunk>(subscriber => {
+	createCachedResponse(result: string, exact = false): Observable<DataChunkVO> {
+		return new Observable<DataChunkVO>(subscriber => {
 			// 分割缓存结果以模拟流式传输
 			const chunks = this.splitTextIntoChunks(result, 15);
 

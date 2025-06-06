@@ -1,30 +1,44 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import type { ProjectVo } from '@prism-ai/shared';
+import { ProjectStatus, type ProjectVo } from '@prism-ai/shared';
 import { ArrowRight, Code, Sparkles, Target, Users } from 'lucide-react';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { StatusBadge } from '../../components/StatusBadge';
 
 interface OriginalProjectProps {
 	projectData: ProjectVo;
 	isDark: boolean;
+	projectIndex: string;
 }
 
-export const OriginalProject: React.FC<OriginalProjectProps> = ({ projectData, isDark }) => {
+export const OriginalProject: React.FC<OriginalProjectProps> = ({
+	projectData,
+	isDark,
+	projectIndex
+}) => {
+	const navigate = useNavigate();
+
+	/* lookup过了就直接跳转到 polish 和 mined */
+	useEffect(() => {
+		if (projectData.status !== ProjectStatus.committed) {
+			navigate(`/main/projects/action/${projectIndex}`);
+		}
+	}, [projectData.status]);
 	return (
 		<>
-			<Card
-				className={`h-full ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
-			>
+			<Card className={` ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
 				<CardHeader>
 					<CardTitle
 						className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
 					>
 						<Target className="w-5 h-5" />
-						原始项目信息
+						项目经验
 					</CardTitle>
-					<CardDescription className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-						{projectData.info.name}
+					<CardDescription className={`flex gap-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+						<h1 className="font-bold">{projectData.info.name}</h1>
+						<StatusBadge status={projectData.status} />
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-6">

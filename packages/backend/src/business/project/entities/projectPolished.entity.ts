@@ -48,6 +48,9 @@ export class ProjectPolished {
 
 	@Prop({ required: true })
 	userInfo: UserInfo;
+
+	@Prop({ type: String })
+	reasonContent?: string; // 推理内容
 }
 
 export type ProjectPolishedDocument = HydratedDocument<ProjectPolished>;

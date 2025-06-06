@@ -73,6 +73,7 @@ export class SseService {
 			throw new Error('会话上下文不完整，请先创建会话');
 		}
 
+		/* 调用llm开启流式传输 */
 		const observable = await this.projectService[this.projectService.target_method[context.target]](
 			context.input,
 			context.userInfo,

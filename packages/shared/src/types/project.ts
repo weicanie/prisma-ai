@@ -7,8 +7,8 @@ import {
 } from './project.schema';
 
 export enum ProjectStatus {
-	refuse = 'refuse', //信息未完整
-	committed = 'committed', //信息完整
+	committed = 'committed', //初提交
+	lookuped = 'lookuped', //llm分析完毕
 
 	/* 仅在 ProjectPolishedSchema 中*/
 	polishing = 'polishing', //llm已打磨
@@ -35,9 +35,13 @@ export interface ProjectVo extends z.infer<typeof projectSchema> {
 	updatedAt?: string;
 
 	//拷打结果
-	lookupResult: z.infer<typeof lookupResultSchema>;
+	lookupResult?: z.infer<typeof lookupResultSchema>;
 }
 
-export interface ProjectPolishedVo extends z.infer<typeof projectPolishedSchema> {}
+export interface ProjectPolishedVo extends z.infer<typeof projectPolishedSchema> {
+	reasonContent?: string; // 推理内容
+}
 
-export interface ProjectMineddVo extends z.infer<typeof projectMinedSchema> {}
+export interface ProjectMineddVo extends z.infer<typeof projectMinedSchema> {
+	reasonContent?: string; // 推理内容
+}

@@ -4,18 +4,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { useTheme } from '@/utils/theme';
 import type { ProjectMinedDto, ProjectPolishedDto } from '@prism-ai/shared';
-import { Code, Lightbulb, MessageSquare, Sparkles, Target, Zap } from 'lucide-react';
+import { Code, Lightbulb, MessageSquare, Pyramid, Sparkles, Target, Zap } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { MinedPolishedLightspotSection } from './MinedLightspotSection';
 import { PolishedLightspotSection } from './PolishedLightspotSection';
 
 interface ProjectResultProps {
-	optimizedData: ProjectPolishedDto | ProjectMinedDto | null;
+	optimizedData: ProjectPolishedDto | ProjectMinedDto | null; //优化后的数据
+	mergedData: ProjectPolishedDto | ProjectMinedDto | null; //正式合并后的数据
 	optimizationType: 'polish' | 'mine' | null;
 	availableActions: string[];
 	handlePolish: () => void;
 	handleMine: () => void;
 	handleCollaborate: () => void;
+
+	handleMerge?: () => void; //正式合并、完成优化
 
 	content: string; //生成内容-流式
 	reasonContent?: string; //推理内容-流式
@@ -25,11 +28,13 @@ interface ProjectResultProps {
 
 export const ProjectResult: React.FC<ProjectResultProps> = ({
 	optimizedData,
+	mergedData,
 	optimizationType,
 	availableActions,
 	handlePolish,
 	handleMine,
 	handleCollaborate,
+	handleMerge,
 	content,
 	reasonContent,
 	isReasoning = false,
@@ -50,7 +55,7 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 	const handleReasoningScroll = (e: React.UIEvent<HTMLDivElement>) => {
 		const element = e.currentTarget;
 		const isAtBottom =
-			Math.abs(element.scrollHeight - element.scrollTop - element.clientHeight) < 15;
+			Math.abs(element.scrollHeight - element.scrollTop - element.clientHeight) < 35;
 		setUserScrolledReasoning(!isAtBottom);
 	};
 
@@ -58,7 +63,7 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 	const handleStreamingScroll = (e: React.UIEvent<HTMLDivElement>) => {
 		const element = e.currentTarget;
 		const isAtBottom =
-			Math.abs(element.scrollHeight - element.scrollTop - element.clientHeight) < 15;
+			Math.abs(element.scrollHeight - element.scrollTop - element.clientHeight) < 35;
 		setUserScrolledStreaming(!isAtBottom);
 	};
 
@@ -94,13 +99,14 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 		if (!done && content && !isReasoning) {
 			setUserScrolledStreaming(false);
 		}
+
 		// 生成结束时回到顶部查看结果卡片
 		if (done) {
 			const element1 = reasoningContentRef.current;
 			const element2 = streamingContentRef.current;
 			requestAnimationFrame(() => {
-				element1!.scrollTop = 0;
-				element2!.scrollTop = 0;
+				element1 && (element1.scrollTop = 0);
+				element2 && (element2.scrollTop = 0);
 			});
 		}
 	}, [isReasoning, done, content]);
@@ -120,12 +126,12 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 				<div
 					ref={reasoningContentRef}
 					onScroll={handleReasoningScroll}
-					className={`whitespace-pre-wrap font-mono text-sm p-4 rounded-md h-full overflow-y-auto scb-thin  ${isDark ? 'bg-gray-900 text-green-400' : 'bg-gray-50 text-gray-800'}`}
+					className={`whitespace-pre-wrap font-mono text-sm p-4 pb-10 rounded-md h-full max-h-[90vh] overflow-y-auto scb-thin  ${isDark ? 'bg-gray-900 text-green-400' : 'bg-gray-50 text-gray-800'}`}
 					style={{
 						scrollBehavior: 'smooth'
 					}}
 				>
-					{reasonContent}
+					<div>{reasonContent}</div>
 					{/* 添加一个闪烁的光标效果 */}
 					<span className="animate-pulse text-blue-400">▋</span>
 				</div>
@@ -148,17 +154,18 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 				<div
 					ref={streamingContentRef}
 					onScroll={handleStreamingScroll}
-					className={`whitespace-pre-wrap p-4 h-full overflow-y-auto scb-thin ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
+					className={`whitespace-pre-wrap p-4 h-full max-h-[90vh] overflow-y-auto scb-thin ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
 					style={{
 						scrollBehavior: 'smooth'
 					}}
 				>
-					{/* {content}
-					<span className="animate-pulse text-blue-400">▋</span> */}
+					{content}
+					<span className="animate-pulse text-blue-400">▋</span>
 				</div>
 			</CardContent>
 		</Card>
 	);
+	/* 优化选择卡片-只在开始出现 */
 	const preflightSection = () => (
 		<Card
 			className={`h-full ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
@@ -166,10 +173,10 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 			<CardHeader>
 				<CardTitle className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
 					<Zap className="w-5 h-5" />
-					AI优化结果
+					Prisma 简历优化
 				</CardTitle>
 				<CardDescription className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-					选择一个优化操作来查看结果
+					Prisma 将逐步深度优化你的项目经验
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -189,7 +196,7 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 						<Button
 							onClick={handleMine}
 							variant="outline"
-							className={`w-full ${isDark ? 'border-gray-600 text-gray-200 hover:bg-gray-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+							className={`w-full ${isDark ? 'border-gray-600 text-gray-200 hover:bg-gray-700' : 'border-gray-300 text-purple-700 hover:bg-gray-50'}`}
 							size="lg"
 						>
 							<Target className="w-4 h-4 mr-2" />
@@ -212,6 +219,7 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 			</CardContent>
 		</Card>
 	);
+	/* 结果卡片-根据优化类型渲染不同格式的结果 */
 	const resultCardSection = () => {
 		if (!optimizedData) return null;
 		return (
@@ -317,13 +325,24 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 										className={`font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
 									>
 										<Lightbulb className="w-5 h-5" />
-										新发现的亮点
+										新增亮点
 									</h4>
 									<MinedPolishedLightspotSection lightspotAdded={optimizedData.lightspotAdded} />
 								</div>
 							</>
 						)}
 				</CardContent>
+				{mergedData && (
+					<Button
+						onClick={handleMerge}
+						variant="outline"
+						className="fixed bottom-5 rounded-md right-5 w-full hover:bg-purple-700 text-white"
+						size="lg"
+					>
+						<Pyramid className="w-4 h-4 mr-2" />
+						完成优化
+					</Button>
+				)}
 			</Card>
 		);
 	};

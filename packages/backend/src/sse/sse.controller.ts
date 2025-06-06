@@ -1,5 +1,5 @@
 import { Controller, Query, Sse } from '@nestjs/common';
-import { DataChunk, UserInfoFromToken } from '@prism-ai/shared';
+import { DataChunkVO, UserInfoFromToken } from '@prism-ai/shared';
 import { Observable } from 'rxjs';
 import { RequireLogin, UserInfo } from '../decorator';
 import { EventBusService, EventList } from '../EventBus/event-bus.service';
@@ -29,6 +29,9 @@ export class SseController {
 		private eventBusService: EventBusService
 	) {}
 
+	/* project服务流式返回数据的标准化接口
+		数据统一转为为DataChunk
+	*/
 	/* 启动llm生成
     前端确保在调用此接口前,检查会话状态、新会话才能调用此接口
     这是为了避免llm重复生成
@@ -79,7 +82,7 @@ export class SseController {
 		const task = await this.sseService.createAndEnqueueTaskProject(sessionId, userInfo);
 
 		/* 4、订阅任务的chunk生成事件并返回数据 */
-		return new Observable<DataChunk>(subscriber => {
+		return new Observable<DataChunkVO>(subscriber => {
 			this.eventBusService.on(EventList.chunkGenerated, async ({ taskId, eventData: chunk }) => {
 				if (taskId === task.id) {
 					if (chunk.done) {
@@ -145,7 +148,7 @@ export class SseController {
       */
 		const curResult = await this.sseService.getSseTaskEvents(curTaskId);
 		if (existingSession && existingSession.done) {
-			return new Observable<DataChunk>(subscriber => {
+			return new Observable<DataChunkVO>(subscriber => {
 				subscriber.next({
 					data: { ...curResult }
 				});
@@ -160,7 +163,7 @@ export class SseController {
       再订阅chunk生成事件
     */
 
-		return new Observable<DataChunk>(subscriber => {
+		return new Observable<DataChunkVO>(subscriber => {
 			/* 1、发送当前已生成的内容 */
 			subscriber.next({
 				data: { ...curResult }

@@ -1,3 +1,4 @@
+import { lazy } from 'react';
 import { Outlet } from 'react-router-dom';
 import LoginRegist from '../views/LoginRegist/LoginRegist';
 import { Main } from '../views/Main';
@@ -6,8 +7,6 @@ import { JobRead } from '../views/Main/Jobs/JobRead';
 import { Knowledges } from '../views/Main/knowbase';
 import { KnowledgeRead } from '../views/Main/knowbase/KnowledgeRead';
 import { Projects } from '../views/Main/Projects';
-import { Action } from '../views/Main/Projects/Action';
-import { Read } from '../views/Main/Projects/Read';
 import { Resumes } from '../views/Main/Resumes';
 import { ResumeRead } from '../views/Main/Resumes/ResumeRead';
 import { Skills } from '../views/Main/Skills';
@@ -15,7 +14,8 @@ import { SkillRead } from '../views/Main/Skills/SkillRead';
 import { Test } from '../views/MyTest/Test';
 import PrivateRoute from './PrivateRoute';
 import UpdateBreadRouter from './UpdateBreadRouter';
-
+const Action = lazy(() => import('../views/Main/Projects/Action'));
+const Read = lazy(() => import('../views/Main/Projects/Read'));
 export const routes = [
 	{
 		path: '',

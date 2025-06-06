@@ -42,6 +42,9 @@ export class ProjectMined {
 
 	@Prop({ required: true })
 	userInfo: UserInfo;
+
+	@Prop({ type: String })
+	reasonContent?: string; // 推理内容
 }
 
 export type ProjectMinedDocument = HydratedDocument<ProjectMined>;

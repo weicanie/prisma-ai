@@ -42,9 +42,10 @@ export class ChainService {
 	private async createChain<Input = string, Output = unknown>(
 		llm: ChatOpenAI | ChatDeepSeek,
 		prompt: ChatPromptTemplate,
-		schema: z.Schema
+		outputSchema: z.Schema,
+		inputSchema?: z.Schema
 	): Promise<RunnableSequence<Input, Output>> {
-		const outputParser = StructuredOutputParser.fromZodSchema(schema);
+		const outputParser = StructuredOutputParser.fromZodSchema(outputSchema);
 
 		const memory = new BufferMemory({
 			chatHistory: this.modelService.getChatHistory(
@@ -65,6 +66,11 @@ export class ChainService {
 				},
 				instructions: async () => {
 					return outputParser.getFormatInstructions();
+				},
+				/* 当输出包含输入格式的输出数据时,需要向模型指定 */
+				instructions0: async () => {
+					const outputParser = inputSchema && StructuredOutputParser.fromZodSchema(inputSchema);
+					return outputParser && outputParser.getFormatInstructions();
 				}
 			},
 			prompt,
@@ -85,7 +91,8 @@ export class ChainService {
 	private async createStreamChain<Input = string>(
 		llm: ChatOpenAI | ChatDeepSeek,
 		prompt: ChatPromptTemplate,
-		schema: z.Schema
+		outputSchema: z.Schema,
+		inputSchema?: z.Schema
 	): Promise<RunnableSequence<Input, any>> {
 		const memory = new BufferMemory({
 			chatHistory: this.modelService.getChatHistory(
@@ -101,8 +108,15 @@ export class ChainService {
 					return vars.history || vars.summary || '';
 				},
 				instructions: async () => {
-					const outputParser = StructuredOutputParser.fromZodSchema(schema);
-					return outputParser.getFormatInstructions();
+					const outputParser = StructuredOutputParser.fromZodSchema(outputSchema);
+					const a = outputParser.getFormatInstructions();
+					console.log('🚀 ~ instructions: ~ a:', a);
+					return a;
+				},
+				/* 当输出包含输入格式的输出数据时,需要向模型指定 */
+				instructions0: async () => {
+					const outputParser = inputSchema && StructuredOutputParser.fromZodSchema(inputSchema);
+					return outputParser && outputParser.getFormatInstructions();
 				}
 			},
 			prompt,
@@ -188,13 +202,14 @@ export class ChainService {
 	 */
 	async polishChain(stream = false) {
 		const schema = projectPolishedSchema;
+		const schema0 = projectSchema; // 输入的schema
 		const outputParser = StructuredOutputParser.fromZodSchema(schema);
-		const prompt = await this.promptService.polishPrompt(outputParser.getFormatInstructions());
+		const prompt = await this.promptService.polishPrompt();
 
 		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
 
-		const chain = await this.createChain<string, ProjectPolishedDto>(llm, prompt, schema);
-		const streamChain = await this.createStreamChain<string>(llm, prompt, schema);
+		const chain = await this.createChain<string, ProjectPolishedDto>(llm, prompt, schema, schema0);
+		const streamChain = await this.createStreamChain<string>(llm, prompt, schema, schema0);
 		if (stream) {
 			return streamChain;
 		}
@@ -207,13 +222,15 @@ export class ChainService {
 	 */
 	async mineChain(stream = false) {
 		const schema = projectMinedSchema;
+		const schema0 = projectSchema; // 输入的schema
+
 		const outputParser = StructuredOutputParser.fromZodSchema(schema);
-		const prompt = await this.promptService.polishPrompt(outputParser.getFormatInstructions());
+		const prompt = await this.promptService.minePrompt();
 
 		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
 
-		const chain = await this.createChain<string, ProjectMinedDto>(llm, prompt, schema);
-		const streamChain = await this.createStreamChain<string>(llm, prompt, schema);
+		const chain = await this.createChain<string, ProjectMinedDto>(llm, prompt, schema, schema0);
+		const streamChain = await this.createStreamChain<string>(llm, prompt, schema, schema0);
 		if (stream) {
 			return streamChain;
 		}
@@ -223,54 +240,17 @@ export class ChainService {
 	/**
 	 * 分析项目经验的问题和解决方案
 	 */
-	async lookupChain() {
+	async lookupChain(stream = false) {
 		const schema = lookupResultSchema;
-		const outputParser = StructuredOutputParser.fromZodSchema(schema);
-		console.log(outputParser.getFormatInstructions());
-		const prompt = ChatPromptTemplate.fromMessages([
-			[
-				`${role.SYSTEM}`,
-				`
-				分析用户输入的项目经验描述。并按照以下格式输出问题和解决方案。
-
-				先查找是否存在以下问题：
-				a. 
-				问题名称: 项目信息不完整
-				问题描述: 项目信息中的<技术栈、角色和职责、核心贡献和参与、背景和目的信息>存在缺失。
-				b. 
-				问题名称: 项目亮点不突出
-				问题描述: 罗列<常见技术的使用>和<普通业务的实现>。
-				c. 
-				问题名称: 项目缺乏亮点
-				问题描述: <团队贡献、技术亮点/难点、用户体验/业务价值方面亮点缺乏>（即某一方面的亮点数量不足3个）。
-
-				再然后根据不同问题给出解决方案：
-				对于a问题: 
-				解决方案名称：补全项目信息
-				解决方案描述：补全项目信息中的<技术栈、角色和职责、核心贡献和参与、背景和目的>信息。
-			  对于b问题: 
-				解决方案名称：评估、改进项目现有亮点
-				解决方案描述：评估并改进当前的项目亮点部分,避免罗列太多常见技术的使用和普通业务的实现。
-				对于c问题: 
-				解决方案名称：挖掘项目亮点
-				解决方案描述: 挖掘<团队贡献、技术亮点/难点、用户体验/业务价值方面>的亮点。
-
-				你应该在理解用户输入的项目经验描述的基础上,分析出存在的问题和解决方案,应该尽量符合上述格式,且"<>"中的内容应该按照项目实际情况确定。
-
-				最后打分,
-				分数 = 100 - 问题数*20
-
-				如果没有问题,则输出空数组。
-				如果没有解决方案,则输出空数组。
-				输出格式说明:{instructions}
-				`
-			],
-			[`${role.HUMAN}`, '{input}']
-		]);
+		const prompt = await this.promptService.lookupPrompt();
 
 		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
 
-		const chain = await this.createChain<string, z.infer<typeof schema>>(llm, prompt, schema);
+		const chain = await this.createChain<string, ProjectMinedDto>(llm, prompt, schema);
+		const streamChain = await this.createStreamChain<string>(llm, prompt, schema);
+		if (stream) {
+			return streamChain;
+		}
 		return chain;
 	}
 

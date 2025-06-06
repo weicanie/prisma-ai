@@ -2,7 +2,7 @@ import { AnimatedCircularProgressBar } from '@/components/magicui/animated-circu
 import { Card, CardFooter, CardHeader } from '@/components/ui/card';
 import { useTheme } from '@/utils/theme';
 import { ArrowRight, CircleAlert } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 
 interface ProjectCardProps {
 	data: {
@@ -85,17 +85,17 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ data }) => {
 							存在的问题
 						</h3> */}
 						<ul className="list-none space-y-2">
-							{problem.slice(0, 3).map((item, index) => (
-								<li key={`problem-${index}`} className="flex  text-sm gap-2">
-									<CircleAlert className="text-red-600 dark:text-red-400 mt-0.5 size-4 flex-shrink-0" />
-									<span className="text-red-600 dark:text-red-400 font-medium">{item.name}</span>
-								</li>
+							{problem.map((item, index) => (
+								<Fragment key={`problem-${index}`}>
+									<li className="flex  text-sm gap-2">
+										<CircleAlert className="text-red-600 dark:text-red-400 mt-0.5 size-4 flex-shrink-0" />
+										<span className="text-red-600 dark:text-red-400 font-medium">{item.name}</span>
+									</li>
+									<li className="flex  text-sm gap-2">
+										<span className="text-red-900 dark:text-red-400 font-medium">{item.desc}</span>
+									</li>
+								</Fragment>
 							))}
-							{problem.length > 3 && (
-								<li className="text-sm text-gray-500 dark:text-gray-400 text-center">
-									还有 {problem.length - 3} 个问题...
-								</li>
-							)}
 						</ul>
 					</div>
 				)}
@@ -107,19 +107,21 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ data }) => {
 							解决方案
 						</h3> */}
 						<ul className="list-none space-y-2">
-							{solution.slice(0, 3).map((item, index) => (
-								<li key={`solution-${index}`} className="flex  text-sm gap-2">
-									<ArrowRight className="text-green-600 dark:text-green-400 mt-0.5 size-4 flex-shrink-0" />
-									<span className="text-green-600 dark:text-green-400 font-medium">
-										{item.name}
-									</span>
-								</li>
+							{solution.map((item, index) => (
+								<Fragment key={`problem-${index}`}>
+									<li key={`solution-${index}`} className="flex  text-sm gap-2">
+										<ArrowRight className="text-green-600 dark:text-green-400 mt-0.5 size-4 flex-shrink-0" />
+										<span className="text-green-600 dark:text-green-400 font-medium">
+											{item.name}
+										</span>
+									</li>
+									<li key={`solution-${index}`} className="flex  text-sm gap-2">
+										<span className="text-green-600 dark:text-green-400 font-medium">
+											{item.desc}
+										</span>
+									</li>
+								</Fragment>
 							))}
-							{solution.length > 3 && (
-								<li className="text-sm text-gray-500 dark:text-gray-400 text-center">
-									还有 {solution.length - 3} 个方案...
-								</li>
-							)}
 						</ul>
 					</div>
 				)}

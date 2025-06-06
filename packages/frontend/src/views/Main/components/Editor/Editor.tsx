@@ -6,7 +6,7 @@ import { Milkdown, useEditor } from '@milkdown/react';
 import { replaceAll } from '@milkdown/utils';
 import type { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import { debounce, throttle } from 'lodash';
-import { CheckIcon } from 'lucide-react';
+import { ArrowLeft, CheckIcon } from 'lucide-react';
 import { useEffect, useRef, type FC } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button } from '../../../../components/ui/button';
@@ -18,10 +18,20 @@ interface EditorProps {
 	type?: 'edit' | 'show'; //编辑模式、展示模式(只读)
 	submitHandler?: (md: string) => (...args: any) => void; //提交按钮回调
 	updateAction?: ActionCreatorWithPayload<any>; //编辑后更新store的action
-	mdSelector?: (state: any) => string; //同步store中的md
+	mdSelector?: (state: any) => string; //同步store中的md,
+
+	/* 在新建弹窗中控制使用表单还是md */
+	isUseMdEditor?: boolean;
+	setIsUseMdEditor?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const Editor: FC<EditorProps> = ({ type, updateAction, submitHandler, mdSelector }) => {
+export const Editor: FC<EditorProps> = ({
+	type,
+	updateAction,
+	submitHandler,
+	mdSelector,
+	setIsUseMdEditor
+}) => {
 	const isShwoMode = type === 'show';
 	const md = useSelector(mdSelector ? mdSelector : selectProjectMd); //获取编辑器内容，默认为项目经验的md
 	const { resolvedTheme } = useTheme();
@@ -103,12 +113,20 @@ export const Editor: FC<EditorProps> = ({ type, updateAction, submitHandler, mdS
 			<Milkdown />
 			{/* 提交按钮 */}
 			{!isShwoMode && (
-				<div className="flex justify-start items-center pl-30">
-					<Button onClick={submitHandler && submitHandler(md)}>
+				<>
+					<Button
+						className="fixed bottom-3 left-3"
+						onClick={() => setIsUseMdEditor && setIsUseMdEditor(false)}
+						variant={'outline'}
+					>
+						<ArrowLeft className="h-4 w-4 mr-2" />
+						使用表单
+					</Button>
+					<Button className="fixed bottom-3 right-33" onClick={submitHandler && submitHandler(md)}>
 						<CheckIcon className="h-4 w-4 mr-2" />
 						提交项目
 					</Button>
-				</div>
+				</>
 			)}
 		</div>
 	);
