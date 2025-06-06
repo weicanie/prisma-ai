@@ -3,9 +3,9 @@ import type { DataChunkVO } from '@prism-ai/shared';
 import { createHash } from 'crypto';
 import { Document } from 'langchain/document';
 import { Observable } from 'rxjs';
-import { ModelService } from '../model/model.service';
-import { RedisService } from '../redis/redis.service';
-import { VectorStoreService } from '../vector-store/vector-store.service';
+import { ModelService } from '../../model/model.service';
+import { RedisService } from '../../redis/redis.service';
+import { VectorStoreService } from '../../vector-store/vector-store.service';
 
 @Injectable()
 export class LLMCacheService {

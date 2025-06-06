@@ -24,7 +24,7 @@ export async function createProject(project: ProjectDto) {
 			data: null
 		};
 	}
-	const res = await instance.post<ProjectDto, SDF<ProjectVo>>('/project/raw', project);
+	const res = await instance.post<ProjectDto, SDF<ProjectVo>>('/project/add', project);
 	return res.data;
 }
 /**
@@ -33,7 +33,7 @@ export async function createProject(project: ProjectDto) {
  * @param projectText 项目经验文本
  */
 export async function createFrommText(projectText: string) {
-	const res = await instance.post<string, SDF<ProjectVo>>('/project/text', projectText);
+	const res = await instance.post<string, SDF<ProjectVo>>('/project/add-text', projectText);
 	return res.data;
 }
 

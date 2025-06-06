@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { StreamingChunk, UserInfoFromToken } from '@prism-ai/shared';
 import { catchError, mergeMap, timeout } from 'rxjs';
-import { ChainService } from '../chain/chain.service';
-import { EventBusService, EventList } from '../EventBus/event-bus.service';
-import { RedisService } from '../redis/redis.service';
-import { SessionPoolService } from '../session/session-pool.service';
-import { PersistentTask, TaskQueueService } from '../task-queue/task-queue.service';
-import { ProjectService } from './../business/project/project.service';
+import { ChainService } from '../../chain/chain.service';
+import { EventBusService, EventList } from '../../EventBus/event-bus.service';
+import { RedisService } from '../../redis/redis.service';
+import { SessionPoolService } from '../../session/session-pool.service';
+import { PersistentTask, TaskQueueService } from '../../task-queue/task-queue.service';
+import { ProjectService } from '../project/project.service';
 import { LLMCacheService } from './LLMCache.service';
 
 interface SseTask extends PersistentTask {}
@@ -17,8 +17,9 @@ export interface redisStoreResult {
 	done: boolean; // 是否完成
 	isReasoning?: boolean; // 是否是推理阶段
 }
+/* 用来给业务模块提供sse响应数据能力
 
-//TODO 相关业务模块自己持有自己的sse返回逻辑,分离出子service
+*/
 @Injectable()
 export class SseService {
 	private readonly logger = new Logger(SseService.name);
@@ -168,7 +169,6 @@ export class SseService {
 		return task;
 	}
 
-	//FIXME 数据存储异常
 	/** 工具-将当前生成的chunk储存到redis中
 	 * 事件处理器内部调用
 	 */

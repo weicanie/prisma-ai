@@ -3,7 +3,9 @@ import { ProjectStatus, UserInfoFromToken } from '@prism-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { ProjectDto } from './dto/project.dto';
 import { ProjectService } from './project.service';
-
+/* CARP原则
+通过聚合增加处理流式请求功能
+*/
 @Controller('project')
 export class ProjectController {
 	constructor(private readonly projectService: ProjectService) {}
@@ -14,7 +16,7 @@ export class ProjectController {
 	 *
 	 */
 	@RequireLogin()
-	@Post('raw')
+	@Post('add')
 	async createProject(@Body() project: ProjectDto, @UserInfo() userInfo: UserInfoFromToken) {
 		return await this.projectService.checkoutProject(project, userInfo);
 	}
@@ -25,7 +27,7 @@ export class ProjectController {
 	 *
 	 */
 	@RequireLogin()
-	@Post('text')
+	@Post('add-text')
 	async createFrommRawText(@Body() projectText: string, @UserInfo() userInfo: UserInfoFromToken) {
 		return await this.projectService.transformAndCheckProject(projectText, userInfo);
 	}

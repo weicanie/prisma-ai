@@ -17,7 +17,7 @@ import { from, mergeMap, Observable } from 'rxjs';
 import { ZodSchema } from 'zod';
 import { ChainService } from '../../chain/chain.service';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
-import { redisStoreResult } from '../../sse/sse.service';
+import { redisStoreResult } from '../sse/sse.service';
 import { RedisService } from './../../redis/redis.service';
 import { ProjectDto } from './dto/project.dto';
 import { LookupResult, LookupResultDocument } from './entities/lookupResult.entity';
@@ -28,6 +28,9 @@ import { ProjectPolished, ProjectPolishedDocument } from './entities/projectPoli
 //FIXME 用validation pipe 结合 zodSchema生成的 dto验证用户上传的数据格式
 // 其它用于验证llm生成的数据格式和指定数据格式
 
+/* CARP原则
+通过聚合增加响应流式数据功能
+*/
 interface DeepSeekStreamChunk {
 	id: string;
 	content: string | ''; //生成内容

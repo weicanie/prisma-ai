@@ -1,10 +1,10 @@
 import { Controller, Query, Sse } from '@nestjs/common';
 import { DataChunkVO, UserInfoFromToken } from '@prism-ai/shared';
 import { Observable } from 'rxjs';
-import { RequireLogin, UserInfo } from '../decorator';
-import { EventBusService, EventList } from '../EventBus/event-bus.service';
-import { SessionPoolService } from '../session/session-pool.service';
-import { TaskQueueService, TaskStatus } from '../task-queue/task-queue.service';
+import { RequireLogin, UserInfo } from '../../decorator';
+import { EventBusService, EventList } from '../../EventBus/event-bus.service';
+import { SessionPoolService } from '../../session/session-pool.service';
+import { TaskQueueService, TaskStatus } from '../../task-queue/task-queue.service';
 import { SseService } from './sse.service';
 
 /* 在前端由于错误被优先处理因此和DataChunk兼容 */
@@ -165,9 +165,12 @@ export class SseController {
 
 		return new Observable<DataChunkVO>(subscriber => {
 			/* 1、发送当前已生成的内容 */
-			subscriber.next({
-				data: { ...curResult }
+			process.nextTick(() => {
+				subscriber.next({
+					data: { ...curResult }
+				});
 			});
+
 			/* 2、订阅内容并继续发送 */
 			this.eventBusService.on(EventList.chunkGenerated, async ({ taskId, eventData: chunk }) => {
 				if (taskId === curTaskId) {

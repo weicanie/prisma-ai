@@ -4,7 +4,7 @@ import * as bodyParser from 'body-parser';
 import { ChainModule } from '../../chain/chain.module';
 import { EventBusModule } from '../../EventBus/event-bus.module';
 import { RedisModule } from '../../redis/redis.module';
-import { SseModule } from '../../sse/sse.module';
+import { SseModule } from '../sse/sse.module';
 import { LookupResult, LookupResultSchema } from './entities/lookupResult.entity';
 import { Project, ProjectSchema } from './entities/project.entity';
 import { ProjectMined, ProjectMinedSchema } from './entities/projectMined.entity';

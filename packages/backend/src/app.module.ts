@@ -7,6 +7,7 @@ import { KnowledgebaseModule } from './business/knowledge-base/knowledge-base.mo
 import { ProjectModule } from './business/project/project.module';
 import { ResumeModule } from './business/resume/resume.module';
 import { SkillModule } from './business/skill/skill.module';
+import { SseModule } from './business/sse/sse.module';
 import { ChainModule } from './chain/chain.module';
 import { CopilotModule } from './copilot/copilot.module';
 import { GlobalInterceptor } from './dataFormat.interceptor';
@@ -16,7 +17,6 @@ import { EventBusModule } from './EventBus/event-bus.module';
 import { GraphModule } from './graph/graph.module';
 import { IsLoginGuard } from './isLogin.guard';
 import { SessionPoolModule } from './session/session-pool.module';
-import { SseModule } from './sse/sse.module';
 import { UserModule } from './user/user.module';
 
 @Module({

@@ -1,5 +1,5 @@
 import { forwardRef, Global, Module } from '@nestjs/common';
-import { SseModule } from '../sse/sse.module';
+import { SseModule } from '../business/sse/sse.module';
 import { TaskQueueModule } from '../task-queue/task-queue.module';
 import { EventBusService } from './event-bus.service';
 
