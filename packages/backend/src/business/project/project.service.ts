@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
 	jsonMd_obj,
@@ -8,7 +8,6 @@ import {
 	projectSchema,
 	ProjectStatus,
 	ProjectVo,
-	RequestTargetMap,
 	StreamingChunk,
 	UserInfoFromToken
 } from '@prism-ai/shared';
@@ -17,7 +16,7 @@ import { from, mergeMap, Observable } from 'rxjs';
 import { ZodSchema } from 'zod';
 import { ChainService } from '../../chain/chain.service';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
-import { redisStoreResult } from '../sse/sse.service';
+import { LLMSseService, redisStoreResult } from '../sse/llm-sse.service';
 import { RedisService } from './../../redis/redis.service';
 import { ProjectDto } from './dto/project.dto';
 import { LookupResult, LookupResultDocument } from './entities/lookupResult.entity';
@@ -28,9 +27,6 @@ import { ProjectPolished, ProjectPolishedDocument } from './entities/projectPoli
 //FIXME 用validation pipe 结合 zodSchema生成的 dto验证用户上传的数据格式
 // 其它用于验证llm生成的数据格式和指定数据格式
 
-/* CARP原则
-通过聚合增加响应流式数据功能
-*/
 interface DeepSeekStreamChunk {
 	id: string;
 	content: string | ''; //生成内容
@@ -66,7 +62,6 @@ interface DeepSeekStreamChunkEnd {
 	tool_call_chunks: [];
 	invalid_tool_calls: [];
 }
-
 @Injectable()
 export class ProjectService {
 	@InjectModel(Project.name)
@@ -83,18 +78,53 @@ export class ProjectService {
 
 	logger = new Logger(ProjectService.name);
 
-	/* 用于llm任务处理器根据上下文中的type字段调用指定方法 */
-	public target_method: Record<keyof typeof RequestTargetMap, string> = {
-		polish: 'polishProject',
-		mine: 'mineProject',
-		lookup: 'lookupProject'
+	public methodKeys = {
+		polishProject: 'polishProject',
+		mineProject: 'mineProject',
+		lookupProject: 'lookupProject'
 	};
 
 	constructor(
 		public chainService: ChainService,
 		public eventBusService: EventBusService,
-		public redisService: RedisService
+		public redisService: RedisService,
+		/* CARP原则：通过聚合增加响应流式数据功能*/
+		@Inject(forwardRef(() => LLMSseService))
+		public LLMSseService: LLMSseService
 	) {}
+
+	/**
+	 * @param sessionId 会话id,用于找到任务
+	 */
+	async SseLookupResult(sessionId: string, userInfo: UserInfoFromToken) {
+		return this.LLMSseService.handleSseRequestAndResponse(
+			sessionId,
+			userInfo,
+			this.methodKeys.lookupProject
+		);
+	}
+
+	/**
+	 * @param sessionId 会话id,用于找到任务
+	 */
+	async SsePolishResult(sessionId: string, userInfo: UserInfoFromToken) {
+		return this.LLMSseService.handleSseRequestAndResponse(
+			sessionId,
+			userInfo,
+			this.methodKeys.polishProject
+		);
+	}
+
+	/**
+	 * @param sessionId 会话id,用于找到任务
+	 */
+	async SseMineResult(sessionId: string, userInfo: UserInfoFromToken) {
+		return this.LLMSseService.handleSseRequestAndResponse(
+			sessionId,
+			userInfo,
+			this.methodKeys.mineProject
+		);
+	}
 
 	/**
 	 * 在生成任务结束时检查、储存结果到数据库
@@ -149,8 +179,8 @@ export class ProjectService {
 	}
 
 	/**
-	 * 项目经验转换为json格式对象并提交
-	 * @param project 项目经验
+	 * 项目经验文本转换为json格式对象并提交
+	 * @param projectText 项目经验文本
 	 * @returns
 	 */
 	async transformAndCheckProject(
@@ -164,7 +194,7 @@ export class ProjectService {
 	}
 
 	/**
-	 * 验证数据格式
+	 * 验证项目数据格式
 	 * 	若通过验证则将数据储存到数据库
 	 * 	否则抛出错误
 	 */
@@ -215,7 +245,7 @@ export class ProjectService {
 		project: ProjectDto,
 		userInfo: UserInfoFromToken,
 		taskId: string
-	): Promise<Observable<StreamingChunk | undefined>> {
+	): Promise<Observable<StreamingChunk>> {
 		const existingLookupResult = await this.lookupResultModel
 			.findOne({
 				'userInfo.userId': userInfo.userId,
@@ -240,13 +270,18 @@ export class ProjectService {
 			if (existingLookupResult) {
 				// 更新
 				await this.lookupResultModel.updateOne({ _id: existingLookupResult._id }, lookupResultSave);
+				//更新项目
+				await this.projectModel.updateOne(
+					{ 'info.name': project.info.name, 'userInfo.userId': userInfo.userId },
+					{ $set: { status: ProjectStatus.lookuped, lookupResult: lookupResultSave } }
+				);
 			} else {
 				// 新建
 				const lookupResult_model = new this.lookupResultModel(lookupResultSave);
-				//更新项目状态
+				//更新项目
 				await this.projectModel.updateOne(
 					{ 'info.name': project.info.name, 'userInfo.userId': userInfo.userId },
-					{ $set: { status: ProjectStatus.lookuped } }
+					{ $set: { status: ProjectStatus.lookuped, lookupResult: lookupResultSave } }
 				);
 				await lookupResult_model.save();
 			}
@@ -304,7 +339,7 @@ export class ProjectService {
 		project: ProjectDto,
 		userInfo: UserInfoFromToken,
 		taskId: string
-	): Promise<Observable<StreamingChunk | undefined>> {
+	): Promise<Observable<StreamingChunk>> {
 		const existingPolishingProject = await this.projectPolishedModel
 			.findOne({
 				'info.name': project.info.name,
@@ -390,7 +425,7 @@ export class ProjectService {
 		project: ProjectDto,
 		userInfo: UserInfoFromToken,
 		taskId: string
-	): Promise<Observable<StreamingChunk | undefined>> {
+	): Promise<Observable<StreamingChunk>> {
 		const existingMiningProject = await this.projectMinedModel
 			.findOne({
 				'info.name': project.info.name,
@@ -570,7 +605,7 @@ export class ProjectService {
 	/**
 	 * 非流式分析项目
 	 */
-	async lookupProjectUnStream(project: ProjectDto, userInfo: UserInfoFromToken) {
+	private async lookupProjectUnStream(project: ProjectDto, userInfo: UserInfoFromToken) {
 		const chain = await this.chainService.lookupChain();
 		const projectStr = JSON.stringify(project);
 		let result = await chain.invoke(projectStr);

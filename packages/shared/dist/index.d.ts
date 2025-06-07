@@ -489,6 +489,149 @@ declare const lookupResultSchema: z.ZodObject<{
     }[] | undefined;
     score?: number | undefined;
 }>;
+declare const projectLookupedSchema: z.ZodObject<{
+    info: z.ZodObject<{
+        name: z.ZodString;
+        desc: z.ZodObject<{
+            role: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+            contribute: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+            bgAndTarget: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+        }, "strip", z.ZodTypeAny, {
+            role: string;
+            contribute: string;
+            bgAndTarget: string;
+        }, {
+            role?: string | undefined;
+            contribute?: string | undefined;
+            bgAndTarget?: string | undefined;
+        }>;
+        techStack: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+    }, "strip", z.ZodTypeAny, {
+        name: string;
+        desc: {
+            role: string;
+            contribute: string;
+            bgAndTarget: string;
+        };
+        techStack: string[];
+    }, {
+        name: string;
+        desc: {
+            role?: string | undefined;
+            contribute?: string | undefined;
+            bgAndTarget?: string | undefined;
+        };
+        techStack?: string[] | undefined;
+    }>;
+    lightspot: z.ZodObject<{
+        team: z.ZodDefault<z.ZodArray<any, "many">>;
+        skill: z.ZodDefault<z.ZodArray<any, "many">>;
+        user: z.ZodDefault<z.ZodArray<any, "many">>;
+    }, "strip", z.ZodTypeAny, {
+        team: any[];
+        skill: any[];
+        user: any[];
+    }, {
+        team?: any[] | undefined;
+        skill?: any[] | undefined;
+        user?: any[] | undefined;
+    }>;
+    lookupResult: z.ZodObject<{
+        problem: z.ZodDefault<z.ZodArray<z.ZodObject<{
+            name: z.ZodString;
+            desc: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            name: string;
+            desc: string;
+        }, {
+            name: string;
+            desc: string;
+        }>, "many">>;
+        solution: z.ZodDefault<z.ZodArray<z.ZodObject<{
+            name: z.ZodString;
+            desc: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            name: string;
+            desc: string;
+        }, {
+            name: string;
+            desc: string;
+        }>, "many">>;
+        score: z.ZodDefault<z.ZodNumber>;
+    }, "strip", z.ZodTypeAny, {
+        problem: {
+            name: string;
+            desc: string;
+        }[];
+        solution: {
+            name: string;
+            desc: string;
+        }[];
+        score: number;
+    }, {
+        problem?: {
+            name: string;
+            desc: string;
+        }[] | undefined;
+        solution?: {
+            name: string;
+            desc: string;
+        }[] | undefined;
+        score?: number | undefined;
+    }>;
+}, "strip", z.ZodTypeAny, {
+    info: {
+        name: string;
+        desc: {
+            role: string;
+            contribute: string;
+            bgAndTarget: string;
+        };
+        techStack: string[];
+    };
+    lightspot: {
+        team: any[];
+        skill: any[];
+        user: any[];
+    };
+    lookupResult: {
+        problem: {
+            name: string;
+            desc: string;
+        }[];
+        solution: {
+            name: string;
+            desc: string;
+        }[];
+        score: number;
+    };
+}, {
+    info: {
+        name: string;
+        desc: {
+            role?: string | undefined;
+            contribute?: string | undefined;
+            bgAndTarget?: string | undefined;
+        };
+        techStack?: string[] | undefined;
+    };
+    lightspot: {
+        team?: any[] | undefined;
+        skill?: any[] | undefined;
+        user?: any[] | undefined;
+    };
+    lookupResult: {
+        problem?: {
+            name: string;
+            desc: string;
+        }[] | undefined;
+        solution?: {
+            name: string;
+            desc: string;
+        }[] | undefined;
+        score?: number | undefined;
+    };
+}>;
 
 declare enum ProjectStatus {
     committed = "committed",//初提交
@@ -499,6 +642,8 @@ declare enum ProjectStatus {
     mined = "mined",//用户已合并挖掘
     accepted = "accepted"
 }
+type lookupResultDto = z.infer<typeof lookupResultSchema>;
+type projectLookupedDto = z.infer<typeof projectLookupedSchema>;
 type ProjectDto = z.infer<typeof projectSchema>;
 type ProjectPolishedDto = z.infer<typeof projectPolishedSchema>;
 type ProjectMinedDto = z.infer<typeof projectMinedSchema>;
@@ -659,9 +804,14 @@ interface StreamingChunk {
 }
 interface DataChunkVO {
     data: StreamingChunk & {
-        error?: string;
         cached?: boolean;
         exact?: boolean;
+    };
+}
+interface DataChunkErrVO {
+    data: {
+        error: string;
+        done: true;
     };
 }
 interface TRequestParams {
@@ -685,7 +835,6 @@ declare const RequestTargetMap: {
 };
 interface LLMSessionRequest {
     input: any;
-    target: keyof typeof RequestTargetMap;
     userInfo?: UserInfoFromToken;
 }
 interface LLMSessionResponse {
@@ -715,4 +864,4 @@ declare function projectSchemaToMarkdown(project: z.infer<typeof projectSchemaFo
 declare const skillsToMarkdown: (data: CreateSkillDto) => string;
 declare const markdownToSkills: (markdown: string) => CreateSkillDto;
 
-export { type CreateJobDto, type CreateKnowledgeDto, type CreateResumeDto, type CreateSkillDto, type DataChunkVO, ErrorCode, type JobVo, type KnowledgeVo, type LLMSessionRequest, type LLMSessionResponse, type LLMSessionStatusResponse, type LoginFormType, type LoginResponse, type PaginatedJobsResult, type PaginatedKnsResult, type PaginatedResumesResult, type ProjectDto, type ProjectMinedDto, type ProjectMineddVo, type ProjectPolishedDto, type ProjectPolishedVo, ProjectStatus, type ProjectVo, type RegistFormType, type RegistResponse, RequestTargetMap, type ResumeVo, type ServerDataFormat, type SkillItem, type SkillVo, type StreamingChunk, type TRequestParams, type UpdateJobDto, type UpdateKnowledgeDto, type UpdateResumeDto, type UpdateSkillDto, type UserInfoFromToken, type VerifyMetaData, errorMessage, getLightspotSchema, jsonMd_obj, loginformSchema, lookupResultSchema, markdownToProjectSchema, markdownToSkills, projectMinedSchema, projectPolishedSchema, projectSchema, projectSchemaForm, projectSchemaToMarkdown, registformSchema, skillsToMarkdown, typeMap };
+export { type CreateJobDto, type CreateKnowledgeDto, type CreateResumeDto, type CreateSkillDto, type DataChunkErrVO, type DataChunkVO, ErrorCode, type JobVo, type KnowledgeVo, type LLMSessionRequest, type LLMSessionResponse, type LLMSessionStatusResponse, type LoginFormType, type LoginResponse, type PaginatedJobsResult, type PaginatedKnsResult, type PaginatedResumesResult, type ProjectDto, type ProjectMinedDto, type ProjectMineddVo, type ProjectPolishedDto, type ProjectPolishedVo, ProjectStatus, type ProjectVo, type RegistFormType, type RegistResponse, RequestTargetMap, type ResumeVo, type ServerDataFormat, type SkillItem, type SkillVo, type StreamingChunk, type TRequestParams, type UpdateJobDto, type UpdateKnowledgeDto, type UpdateResumeDto, type UpdateSkillDto, type UserInfoFromToken, type VerifyMetaData, errorMessage, getLightspotSchema, jsonMd_obj, loginformSchema, type lookupResultDto, lookupResultSchema, markdownToProjectSchema, markdownToSkills, type projectLookupedDto, projectLookupedSchema, projectMinedSchema, projectPolishedSchema, projectSchema, projectSchemaForm, projectSchemaToMarkdown, registformSchema, skillsToMarkdown, typeMap };

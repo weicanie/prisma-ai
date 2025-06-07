@@ -7,6 +7,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
 	lookupResultSchema,
+	projectLookupedSchema,
 	ProjectMinedDto,
 	projectMinedSchema,
 	ProjectPolishedDto,
@@ -109,9 +110,7 @@ export class ChainService {
 				},
 				instructions: async () => {
 					const outputParser = StructuredOutputParser.fromZodSchema(outputSchema);
-					const a = outputParser.getFormatInstructions();
-					console.log('🚀 ~ instructions: ~ a:', a);
-					return a;
+					return outputParser.getFormatInstructions();
 				},
 				/* 当输出包含输入格式的输出数据时,需要向模型指定 */
 				instructions0: async () => {
@@ -197,13 +196,30 @@ export class ChainService {
 	}
 
 	/**
+	 * 分析项目经验的问题和解决方案
+	 */
+	async lookupChain(stream = false) {
+		const schema = lookupResultSchema;
+		const schema0 = projectLookupedSchema;
+		const prompt = await this.promptService.lookupPrompt();
+
+		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
+
+		const chain = await this.createChain<string, ProjectMinedDto>(llm, prompt, schema);
+		const streamChain = await this.createStreamChain<string>(llm, prompt, schema, schema0);
+		if (stream) {
+			return streamChain;
+		}
+		return chain;
+	}
+
+	/**
 	 * 现有亮点评估、改进。
 	 * @description -> 亮点突出
 	 */
 	async polishChain(stream = false) {
 		const schema = projectPolishedSchema;
 		const schema0 = projectSchema; // 输入的schema
-		const outputParser = StructuredOutputParser.fromZodSchema(schema);
 		const prompt = await this.promptService.polishPrompt();
 
 		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
@@ -224,30 +240,12 @@ export class ChainService {
 		const schema = projectMinedSchema;
 		const schema0 = projectSchema; // 输入的schema
 
-		const outputParser = StructuredOutputParser.fromZodSchema(schema);
 		const prompt = await this.promptService.minePrompt();
 
 		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
 
 		const chain = await this.createChain<string, ProjectMinedDto>(llm, prompt, schema, schema0);
 		const streamChain = await this.createStreamChain<string>(llm, prompt, schema, schema0);
-		if (stream) {
-			return streamChain;
-		}
-		return chain;
-	}
-
-	/**
-	 * 分析项目经验的问题和解决方案
-	 */
-	async lookupChain(stream = false) {
-		const schema = lookupResultSchema;
-		const prompt = await this.promptService.lookupPrompt();
-
-		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
-
-		const chain = await this.createChain<string, ProjectMinedDto>(llm, prompt, schema);
-		const streamChain = await this.createStreamChain<string>(llm, prompt, schema);
 		if (stream) {
 			return streamChain;
 		}

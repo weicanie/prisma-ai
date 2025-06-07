@@ -1,15 +1,49 @@
 import type {
+	DataChunkErrVO,
 	DataChunkVO,
 	LLMSessionRequest,
 	LLMSessionResponse,
 	LLMSessionStatusResponse,
-	RequestTargetMap,
+	ProjectDto,
 	ServerDataFormat as SDF
 } from '@prism-ai/shared';
 import { message } from 'antd';
 import { instance } from '../config';
+
+/**
+ * 创建sse请求的上下文中的输入
+ */
+export interface contextInput extends ProjectDto {}
+/**
+ * 提取会话状态
+ */
+type SessionStatus<T> = T extends { status: infer R } ? R : unknown;
+
+/* localStorage存储key */
 export const llmSessionKey = 'llmSessionId'; //会话id储存的key
 export const sessionStatusKey = 'llmSessionStatus'; //当前会话状态key（注意是当前会话的状态,新建的会话则需要新置状态）
+export const pathKey = 'llmSessionPath'; //当前会话对应的URL的path（用于断点接传）
+/**
+ *
+ * @param input 创建sse请求的上下文中的输入
+ * @param prevStatus 现存会话的状态
+ */
+async function createLLMSessionContext(
+	input: contextInput,
+	prevStatus: SessionStatus<LLMSessionStatusResponse>
+) {
+	//更新现存会话的状态
+	localStorage.setItem(sessionStatusKey, prevStatus);
+	//新建会话
+	const res = await instance.post<LLMSessionRequest, SDF<LLMSessionResponse>>(
+		'llm-session/context',
+		{
+			input
+		}
+	);
+	localStorage.setItem(llmSessionKey, res.data.data.sessionId);
+	localStorage.setItem(sessionStatusKey, 'tasknotfound');
+}
 
 /* 当前会话状态 -> 决策 
 
@@ -28,13 +62,7 @@ getSseData的行为
 	'backdone'、'running' -> 请求sse/generate-recover 进行断点续传
 	
 */
-async function getSessionStatusAndDecide({
-	input,
-	target
-}: {
-	input: any;
-	target: keyof typeof RequestTargetMap;
-}): Promise<SDF<string>> {
+async function getSessionStatusAndDecide(input: contextInput | ''): Promise<SDF<string>> {
 	/* 仅仅为了满足类型约束 */
 	const forReturn = {
 		code: '0',
@@ -47,22 +75,12 @@ async function getSessionStatusAndDecide({
 		const sessionId = localStorage.getItem(llmSessionKey);
 		if (sessionId) {
 			const res = await instance.get<SDF<LLMSessionStatusResponse>>(
-				`/session/status?sessionId=${sessionId}`
+				`/llm-session/status?sessionId=${sessionId}`
 			);
 			const status = res.data.data.status;
 
 			if (status === 'notfound' || status === 'bothdone') {
-				localStorage.setItem(sessionStatusKey, status);
-				//新建会话
-				const res = await instance.post<LLMSessionRequest, SDF<LLMSessionResponse>>(
-					'session/context',
-					{
-						input,
-						target
-					}
-				);
-				localStorage.setItem(llmSessionKey, res.data.data.sessionId);
-				localStorage.setItem(sessionStatusKey, 'tasknotfound');
+				await createLLMSessionContext(input, status);
 			}
 
 			if (status === 'backdone' || status === 'running' || status === 'tasknotfound') {
@@ -70,28 +88,20 @@ async function getSessionStatusAndDecide({
 			}
 		} else {
 			//目前无会话,新建会话
-			const res = await instance.post<LLMSessionRequest, SDF<LLMSessionResponse>>(
-				'session/context',
-				{
-					input,
-					target
-				}
-			);
-
-			localStorage.setItem(llmSessionKey, res.data.data.sessionId);
-			localStorage.setItem(sessionStatusKey, 'tasknotfound');
+			await createLLMSessionContext(input, 'notfound');
 		}
 		return forReturn;
 	} else {
+		//input=''为进行断点接传的信号
 		/* 断点续传副作用触发 */
 		const sessionId = localStorage.getItem(llmSessionKey);
 		if (sessionId) {
 			const res = await instance.get<SDF<LLMSessionStatusResponse>>(
-				`/session/status?sessionId=${sessionId}`
+				`/llm-session/status?sessionId=${sessionId}`
 			);
 			const status = res.data.data.status;
 			if (status === 'backdone' || status === 'running') {
-				//断点续传
+				//断点续传信号
 				localStorage.setItem(sessionStatusKey, status);
 			}
 			return forReturn;
@@ -101,12 +111,13 @@ async function getSessionStatusAndDecide({
 
 /**
  * 通过EventSource请求特定接口获取SSE数据
+ * @param path 请求的URL路径,如 '/project/lookup'
  * @param setDone 设置完成状态的函数，标记SSE数据传输是否结束
  * @param setAnswering 设置 useSseAnswer 是否可以进行下一次SSE回答推送
  * @returns 清理函数，用于关闭EventSource连接
  */
 function getSseData(
-	urlRoute: (typeof RequestTargetMap)[keyof typeof RequestTargetMap],
+	path: string,
 	setData: (data: string | ((prevData: string) => string)) => void,
 	setReasonContent: (data: string | ((prevData: string) => string)) => void,
 	setDone: (done: boolean) => void,
@@ -173,32 +184,32 @@ function getSseData(
 
 	// 根据会话状态确定要请求的接口
 	let url = '';
-	const baseUrl = import.meta.env.VITE_API_BASE_URL;
+	const baseUrl = import.meta.env.VITE_API_BASE_URL; //协议-主机-端口
 
 	if (status === 'backdone' || status === 'running') {
-		// 断点续传 - 从上次中断的地方继续
-		url =
-			baseUrl +
-			'/sse/generate-recover' +
-			`?sessionId=${localStorage.getItem(llmSessionKey)}&token=${token}`;
+		// 断点接传 - 从上次中断的地方继续
+		url = `${baseUrl}${path}?sessionId=${localStorage.getItem(llmSessionKey)}&token=${token}`;
 	} else if (status === 'tasknotfound') {
 		// 创建新任务 - 开始新的生成
-		url = baseUrl + urlRoute + `?sessionId=${localStorage.getItem(llmSessionKey)}&token=${token}`;
+		url = `${baseUrl}${path}?sessionId=${localStorage.getItem(llmSessionKey)}&token=${token}`;
 	} else return;
 
 	try {
 		// 创建连接
 		eventSource = new EventSource(url);
+		// 记录当前path,用于断点接传
+		localStorage.setItem(pathKey, path);
 
 		// 处理服务器推送的消息
 		eventSource.onmessage = event => {
-			const messageObj: DataChunkVO = JSON.parse(event.data as unknown as string);
-			const chunk = messageObj.data;
+			const eventData: DataChunkVO | DataChunkErrVO = JSON.parse(event.data as string);
 
-			if (chunk.error) {
+			if (eventData?.data.hasOwnProperty('error')) {
 				cleanup();
-				setTupError('9999', `chunk错误:${chunk.error}`);
+				setTupError('9999', `chunk错误:${(eventData as DataChunkErrVO).data.error}`);
 			}
+
+			const chunk = (eventData as DataChunkVO).data;
 
 			// 数据流式抵达
 			if (chunk) {
@@ -239,12 +250,13 @@ function getSseData(
 
 	return;
 }
+
 /* 
 报告后端前端的SSE会话已完成
  */
 async function frontendOver(sessionId: string) {
 	//上报前端完成
-	const res = await instance.get<SDF<string>>(`session/frontend-over?sessionId=${sessionId}`);
+	const res = await instance.get<SDF<string>>(`llm-session/frontend-over?sessionId=${sessionId}`);
 	return res;
 }
 export { frontendOver, getSessionStatusAndDecide, getSseData };

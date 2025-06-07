@@ -169,6 +169,11 @@ var lookupResultSchema = z2.object({
   ).describe("\u89E3\u51B3\u65B9\u6848").default([]),
   score: z2.number().describe("\u9879\u76EE\u63CF\u8FF0\u8BC4\u5206, 0-100\u5206").default(0)
 });
+var projectLookupedSchema = z2.object({
+  info: infoSchema,
+  lightspot: getLightspotSchema(),
+  lookupResult: lookupResultSchema
+});
 
 // src/types/project.schema-form.ts
 import { z as z3 } from "zod";
@@ -395,6 +400,7 @@ export {
   lookupResultSchema,
   markdownToProjectSchema,
   markdownToSkills,
+  projectLookupedSchema,
   projectMinedSchema,
   projectPolishedSchema,
   projectSchema,

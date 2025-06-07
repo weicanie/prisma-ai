@@ -1,14 +1,48 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Sse } from '@nestjs/common';
 import { ProjectStatus, UserInfoFromToken } from '@prism-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { ProjectDto } from './dto/project.dto';
 import { ProjectService } from './project.service';
-/* CARP原则
-通过聚合增加处理流式请求功能
-*/
+
 @Controller('project')
 export class ProjectController {
 	constructor(private readonly projectService: ProjectService) {}
+
+	@RequireLogin()
+	@Sse('lookup')
+	async lookupProject(@Query('sessionId') sessionId, @UserInfo() userInfo: UserInfoFromToken) {
+		return this.projectService.SseLookupResult(sessionId, userInfo);
+	}
+
+	/**
+	 * 打磨项目经验 - 使用AI对项目经验进行优化和改进
+	 * @param project 原始项目经验数据
+	 * @param userInfo 用户信息
+	 * @returns 返回打磨后的项目经验
+	 */
+	@RequireLogin()
+	@Sse('polish')
+	async polishProject(@Query('sessionId') sessionId, @UserInfo() userInfo: UserInfoFromToken) {
+		return this.projectService.SsePolishResult(sessionId, userInfo);
+	}
+
+	/**
+	 * 挖掘项目经验 - 使用AI深度挖掘项目经验中的亮点和价值
+	 * @param project 原始项目经验数据
+	 * @param userInfo 用户信息
+	 * @returns 返回挖掘后的项目经验
+	 */
+	@RequireLogin()
+	@Sse('mine')
+	async mineProject(@Query('sessionId') sessionId, @UserInfo() userInfo: UserInfoFromToken) {
+		return this.projectService.SseMineResult(sessionId, userInfo);
+	}
+
+	/* mcp tools 测试 */
+	@Post('tool-query')
+	async toolQuery(@Body() query: string) {
+		return await this.projectService.toolQuery(query);
+	}
 
 	/**
 	 * 用户上传指定格式的项目经验
@@ -80,37 +114,5 @@ export class ProjectController {
 	@Delete(':id')
 	async deleteProject(@Param('id') id: string, @UserInfo() userInfo: UserInfoFromToken) {
 		return await this.projectService.deleteProject(id, userInfo);
-	}
-
-	/**
-	 * 打磨项目经验 - 使用AI对项目经验进行优化和改进
-	 * @param project 原始项目经验数据
-	 * @param userInfo 用户信息
-	 * @returns 返回打磨后的项目经验
-	 */
-	@RequireLogin()
-	@Post('polish')
-	async polishProject(@Body() project: ProjectDto, @UserInfo() userInfo: UserInfoFromToken) {
-		// return await this.projectService.polishProject(project, userInfo);
-		return '请使用sse接口';
-	}
-
-	/**
-	 * 挖掘项目经验 - 使用AI深度挖掘项目经验中的亮点和价值
-	 * @param project 原始项目经验数据
-	 * @param userInfo 用户信息
-	 * @returns 返回挖掘后的项目经验
-	 */
-	@RequireLogin()
-	@Post('mine')
-	async mineProject(@Body() project: ProjectDto, @UserInfo() userInfo: UserInfoFromToken) {
-		// return await this.projectService.mineProject(project, userInfo);
-		return '请使用sse接口';
-	}
-
-	/* mcp tools 测试 */
-	@Post('tool-query')
-	async toolQuery(@Body() query: string) {
-		return await this.projectService.toolQuery(query);
 	}
 }

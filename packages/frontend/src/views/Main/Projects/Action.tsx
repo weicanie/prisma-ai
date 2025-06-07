@@ -1,10 +1,10 @@
 import { useTheme } from '@/utils/theme';
 import {
 	jsonMd_obj,
+	type lookupResultDto,
 	type ProjectDto,
 	type ProjectMinedDto,
-	ProjectStatus,
-	RequestTargetMap
+	ProjectStatus
 } from '@prism-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
@@ -13,8 +13,8 @@ import { useCustomQuery } from '../../../query/config';
 import { ProjectQueryKey } from '../../../query/keys';
 import { findAllProjects } from '../../../services/project';
 import { useSseAnswer } from '../../../services/sse/useSseAnswer';
-import { OriginalProject } from './Result/OriginalProject';
-import { ProjectResult } from './Result/ProjectResult';
+import { OriginalProject } from './Action-Result/OriginalProject';
+import { ProjectResult } from './Action-Result/ProjectResult';
 
 interface ActionProps {}
 
@@ -25,22 +25,37 @@ export const Action: React.FC<ActionProps> = () => {
 	const isDark = resolvedTheme === 'dark';
 
 	const [input, setInput] = useState<ProjectDto | {}>({});
-	const [target, setTarget] = useState<keyof typeof RequestTargetMap>('polish');
-	const [optimizedData, setOptimizedData] = useState<ProjectMinedDto | ProjectMinedDto | null>(
-		null
-	);
-	const [mergedData, setMergedData] = useState<ProjectMinedDto | null>(null);
+	//目标接口的URL path
+	const [target, setTarget] = useState('');
+	/**
+	 * 流式传输结束时string转为的JSON格式对象数据-原结果
+	 */
+	const [resultData, setResultData] = useState<
+		lookupResultDto | ProjectMinedDto | ProjectMinedDto | null
+	>(null);
+	/**
+	 * 流式传输结束时string转为的JSON格式对象数据-合并后的结果
+	 */
+	const [mergedData, setMergedData] = useState<ProjectDto | null>(null);
 
 	const queryClient = useQueryClient();
 
 	/* 使用SSE获取AI生成结果 */
 	const { content, reasonContent, done, isReasoning } = useSseAnswer(input, target);
-	const [optimizationType, setOptimizationType] = useState<'polish' | 'mine' | null>(null);
+	const [actionType, setActionType] = useState<'lookup' | 'polish' | 'mine' | null>(null);
 	useEffect(() => {
 		if (done) {
-			const [mergedData, optimizedData] = jsonMd_obj(content);
-			setMergedData(mergedData);
-			setOptimizedData(optimizedData);
+			const result = jsonMd_obj(content);
+			if (Array.isArray(result)) {
+				const [resultData, mergedData] = result;
+				console.log('🚀 ~ useEffect ~ mergedData:', mergedData);
+				console.log('🚀 ~ useEffect ~ resultData:', resultData);
+				setResultData(resultData);
+				mergedData && setMergedData(mergedData); //[结果]支持
+			} else {
+				setResultData(result);
+			}
+
 			setInput({}); // 清空输入防止sse重复请求
 		}
 	}, [done]);
@@ -63,6 +78,8 @@ export const Action: React.FC<ActionProps> = () => {
 	// 根据项目状态确定可用操作
 	const getAvailableActions = (status: ProjectStatus) => {
 		switch (status) {
+			case ProjectStatus.committed:
+				return ['lookup'];
 			case ProjectStatus.lookuped:
 			case ProjectStatus.polishing:
 				return ['polish'];
@@ -79,15 +96,26 @@ export const Action: React.FC<ActionProps> = () => {
 
 	const availableActions = getAvailableActions(projectData.status);
 
+	// 处理AI分析
+	const handleLookup = () => {
+		const projectDto: ProjectDto = {
+			info: projectData.info,
+			lightspot: projectData.lightspot
+		};
+		setActionType('lookup');
+		setInput(projectDto);
+		setTarget('/project/lookup');
+	};
+
 	// 处理AI打磨
 	const handlePolish = () => {
 		const projectDto: ProjectDto = {
 			info: projectData.info,
 			lightspot: projectData.lightspot
 		};
-		setOptimizationType('polish');
+		setActionType('polish');
 		setInput(projectDto);
-		setTarget('polish');
+		setTarget('/project/polish');
 	};
 
 	// 处理AI挖掘
@@ -96,9 +124,9 @@ export const Action: React.FC<ActionProps> = () => {
 			info: projectData.info,
 			lightspot: projectData.lightspot
 		};
-		setOptimizationType('mine');
+		setActionType('mine');
 		setInput(projectDto);
-		setTarget('mine');
+		setTarget('/project/mine');
 	};
 
 	// 处理协作
@@ -111,17 +139,18 @@ export const Action: React.FC<ActionProps> = () => {
 	const handleMerge = () => {
 		queryClient.invalidateQueries({ queryKey: [ProjectQueryKey.Projects] });
 		setInput({});
-		setOptimizedData(null);
+		setResultData(null);
 		setMergedData(null);
-		setOptimizationType(null);
+		setActionType(null);
 		setTarget('polish');
 	};
 
 	const ProjectResultProps = {
-		optimizedData,
+		resultData,
 		mergedData,
-		optimizationType,
+		actionType,
 		availableActions,
+		handleLookup,
 		handlePolish,
 		handleMine,
 		handleCollaborate,
@@ -149,7 +178,7 @@ export const Action: React.FC<ActionProps> = () => {
 						/>
 					</div>
 
-					{/* 右栏：AI优化结果 */}
+					{/* 右栏：AI行动区域 */}
 					<div className="overflow-y-auto scb-thin ">
 						<ProjectResult {...ProjectResultProps} />
 					</div>

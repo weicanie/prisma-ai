@@ -15,7 +15,6 @@ import { Test } from '../views/MyTest/Test';
 import PrivateRoute from './PrivateRoute';
 import UpdateBreadRouter from './UpdateBreadRouter';
 const Action = lazy(() => import('../views/Main/Projects/Action'));
-const Read = lazy(() => import('../views/Main/Projects/Read'));
 export const routes = [
 	{
 		path: '',
@@ -102,7 +101,7 @@ export const routes = [
 						path: 'detail/:projectIndex',
 						element: (
 							<UpdateBreadRouter>
-								<Read></Read>
+								<Action></Action>
 							</UpdateBreadRouter>
 						)
 					},

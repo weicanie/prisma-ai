@@ -8,12 +8,12 @@ import { createHashedPassword, verifyPassword } from '../utils/passwordEncrypt';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
 type UserInfo = RegistResponse;
+
 @Injectable()
 export class UserService {
 	@Inject(RedisService)
 	private redisService: RedisService;
 	private logger = new Logger();
-
 	constructor(
 		@Inject(DbService)
 		private readonly dbService: DbService,

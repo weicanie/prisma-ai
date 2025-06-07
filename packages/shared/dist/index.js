@@ -30,6 +30,7 @@ __export(index_exports, {
   lookupResultSchema: () => lookupResultSchema,
   markdownToProjectSchema: () => markdownToProjectSchema,
   markdownToSkills: () => markdownToSkills,
+  projectLookupedSchema: () => projectLookupedSchema,
   projectMinedSchema: () => projectMinedSchema,
   projectPolishedSchema: () => projectPolishedSchema,
   projectSchema: () => projectSchema,
@@ -211,6 +212,11 @@ var lookupResultSchema = import_zod2.z.object({
     })
   ).describe("\u89E3\u51B3\u65B9\u6848").default([]),
   score: import_zod2.z.number().describe("\u9879\u76EE\u63CF\u8FF0\u8BC4\u5206, 0-100\u5206").default(0)
+});
+var projectLookupedSchema = import_zod2.z.object({
+  info: infoSchema,
+  lightspot: getLightspotSchema(),
+  lookupResult: lookupResultSchema
 });
 
 // src/types/project.schema-form.ts
@@ -439,6 +445,7 @@ var markdownToSkills = (markdown) => {
   lookupResultSchema,
   markdownToProjectSchema,
   markdownToSkills,
+  projectLookupedSchema,
   projectMinedSchema,
   projectPolishedSchema,
   projectSchema,

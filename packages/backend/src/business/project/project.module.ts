@@ -20,7 +20,7 @@ import { ProjectService } from './project.service';
 		ChainModule,
 		EventBusModule,
 		RedisModule,
-		forwardRef(() => SseModule), // 解决循环依赖
+		forwardRef(() => SseModule),
 		MongooseModule.forFeature([
 			{ name: Project.name, schema: ProjectSchema },
 			{ name: ProjectPolished.name, schema: ProjectPolishedSchema },

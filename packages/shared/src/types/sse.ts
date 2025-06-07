@@ -11,12 +11,18 @@ export interface StreamingChunk {
 	isReasoning?: boolean; // 是否是推理中-r1
 }
 
-/* 前端收到的数据格式 */
+/* 前端收到的chunk数据格式 */
 export interface DataChunkVO {
 	data: StreamingChunk & {
-		error?: string; // 错误信息
 		cached?: boolean; //是否命中llm缓存
 		exact?: boolean; //缓存命中类型 true: 相同 false:相似
+	};
+}
+/* 前端收到的chunk数据格式-错误信息 */
+export interface DataChunkErrVO {
+	data: {
+		error: string;
+		done: true;
 	};
 }
 
@@ -42,16 +48,26 @@ export const RequestTargetMap = {
 	lookup: '/sse/project-generate'
 };
 
-//用于创建sse会话的context类型
+//用于创建llm-sse会话的context
 export interface LLMSessionRequest {
 	input: any; //传入目标方法的输入
-	target: keyof typeof RequestTargetMap; //目标方法
 	userInfo?: UserInfoFromToken; //由登录验证 Guard 注入的用户信息
 }
+//llm-sse会话创建成功后的响应
 export interface LLMSessionResponse {
 	sessionId: string;
 }
-//查询会话状态
+//llm-sse会话状态
 export interface LLMSessionStatusResponse {
+	/*
+	  服务端完成但客户端没完成、会话缓存没了（视为会话不存在）：'notfound' 前端应该新建会话
+    服务端和客户端都完成：'bothdone' 前端应该新建会话
+      
+    服务端完成但客户端没完成、会话缓存还在：'backdone' 前端应该请求断点续传
+
+    服务端和客户端都没完成、创建了任务：'running' 前端应该请求断点续传
+    服务端和客户端都没完成、没创建任务：'tasknotfound' 前端应该请求sse/generate接口创建任务
+
+	 */
 	status: 'notfound' | 'bothdone' | 'backdone' | 'running' | 'tasknotfound';
 }

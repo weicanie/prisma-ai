@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
 	lookupResultSchema,
+	projectLookupedSchema,
 	projectMinedSchema,
 	projectPolishedSchema,
 	projectSchema
@@ -21,11 +22,11 @@ export enum ProjectStatus {
 	mined = 'mined', //用户已合并挖掘
 	accepted = 'accepted' //完成
 }
-
+export type lookupResultDto = z.infer<typeof lookupResultSchema>;
+export type projectLookupedDto = z.infer<typeof projectLookupedSchema>;
 export type ProjectDto = z.infer<typeof projectSchema>;
 export type ProjectPolishedDto = z.infer<typeof projectPolishedSchema>;
 export type ProjectMinedDto = z.infer<typeof projectMinedSchema>;
-
 export interface ProjectVo extends z.infer<typeof projectSchema> {
 	id?: string; // 数据库中的ID
 	name?: string; //项目名称

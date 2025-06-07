@@ -1,19 +1,24 @@
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { useTheme } from '@/utils/theme';
-import type { ProjectMinedDto, ProjectPolishedDto } from '@prism-ai/shared';
-import { Code, Lightbulb, MessageSquare, Pyramid, Sparkles, Target, Zap } from 'lucide-react';
+import type {
+	lookupResultDto,
+	ProjectDto,
+	projectLookupedDto,
+	ProjectMinedDto,
+	ProjectPolishedDto
+} from '@prism-ai/shared';
+import { MessageSquare, Sparkles, Target, Wand2, Zap } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { MinedPolishedLightspotSection } from './MinedLightspotSection';
-import { PolishedLightspotSection } from './PolishedLightspotSection';
+import { ProejctPMResultCard } from './ProejctPMResultCard';
+import { ProjectAnalysisResultCard } from './ProjectAnalysisResultCard';
 
-interface ProjectResultProps {
-	optimizedData: ProjectPolishedDto | ProjectMinedDto | null; //优化后的数据
-	mergedData: ProjectPolishedDto | ProjectMinedDto | null; //正式合并后的数据
-	optimizationType: 'polish' | 'mine' | null;
+export interface ProjectResultProps {
+	resultData: lookupResultDto | ProjectPolishedDto | ProjectMinedDto | null; //行动结果
+	mergedData: projectLookupedDto | ProjectDto | null; //正式合并后的数据
+	actionType: keyof typeof headerMap | null;
 	availableActions: string[];
+	handleLookup: () => void;
 	handlePolish: () => void;
 	handleMine: () => void;
 	handleCollaborate: () => void;
@@ -26,11 +31,27 @@ interface ProjectResultProps {
 	done?: boolean; //是否完成生成
 }
 
+export const headerMap = {
+	lookup: {
+		title: 'AI分析结果',
+		desc: 'AI的深度分析结果'
+	},
+	polish: {
+		title: 'AI优化结果',
+		desc: '深度优化后的项目经验'
+	},
+	mine: {
+		title: 'AI挖掘结果',
+		desc: '深度挖掘的项目亮点'
+	}
+};
+
 export const ProjectResult: React.FC<ProjectResultProps> = ({
-	optimizedData,
+	resultData,
 	mergedData,
-	optimizationType,
+	actionType,
 	availableActions,
+	handleLookup,
 	handlePolish,
 	handleMine,
 	handleCollaborate,
@@ -110,7 +131,7 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 			});
 		}
 	}, [isReasoning, done, content]);
-
+	/* 思维链sse展示卡片 */
 	const reasonContentSection = () => (
 		<Card
 			className={`overflow-hidden h-full ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
@@ -138,6 +159,7 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 			</CardContent>
 		</Card>
 	);
+	/* 生成内容sse展示卡片 */
 	const streamingContentSection = () => (
 		<Card
 			className={`overflow-hidden h-full ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
@@ -165,7 +187,8 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 			</CardContent>
 		</Card>
 	);
-	/* 优化选择卡片-只在开始出现 */
+
+	/* 行动选择卡片-只在开始出现 */
 	const preflightSection = () => (
 		<Card
 			className={`h-full ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
@@ -181,27 +204,80 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 			</CardHeader>
 			<CardContent>
 				<div className="space-y-3">
-					{availableActions.includes('polish') && (
-						<Button
-							onClick={handlePolish}
-							className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-							size="lg"
+					{availableActions.includes('lookup') && (
+						<Card
+							className={`flex flex-col items-center justify-center text-center ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
 						>
-							<Sparkles className="w-4 h-4 mr-2" />
-							打磨优化项目经验
-						</Button>
+							<Wand2 className={`w-12 h-12 mb-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+							<h3
+								className={`text-xl font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
+							>
+								项目深度分析
+							</h3>
+							<p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+								让 Prisma 帮助您分析项目的潜在问题和改进方向。
+							</p>
+							<Button
+								onClick={handleLookup}
+								size="lg"
+								className={`${isDark ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600'} text-white`}
+							>
+								<Wand2 className="mr-2 h-5 w-5" /> 使用 Prisma 分析项目
+							</Button>
+						</Card>
+					)}
+
+					{availableActions.includes('polish') && (
+						<Card
+							className={`flex flex-col items-center justify-center text-center ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+						>
+							<Sparkles
+								className={`w-12 h-12 mb-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}
+							/>
+							<h3
+								className={`text-xl font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
+							>
+								项目深度优化
+							</h3>
+							<p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+								让 Prisma 帮助您优化项目经验。
+							</p>
+							<Button
+								onClick={handlePolish}
+								className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+								size="lg"
+							>
+								<Sparkles className="w-4 h-4 mr-2" />
+								深度优化项目经验
+							</Button>
+						</Card>
 					)}
 
 					{availableActions.includes('mine') && (
-						<Button
-							onClick={handleMine}
-							variant="outline"
-							className={`w-full ${isDark ? 'border-gray-600 text-gray-200 hover:bg-gray-700' : 'border-gray-300 text-purple-700 hover:bg-gray-50'}`}
-							size="lg"
+						<Card
+							className={`flex flex-col items-center justify-center text-center ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
 						>
-							<Target className="w-4 h-4 mr-2" />
-							深度挖掘项目亮点
-						</Button>
+							<Sparkles
+								className={`w-12 h-12 mb-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}
+							/>
+							<h3
+								className={`text-xl font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
+							>
+								亮点深度挖掘
+							</h3>
+							<p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+								让 Prisma 帮助您挖掘项目亮点。
+							</p>
+							<Button
+								onClick={handleMine}
+								variant="outline"
+								className={`w-full ${isDark ? 'border-gray-600 text-gray-200 hover:bg-gray-700' : 'border-gray-300 text-purple-700 hover:bg-gray-50'}`}
+								size="lg"
+							>
+								<Target className="w-4 h-4 mr-2" />
+								深度挖掘项目亮点
+							</Button>
+						</Card>
 					)}
 
 					{availableActions.includes('collaborate') && (
@@ -219,139 +295,30 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 			</CardContent>
 		</Card>
 	);
-	/* 结果卡片-根据优化类型渲染不同格式的结果 */
-	const resultCardSection = () => {
-		if (!optimizedData) return null;
-		return (
-			<Card
-				className={`h-full mb-8 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
-			>
-				<CardHeader>
-					<CardTitle
-						className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
-					>
-						<Zap className="w-5 h-5" />
-						{optimizationType === 'polish' ? 'AI打磨结果' : 'AI挖掘结果'}
-					</CardTitle>
-					<CardDescription className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-						{optimizationType === 'polish' ? '优化后的项目描述' : '深度挖掘的项目亮点'}
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="space-y-6">
-					{/* 基本信息 */}
-					<div className="space-y-4">
-						{optimizedData.info.desc.role && (
-							<div>
-								<h4 className={`font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-									角色职责
-								</h4>
-								<p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-									{optimizedData.info.desc.role}
-								</p>
-							</div>
-						)}
-
-						{optimizedData.info.desc.contribute && (
-							<div>
-								<h4 className={`font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-									核心贡献
-								</h4>
-								<p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-									{optimizedData.info.desc.contribute}
-								</p>
-							</div>
-						)}
-
-						{optimizedData.info.desc.bgAndTarget && (
-							<div>
-								<h4 className={`font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-									项目背景
-								</h4>
-								<p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-									{optimizedData.info.desc.bgAndTarget}
-								</p>
-							</div>
-						)}
-					</div>
-					<Separator />
-					{/* 技术栈 */}
-					{optimizedData.info.techStack?.length > 0 && (
-						<div>
-							<h4
-								className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}
-							>
-								<Code className="w-4 h-4" />
-								技术栈
-							</h4>
-							<div className="flex flex-wrap gap-2">
-								{optimizedData.info.techStack.map((tech, index) => (
-									<Badge
-										key={index}
-										variant="outline"
-										className={`${isDark ? 'border-gray-600 text-gray-300' : 'border-gray-300 text-gray-700'}`}
-									>
-										{tech}
-									</Badge>
-								))}
-							</div>
-						</div>
-					)}
-					<Separator />
-
-					{/* 优化后的亮点 */}
-					{optimizedData.lightspot && (
-						<div>
-							<h4
-								className={`font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
-							>
-								<Sparkles className="w-5 h-5" />
-								{optimizationType === 'polish' ? '优化后亮点' : '原始亮点'}
-							</h4>
-							<PolishedLightspotSection
-								lightspot={optimizedData.lightspot}
-								isPolished={optimizationType === 'polish'}
-							/>
-						</div>
-					)}
-
-					{/* 如果是挖掘结果，显示新增亮点 */}
-					{optimizationType === 'mine' &&
-						'lightspotAdded' in optimizedData &&
-						optimizedData.lightspotAdded && (
-							<>
-								<Separator />
-								<div>
-									<h4
-										className={`font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
-									>
-										<Lightbulb className="w-5 h-5" />
-										新增亮点
-									</h4>
-									<MinedPolishedLightspotSection lightspotAdded={optimizedData.lightspotAdded} />
-								</div>
-							</>
-						)}
-				</CardContent>
-				{mergedData && (
-					<Button
-						onClick={handleMerge}
-						variant="outline"
-						className="fixed bottom-5 rounded-md right-5 w-full hover:bg-purple-700 text-white"
-						size="lg"
-					>
-						<Pyramid className="w-4 h-4 mr-2" />
-						完成优化
-					</Button>
-				)}
-			</Card>
-		);
+	/* 结果卡片-根据行动类型渲染不同格式的结果 */
+	const resultCardProps = {
+		actionType,
+		resultData,
+		mergedData,
+		handleMerge
 	};
+	const proejctResultCard = <ProejctPMResultCard {...resultCardProps} />;
+	const contentMap = {
+		lookup: <ProjectAnalysisResultCard {...resultCardProps} isDark={isDark} />,
+		polish: proejctResultCard,
+		mine: proejctResultCard
+	};
+	const resultCardSection = () => {
+		if (!resultData || !actionType) return null;
+		return contentMap[actionType];
+	};
+
 	return (
 		<>
 			{/* 优化选择卡片-只在开始出现 */}
-			{optimizedData === null && !reasonContent && !content && preflightSection()}
+			{resultData === null && !reasonContent && !content && preflightSection()}
 			{/* 结果卡片-根据优化类型渲染不同格式的结果 */}
-			{optimizedData && resultCardSection()}
+			{resultData && resultCardSection()}
 			{/* 推理内容生成 */}
 			{reasonContent && reasonContentSection()}
 			{/* 内容生成-最后消失 */}

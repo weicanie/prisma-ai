@@ -71,6 +71,7 @@ const projectMinedSchema = z.object({
 		})
 	)
 });
+
 const lookupResultSchema = z.object({
 	problem: z
 		.array(
@@ -93,4 +94,16 @@ const lookupResultSchema = z.object({
 	score: z.number().describe('项目描述评分, 0-100分').default(0)
 });
 
-export { lookupResultSchema, projectMinedSchema, projectPolishedSchema, projectSchema };
+const projectLookupedSchema = z.object({
+	info: infoSchema,
+	lightspot: getLightspotSchema(),
+	lookupResult: lookupResultSchema
+});
+
+export {
+	lookupResultSchema,
+	projectLookupedSchema,
+	projectMinedSchema,
+	projectPolishedSchema,
+	projectSchema
+};
