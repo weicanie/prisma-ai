@@ -126,8 +126,12 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 			const element1 = reasoningContentRef.current;
 			const element2 = streamingContentRef.current;
 			requestAnimationFrame(() => {
-				element1 && (element1.scrollTop = 0);
-				element2 && (element2.scrollTop = 0);
+				if (element1) {
+					element1.scrollTop = 0;
+				}
+				if (element2) {
+					element2.scrollTop = 0;
+				}
 			});
 		}
 	}, [isReasoning, done, content]);

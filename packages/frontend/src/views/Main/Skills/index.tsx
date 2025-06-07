@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { SkillVo } from '@prism-ai/shared';
+import type { Row, Table } from '@tanstack/react-table';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCustomQuery } from '../../../query/config';
@@ -15,17 +16,12 @@ import { SkillCreate } from './SkillCreate';
 
 interface SkillsProps {
 	selectColShow?: boolean; // 是否显示选择列
-	selectionHandler?: (...args: any) => void; //储存选中状态到store
+	selectionHandler?: (rows: unknown[]) => void; //储存选中状态到store
 	title?: string; // 页面标题
 	description?: string; // 页面描述
 }
 
-export const Skills: React.FC<SkillsProps> = ({
-	selectColShow,
-	selectionHandler,
-	title,
-	description
-}) => {
+const Skills: React.FC<SkillsProps> = ({ selectColShow, selectionHandler, title, description }) => {
 	const navigate = useNavigate();
 	const { data, status } = useCustomQuery([SkillQueryKey.Skills], findAllUserSkills);
 
@@ -41,7 +37,7 @@ export const Skills: React.FC<SkillsProps> = ({
 		? [
 				{
 					id: '_select' as const,
-					header: ({ table }: any) => (
+					header: ({ table }: { table: Table<SkillVo> }) => (
 						<Checkbox
 							checked={
 								table.getIsAllPageRowsSelected() ||
@@ -52,7 +48,7 @@ export const Skills: React.FC<SkillsProps> = ({
 							className="translate-y-[2px]"
 						/>
 					),
-					cell: ({ row }: any) => (
+					cell: ({ row }: { row: Row<SkillVo> }) => (
 						<Checkbox
 							checked={row.getIsSelected()}
 							onCheckedChange={value => row.toggleSelected(!!value)}
@@ -166,4 +162,5 @@ export const Skills: React.FC<SkillsProps> = ({
 		</>
 	);
 };
+
 export default Skills;

@@ -9,9 +9,11 @@ import { useCustomQuery } from '../../../query/config';
 import { JobQueryKey } from '../../../query/keys';
 import { findAllUserJobs } from '../../../services/job';
 
-interface JobReadProps {}
+interface JobReadProps {
+	_?: string;
+}
 
-export const JobRead: React.FC<JobReadProps> = ({}) => {
+const JobRead: React.FC<JobReadProps> = () => {
 	const { jobIndex } = useParams();
 	const { data, status } = useCustomQuery([JobQueryKey.Jobs], () => findAllUserJobs(1, 100));
 
@@ -172,3 +174,5 @@ export const JobRead: React.FC<JobReadProps> = ({}) => {
 		</div>
 	);
 };
+
+export default JobRead;

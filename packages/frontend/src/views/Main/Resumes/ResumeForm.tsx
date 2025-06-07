@@ -14,7 +14,7 @@ import {
 	FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import type { CreateResumeDto } from '@prism-ai/shared';
+import type { CreateResumeDto, ProjectVo, SkillItem } from '@prism-ai/shared';
 import { Code, FileText, Sparkles } from 'lucide-react';
 import React, { memo } from 'react';
 import { useSelector } from 'react-redux';
@@ -43,7 +43,7 @@ const generateDefaultResumeName = () => {
 	return `我的简历-${year}-${month}-${day}`;
 };
 
-export const ResumeForm: React.FC<ResumeFormProps> = memo(({ onSubmit }) => {
+const ResumeForm: React.FC<ResumeFormProps> = memo(({ onSubmit }) => {
 	const form = useForm<ResumeFormData>({
 		resolver: zodResolver(resumeFormSchema),
 		defaultValues: {
@@ -83,7 +83,7 @@ export const ResumeForm: React.FC<ResumeFormProps> = memo(({ onSubmit }) => {
 		const resumeData: CreateResumeDto = {
 			name: data.name,
 			skill: selectedSkill?.id,
-			projects: selectedProjects?.map((project: any) => project.id) || []
+			projects: selectedProjects?.map((project: ProjectVo): string => project.id!) || []
 		};
 
 		console.log('提交的简历数据:', resumeData);
@@ -128,7 +128,7 @@ export const ResumeForm: React.FC<ResumeFormProps> = memo(({ onSubmit }) => {
 							</CardHeader>
 							<CardContent>
 								<div className="space-y-3">
-									{selectedSkill.content?.map((skillGroup: any, index: number) => (
+									{selectedSkill.content?.map((skillGroup: SkillItem, index: number) => (
 										<div key={index}>
 											<h5 className="font-medium text-sm mb-2">{skillGroup.type}</h5>
 											<div className="flex flex-wrap gap-1">
@@ -159,7 +159,7 @@ export const ResumeForm: React.FC<ResumeFormProps> = memo(({ onSubmit }) => {
 							</CardHeader>
 							<CardContent>
 								<div className="space-y-3">
-									{selectedProjects.map((project: any, index: number) => (
+									{selectedProjects.map((project: ProjectVo, index: number) => (
 										<div
 											key={project.id || index}
 											className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800"
@@ -254,3 +254,5 @@ export const ResumeForm: React.FC<ResumeFormProps> = memo(({ onSubmit }) => {
 		</div>
 	);
 });
+
+export default ResumeForm;

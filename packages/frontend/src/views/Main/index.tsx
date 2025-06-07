@@ -46,4 +46,4 @@ function Main() {
 	);
 }
 
-export { Main };
+export default Main;

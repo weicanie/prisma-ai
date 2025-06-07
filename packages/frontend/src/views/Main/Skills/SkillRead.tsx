@@ -8,9 +8,11 @@ import { useCustomQuery } from '../../../query/config';
 import { SkillQueryKey } from '../../../query/keys';
 import { findAllUserSkills } from '../../../services/skill';
 
-interface SkillReadProps {}
+interface SkillReadProps {
+	_?: string;
+}
 
-export const SkillRead: React.FC<SkillReadProps> = ({}) => {
+const SkillRead: React.FC<SkillReadProps> = () => {
 	const { skillIndex } = useParams();
 	const { data, status } = useCustomQuery([SkillQueryKey.Skills], findAllUserSkills);
 
@@ -136,4 +138,5 @@ export const SkillRead: React.FC<SkillReadProps> = ({}) => {
 		</div>
 	);
 };
+
 export default SkillRead;

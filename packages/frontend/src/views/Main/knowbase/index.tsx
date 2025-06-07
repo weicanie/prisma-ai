@@ -1,5 +1,6 @@
 import { Checkbox } from '@/components/ui/checkbox';
 import { typeMap, type KnowledgeVo } from '@prism-ai/shared';
+import type { Row, Table } from '@tanstack/react-table';
 import { AlignLeft, Link } from 'lucide-react';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -11,14 +12,14 @@ import type { DataTableConfig } from '../components/config-data-table/config.typ
 import { DataTableColumnHeader } from '../components/config-data-table/data-table/columns/header';
 import { DataTableRowActions } from '../components/config-data-table/data-table/columns/row-actions';
 import { PageHeader } from '../components/PageHeader';
-import { KnowledgeCreate } from './KnowledgeCreate';
+import KnowledgeCreate from './KnowledgeCreate';
 
 interface KnowledgesProps {
 	selectColShow?: boolean;
-	selectionHandler?: (...args: any) => void;
+	selectionHandler?: (...args: unknown[]) => void;
 }
 
-export const Knowledges: React.FC<KnowledgesProps> = ({ selectColShow, selectionHandler }) => {
+const Knowledges: React.FC<KnowledgesProps> = ({ selectColShow, selectionHandler }) => {
 	const navigate = useNavigate();
 	const { data, status } = useCustomQuery([KnowledgeQueryKey.Knowledges], () =>
 		findAllUserKnowledge({ page: 1, limit: 10 })
@@ -37,7 +38,7 @@ export const Knowledges: React.FC<KnowledgesProps> = ({ selectColShow, selection
 		? [
 				{
 					id: '_select' as const,
-					header: ({ table }: any) => (
+					header: ({ table }: { table: Table<KnowledgeVo> }) => (
 						<Checkbox
 							checked={
 								table.getIsAllPageRowsSelected() ||
@@ -48,7 +49,7 @@ export const Knowledges: React.FC<KnowledgesProps> = ({ selectColShow, selection
 							className="translate-y-[2px]"
 						/>
 					),
-					cell: ({ row }: any) => (
+					cell: ({ row }: { row: Row<KnowledgeVo> }) => (
 						<Checkbox
 							checked={row.getIsSelected()}
 							onCheckedChange={value => row.toggleSelected(!!value)}
@@ -161,3 +162,5 @@ export const Knowledges: React.FC<KnowledgesProps> = ({ selectColShow, selection
 		</>
 	);
 };
+
+export default Knowledges;

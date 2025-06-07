@@ -17,15 +17,17 @@ import { useSseAnswer } from '../../../services/sse/useSseAnswer';
 import { OriginalProject } from './Action-Result/OriginalProject';
 import { ProjectResult } from './Action-Result/ProjectResult';
 
-interface ActionProps {}
+interface ActionProps {
+	_?: string;
+}
 
-export const Action: React.FC<ActionProps> = () => {
+const Action: React.FC<ActionProps> = () => {
 	const { projectIndex } = useParams();
 	const { data, status } = useCustomQuery([ProjectQueryKey.Projects], findAllProjects);
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
 
-	const [input, setInput] = useState<ProjectDto | {}>({});
+	const [input, setInput] = useState<ProjectDto | Record<string, unknown>>({});
 	//目标接口的URL path
 	const [target, setTarget] = useState('');
 	/**
@@ -53,7 +55,9 @@ export const Action: React.FC<ActionProps> = () => {
 				console.log('🚀 ~ useEffect ~ mergedData:', mergedData);
 				console.log('🚀 ~ useEffect ~ resultData:', resultData);
 				setResultData(resultData);
-				mergedData && setMergedData(mergedData); //[结果]支持
+				if (mergedData) {
+					setMergedData(mergedData); //[结果]支持
+				}
 			} else {
 				setResultData(result);
 			}
@@ -191,4 +195,5 @@ export const Action: React.FC<ActionProps> = () => {
 		</div>
 	);
 };
+
 export default Action;

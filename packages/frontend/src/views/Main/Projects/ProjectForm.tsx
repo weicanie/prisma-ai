@@ -17,18 +17,19 @@ import { projectSchemaForm, type ProjectDto } from '@prism-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { throttle } from 'lodash';
 import { CheckIcon, ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
-import { memo, useState, type PropsWithChildren } from 'react';
+import { useState, type PropsWithChildren } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useCustomMutation } from '../../../query/config';
 import { ProjectQueryKey } from '../../../query/keys';
 import { createProject } from '../../../services/project';
 import { resetProjectData, selectProjectData, setDataFromDto } from '../../../store/projects';
+
 type PropsType = PropsWithChildren<{
 	isUseMdEditor: boolean;
 	setIsUseMdEditor: React.Dispatch<React.SetStateAction<boolean>>;
 }>;
 
-export const ProjectForm = memo(({ setIsUseMdEditor }: PropsType) => {
+const ProjectForm: React.FC<PropsType> = ({ setIsUseMdEditor }) => {
 	const [currentStep, setCurrentStep] = useState(0);
 	const totalSteps = 3;
 	const stepTitles = ['项目信息', '技术栈', '项目亮点'];
@@ -69,8 +70,8 @@ export const ProjectForm = memo(({ setIsUseMdEditor }: PropsType) => {
 	// 使用 useFieldArray 实现动态数组
 	const techStackArray = useFieldArray({
 		control: form.control,
-		//内部类型体操失误导致误报, 实际没有问题
-		//@ts-expect-error
+
+		//@ts-expect-error 内部类型体操失误导致误报, 实际没有问题
 		name: 'info.techStack'
 	});
 
@@ -201,7 +202,8 @@ export const ProjectForm = memo(({ setIsUseMdEditor }: PropsType) => {
 					<FormField
 						key={field.key}
 						control={form.control}
-						name={`info.desc.${field.key}` as any}
+						//@ts-expect-error 内部类型体操失误导致误报, 实际没有问题
+						name={`info.desc.${field.key}`}
 						render={({ field: formField }) => (
 							<FormItem>
 								<FormLabel>
@@ -290,7 +292,8 @@ export const ProjectForm = memo(({ setIsUseMdEditor }: PropsType) => {
 							<div key={field.id} className="flex items-start gap-3">
 								<FormField
 									control={form.control}
-									name={`lightspot.${section.key}.${index}` as any}
+									//@ts-expect-error 内部类型体操失误导致误报, 实际没有问题
+									name={`lightspot.${section.key}.${index}`}
 									render={({ field: formField }) => (
 										<FormItem className="flex-1">
 											<FormControl>
@@ -392,4 +395,6 @@ export const ProjectForm = memo(({ setIsUseMdEditor }: PropsType) => {
 			</div>
 		</div>
 	);
-});
+};
+
+export default ProjectForm;

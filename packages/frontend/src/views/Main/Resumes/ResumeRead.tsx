@@ -8,9 +8,11 @@ import { useCustomQuery } from '../../../query/config';
 import { ResumeQueryKey } from '../../../query/keys';
 import { findAllUserResumes } from '../../../services/resume';
 
-interface ResumeReadProps {}
+interface ResumeReadProps {
+	_?: string;
+}
 
-export const ResumeRead: React.FC<ResumeReadProps> = ({}) => {
+const ResumeRead: React.FC<ResumeReadProps> = () => {
 	const { resumeIndex } = useParams();
 	const { data, status } = useCustomQuery([ResumeQueryKey.Resumes, 1, 10], ({ queryKey }) => {
 		const [, page, limit] = queryKey; // 从 queryKey 中解构分页参数
@@ -309,3 +311,5 @@ export const ResumeRead: React.FC<ResumeReadProps> = ({}) => {
 		</div>
 	);
 };
+
+export default ResumeRead;

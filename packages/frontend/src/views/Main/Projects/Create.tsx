@@ -14,7 +14,7 @@ import { ProjectQueryKey } from '../../../query/keys';
 import { createProject } from '../../../services/project';
 import { resetProjectData, selectProjectMd, setDataFromMd } from '../../../store/projects';
 import MilkdownEditor from '../components/Editor';
-import { ProjectForm } from './ProjectForm';
+import ProjectForm from './ProjectForm';
 
 //TODO 项目经验新建支持md编辑器、格式保护
 //TODO支持项目经验上传, 支持上传文本（格式转换）和上传文件（提取文本,然后格式转换）
@@ -51,9 +51,11 @@ export function CreateBtn(props: CreateBtnProps) {
 	);
 }
 
-interface CreateProjectProps {}
+interface CreateProjectProps {
+	_?: string;
+}
 
-export const CreateProject: React.FC<CreateProjectProps> = () => {
+const CreateProject: React.FC<CreateProjectProps> = () => {
 	const queryClient = useQueryClient();
 	const dispatch = useDispatch();
 	const uploadProjectMutation = useCustomMutation(createProject, {
@@ -111,3 +113,5 @@ export const CreateProject: React.FC<CreateProjectProps> = () => {
 		</>
 	);
 };
+
+export default CreateProject;

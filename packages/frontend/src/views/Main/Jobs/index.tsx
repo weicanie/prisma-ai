@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { JobVo } from '@prism-ai/shared';
+import type { Row, Table } from '@tanstack/react-table';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCustomQuery } from '../../../query/config';
@@ -11,14 +12,14 @@ import type { DataTableConfig } from '../components/config-data-table/config.typ
 import { DataTableColumnHeader } from '../components/config-data-table/data-table/columns/header';
 import { DataTableRowActions } from '../components/config-data-table/data-table/columns/row-actions';
 import { PageHeader } from '../components/PageHeader';
-import { JobCreate } from './JobCreate';
+import JobCreate from './JobCreate';
 
 interface JobsProps {
 	selectColShow?: boolean; // 是否显示选择列
-	selectionHandler?: (...args: any) => void; //储存选中状态到store
+	selectionHandler?: (...args: unknown[]) => void; //储存选中状态到store
 }
 
-export const Jobs: React.FC<JobsProps> = ({ selectColShow, selectionHandler }) => {
+const Jobs: React.FC<JobsProps> = ({ selectColShow, selectionHandler }) => {
 	const navigate = useNavigate();
 	const { data, status } = useCustomQuery([JobQueryKey.Jobs], () => findAllUserJobs(1, 100));
 
@@ -34,7 +35,7 @@ export const Jobs: React.FC<JobsProps> = ({ selectColShow, selectionHandler }) =
 		? [
 				{
 					id: '_select' as const,
-					header: ({ table }: any) => (
+					header: ({ table }: { table: Table<JobVo> }) => (
 						<Checkbox
 							checked={
 								table.getIsAllPageRowsSelected() ||
@@ -45,7 +46,7 @@ export const Jobs: React.FC<JobsProps> = ({ selectColShow, selectionHandler }) =
 							className="translate-y-[2px]"
 						/>
 					),
-					cell: ({ row }: any) => (
+					cell: ({ row }: { row: Row<JobVo> }) => (
 						<Checkbox
 							checked={row.getIsSelected()}
 							onCheckedChange={value => row.toggleSelected(!!value)}
@@ -154,3 +155,5 @@ export const Jobs: React.FC<JobsProps> = ({ selectColShow, selectionHandler }) =
 		</>
 	);
 };
+
+export default Jobs;

@@ -28,11 +28,11 @@ import { DataTableToolbar } from './toolbar';
 
 type DataTableProps<TData, TValue> = Omit<DataTableConfig<TData>, 'columns'> & {
 	columns: ColumnDef<TData, TValue>[]; // 列定义
-	filterDataCols?: DataColWithFilter<any>[]; // 支持过滤功能的列的定义
+	filterDataCols?: DataColWithFilter<TData>[]; // 支持过滤功能的列的定义
 	data: TData[]; // 表格数据源
 };
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData, TValue = unknown>({
 	columns,
 	data,
 	filterDataCols,
@@ -46,12 +46,13 @@ export function DataTable<TData, TValue>({
 
 	// 处理行选择变化事件
 	React.useEffect(() => {
-		selectionHandler &&
+		if (selectionHandler) {
 			selectionHandler(
 				[...Object.getOwnPropertyNames(rowSelection)]
 					.map((key: string) => parseInt(key))
 					.map((index: number) => data[index])
 			);
+		}
 	}, [rowSelection]);
 
 	const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});

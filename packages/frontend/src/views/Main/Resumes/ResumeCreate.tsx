@@ -2,11 +2,13 @@ import React from 'react';
 import { useCustomMutation } from '../../../query/config';
 import { createResume } from '../../../services/resume';
 import { CreateBtn } from '../Projects/Create';
-import { ResumeForm } from './ResumeForm';
+import ResumeForm from './ResumeForm';
 
-interface ResumeCreateProps {}
+interface ResumeCreateProps {
+	_?: string;
+}
 
-export const ResumeCreate: React.FC<ResumeCreateProps> = () => {
+const ResumeCreate: React.FC<ResumeCreateProps> = () => {
 	const createResumeMutation = useCustomMutation(createResume);
 
 	const dialogContent = (
@@ -23,3 +25,5 @@ export const ResumeCreate: React.FC<ResumeCreateProps> = () => {
 		</CreateBtn>
 	);
 };
+
+export default ResumeCreate;

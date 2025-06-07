@@ -1,7 +1,11 @@
-import React from 'react';
+import Tabs from '../Main/components/Tabs';
 
-interface TestProps {}
-
-export const Test: React.FC<TestProps> = () => {
-	return <></>;
+const Test = () => {
+	return (
+		<>
+			<Tabs />
+		</>
+	);
 };
+
+export default Test;

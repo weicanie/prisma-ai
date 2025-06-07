@@ -2,9 +2,11 @@ import React from 'react';
 import { CreateBtn } from '../Projects/Create';
 import { KnowledgeForm } from './KnowledgeForm';
 
-interface KnowledgeCreateProps {}
+interface KnowledgeCreateProps {
+	_?: string;
+}
 
-export const KnowledgeCreate: React.FC<KnowledgeCreateProps> = () => {
+const KnowledgeCreate: React.FC<KnowledgeCreateProps> = () => {
 	const dialogContent = (
 		<>
 			<div className="flex gap-2">
@@ -21,3 +23,5 @@ export const KnowledgeCreate: React.FC<KnowledgeCreateProps> = () => {
 		</CreateBtn>
 	);
 };
+
+export default KnowledgeCreate;

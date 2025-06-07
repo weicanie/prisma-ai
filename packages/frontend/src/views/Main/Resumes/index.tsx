@@ -12,13 +12,15 @@ import type { DataTableConfig } from '../components/config-data-table/config.typ
 import { DataTableColumnHeader } from '../components/config-data-table/data-table/columns/header';
 import { DataTableRowActions } from '../components/config-data-table/data-table/columns/row-actions';
 import { PageHeader } from '../components/PageHeader';
-import { Projects } from '../Projects';
-import { Skills } from '../Skills';
-import { ResumeCreate } from './ResumeCreate';
+import Projects from '../Projects';
+import Skills from '../Skills';
+import ResumeCreate from './ResumeCreate';
 
-interface ResumesProps {}
+interface ResumesProps {
+	_?: string;
+}
 
-export const Resumes: React.FC<ResumesProps> = () => {
+const Resumes: React.FC<ResumesProps> = () => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
@@ -126,16 +128,20 @@ export const Resumes: React.FC<ResumesProps> = () => {
 	};
 	const SkillsProps = {
 		selectColShow: true,
-		selectionHandler: (selectedRows: any) => {
-			dispatch(setResumeData({ skill: selectedRows[0]?.id }));
+		selectionHandler: (selectedRows: unknown[]) => {
+			dispatch(setResumeData({ skill: (selectedRows[0] as ResumeVo).id }));
 		},
 		title: '',
 		description: '选择一个职业技能'
 	};
 	const ProjectsProps = {
 		selectColShow: true,
-		selectionHandler: (selectedRows: any) => {
-			dispatch(setResumeData({ projects: selectedRows.map((row: any) => row.id) }));
+		selectionHandler: (selectedRows: unknown[]) => {
+			dispatch(
+				setResumeData({
+					projects: selectedRows.map((row: unknown): string => (row as ResumeVo).id!)
+				})
+			);
 		},
 		title: '',
 		description: '选择若干项目经验'
@@ -155,3 +161,5 @@ export const Resumes: React.FC<ResumesProps> = () => {
 		</>
 	);
 };
+
+export default Resumes;

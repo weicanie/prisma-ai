@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { ProjectVo } from '@prism-ai/shared';
+import type { Row, Table } from '@tanstack/react-table';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCustomQuery } from '../../../query/config';
@@ -11,16 +12,16 @@ import type { DataTableConfig } from '../components/config-data-table/config.typ
 import { DataTableColumnHeader } from '../components/config-data-table/data-table/columns/header';
 import { DataTableRowActions } from '../components/config-data-table/data-table/columns/row-actions';
 import { PageHeader } from '../components/PageHeader';
-import { CreateProject } from './Create';
+import CreateProject from './Create';
 
 interface ProjectsProps {
 	selectColShow?: boolean; // 是否显示选择列
-	selectionHandler?: (...args: any) => void; //储存选中状态到store
+	selectionHandler?: (rows: unknown[]) => void; //储存选中状态到store
 	title?: string; // 页面标题
 	description?: string; // 页面描述
 }
 
-export const Projects: React.FC<ProjectsProps> = ({
+const Projects: React.FC<ProjectsProps> = ({
 	selectColShow,
 	selectionHandler,
 	title,
@@ -40,7 +41,7 @@ export const Projects: React.FC<ProjectsProps> = ({
 				{
 					id: '_select' as const,
 
-					header: ({ table }: any) => (
+					header: ({ table }: { table: Table<ProjectVo> }) => (
 						<Checkbox
 							checked={
 								table.getIsAllPageRowsSelected() ||
@@ -51,7 +52,7 @@ export const Projects: React.FC<ProjectsProps> = ({
 							className="translate-y-[2px]"
 						/>
 					),
-					cell: ({ row }: any) => (
+					cell: ({ row }: { row: Row<ProjectVo> }) => (
 						<Checkbox
 							checked={row.getIsSelected()}
 							onCheckedChange={value => row.toggleSelected(!!value)}
@@ -158,3 +159,5 @@ export const Projects: React.FC<ProjectsProps> = ({
 		</>
 	);
 };
+
+export default Projects;

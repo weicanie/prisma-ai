@@ -1,4 +1,6 @@
 import { Pyramid } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const tabs = [
 	{ name: 'My Account', href: '#', icon: Pyramid, current: false },
@@ -7,13 +9,34 @@ const tabs = [
 	{ name: 'Billing', href: '#', icon: Pyramid, current: false }
 ];
 
-function classNames(...classes: any[]) {
+interface Tab {
+	name: string;
+	href: string;
+	icon: React.ElementType;
+	current: boolean;
+}
+function classNames(...classes: (string | boolean)[]) {
 	return classes.filter(Boolean).join(' ');
 }
 
 export default function Tabs() {
+	const [currentTab, setCurrentTab] = useState<Tab>(tabs[0]);
+	const navigate = useNavigate();
+	tabs.forEach(t => {
+		t.current = t.name === currentTab.name; //更新当前选中状态
+	});
+	//添加点击选中功能
+	const handleClick = (tab: Tab) => {
+		console.log('🚀 ~ handleClick ~ tab:', tab);
+		navigate(tab.href);
+		tabs.forEach(t => {
+			t.current = t.name === tab.name; //更新当前选中状态
+		});
+		setCurrentTab(tab);
+	};
 	return (
 		<div>
+			{/* 在小屏幕如手机上显示select group */}
 			<div className="grid grid-cols-1 sm:hidden">
 				{/* Use an "onChange" listener to redirect the user to the selected tab URL. */}
 				<select
@@ -22,7 +45,9 @@ export default function Tabs() {
 					className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-2 pl-3 pr-8 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
 				>
 					{tabs.map(tab => (
-						<option key={tab.name}>{tab.name}</option>
+						<option key={tab.name} onClick={() => handleClick(tab)}>
+							{tab.name}
+						</option>
 					))}
 				</select>
 				<Pyramid
@@ -30,6 +55,7 @@ export default function Tabs() {
 					className="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end fill-gray-500"
 				/>
 			</div>
+			{/* 在大屏幕如电脑上显示tab group */}
 			<div className="hidden sm:block">
 				<div className="border-b border-gray-200">
 					<nav aria-label="Tabs" className="-mb-px flex space-x-8">

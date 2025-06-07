@@ -1,20 +1,22 @@
 import { lazy } from 'react';
 import { Outlet } from 'react-router-dom';
-import LoginRegist from '../views/LoginRegist/LoginRegist';
-import { Main } from '../views/Main';
-import { Jobs } from '../views/Main/Jobs';
-import { JobRead } from '../views/Main/Jobs/JobRead';
-import { Knowledges } from '../views/Main/knowbase';
-import { KnowledgeRead } from '../views/Main/knowbase/KnowledgeRead';
-import { Projects } from '../views/Main/Projects';
-import { Resumes } from '../views/Main/Resumes';
-import { ResumeRead } from '../views/Main/Resumes/ResumeRead';
-import { Test } from '../views/MyTest/Test';
 import PrivateRoute from './PrivateRoute';
 import UpdateBreadRouter from './UpdateBreadRouter';
+
+const LoginRegist = lazy(() => import('../views/LoginRegist/LoginRegist'));
+const Main = lazy(() => import('../views/Main'));
+const Jobs = lazy(() => import('../views/Main/Jobs'));
+const JobRead = lazy(() => import('../views/Main/Jobs/JobRead'));
+const Knowledges = lazy(() => import('../views/Main/knowbase'));
+const KnowledgeRead = lazy(() => import('../views/Main/knowbase/KnowledgeRead'));
+const Projects = lazy(() => import('../views/Main/Projects'));
+const Resumes = lazy(() => import('../views/Main/Resumes'));
+const ResumeRead = lazy(() => import('../views/Main/Resumes/ResumeRead'));
+const Test = lazy(() => import('../views/MyTest/Test'));
 const Action = lazy(() => import('../views/Main/Projects/Action'));
 const Skills = lazy(() => import('../views/Main/Skills'));
 const SkillRead = lazy(() => import('../views/Main/Skills/SkillRead'));
+
 export const routes = [
 	{
 		path: '',
@@ -62,9 +64,7 @@ export const routes = [
 						path: '',
 						element: (
 							<UpdateBreadRouter>
-								<>
-									<Skills />
-								</>
+								<Skills />
 							</UpdateBreadRouter>
 						)
 					},
@@ -91,9 +91,7 @@ export const routes = [
 						path: '',
 						element: (
 							<UpdateBreadRouter>
-								<>
-									<Projects />
-								</>
+								<Projects />
 							</UpdateBreadRouter>
 						)
 					},
@@ -128,9 +126,7 @@ export const routes = [
 						path: '',
 						element: (
 							<UpdateBreadRouter>
-								<>
-									<Resumes />
-								</>
+								<Resumes />
 							</UpdateBreadRouter>
 						)
 					},
@@ -157,9 +153,7 @@ export const routes = [
 						path: '',
 						element: (
 							<UpdateBreadRouter>
-								<>
-									<Jobs />
-								</>
+								<Jobs />
 							</UpdateBreadRouter>
 						)
 					},
@@ -185,9 +179,7 @@ export const routes = [
 						path: '',
 						element: (
 							<UpdateBreadRouter>
-								<>
-									<Knowledges />
-								</>
+								<Knowledges />
 							</UpdateBreadRouter>
 						)
 					},
@@ -247,6 +239,7 @@ export const routes = [
 		]
 	}
 ];
+
 /* 用于面包屑导航 */
 export const path_name: Record<string, string> = {
 	'/main/home': '首页',

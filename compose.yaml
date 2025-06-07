@@ -9,6 +9,8 @@ services:
         condition: service_healthy
       redis-container:
         condition: service_healthy
+      mongo-container:
+        condition: service_healthy
     restart: unless-stopped
     container_name: nest-app
     # 将指定的文件的环境变量加载到容器中
@@ -18,6 +20,7 @@ services:
     environment:
       NODE_ENV: production
       DATABASE_URL: mysql://root:qwqw1314.@mysql-container:3306/fetch
+      MONGO_URL: mongodb://mongo-container:27017/fetch
     ports:
       - '3003:3003'
     volumes:
@@ -49,6 +52,18 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  mongo-container:
+    image: mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - D:/docker/mongo:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'mongo', 'admin', '--eval', 'db.adminCommand("ping")']
       interval: 10s
       timeout: 5s
       retries: 5

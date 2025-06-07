@@ -2,9 +2,11 @@ import React from 'react';
 import { CreateBtn } from '../Projects/Create';
 import { JobForm } from './JobForm';
 
-interface JobCreateProps {}
+interface JobCreateProps {
+	_?: string;
+}
 
-export const JobCreate: React.FC<JobCreateProps> = () => {
+const JobCreate: React.FC<JobCreateProps> = () => {
 	const dialogContent = (
 		<>
 			<div className="flex gap-2">
@@ -21,3 +23,5 @@ export const JobCreate: React.FC<JobCreateProps> = () => {
 		</CreateBtn>
 	);
 };
+
+export default JobCreate;

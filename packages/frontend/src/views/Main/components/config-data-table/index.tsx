@@ -3,7 +3,7 @@ import type { DataTableConfig } from './config.type';
 import { DataTable } from './data-table';
 
 interface ConfigDataTableProps<TData> {
-	dataTableConfig: DataTableConfig<any>;
+	dataTableConfig: DataTableConfig<TData>;
 	data: TData[]; //由输入自动推导出TData
 }
 
@@ -14,7 +14,7 @@ export function ConfigDataTable<TData>({ dataTableConfig, data }: ConfigDataTabl
 		col => col.filterFn !== undefined && typeof col.filterFn === 'function'
 	);
 	return (
-		<DataTable<TData, any>
+		<DataTable<TData>
 			{...dataTableConfig}
 			data={data}
 			columns={columns}

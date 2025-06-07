@@ -9,9 +9,11 @@ import { useCustomQuery } from '../../../query/config';
 import { KnowledgeQueryKey } from '../../../query/keys';
 import { findAllUserKnowledge } from '../../../services/knowbase';
 
-interface KnowledgeReadProps {}
+interface KnowledgeReadProps {
+	_?: string;
+}
 
-export const KnowledgeRead: React.FC<KnowledgeReadProps> = ({}) => {
+const KnowledgeRead: React.FC<KnowledgeReadProps> = () => {
 	const { knowledgeIndex } = useParams();
 	const { data, status } = useCustomQuery([KnowledgeQueryKey.Knowledges, 1, 10], ({ queryKey }) =>
 		findAllUserKnowledge({ page: queryKey[1] as number, limit: queryKey[2] as number })
@@ -170,3 +172,5 @@ export const KnowledgeRead: React.FC<KnowledgeReadProps> = ({}) => {
 		</div>
 	);
 };
+
+export default KnowledgeRead;
