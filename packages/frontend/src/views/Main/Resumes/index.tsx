@@ -18,7 +18,7 @@ import { ResumeCreate } from './ResumeCreate';
 
 interface ResumesProps {}
 
-export const Resumes: React.FC<ResumesProps> = props => {
+export const Resumes: React.FC<ResumesProps> = () => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 

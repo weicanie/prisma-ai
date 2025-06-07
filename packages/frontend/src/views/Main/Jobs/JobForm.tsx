@@ -64,7 +64,7 @@ export const JobForm = memo(() => {
 
 	const queryClient = useQueryClient();
 	const uploadJobMutation = useCustomMutation(createJob, {
-		onSuccess: data => {
+		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [JobQueryKey.Jobs] });
 			dispatch(reset());
 		}

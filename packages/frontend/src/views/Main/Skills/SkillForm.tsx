@@ -90,7 +90,7 @@ export const SkillForm = memo(() => {
 
 	const queryClient = useQueryClient();
 	const uploadSkillMutation = useCustomMutation(createSkill, {
-		onSuccess: data => {
+		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [SkillQueryKey.Skills] });
 			dispatch(resetSkillData());
 		}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 interface WallAProps {
@@ -34,8 +34,8 @@ const WallWrapper = styled.div`
 	}
 `;
 const Wall: React.FC<WallAProps> = ({ play, duration = 1500, delay = 1000 }) => {
-	const [rows, setRows] = useState(30);
-	const [cols, setCols] = useState(24);
+	const rows = 30;
+	const cols = 24;
 	/*开销太大
 	 	useEffect(() => {
 		const calculate = () => {

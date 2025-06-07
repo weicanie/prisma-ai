@@ -9,8 +9,8 @@ import {
 	useMutation,
 	useQuery
 } from '@tanstack/react-query';
-import { message } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 /** 固定一些配置 并提供统一的错误处理
  *
  * @param queryKey
@@ -33,7 +33,7 @@ export function useCustomQuery<SD>( //SD: Response Data
 		queryKey,
 		queryFn,
 		staleTime: 1 * 60 * 1000, //1分钟后过时
-		retry: (failureCount, error) => {
+		retry: failureCount => {
 			return failureCount < 3;
 		},
 		...options,
@@ -46,14 +46,14 @@ export function useCustomQuery<SD>( //SD: Response Data
 				if (data.code === '2006' || data.code === '2007') {
 					localStorage.removeItem('token');
 					localStorage.removeItem('userInfo');
-					message.warning(data.code === '2006' ? '登录已过期，请重新登录' : '请先登录');
+					toast.warning(data.code === '2006' ? '登录已过期，请重新登录' : '请先登录');
 					navigate('/login');
 				} else {
-					message.error(data.message || '系统繁忙，请稍后再试');
+					toast.error(data.message || '系统繁忙，请稍后再试');
 				}
 			}
 			if (data.message && data.message !== 'ok') {
-				message.success(data.message);
+				toast.success(data.message);
 			}
 			if (outerSelect) {
 				return outerSelect(data);
@@ -86,7 +86,7 @@ export function useCustomMutation<TData, TVariables, TContext = unknown>(
 	const outerOnError = options?.onError;
 	return useMutation({
 		// 重试逻辑
-		retry: (failureCount, error) => {
+		retry: failureCount => {
 			return failureCount < 2; // 最多试2次
 		},
 		retryDelay: attemptCount => {
@@ -102,15 +102,15 @@ export function useCustomMutation<TData, TVariables, TContext = unknown>(
 				if (data.code === '2006' || data.code === '2007') {
 					localStorage.removeItem('token');
 					localStorage.removeItem('userInfo');
-					message.warning(data.code === '2006' ? '登录已过期，请重新登录' : '请先登录');
+					toast.warning(data.code === '2006' ? '登录已过期，请重新登录' : '请先登录');
 					navigate('/login');
 					return;
 				} else {
-					message.error(data.message || '系统繁忙，请稍后再试');
+					toast.error(data.message || '系统繁忙，请稍后再试');
 				}
 			} else {
 				if (data.message && data.message !== 'ok') {
-					message.success(data.message);
+					toast.success(data.message);
 				}
 				if (outerOnSuccess) {
 					outerOnSuccess(data, variables, context);
@@ -120,7 +120,7 @@ export function useCustomMutation<TData, TVariables, TContext = unknown>(
 
 		// 处理其它错误（如网络错误）
 		onError: (error, variables, context) => {
-			message.error(`系统繁忙，请稍后再试${error}`);
+			toast.error(`系统繁忙，请稍后再试${error}`);
 
 			if (outerOnError) {
 				outerOnError(error, variables, context);

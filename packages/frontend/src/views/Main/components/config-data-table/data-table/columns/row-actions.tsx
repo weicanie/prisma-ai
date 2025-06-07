@@ -13,7 +13,7 @@ interface DataTableRowActionsProps<TData> {
 	row: Row<TData>;
 }
 /* 数据行的操作选项,单独作为一列 */
-export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TData>) {
+export function DataTableRowActions<TData>({}: DataTableRowActionsProps<TData>) {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>

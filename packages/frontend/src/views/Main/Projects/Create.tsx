@@ -26,7 +26,7 @@ type CreateBtnProps = PropsWithChildren<{
 }>;
 
 export function CreateBtn(props: CreateBtnProps) {
-	const { title, description, children } = props;
+	const { title, children } = props;
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
@@ -53,11 +53,11 @@ export function CreateBtn(props: CreateBtnProps) {
 
 interface CreateProjectProps {}
 
-export const CreateProject: React.FC<CreateProjectProps> = props => {
+export const CreateProject: React.FC<CreateProjectProps> = () => {
 	const queryClient = useQueryClient();
 	const dispatch = useDispatch();
 	const uploadProjectMutation = useCustomMutation(createProject, {
-		onSuccess: data => {
+		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [ProjectQueryKey.Projects] });
 			dispatch(resetProjectData()); // 重置表单
 		},

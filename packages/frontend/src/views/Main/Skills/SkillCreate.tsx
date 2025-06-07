@@ -9,7 +9,7 @@ import { SkillForm } from './SkillForm';
 
 interface SkillCreateProps {}
 
-export const SkillCreate: React.FC<SkillCreateProps> = props => {
+export const SkillCreate: React.FC<SkillCreateProps> = () => {
 	const uploadSkillMutation = useCustomMutation(createSkill);
 
 	const editorProps = {

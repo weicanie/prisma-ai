@@ -23,7 +23,7 @@ export function useOptimisticMutation<T, TData>(
 			queryClient.setQueryData(queryKey, (old: any) => updateFn(old, newData));
 			return { previousData };
 		},
-		onError: (err, _, context) => {
+		onError: (_, __, context) => {
 			// 失败时回滚到先前的值
 			queryClient.setQueryData(queryKey, context?.previousData);
 		},

@@ -28,7 +28,7 @@ type PropsType = PropsWithChildren<{
 	setIsUseMdEditor: React.Dispatch<React.SetStateAction<boolean>>;
 }>;
 
-export const ProjectForm = memo(({ isUseMdEditor, setIsUseMdEditor }: PropsType) => {
+export const ProjectForm = memo(({ setIsUseMdEditor }: PropsType) => {
 	const [currentStep, setCurrentStep] = useState(0);
 	const totalSteps = 3;
 	const stepTitles = ['项目信息', '技术栈', '项目亮点'];
@@ -43,7 +43,7 @@ export const ProjectForm = memo(({ isUseMdEditor, setIsUseMdEditor }: PropsType)
 
 	const queryClient = useQueryClient();
 	const uploadProjectMutation = useCustomMutation(createProject, {
-		onSuccess: data => {
+		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [ProjectQueryKey.Projects] });
 			dispatch(resetProjectData()); // 重置表单
 		},
@@ -197,7 +197,7 @@ export const ProjectForm = memo(({ isUseMdEditor, setIsUseMdEditor }: PropsType)
 			{/* 项目描述 */}
 			<h4 className="text-lg font-semibold">项目描述</h4>
 			<div className="mt-4 space-y-6">
-				{descriptionFields.map((field, index) => (
+				{descriptionFields.map(field => (
 					<FormField
 						key={field.key}
 						control={form.control}
@@ -270,7 +270,7 @@ export const ProjectForm = memo(({ isUseMdEditor, setIsUseMdEditor }: PropsType)
 		<div className="space-y-8">
 			<h3 className="text-2xl font-bold">项目亮点</h3>
 
-			{lightspotSections.map((section, sectionIndex) => (
+			{lightspotSections.map(section => (
 				<div key={section.key} className="space-y-4">
 					<div className="flex items-center justify-between">
 						<h4 className="text-lg font-semibold">{section.label}</h4>

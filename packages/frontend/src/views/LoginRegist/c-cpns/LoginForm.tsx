@@ -12,9 +12,9 @@ import {
 	FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { message } from 'antd';
 import type { Dispatch, PropsWithChildren, SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { loginformSchema } from '../../../../../shared/src/types/login_regist.schema';
 import { login } from '../../../services/login_regist';
 
@@ -36,14 +36,14 @@ export function LoginForm({ setIsLoginCard }: PropsType) {
 		try {
 			const res = await login({ username: values.username, password: values.password });
 			if (res.data.code === '0') {
-				message.success('登录成功');
+				toast.success('登录成功');
 				res.data.data.userId = res.data.data.id;
 				localStorage.setItem('token', res.data.data.token);
 				localStorage.setItem('userInfo', JSON.stringify(res.data));
 				navigate('/');
 			}
 		} catch (e: any) {
-			message.error(e.response?.data?.message || '系统繁忙，请稍后再试');
+			toast.error(e.response?.data?.message || '系统繁忙，请稍后再试');
 		}
 	}
 

@@ -6,13 +6,13 @@ interface SkillState {
 	dataMd: string;
 }
 
-const initialMdWithComment = `## 职业技能
+// const initialMdWithComment = `## 职业技能
 
-<br />
+// <br />
 
-> 在上方写下某一类别的以逗号或顿号分隔的技能列表
-> 例如：* 前端基础: HTML、CSS、JavaScript
-`;
+// > 在上方写下某一类别的以逗号或顿号分隔的技能列表
+// > 例如：* 前端基础: HTML、CSS、JavaScript
+// `;
 const initialMd = `## 职业技能
 
 <br />

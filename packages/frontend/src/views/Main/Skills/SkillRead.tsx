@@ -136,3 +136,4 @@ export const SkillRead: React.FC<SkillReadProps> = ({}) => {
 		</div>
 	);
 };
+export default SkillRead;

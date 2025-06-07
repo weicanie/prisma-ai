@@ -9,12 +9,12 @@ import { KnowledgeRead } from '../views/Main/knowbase/KnowledgeRead';
 import { Projects } from '../views/Main/Projects';
 import { Resumes } from '../views/Main/Resumes';
 import { ResumeRead } from '../views/Main/Resumes/ResumeRead';
-import { Skills } from '../views/Main/Skills';
-import { SkillRead } from '../views/Main/Skills/SkillRead';
 import { Test } from '../views/MyTest/Test';
 import PrivateRoute from './PrivateRoute';
 import UpdateBreadRouter from './UpdateBreadRouter';
 const Action = lazy(() => import('../views/Main/Projects/Action'));
+const Skills = lazy(() => import('../views/Main/Skills'));
+const SkillRead = lazy(() => import('../views/Main/Skills/SkillRead'));
 export const routes = [
 	{
 		path: '',

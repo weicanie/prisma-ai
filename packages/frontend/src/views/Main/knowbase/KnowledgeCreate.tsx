@@ -4,7 +4,7 @@ import { KnowledgeForm } from './KnowledgeForm';
 
 interface KnowledgeCreateProps {}
 
-export const KnowledgeCreate: React.FC<KnowledgeCreateProps> = props => {
+export const KnowledgeCreate: React.FC<KnowledgeCreateProps> = () => {
 	const dialogContent = (
 		<>
 			<div className="flex gap-2">

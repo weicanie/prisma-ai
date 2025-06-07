@@ -12,8 +12,8 @@ import {
 	FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { message } from 'antd';
 import type { Dispatch, PropsWithChildren, SetStateAction } from 'react';
+import { toast } from 'sonner';
 import { registformSchema } from '../../../../../shared/src/types/login_regist.schema';
 import { register, registerCaptcha } from '../../../services/login_regist';
 
@@ -31,31 +31,31 @@ export function RegistForm({ setIsLoginCard }: PropsType) {
 	async function sendCaptcha() {
 		const address = form.getValues('email');
 		if (!address) {
-			return message.error('请输入邮箱地址');
+			return toast.error('请输入邮箱地址');
 		}
 
 		try {
 			const res = await registerCaptcha(address);
 			if (res.data.code === '0') {
-				message.success('发送成功');
+				toast.success('发送成功');
 			}
 		} catch (e: any) {
-			message.error(e.response?.data?.message || '系统繁忙，请稍后再试');
+			toast.error(e.response?.data?.message || '系统繁忙，请稍后再试');
 		}
 	}
 	async function onSubmit(values: z.infer<typeof registformSchema>) {
 		if (values.password !== values.confirmPassword) {
-			return message.error('两次密码不一致');
+			return toast.error('两次密码不一致');
 		}
 		try {
 			const res = await register(values);
 
 			if (res.data.code === '0') {
-				message.success('注册成功');
+				toast.success('注册成功');
 				setIsLoginCard(true);
 			}
 		} catch (e: any) {
-			message.error(e.response?.data?.message || '系统繁忙，请稍后再试');
+			toast.error(e.response?.data?.message || '系统繁忙，请稍后再试');
 		}
 	}
 

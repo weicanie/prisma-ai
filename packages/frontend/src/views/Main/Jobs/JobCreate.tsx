@@ -4,7 +4,7 @@ import { JobForm } from './JobForm';
 
 interface JobCreateProps {}
 
-export const JobCreate: React.FC<JobCreateProps> = props => {
+export const JobCreate: React.FC<JobCreateProps> = () => {
 	const dialogContent = (
 		<>
 			<div className="flex gap-2">

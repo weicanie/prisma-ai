@@ -7,7 +7,7 @@ import type {
 	ProjectDto,
 	ServerDataFormat as SDF
 } from '@prism-ai/shared';
-import { message } from 'antd';
+import { toast } from 'sonner';
 import { instance } from '../config';
 
 /**
@@ -84,7 +84,7 @@ async function getSessionStatusAndDecide(input: contextInput | ''): Promise<SDF<
 			}
 
 			if (status === 'backdone' || status === 'running' || status === 'tasknotfound') {
-				message.warning('当前会话正在进行中，请稍后再试');
+				toast.warning('当前会话正在进行中，请稍后再试');
 			}
 		} else {
 			//目前无会话,新建会话

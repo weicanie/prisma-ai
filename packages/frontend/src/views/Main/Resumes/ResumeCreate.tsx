@@ -6,7 +6,7 @@ import { ResumeForm } from './ResumeForm';
 
 interface ResumeCreateProps {}
 
-export const ResumeCreate: React.FC<ResumeCreateProps> = props => {
+export const ResumeCreate: React.FC<ResumeCreateProps> = () => {
 	const createResumeMutation = useCustomMutation(createResume);
 
 	const dialogContent = (

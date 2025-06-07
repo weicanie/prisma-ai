@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { projectSchemaForm } from '../types/project.schema-form';
-import { CreateSkillDto, SkillItem } from '../types/skill';
+import { type CreateSkillDto, type SkillItem } from '../types/skill';
 /**
  * 将项目的Markdown格式文本转换为符合projectSchemaForm的结构化数据
  * @param markdown 项目的Markdown格式文本

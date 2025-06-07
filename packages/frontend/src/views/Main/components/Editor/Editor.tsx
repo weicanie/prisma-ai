@@ -49,7 +49,7 @@ export const Editor: FC<EditorProps> = ({
 
 	const dispatch = useDispatch();
 	/* 防抖来防止正常编辑产生闪动、输入体验差问题 */
-	const onMarkdownUpdated = debounce((ctx: Ctx, markdown: string, prevMarkdown: string) => {
+	const onMarkdownUpdated = debounce((_: Ctx, markdown: string, __: string) => {
 		//防止外部更新触发内部更新
 		if (!isInternalUpdate.current) {
 			!isShwoMode && updateAction && dispatch(updateAction(markdown));
