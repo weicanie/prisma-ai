@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import {
 	jsonMd_obj,
 	lookupResultSchema,
+	projectLookupedDto,
 	projectMinedSchema,
 	projectPolishedSchema,
 	projectSchema,
@@ -19,7 +20,6 @@ import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { LLMSseService, redisStoreResult } from '../sse/llm-sse.service';
 import { RedisService } from './../../redis/redis.service';
 import { ProjectDto } from './dto/project.dto';
-import { LookupResult, LookupResultDocument } from './entities/lookupResult.entity';
 import { Project, ProjectDocument } from './entities/project.entity';
 import { ProjectMined, ProjectMinedDocument } from './entities/projectMined.entity';
 import { ProjectPolished, ProjectPolishedDocument } from './entities/projectPolished.entity';
@@ -72,9 +72,6 @@ export class ProjectService {
 
 	@InjectModel(ProjectMined.name)
 	private projectMinedModel: Model<ProjectMinedDocument>;
-
-	@InjectModel(LookupResult.name)
-	private lookupResultModel: Model<LookupResultDocument>;
 
 	logger = new Logger(ProjectService.name);
 
@@ -246,13 +243,13 @@ export class ProjectService {
 		userInfo: UserInfoFromToken,
 		taskId: string
 	): Promise<Observable<StreamingChunk>> {
-		const existingLookupResult = await this.lookupResultModel
+		const existingProject = await this.projectModel
 			.findOne({
 				'userInfo.userId': userInfo.userId,
-				projectName: project.info.name
+				'info.name': project.info.name
 			})
 			.exec();
-
+		const existingLookupResult = existingProject?.lookupResult;
 		//储存：新建或更新
 		const handler = async (resultRedis: redisStoreResult) => {
 			let lookupResult = jsonMd_obj(resultRedis.content); //分析的思考结果、结果
@@ -269,21 +266,16 @@ export class ProjectService {
 			const lookupResultSave = { ...lookupResult, userInfo, projectName: project.info.name };
 			if (existingLookupResult) {
 				// 更新
-				await this.lookupResultModel.updateOne({ _id: existingLookupResult._id }, lookupResultSave);
-				//更新项目
 				await this.projectModel.updateOne(
 					{ 'info.name': project.info.name, 'userInfo.userId': userInfo.userId },
 					{ $set: { status: ProjectStatus.lookuped, lookupResult: lookupResultSave } }
 				);
 			} else {
 				// 新建
-				const lookupResult_model = new this.lookupResultModel(lookupResultSave);
-				//更新项目
 				await this.projectModel.updateOne(
 					{ 'info.name': project.info.name, 'userInfo.userId': userInfo.userId },
 					{ $set: { status: ProjectStatus.lookuped, lookupResult: lookupResultSave } }
 				);
-				await lookupResult_model.save();
 			}
 		};
 
@@ -336,7 +328,7 @@ export class ProjectService {
 	 * @param taskId 任务ID
 	 */
 	async polishProject(
-		project: ProjectDto,
+		project: projectLookupedDto,
 		userInfo: UserInfoFromToken,
 		taskId: string
 	): Promise<Observable<StreamingChunk>> {
@@ -507,25 +499,7 @@ export class ProjectService {
 		if (!projects || projects.length === 0) {
 			return [];
 		}
-		const promises = projects.map(project => {
-			return this.lookupResultModel
-				.findOne({
-					'userInfo.userId': userInfo.userId,
-					projectName: project.info.name
-				})
-				.exec();
-		});
-		const LookupResults = await Promise.allSettled(promises);
-		const projectDatas = projects.map(project => {
-			const lookupResult = LookupResults.find(
-				result => result.status === 'fulfilled' && result.value?.projectName === project.info.name
-			);
-			if (lookupResult && lookupResult.status === 'fulfilled') {
-				return { ...project.toObject(), lookupResult: lookupResult.value };
-			}
-			return { ...project.toObject(), lookupResult: {} };
-		});
-		return projectDatas as ProjectVo[];
+		return projects as ProjectVo[];
 	}
 
 	/**
@@ -540,19 +514,8 @@ export class ProjectService {
 		if (!project) {
 			throw new Error(`ID为${id}的项目经验不存在`);
 		} else {
-			const lookupResult = await this.lookupResultModel
-				.findOne({
-					'userInfo.userId': userInfo.userId,
-					projectName: project.info.name
-				})
-				.exec();
 			return {
-				...project.toObject(),
-				lookupResult: {
-					problem: lookupResult!.problem,
-					solution: lookupResult!.solution,
-					score: lookupResult!.score
-				}
+				...project.toObject()
 			} as ProjectVo;
 		}
 	}
@@ -585,19 +548,8 @@ export class ProjectService {
 		if (!project) {
 			throw new Error(`名为${name}状态为${status}的项目经验不存在`);
 		} else if (project.status === 'fulfilled') {
-			const lookupResult = await this.lookupResultModel
-				.findOne({
-					'userInfo.userId': userInfo.userId,
-					projectName: project.value!.info.name
-				})
-				.exec();
 			return {
-				...project.value,
-				lookupResult: {
-					problem: lookupResult!.problem,
-					solution: lookupResult!.solution,
-					score: lookupResult!.score
-				}
+				...project.value?.toObject()
 			} as ProjectVo;
 		}
 	}
@@ -608,8 +560,9 @@ export class ProjectService {
 	private async lookupProjectUnStream(project: ProjectDto, userInfo: UserInfoFromToken) {
 		const chain = await this.chainService.lookupChain();
 		const projectStr = JSON.stringify(project);
-		let result = await chain.invoke(projectStr);
-		let lookupResult: LookupResult = { ...result, userInfo, projectName: project.info.name };
+		//TODO 这里只消费lookupResult,但使用了更多的prompt
+		let [result] = await chain.invoke(projectStr);
+		let lookupResult = { ...result, userInfo, projectName: project.info.name };
 		// 格式验证
 		const validationResult = lookupResultSchema.safeParse(lookupResult);
 		if (!validationResult.success) {
@@ -621,26 +574,26 @@ export class ProjectService {
 			const lookupResultStr = JSON.stringify(lookupResult);
 			lookupResult = await fomartFixChain.invoke({ input: lookupResultStr });
 		}
-		const existingLookupResult = await this.lookupResultModel
+		const existingProject = await this.projectModel
 			.findOne({
 				'userInfo.userId': userInfo.userId,
-				projectName: project.info.name
+				'info.name': project.info.name
 			})
 			.exec();
-		const lookupResultSave = { ...lookupResult, userInfo, projectName: project.info.name };
+		const existingLookupResult = existingProject?.lookupResult;
 
+		const lookupResultSave = { ...lookupResult, userInfo, projectName: project.info.name };
 		if (existingLookupResult) {
 			// 更新
-			await this.lookupResultModel.updateOne({ _id: existingLookupResult._id }, lookupResultSave);
-		} else {
-			// 新建
-			const lookupResult_model = new this.lookupResultModel(lookupResultSave);
-			//更新可能需要更新的项目状态
 			await this.projectModel.updateOne(
 				{ 'info.name': project.info.name, 'userInfo.userId': userInfo.userId },
-				{ $set: { status: ProjectStatus.lookuped } }
+				{ $set: { status: ProjectStatus.lookuped, lookupResult: lookupResultSave } }
 			);
-			await lookupResult_model.save();
+		} else {
+			await this.projectModel.updateOne(
+				{ 'info.name': project.info.name, 'userInfo.userId': userInfo.userId },
+				{ $set: { status: ProjectStatus.lookuped, lookupResult: lookupResultSave } }
+			);
 		}
 	}
 

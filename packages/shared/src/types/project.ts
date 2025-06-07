@@ -23,10 +23,12 @@ export enum ProjectStatus {
 	accepted = 'accepted' //完成
 }
 export type lookupResultDto = z.infer<typeof lookupResultSchema>;
+/* 含lookupResult的projectDto */
 export type projectLookupedDto = z.infer<typeof projectLookupedSchema>;
 export type ProjectDto = z.infer<typeof projectSchema>;
 export type ProjectPolishedDto = z.infer<typeof projectPolishedSchema>;
 export type ProjectMinedDto = z.infer<typeof projectMinedSchema>;
+
 export interface ProjectVo extends z.infer<typeof projectSchema> {
 	id?: string; // 数据库中的ID
 	name?: string; //项目名称
@@ -35,7 +37,7 @@ export interface ProjectVo extends z.infer<typeof projectSchema> {
 	createdAt?: string;
 	updatedAt?: string;
 
-	//拷打结果
+	//分析结果
 	lookupResult?: z.infer<typeof lookupResultSchema>;
 }
 

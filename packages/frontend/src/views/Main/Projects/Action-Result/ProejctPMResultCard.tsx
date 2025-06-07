@@ -137,8 +137,8 @@ export const ProejctPMResultCard: React.FC<ProejctPMResultCardProps> = ({
 				{mergedData && (
 					<Button
 						onClick={handleMerge}
-						variant="outline"
-						className="fixed bottom-5 rounded-md right-5 w-full hover:bg-purple-700 text-white"
+						variant="default"
+						className="fixed  bottom-5 right-40   rounded-md  w-80 hover:bg-purple-700 text-white"
 						size="lg"
 					>
 						<Pyramid className="w-4 h-4 mr-2" />

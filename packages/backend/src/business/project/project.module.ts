@@ -5,7 +5,6 @@ import { ChainModule } from '../../chain/chain.module';
 import { EventBusModule } from '../../EventBus/event-bus.module';
 import { RedisModule } from '../../redis/redis.module';
 import { SseModule } from '../sse/sse.module';
-import { LookupResult, LookupResultSchema } from './entities/lookupResult.entity';
 import { Project, ProjectSchema } from './entities/project.entity';
 import { ProjectMined, ProjectMinedSchema } from './entities/projectMined.entity';
 import { ProjectPolished, ProjectPolishedSchema } from './entities/projectPolished.entity';
@@ -24,8 +23,7 @@ import { ProjectService } from './project.service';
 		MongooseModule.forFeature([
 			{ name: Project.name, schema: ProjectSchema },
 			{ name: ProjectPolished.name, schema: ProjectPolishedSchema },
-			{ name: ProjectMined.name, schema: ProjectMinedSchema },
-			{ name: LookupResult.name, schema: LookupResultSchema }
+			{ name: ProjectMined.name, schema: ProjectMinedSchema }
 		])
 	] //forFeature指定模块可用的集合（表）
 })

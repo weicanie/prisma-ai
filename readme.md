@@ -1,3 +1,5 @@
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](...)
+
 # prisma-ai 介绍
 
 prisma-ai 搭建了一个实现rag、agent + mcp范式的paas平台，以及在此基础上实现一个llm saas应用——帮助用户从简历到拿到offer的saas应用——简历灵感菇。

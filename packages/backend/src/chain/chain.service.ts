@@ -205,7 +205,8 @@ export class ChainService {
 
 		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
 
-		const chain = await this.createChain<string, ProjectMinedDto>(llm, prompt, schema);
+		const shemaTotal = z.tuple([schema, schema0]);
+		const chain = await this.createChain<string, ProjectMinedDto>(llm, prompt, shemaTotal);
 		const streamChain = await this.createStreamChain<string>(llm, prompt, schema, schema0);
 		if (stream) {
 			return streamChain;

@@ -51,6 +51,7 @@ const projectSchema = z.object({
 
 const projectPolishedSchema = z.object({
 	info: infoSchema,
+	// polishedInfo: infoSchema.optional(),
 	lightspot: getLightspotSchema(
 		z.object({
 			content: z.string().describe('亮点内容'),

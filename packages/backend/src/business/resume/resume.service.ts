@@ -1,9 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { PaginatedResumesResult, ProjectVo, ResumeVo, UserInfoFromToken } from '@prism-ai/shared';
+import { PaginatedResumesResult, ResumeVo, UserInfoFromToken } from '@prism-ai/shared';
 import { Model, Types } from 'mongoose';
 import { PopulateFields } from '../../utils/type';
-import { LookupResult, LookupResultDocument } from '../project/entities/lookupResult.entity';
 import { ProjectDocument } from '../project/entities/project.entity';
 import { SkillDocument } from '../skill/entities/skill.entity';
 import { CreateResumeDto } from './dto/create-resume.dto';
@@ -14,9 +13,6 @@ import { Resume, ResumeDocument } from './entities/resume.entity';
 export class ResumeService {
 	@InjectModel(Resume.name)
 	private resumeModel: Model<ResumeDocument>;
-
-	@InjectModel(LookupResult.name)
-	private LookupResultModel: Model<LookupResultDocument>;
 
 	constructor() {}
 
@@ -73,27 +69,7 @@ export class ResumeService {
 			throw new NotFoundException(`Resume with ID "${id}" not found or access denied`);
 		}
 
-		//查询各项目经验的分析结果
-		const projects = resume.projects;
-		const promises = projects.map(project => {
-			return this.LookupResultModel.findOne({
-				'userInfo.userId': userInfo.userId,
-				projectName: project.info.name
-			}).exec();
-		});
-
-		const LookupResults = await Promise.allSettled(promises);
-		const projectDatas = projects.map(project => {
-			const lookupResult = LookupResults.find(
-				result => result.status === 'fulfilled' && result.value?.projectName === project.info.name
-			);
-			if (lookupResult && lookupResult.status === 'fulfilled') {
-				return { ...project.toObject(), lookupResult: lookupResult.value };
-			}
-			return { ...project.toObject(), lookupResult: {} };
-		});
-
-		const result = { ...resume.toObject(), projects: projectDatas as ProjectVo[] };
+		const result = { ...resume.toObject() };
 
 		return result as unknown as PopulateFields<ResumeDocument, 'projects' | 'skill', ResumeVo>;
 	}

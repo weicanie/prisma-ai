@@ -1,15 +1,14 @@
-import { Badge } from '@/components/ui/badge';
+import { AnimatedCircularProgressBar } from '@/components/magicui/animated-circular-progress-bar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { lookupResultDto, projectLookupedDto } from '@prism-ai/shared';
-
 import { AlertTriangle, CheckCircle, Lightbulb, Pyramid } from 'lucide-react'; // Assuming lucide-react for icons
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { ProjectResultProps } from './ProjectResult';
 
 type ProjectAnalysisResultCardProps = Pick<
 	ProjectResultProps,
-	'actionType' | 'resultData' | 'mergedData' | 'handleMerge'
+	'resultData' | 'mergedData' | 'handleMerge'
 > & {
 	isDark: boolean;
 };
@@ -23,9 +22,31 @@ export const ProjectAnalysisResultCard: React.FC<ProjectAnalysisResultCardProps>
 	mergedData,
 	handleMerge
 }) => {
+	result = result as lookupResultDto | null;
+
+	const score = result?.score;
+	const [animatedScore, setAnimatedScore] = useState(0);
+
+	useEffect(() => {
+		const animationTimeout = setTimeout(() => {
+			score && setAnimatedScore(score);
+		}, 500);
+
+		return () => clearTimeout(animationTimeout);
+	}, [score]);
+
 	if (!result) return;
-	result = result as lookupResultDto;
+	// 根据分数确定进度条颜色
+	let gaugePrimaryColor: string;
+	if (score! < 60) {
+		gaugePrimaryColor = '#ef4444';
+	} else if (score! < 80) {
+		gaugePrimaryColor = '#eab308';
+	} else {
+		gaugePrimaryColor = '#22c55e';
+	}
 	mergedData = mergedData as projectLookupedDto | null;
+
 	return (
 		<Card className={` ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
 			<CardHeader>
@@ -36,18 +57,26 @@ export const ProjectAnalysisResultCard: React.FC<ProjectAnalysisResultCardProps>
 			</CardHeader>
 			<CardContent className="space-y-6">
 				{/* 评分 */}
-				<div>
-					<h4 className={`font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+				<div className="flex flex-col items-center">
+					{/* <h4 className={`font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
 						综合评分
-					</h4>
-					<Badge
+					</h4> */}
+					{/* <Badge
 						variant={
 							result.score >= 80 ? 'default' : result.score >= 60 ? 'secondary' : 'destructive'
 						}
 						className="text-lg px-3 py-1"
 					>
 						{result.score} / 100
-					</Badge>
+					</Badge> */}
+					<AnimatedCircularProgressBar
+						max={100}
+						min={0}
+						value={animatedScore}
+						gaugePrimaryColor={gaugePrimaryColor} // 进度条颜色
+						gaugeSecondaryColor={isDark ? '#37415177' : '#d7dce577'} //进度条背景色
+						className="size-32" // 进度条大小
+					/>
 				</div>
 
 				{/* 存在的问题 */}
@@ -105,15 +134,17 @@ export const ProjectAnalysisResultCard: React.FC<ProjectAnalysisResultCardProps>
 				)}
 			</CardContent>
 			{mergedData && (
-				<Button
-					onClick={handleMerge}
-					variant="outline"
-					className="fixed bottom-5 rounded-md right-5 w-full hover:bg-purple-700 text-white"
-					size="lg"
-				>
-					<Pyramid className="w-4 h-4 mr-2" />
-					完成分析
-				</Button>
+				<div className="flex justify-center">
+					<Button
+						onClick={handleMerge}
+						variant="default"
+						className="fixed  bottom-5 right-40   rounded-md  w-80 hover:bg-purple-700 text-white"
+						size="lg"
+					>
+						<Pyramid className="w-4 h-4 mr-2" />
+						完成分析
+					</Button>
+				</div>
 			)}
 		</Card>
 	);

@@ -135,6 +135,7 @@ var projectSchema = z2.object({
 });
 var projectPolishedSchema = z2.object({
   info: infoSchema,
+  // polishedInfo: infoSchema.optional(),
   lightspot: getLightspotSchema(
     z2.object({
       content: z2.string().describe("\u4EAE\u70B9\u5185\u5BB9"),

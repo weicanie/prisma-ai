@@ -87,23 +87,3 @@ export async function deleteProject(id: string) {
 	const res = await instance.delete<SDF<null>>(`/project/${id}`);
 	return res.data;
 }
-
-/**
- * 打磨项目经验 - 使用AI对项目经验进行优化和改进
- * @param project 原始项目经验数据
- * @returns 返回打磨后的项目经验数据
- */
-export async function polishProject(project: ProjectDto) {
-	const res = await instance.post<ProjectDto, SDF<any>>('/project/polish', project);
-	return res.data;
-}
-
-/**
- * 挖掘项目经验 - 使用AI深度挖掘项目经验中的亮点和价值
- * @param project 原始项目经验数据
- * @returns 返回挖掘后的项目经验数据
- */
-export async function mineProject(project: ProjectDto) {
-	const res = await instance.post<ProjectDto, SDF<any>>('/project/mine', project);
-	return res.data;
-}

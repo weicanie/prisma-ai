@@ -3,6 +3,7 @@ import {
 	jsonMd_obj,
 	type lookupResultDto,
 	type ProjectDto,
+	type projectLookupedDto,
 	type ProjectMinedDto,
 	ProjectStatus
 } from '@prism-ai/shared';
@@ -43,6 +44,7 @@ export const Action: React.FC<ActionProps> = () => {
 	/* 使用SSE获取AI生成结果 */
 	const { content, reasonContent, done, isReasoning } = useSseAnswer(input, target);
 	const [actionType, setActionType] = useState<'lookup' | 'polish' | 'mine' | null>(null);
+
 	useEffect(() => {
 		if (done) {
 			const result = jsonMd_obj(content);
@@ -109,12 +111,14 @@ export const Action: React.FC<ActionProps> = () => {
 
 	// 处理AI打磨
 	const handlePolish = () => {
-		const projectDto: ProjectDto = {
+		const projectLookupedDto: projectLookupedDto = {
 			info: projectData.info,
-			lightspot: projectData.lightspot
+			lightspot: projectData.lightspot,
+			lookupResult: projectData.lookupResult!
 		};
+		console.log('🚀 ~ handlePolish ~ projectLookupedDto:', projectLookupedDto);
 		setActionType('polish');
-		setInput(projectDto);
+		setInput(projectLookupedDto);
 		setTarget('/project/polish');
 	};
 

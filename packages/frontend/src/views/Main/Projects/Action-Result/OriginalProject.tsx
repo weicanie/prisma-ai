@@ -6,6 +6,7 @@ import { ArrowRight, Code, Sparkles, Target, Users } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StatusBadge } from '../../components/StatusBadge';
+import { ProjectAnalysisResultCard } from './ProjectAnalysisResultCard';
 
 interface OriginalProjectProps {
 	projectData: ProjectVo;
@@ -179,6 +180,14 @@ export const OriginalProject: React.FC<OriginalProjectProps> = ({
 											))}
 										</ul>
 									</div>
+								)}
+
+								{projectData.lookupResult && (
+									<ProjectAnalysisResultCard
+										isDark={isDark}
+										resultData={projectData.lookupResult}
+										mergedData={null}
+									/>
 								)}
 							</div>
 						</div>

@@ -179,6 +179,7 @@ var projectSchema = import_zod2.z.object({
 });
 var projectPolishedSchema = import_zod2.z.object({
   info: infoSchema,
+  // polishedInfo: infoSchema.optional(),
   lightspot: getLightspotSchema(
     import_zod2.z.object({
       content: import_zod2.z.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
