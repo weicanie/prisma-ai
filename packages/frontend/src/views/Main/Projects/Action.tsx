@@ -70,7 +70,10 @@ const Action: React.FC<ActionProps> = () => {
 			}
 
 			setInput({}); // 清空输入防止sse重复请求
-			navigate('#result');
+			//setState异步, 需要等待setState执行完再执行navigate
+			setTimeout(() => {
+				navigate('#result');
+			}, 0);
 		}
 	}, [done]);
 

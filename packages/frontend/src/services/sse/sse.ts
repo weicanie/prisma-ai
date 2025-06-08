@@ -225,9 +225,8 @@ function getSseData(
 			// 处理完成信号
 			if (chunk.done) {
 				// 上报后端：前端已完成接收
-				frontendOver(sessionId).then(() => {
-					localStorage.setItem(sessionStatusKey, 'bothdone');
-				});
+				frontendOver(sessionId);
+				localStorage.setItem(sessionStatusKey, 'bothdone');
 
 				setDone(true);
 				cleanup();
