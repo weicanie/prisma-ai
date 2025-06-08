@@ -188,7 +188,7 @@ function getSseData(
 
 	if (status === 'backdone' || status === 'running') {
 		// 断点接传 - 从上次中断的地方继续
-		url = `${baseUrl}${path}-recover?sessionId=${localStorage.getItem(llmSessionKey)}&token=${token}`;
+		url = `${baseUrl}${path}?sessionId=${localStorage.getItem(llmSessionKey)}&token=${token}&recover=true`;
 	} else if (status === 'tasknotfound') {
 		// 创建新任务 - 开始新的生成
 		url = `${baseUrl}${path}?sessionId=${localStorage.getItem(llmSessionKey)}&token=${token}`;

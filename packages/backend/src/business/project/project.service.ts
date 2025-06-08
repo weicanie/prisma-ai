@@ -93,7 +93,10 @@ export class ProjectService {
 	/**
 	 * @param sessionId 会话id,用于找到任务
 	 */
-	async SseLookupResult(sessionId: string, userInfo: UserInfoFromToken) {
+	async SseLookupResult(sessionId: string, userInfo: UserInfoFromToken, recover: boolean) {
+		if (recover) {
+			return this.LLMSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);
+		}
 		return this.LLMSseService.handleSseRequestAndResponse(
 			sessionId,
 			userInfo,
@@ -104,7 +107,10 @@ export class ProjectService {
 	/**
 	 * @param sessionId 会话id,用于找到任务
 	 */
-	async SsePolishResult(sessionId: string, userInfo: UserInfoFromToken) {
+	async SsePolishResult(sessionId: string, userInfo: UserInfoFromToken, recover: boolean) {
+		if (recover) {
+			return this.LLMSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);
+		}
 		return this.LLMSseService.handleSseRequestAndResponse(
 			sessionId,
 			userInfo,
@@ -115,7 +121,10 @@ export class ProjectService {
 	/**
 	 * @param sessionId 会话id,用于找到任务
 	 */
-	async SseMineResult(sessionId: string, userInfo: UserInfoFromToken) {
+	async SseMineResult(sessionId: string, userInfo: UserInfoFromToken, recover: boolean) {
+		if (recover) {
+			return this.LLMSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);
+		}
 		return this.LLMSseService.handleSseRequestAndResponse(
 			sessionId,
 			userInfo,

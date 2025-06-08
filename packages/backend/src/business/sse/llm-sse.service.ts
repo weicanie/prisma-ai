@@ -309,13 +309,12 @@ export class LLMSseService implements OnApplicationBootstrap {
 					taskCheck.status === TaskStatus.PENDING ||
 					taskCheck.status === TaskStatus.COMPLETED)
 			) {
-				return this.handleSseRequestAndResponseRecover(sessionId, userInfo);
-				/* 				return new Observable<DataChunkErrVO>(subscriber => {
+				return new Observable<DataChunkErrVO>(subscriber => {
 					subscriber.next({
 						data: { error: '用户sse会话已存在,请请求断点接传接口', done: true }
 					});
 					subscriber.complete();
-				}); */
+				});
 			}
 		}
 

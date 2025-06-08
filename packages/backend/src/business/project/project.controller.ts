@@ -10,8 +10,12 @@ export class ProjectController {
 
 	@RequireLogin()
 	@Sse('lookup')
-	async lookupProject(@Query('sessionId') sessionId, @UserInfo() userInfo: UserInfoFromToken) {
-		return this.projectService.SseLookupResult(sessionId, userInfo);
+	async lookupProject(
+		@Query('sessionId') sessionId,
+		@Query('recover') recover: boolean,
+		@UserInfo() userInfo: UserInfoFromToken
+	) {
+		return this.projectService.SseLookupResult(sessionId, userInfo, recover);
 	}
 
 	/**
@@ -22,8 +26,12 @@ export class ProjectController {
 	 */
 	@RequireLogin()
 	@Sse('polish')
-	async polishProject(@Query('sessionId') sessionId, @UserInfo() userInfo: UserInfoFromToken) {
-		return this.projectService.SsePolishResult(sessionId, userInfo);
+	async polishProject(
+		@Query('sessionId') sessionId,
+		@Query('recover') recover: boolean,
+		@UserInfo() userInfo: UserInfoFromToken
+	) {
+		return this.projectService.SsePolishResult(sessionId, userInfo, recover);
 	}
 
 	/**
@@ -34,8 +42,12 @@ export class ProjectController {
 	 */
 	@RequireLogin()
 	@Sse('mine')
-	async mineProject(@Query('sessionId') sessionId, @UserInfo() userInfo: UserInfoFromToken) {
-		return this.projectService.SseMineResult(sessionId, userInfo);
+	async mineProject(
+		@Query('sessionId') sessionId,
+		@Query('recover') recover: boolean,
+		@UserInfo() userInfo: UserInfoFromToken
+	) {
+		return this.projectService.SseMineResult(sessionId, userInfo, recover);
 	}
 
 	/* mcp tools 测试 */
