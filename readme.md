@@ -23,6 +23,27 @@ pnpm install
 pnpm lerna dev --parallel
 ```
 
+## 🐳 Docker
+```bash
+# 克隆仓库
+git clone https://github.com/yourusername/prisma-ai.git
+
+# 安装依赖
+pnpm install
+```
+
+然后打开packages/backend, 配置.env、.env.development对应的环境变量。
+```bash
+# 构建后端服务,在仓库根目录执行
+docker compose -f compose.yaml up --build
+```
+
+```bash
+# 启动前端
+cd packages/frontend
+pnpm dev
+```
+
 ## 一、prisma-ai 介绍
 
 一个实现`agent(代理) + mcp(模型上下文协议)`等 `llm(大语言模型)` 应用开发范式的平台，以及在此基础上实现的`llm`应用——**简历灵感菇**——帮助用户把简历变成offer。
