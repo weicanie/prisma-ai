@@ -60,6 +60,7 @@ export class LLMSseService implements OnApplicationBootstrap {
 
 	/**
 	 * 存储每个任务的chunk数组池
+	 * 任务id -> chunk数组
 	 */
 	chunkArrayPool: Record<string, LLMStreamingChunk[]> = {};
 
@@ -254,31 +255,25 @@ export class LLMSseService implements OnApplicationBootstrap {
 		return task;
 	}
 
-	/** 工具-断点接传接口调用
+	/** 工具-断点接传接口调用-当还在生成时调用-此时chunk储存在chunkArrayPool而不是redis中
 	 * 获取任务已生成的所有chunk
 	 */
 	private async getLLMSseTaskEvents(taskId: string): Promise<redisStoreResult> {
-		const resultKey = `${this.taskQueueService.PREFIX.RESULT}${taskId}`;
-		let result: redisStoreResult;
-		const json = await this.redisService.get(resultKey);
-		try {
-			result = json
-				? (JSON.parse(json) as redisStoreResult)
-				: {
-						content: '',
-						reasonContent: '',
-						done: false,
-						isReasoning: false
-					};
-		} catch (error) {
-			this.logger.error(`任务${resultKey}解析redis结果失败: ${error}`);
-			return {
-				content: '错误,请重试',
-				reasonContent: '',
-				done: true,
-				isReasoning: true
-			};
+		const chunkArray = this.chunkArrayPool[taskId];
+		if (!chunkArray) {
+			throw new Error(`任务${taskId}不存在`);
 		}
+		const lastChunk = chunkArray[chunkArray.length - 1];
+		const result = {
+			content: chunkArray.reduce((prev, cur) => {
+				return prev + (cur.content || '');
+			}, ''),
+			reasonContent: chunkArray.reduce((prev, cur) => {
+				return prev + (cur.reasonContent || '');
+			}, ''),
+			done: lastChunk.done,
+			isReasoning: lastChunk.isReasoning
+		};
 		return result;
 	}
 	/** 流式响应生成内容
@@ -314,7 +309,6 @@ export class LLMSseService implements OnApplicationBootstrap {
 					taskCheck.status === TaskStatus.PENDING ||
 					taskCheck.status === TaskStatus.COMPLETED)
 			) {
-				//TODO 会话状态需要确认,但接口可以合并!!??
 				return this.handleSseRequestAndResponseRecover(sessionId, userInfo);
 				/* 				return new Observable<DataChunkErrVO>(subscriber => {
 					subscriber.next({

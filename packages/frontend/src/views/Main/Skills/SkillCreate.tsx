@@ -7,7 +7,9 @@ import MilkdownEditor from '../components/Editor';
 import { CreateBtn } from '../Projects/Create';
 import { SkillForm } from './SkillForm';
 
-interface SkillCreateProps {}
+interface SkillCreateProps {
+	_?: string;
+}
 
 export const SkillCreate: React.FC<SkillCreateProps> = () => {
 	const uploadSkillMutation = useCustomMutation(createSkill);
@@ -26,12 +28,12 @@ export const SkillCreate: React.FC<SkillCreateProps> = () => {
 	const dialogContent = (
 		<>
 			<div className="flex gap-2">
-				<div className="basis-180 max-w-3xl mt-10">
+				<div className="basis-180 max-w-3xl mt-10 max-h-[calc(100vh-100px)] overflow-y-auto scb-thin">
 					<SkillForm></SkillForm>
 				</div>
 				<div className="size-200 flex items-center justify-center bg-[rgb(242,242,242)] dark:bg-black ">
 					<div
-						className="w-9/10 h-9/10 flex-none overflow-y-auto flex items-center justify-center  scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-300 
+						className="w-9/10 h-9/10 flex-none overflow-y-auto flex items-center justify-center  scb-thin scrollbar-track-transparent scrollbar-thumb-gray-300 
                     hover:scrollbar-thumb-gray-400 
                     dark:scrollbar-thumb-gray-600 dark:hover:scrollbar-thumb-gray-500
                     scrollbar-thumb-rounded-full"

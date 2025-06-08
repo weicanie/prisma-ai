@@ -84,19 +84,33 @@ interface PaginatedJobsResult {
     limit: number;
 }
 
-declare const typeMap: Record<string, string>;
+declare const type_content_Map: Record<string, string>;
+declare enum KnowledgeTypeEnum {
+    userProjectDoc = "userProjectDoc",//我的项目文档
+    userProjectRepo = "userProjectRepo",//我的项目github仓库地址
+    openSourceProjectDoc = "openSourceProjectDoc",//开源项目文档
+    openSourceProjectRepo = "openSourceProjectRepo",//开源项目github仓库地址
+    techDoc = "techDoc",//技术文档
+    interviewQuestion = "interviewQuestion",//面试题
+    other = "other"
+}
+declare enum FileTypeEnum {
+    txt = "txt",//txt
+    url = "url",//url
+    doc = "doc"
+}
 interface CreateKnowledgeDto {
     name: string;
-    fileType: string;
+    fileType: `${FileTypeEnum}`;
     tag: string[];
-    type: keyof typeof typeMap;
+    type: `${KnowledgeTypeEnum}`;
     content: string;
 }
 type UpdateKnowledgeDto = Partial<CreateKnowledgeDto>;
 interface KnowledgeVo {
     id: string;
     name: string;
-    type: keyof typeof typeMap;
+    type: `${KnowledgeTypeEnum}`;
     createdAt: Date;
     updatedAt: Date;
     fileType: string;
@@ -176,18 +190,18 @@ type VerifyMetaData = {
  * @param item 每个亮点的类型
  * @returns
  */
-declare function getLightspotSchema(item?: any, polish?: boolean): z.ZodObject<{
-    team: z.ZodDefault<z.ZodArray<any, "many">>;
-    skill: z.ZodDefault<z.ZodArray<any, "many">>;
-    user: z.ZodDefault<z.ZodArray<any, "many">>;
+declare function getLightspotSchema<T extends z.ZodTypeAny = z.ZodType<string>>(item: T): z.ZodObject<{
+    team: z.ZodDefault<z.ZodArray<T, "many">>;
+    skill: z.ZodDefault<z.ZodArray<T, "many">>;
+    user: z.ZodDefault<z.ZodArray<T, "many">>;
 }, "strip", z.ZodTypeAny, {
-    team: any[];
-    skill: any[];
-    user: any[];
+    team: T["_output"][];
+    skill: T["_output"][];
+    user: T["_output"][];
 }, {
-    team?: any[] | undefined;
-    skill?: any[] | undefined;
-    user?: any[] | undefined;
+    team?: T["_input"][] | undefined;
+    skill?: T["_input"][] | undefined;
+    user?: T["_input"][] | undefined;
 }>;
 declare const projectSchema: z.ZodObject<{
     info: z.ZodObject<{
@@ -224,17 +238,17 @@ declare const projectSchema: z.ZodObject<{
         techStack?: string[] | undefined;
     }>;
     lightspot: z.ZodObject<{
-        team: z.ZodDefault<z.ZodArray<any, "many">>;
-        skill: z.ZodDefault<z.ZodArray<any, "many">>;
-        user: z.ZodDefault<z.ZodArray<any, "many">>;
+        team: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+        skill: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+        user: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
-        team: any[];
-        skill: any[];
-        user: any[];
+        team: string[];
+        skill: string[];
+        user: string[];
     }, {
-        team?: any[] | undefined;
-        skill?: any[] | undefined;
-        user?: any[] | undefined;
+        team?: string[] | undefined;
+        skill?: string[] | undefined;
+        user?: string[] | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
     info: {
@@ -247,9 +261,9 @@ declare const projectSchema: z.ZodObject<{
         techStack: string[];
     };
     lightspot: {
-        team: any[];
-        skill: any[];
-        user: any[];
+        team: string[];
+        skill: string[];
+        user: string[];
     };
 }, {
     info: {
@@ -262,9 +276,9 @@ declare const projectSchema: z.ZodObject<{
         techStack?: string[] | undefined;
     };
     lightspot: {
-        team?: any[] | undefined;
-        skill?: any[] | undefined;
-        user?: any[] | undefined;
+        team?: string[] | undefined;
+        skill?: string[] | undefined;
+        user?: string[] | undefined;
     };
 }>;
 declare const projectPolishedSchema: z.ZodObject<{
@@ -302,17 +316,80 @@ declare const projectPolishedSchema: z.ZodObject<{
         techStack?: string[] | undefined;
     }>;
     lightspot: z.ZodObject<{
-        team: z.ZodDefault<z.ZodArray<any, "many">>;
-        skill: z.ZodDefault<z.ZodArray<any, "many">>;
-        user: z.ZodDefault<z.ZodArray<any, "many">>;
+        team: z.ZodDefault<z.ZodArray<z.ZodObject<{
+            content: z.ZodString;
+            advice: z.ZodDefault<z.ZodString>;
+        }, "strip", z.ZodTypeAny, {
+            content: string;
+            advice: string;
+        }, {
+            content: string;
+            advice?: string | undefined;
+        }>, "many">>;
+        skill: z.ZodDefault<z.ZodArray<z.ZodObject<{
+            content: z.ZodString;
+            advice: z.ZodDefault<z.ZodString>;
+        }, "strip", z.ZodTypeAny, {
+            content: string;
+            advice: string;
+        }, {
+            content: string;
+            advice?: string | undefined;
+        }>, "many">>;
+        user: z.ZodDefault<z.ZodArray<z.ZodObject<{
+            content: z.ZodString;
+            advice: z.ZodDefault<z.ZodString>;
+        }, "strip", z.ZodTypeAny, {
+            content: string;
+            advice: string;
+        }, {
+            content: string;
+            advice?: string | undefined;
+        }>, "many">>;
+        delete: z.ZodDefault<z.ZodArray<z.ZodObject<{
+            content: z.ZodString;
+            reason: z.ZodDefault<z.ZodString>;
+        }, "strip", z.ZodTypeAny, {
+            content: string;
+            reason: string;
+        }, {
+            content: string;
+            reason?: string | undefined;
+        }>, "many">>;
     }, "strip", z.ZodTypeAny, {
-        team: any[];
-        skill: any[];
-        user: any[];
+        team: {
+            content: string;
+            advice: string;
+        }[];
+        skill: {
+            content: string;
+            advice: string;
+        }[];
+        user: {
+            content: string;
+            advice: string;
+        }[];
+        delete: {
+            content: string;
+            reason: string;
+        }[];
     }, {
-        team?: any[] | undefined;
-        skill?: any[] | undefined;
-        user?: any[] | undefined;
+        team?: {
+            content: string;
+            advice?: string | undefined;
+        }[] | undefined;
+        skill?: {
+            content: string;
+            advice?: string | undefined;
+        }[] | undefined;
+        user?: {
+            content: string;
+            advice?: string | undefined;
+        }[] | undefined;
+        delete?: {
+            content: string;
+            reason?: string | undefined;
+        }[] | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
     info: {
@@ -325,9 +402,22 @@ declare const projectPolishedSchema: z.ZodObject<{
         techStack: string[];
     };
     lightspot: {
-        team: any[];
-        skill: any[];
-        user: any[];
+        team: {
+            content: string;
+            advice: string;
+        }[];
+        skill: {
+            content: string;
+            advice: string;
+        }[];
+        user: {
+            content: string;
+            advice: string;
+        }[];
+        delete: {
+            content: string;
+            reason: string;
+        }[];
     };
 }, {
     info: {
@@ -340,9 +430,22 @@ declare const projectPolishedSchema: z.ZodObject<{
         techStack?: string[] | undefined;
     };
     lightspot: {
-        team?: any[] | undefined;
-        skill?: any[] | undefined;
-        user?: any[] | undefined;
+        team?: {
+            content: string;
+            advice?: string | undefined;
+        }[] | undefined;
+        skill?: {
+            content: string;
+            advice?: string | undefined;
+        }[] | undefined;
+        user?: {
+            content: string;
+            advice?: string | undefined;
+        }[] | undefined;
+        delete?: {
+            content: string;
+            reason?: string | undefined;
+        }[] | undefined;
     };
 }>;
 declare const projectMinedSchema: z.ZodObject<{
@@ -380,30 +483,90 @@ declare const projectMinedSchema: z.ZodObject<{
         techStack?: string[] | undefined;
     }>;
     lightspot: z.ZodObject<{
-        team: z.ZodDefault<z.ZodArray<any, "many">>;
-        skill: z.ZodDefault<z.ZodArray<any, "many">>;
-        user: z.ZodDefault<z.ZodArray<any, "many">>;
+        team: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+        skill: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+        user: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
-        team: any[];
-        skill: any[];
-        user: any[];
+        team: string[];
+        skill: string[];
+        user: string[];
     }, {
-        team?: any[] | undefined;
-        skill?: any[] | undefined;
-        user?: any[] | undefined;
+        team?: string[] | undefined;
+        skill?: string[] | undefined;
+        user?: string[] | undefined;
     }>;
     lightspotAdded: z.ZodObject<{
-        team: z.ZodDefault<z.ZodArray<any, "many">>;
-        skill: z.ZodDefault<z.ZodArray<any, "many">>;
-        user: z.ZodDefault<z.ZodArray<any, "many">>;
+        team: z.ZodDefault<z.ZodArray<z.ZodObject<{
+            content: z.ZodString;
+            reason: z.ZodDefault<z.ZodString>;
+            tech: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+        }, "strip", z.ZodTypeAny, {
+            content: string;
+            reason: string;
+            tech: string[];
+        }, {
+            content: string;
+            reason?: string | undefined;
+            tech?: string[] | undefined;
+        }>, "many">>;
+        skill: z.ZodDefault<z.ZodArray<z.ZodObject<{
+            content: z.ZodString;
+            reason: z.ZodDefault<z.ZodString>;
+            tech: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+        }, "strip", z.ZodTypeAny, {
+            content: string;
+            reason: string;
+            tech: string[];
+        }, {
+            content: string;
+            reason?: string | undefined;
+            tech?: string[] | undefined;
+        }>, "many">>;
+        user: z.ZodDefault<z.ZodArray<z.ZodObject<{
+            content: z.ZodString;
+            reason: z.ZodDefault<z.ZodString>;
+            tech: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+        }, "strip", z.ZodTypeAny, {
+            content: string;
+            reason: string;
+            tech: string[];
+        }, {
+            content: string;
+            reason?: string | undefined;
+            tech?: string[] | undefined;
+        }>, "many">>;
     }, "strip", z.ZodTypeAny, {
-        team: any[];
-        skill: any[];
-        user: any[];
+        team: {
+            content: string;
+            reason: string;
+            tech: string[];
+        }[];
+        skill: {
+            content: string;
+            reason: string;
+            tech: string[];
+        }[];
+        user: {
+            content: string;
+            reason: string;
+            tech: string[];
+        }[];
     }, {
-        team?: any[] | undefined;
-        skill?: any[] | undefined;
-        user?: any[] | undefined;
+        team?: {
+            content: string;
+            reason?: string | undefined;
+            tech?: string[] | undefined;
+        }[] | undefined;
+        skill?: {
+            content: string;
+            reason?: string | undefined;
+            tech?: string[] | undefined;
+        }[] | undefined;
+        user?: {
+            content: string;
+            reason?: string | undefined;
+            tech?: string[] | undefined;
+        }[] | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
     info: {
@@ -416,14 +579,26 @@ declare const projectMinedSchema: z.ZodObject<{
         techStack: string[];
     };
     lightspot: {
-        team: any[];
-        skill: any[];
-        user: any[];
+        team: string[];
+        skill: string[];
+        user: string[];
     };
     lightspotAdded: {
-        team: any[];
-        skill: any[];
-        user: any[];
+        team: {
+            content: string;
+            reason: string;
+            tech: string[];
+        }[];
+        skill: {
+            content: string;
+            reason: string;
+            tech: string[];
+        }[];
+        user: {
+            content: string;
+            reason: string;
+            tech: string[];
+        }[];
     };
 }, {
     info: {
@@ -436,14 +611,26 @@ declare const projectMinedSchema: z.ZodObject<{
         techStack?: string[] | undefined;
     };
     lightspot: {
-        team?: any[] | undefined;
-        skill?: any[] | undefined;
-        user?: any[] | undefined;
+        team?: string[] | undefined;
+        skill?: string[] | undefined;
+        user?: string[] | undefined;
     };
     lightspotAdded: {
-        team?: any[] | undefined;
-        skill?: any[] | undefined;
-        user?: any[] | undefined;
+        team?: {
+            content: string;
+            reason?: string | undefined;
+            tech?: string[] | undefined;
+        }[] | undefined;
+        skill?: {
+            content: string;
+            reason?: string | undefined;
+            tech?: string[] | undefined;
+        }[] | undefined;
+        user?: {
+            content: string;
+            reason?: string | undefined;
+            tech?: string[] | undefined;
+        }[] | undefined;
     };
 }>;
 declare const lookupResultSchema: z.ZodObject<{
@@ -524,17 +711,17 @@ declare const projectLookupedSchema: z.ZodObject<{
         techStack?: string[] | undefined;
     }>;
     lightspot: z.ZodObject<{
-        team: z.ZodDefault<z.ZodArray<any, "many">>;
-        skill: z.ZodDefault<z.ZodArray<any, "many">>;
-        user: z.ZodDefault<z.ZodArray<any, "many">>;
+        team: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+        skill: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+        user: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
-        team: any[];
-        skill: any[];
-        user: any[];
+        team: string[];
+        skill: string[];
+        user: string[];
     }, {
-        team?: any[] | undefined;
-        skill?: any[] | undefined;
-        user?: any[] | undefined;
+        team?: string[] | undefined;
+        skill?: string[] | undefined;
+        user?: string[] | undefined;
     }>;
     lookupResult: z.ZodObject<{
         problem: z.ZodDefault<z.ZodArray<z.ZodObject<{
@@ -590,9 +777,9 @@ declare const projectLookupedSchema: z.ZodObject<{
         techStack: string[];
     };
     lightspot: {
-        team: any[];
-        skill: any[];
-        user: any[];
+        team: string[];
+        skill: string[];
+        user: string[];
     };
     lookupResult: {
         problem: {
@@ -616,9 +803,9 @@ declare const projectLookupedSchema: z.ZodObject<{
         techStack?: string[] | undefined;
     };
     lightspot: {
-        team?: any[] | undefined;
-        skill?: any[] | undefined;
-        user?: any[] | undefined;
+        team?: string[] | undefined;
+        skill?: string[] | undefined;
+        user?: string[] | undefined;
     };
     lookupResult: {
         problem?: {
@@ -864,4 +1051,4 @@ declare function projectSchemaToMarkdown(project: z.infer<typeof projectSchemaFo
 declare const skillsToMarkdown: (data: CreateSkillDto) => string;
 declare const markdownToSkills: (markdown: string) => CreateSkillDto;
 
-export { type CreateJobDto, type CreateKnowledgeDto, type CreateResumeDto, type CreateSkillDto, type DataChunkErrVO, type DataChunkVO, ErrorCode, type JobVo, type KnowledgeVo, type LLMSessionRequest, type LLMSessionResponse, type LLMSessionStatusResponse, type LoginFormType, type LoginResponse, type PaginatedJobsResult, type PaginatedKnsResult, type PaginatedResumesResult, type ProjectDto, type ProjectMinedDto, type ProjectMineddVo, type ProjectPolishedDto, type ProjectPolishedVo, ProjectStatus, type ProjectVo, type RegistFormType, type RegistResponse, RequestTargetMap, type ResumeVo, type ServerDataFormat, type SkillItem, type SkillVo, type StreamingChunk, type TRequestParams, type UpdateJobDto, type UpdateKnowledgeDto, type UpdateResumeDto, type UpdateSkillDto, type UserInfoFromToken, type VerifyMetaData, errorMessage, getLightspotSchema, jsonMd_obj, loginformSchema, type lookupResultDto, lookupResultSchema, markdownToProjectSchema, markdownToSkills, type projectLookupedDto, projectLookupedSchema, projectMinedSchema, projectPolishedSchema, projectSchema, projectSchemaForm, projectSchemaToMarkdown, registformSchema, skillsToMarkdown, typeMap };
+export { type CreateJobDto, type CreateKnowledgeDto, type CreateResumeDto, type CreateSkillDto, type DataChunkErrVO, type DataChunkVO, ErrorCode, FileTypeEnum, type JobVo, KnowledgeTypeEnum, type KnowledgeVo, type LLMSessionRequest, type LLMSessionResponse, type LLMSessionStatusResponse, type LoginFormType, type LoginResponse, type PaginatedJobsResult, type PaginatedKnsResult, type PaginatedResumesResult, type ProjectDto, type ProjectMinedDto, type ProjectMineddVo, type ProjectPolishedDto, type ProjectPolishedVo, ProjectStatus, type ProjectVo, type RegistFormType, type RegistResponse, RequestTargetMap, type ResumeVo, type ServerDataFormat, type SkillItem, type SkillVo, type StreamingChunk, type TRequestParams, type UpdateJobDto, type UpdateKnowledgeDto, type UpdateResumeDto, type UpdateSkillDto, type UserInfoFromToken, type VerifyMetaData, errorMessage, getLightspotSchema, jsonMd_obj, loginformSchema, type lookupResultDto, lookupResultSchema, markdownToProjectSchema, markdownToSkills, type projectLookupedDto, projectLookupedSchema, projectMinedSchema, projectPolishedSchema, projectSchema, projectSchemaForm, projectSchemaToMarkdown, registformSchema, skillsToMarkdown, type_content_Map };

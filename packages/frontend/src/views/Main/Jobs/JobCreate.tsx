@@ -9,10 +9,8 @@ interface JobCreateProps {
 const JobCreate: React.FC<JobCreateProps> = () => {
 	const dialogContent = (
 		<>
-			<div className="flex gap-2">
-				<div className="basis-180 max-w-3xl mt-10">
-					<JobForm></JobForm>
-				</div>
+			<div className="w-full p-7 ">
+				<JobForm></JobForm>
 			</div>
 		</>
 	);

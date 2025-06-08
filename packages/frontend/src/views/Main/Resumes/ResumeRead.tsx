@@ -240,7 +240,7 @@ const ResumeRead: React.FC<ResumeReadProps> = () => {
 																		}`}
 																	>
 																		<ArrowRight className="w-4 h-4 mt-0.5 text-blue-500 flex-shrink-0" />
-																		<span>{typeof item === 'string' ? item : item.content}</span>
+																		<span>{item}</span>
 																	</div>
 																))}
 															</div>
@@ -261,7 +261,7 @@ const ResumeRead: React.FC<ResumeReadProps> = () => {
 																		}`}
 																	>
 																		<ArrowRight className="w-4 h-4 mt-0.5 text-green-500 flex-shrink-0" />
-																		<span>{typeof item === 'string' ? item : item.content}</span>
+																		<span>{item}</span>
 																	</div>
 																))}
 															</div>
@@ -282,7 +282,7 @@ const ResumeRead: React.FC<ResumeReadProps> = () => {
 																		}`}
 																	>
 																		<ArrowRight className="w-4 h-4 mt-0.5 text-purple-500 flex-shrink-0" />
-																		<span>{typeof item === 'string' ? item : item.content}</span>
+																		<span>{item}</span>
 																	</div>
 																))}
 															</div>

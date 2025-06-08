@@ -9,7 +9,7 @@ import {
 } from '@prism-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useCustomQuery } from '../../../query/config';
 import { ProjectQueryKey } from '../../../query/keys';
 import { findAllProjects } from '../../../services/project';
@@ -27,9 +27,11 @@ const Action: React.FC<ActionProps> = () => {
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
 
+	const navigate = useNavigate();
+
 	const [input, setInput] = useState<ProjectDto | Record<string, unknown>>({});
 	//目标接口的URL path
-	const [target, setTarget] = useState('');
+	const [urlPath, setUrlPath] = useState('');
 	/**
 	 * 流式传输结束时string转为的JSON格式对象数据-原结果
 	 */
@@ -44,8 +46,13 @@ const Action: React.FC<ActionProps> = () => {
 	const queryClient = useQueryClient();
 
 	/* 使用SSE获取AI生成结果 */
-	const { content, reasonContent, done, isReasoning } = useSseAnswer(input, target);
-	const [actionType, setActionType] = useState<'lookup' | 'polish' | 'mine' | null>(null);
+	const { content, reasonContent, done, isReasoning } = useSseAnswer(input, urlPath);
+	/* 自动切换tab */
+	useEffect(() => {
+		if (content) {
+			navigate('#content');
+		}
+	}, [content]);
 
 	useEffect(() => {
 		if (done) {
@@ -63,6 +70,7 @@ const Action: React.FC<ActionProps> = () => {
 			}
 
 			setInput({}); // 清空输入防止sse重复请求
+			navigate('#result');
 		}
 	}, [done]);
 
@@ -101,6 +109,12 @@ const Action: React.FC<ActionProps> = () => {
 	};
 
 	const availableActions = getAvailableActions(projectData.status);
+	const actionType: 'lookup' | 'polish' | 'mine' | 'collaborate' | null = availableActions[0] as
+		| 'lookup'
+		| 'polish'
+		| 'mine'
+		| 'collaborate'
+		| null;
 
 	// 处理AI分析
 	const handleLookup = () => {
@@ -108,9 +122,9 @@ const Action: React.FC<ActionProps> = () => {
 			info: projectData.info,
 			lightspot: projectData.lightspot
 		};
-		setActionType('lookup');
 		setInput(projectDto);
-		setTarget('/project/lookup');
+		setUrlPath('/project/lookup');
+		navigate('#reasoning');
 	};
 
 	// 处理AI打磨
@@ -120,10 +134,9 @@ const Action: React.FC<ActionProps> = () => {
 			lightspot: projectData.lightspot,
 			lookupResult: projectData.lookupResult!
 		};
-		console.log('🚀 ~ handlePolish ~ projectLookupedDto:', projectLookupedDto);
-		setActionType('polish');
 		setInput(projectLookupedDto);
-		setTarget('/project/polish');
+		setUrlPath('/project/polish');
+		navigate('#reasoning');
 	};
 
 	// 处理AI挖掘
@@ -132,25 +145,24 @@ const Action: React.FC<ActionProps> = () => {
 			info: projectData.info,
 			lightspot: projectData.lightspot
 		};
-		setActionType('mine');
 		setInput(projectDto);
-		setTarget('/project/mine');
+		setUrlPath('/project/mine');
+		navigate('#reasoning');
 	};
 
 	// 处理协作
 	const handleCollaborate = () => {
 		// TODO: 实现与项目经验优化 agent 的协作功能
 		console.log('启动与AI agent的协作');
+		navigate('#collaborate');
 	};
 
 	/* 用户点击完成优化后更新左侧的项目经验,并清理所有状态 */
 	const handleMerge = () => {
 		queryClient.invalidateQueries({ queryKey: [ProjectQueryKey.Projects] });
 		setInput({});
-		setResultData(null);
-		setMergedData(null);
-		setActionType(null);
-		setTarget('polish');
+		setUrlPath('polish');
+		navigate('#next-action');
 	};
 
 	const ProjectResultProps = {
@@ -187,9 +199,7 @@ const Action: React.FC<ActionProps> = () => {
 					</div>
 
 					{/* 右栏：AI行动区域 */}
-					<div className="overflow-y-auto scb-thin ">
-						<ProjectResult {...ProjectResultProps} />
-					</div>
+					<ProjectResult {...ProjectResultProps} />
 				</div>
 			</div>
 		</div>

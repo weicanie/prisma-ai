@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTheme } from '@/utils/theme';
-import { typeMap } from '@prism-ai/shared';
+import { type_content_Map } from '@prism-ai/shared';
 import { BookOpen, Calendar, Edit, ExternalLink } from 'lucide-react';
 import React from 'react';
 import { useParams } from 'react-router-dom';
@@ -79,7 +79,7 @@ const KnowledgeRead: React.FC<KnowledgeReadProps> = () => {
 								{knowledgeData.fileType}
 							</span>
 							<p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} leading-relaxed`}>
-								{typeMap[knowledgeData.type] ?? '未知类型'}
+								{type_content_Map[knowledgeData.type] ?? '未知类型'}
 							</p>
 						</CardContent>
 					</Card>

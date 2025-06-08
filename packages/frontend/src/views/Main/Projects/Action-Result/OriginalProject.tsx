@@ -131,7 +131,7 @@ export const OriginalProject: React.FC<OriginalProjectProps> = ({
 													className={`flex items-start gap-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
 												>
 													<ArrowRight className="w-4 h-4 mt-0.5 text-blue-500 flex-shrink-0" />
-													<span>{typeof item === 'string' ? item : item.content}</span>
+													<span>{item}</span>
 												</li>
 											))}
 										</ul>
@@ -153,7 +153,7 @@ export const OriginalProject: React.FC<OriginalProjectProps> = ({
 													className={`flex items-start gap-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
 												>
 													<ArrowRight className="w-4 h-4 mt-0.5 text-green-500 flex-shrink-0" />
-													<span>{typeof item === 'string' ? item : item.content}</span>
+													<span>{item}</span>
 												</li>
 											))}
 										</ul>
@@ -175,7 +175,7 @@ export const OriginalProject: React.FC<OriginalProjectProps> = ({
 													className={`flex items-start gap-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
 												>
 													<ArrowRight className="w-4 h-4 mt-0.5 text-purple-500 flex-shrink-0" />
-													<span>{typeof item === 'string' ? item : item.content}</span>
+													<span>{item}</span>
 												</li>
 											))}
 										</ul>
@@ -183,11 +183,14 @@ export const OriginalProject: React.FC<OriginalProjectProps> = ({
 								)}
 
 								{projectData.lookupResult && (
-									<ProjectAnalysisResultCard
-										isDark={isDark}
-										resultData={projectData.lookupResult}
-										mergedData={null}
-									/>
+									<>
+										<Separator />
+										<ProjectAnalysisResultCard
+											isDark={isDark}
+											resultData={projectData.lookupResult}
+											mergedData={null}
+										/>
+									</>
 								)}
 							</div>
 						</div>

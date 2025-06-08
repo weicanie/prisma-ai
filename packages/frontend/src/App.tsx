@@ -1,5 +1,3 @@
-import { CopilotKit } from '@copilotkit/react-core';
-import { CopilotSidebar } from '@copilotkit/react-ui';
 import '@copilotkit/react-ui/styles.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -44,10 +42,10 @@ const queryClient = new QueryClient({
 function APP() {
 	return (
 		<QueryClientProvider client={queryClient}>
-			<CopilotKit runtimeUrl={import.meta.env.VITE_API_BASE_URL + '/copilotkit' || '/api'}>
-				<GlobalStyle></GlobalStyle>
-				<Toaster />
-				<CopilotSidebar
+			{/* <CopilotKit runtimeUrl={import.meta.env.VITE_API_BASE_URL + '/copilotkit' || '/api'}> */}
+			<GlobalStyle></GlobalStyle>
+			<Toaster />
+			{/* <CopilotSidebar
 					defaultOpen={true}
 					instructions={
 						'You are assisting the user as best as you can. Answer in the best way possible given the data you have.'
@@ -56,12 +54,12 @@ function APP() {
 						title: 'Prisma',
 						initial: '您好, 我是 Prisma, 我可以帮您优化简历、匹配岗位信息、提升面试表现等。'
 					}}
-				>
-					<AppWrapper>{useRoutes(routes)}</AppWrapper>
-				</CopilotSidebar>
+				> */}
+			<AppWrapper>{useRoutes(routes)}</AppWrapper>
+			{/* </CopilotSidebar> */}
 
-				<ReactQueryDevtools initialIsOpen={false} />
-			</CopilotKit>
+			<ReactQueryDevtools initialIsOpen={false} />
+			{/* </CopilotKit> */}
 		</QueryClientProvider>
 	);
 }

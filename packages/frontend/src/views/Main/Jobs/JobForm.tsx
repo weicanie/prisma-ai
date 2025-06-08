@@ -76,7 +76,7 @@ export const JobForm = memo(() => {
 	};
 
 	return (
-		<div className="flex justify-center items-center basis-180 max-w-3xl">
+		<div className="flex justify-center items-center w-full">
 			<div className="w-full h-full">
 				<Form {...form}>
 					<form

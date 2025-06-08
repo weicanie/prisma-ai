@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { KnowledgeVo, UserInfoFromToken } from '@prism-ai/shared';
+import { FileTypeEnum, KnowledgeTypeEnum, KnowledgeVo, UserInfoFromToken } from '@prism-ai/shared';
 import { Document } from 'mongoose';
 import { UserInfo } from '../../project/entities/project.entity';
 
@@ -9,13 +9,13 @@ export class Knowledgebase implements Omit<KnowledgeVo, 'id' | 'createdAt' | 'up
 	name: string;
 
 	@Prop({ required: true })
-	fileType: string;
+	fileType: `${FileTypeEnum}`;
 
 	@Prop([String])
 	tag: string[];
 
 	@Prop({ required: true })
-	type: string;
+	type: `${KnowledgeTypeEnum}`;
 
 	@Prop({ required: true })
 	content: string;

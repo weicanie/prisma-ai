@@ -14,7 +14,7 @@ import {
  * @param path 请求的URL路径,如 '/project/lookup'
  * @returns
  */
-export function useSseAnswer(input: contextInput | {}, path: string) {
+export function useSseAnswer(input: contextInput | object, path: string) {
 	const doNotStart = typeof input === 'object' && Object.getOwnPropertyNames(input).length === 0;
 	const [content, setContent] = useState('');
 	const [reasonContent, setReasonContent] = useState('');
@@ -26,6 +26,7 @@ export function useSseAnswer(input: contextInput | {}, path: string) {
 	const [errorMsg, setErrorMsg] = useState('');
 	/* 控制同一时间只有一个对话,避免反复执行mutate */
 	const [answering, setAnswering] = useState(false);
+	console.log('🚀 ~ useSseAnswer ~ answering:', answering);
 
 	/* 上传prompt建立会话, 开始接收llm流式返回 */
 	function useCeateSession() {
@@ -39,7 +40,8 @@ export function useSseAnswer(input: contextInput | {}, path: string) {
 					setIsReasoning,
 					setError,
 					setErrorCode,
-					setErrorMsg
+					setErrorMsg,
+					setAnswering
 				);
 			}
 		});
@@ -77,7 +79,8 @@ export function useSseAnswer(input: contextInput | {}, path: string) {
 					setIsReasoning,
 					setError,
 					setErrorCode,
-					setErrorMsg
+					setErrorMsg,
+					setAnswering
 				);
 			}
 		});

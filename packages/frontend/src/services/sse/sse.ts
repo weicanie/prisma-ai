@@ -13,7 +13,7 @@ import { instance } from '../config';
 /**
  * 创建sse请求的上下文中的输入
  */
-export interface contextInput extends ProjectDto {}
+export type contextInput = ProjectDto;
 /**
  * 提取会话状态
  */
@@ -188,7 +188,7 @@ function getSseData(
 
 	if (status === 'backdone' || status === 'running') {
 		// 断点接传 - 从上次中断的地方继续
-		url = `${baseUrl}${path}?sessionId=${localStorage.getItem(llmSessionKey)}&token=${token}`;
+		url = `${baseUrl}${path}-recover?sessionId=${localStorage.getItem(llmSessionKey)}&token=${token}`;
 	} else if (status === 'tasknotfound') {
 		// 创建新任务 - 开始新的生成
 		url = `${baseUrl}${path}?sessionId=${localStorage.getItem(llmSessionKey)}&token=${token}`;
@@ -204,7 +204,7 @@ function getSseData(
 		eventSource.onmessage = event => {
 			const eventData: DataChunkVO | DataChunkErrVO = JSON.parse(event.data as string);
 
-			if (eventData?.data.hasOwnProperty('error')) {
+			if (Object.prototype.hasOwnProperty.call(eventData?.data, 'error')) {
 				cleanup();
 				setTupError('9999', `chunk错误:${(eventData as DataChunkErrVO).data.error}`);
 			}

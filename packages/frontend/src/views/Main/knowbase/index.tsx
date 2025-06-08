@@ -1,5 +1,5 @@
 import { Checkbox } from '@/components/ui/checkbox';
-import { typeMap, type KnowledgeVo } from '@prism-ai/shared';
+import { type_content_Map, type KnowledgeVo } from '@prism-ai/shared';
 import type { Row, Table } from '@tanstack/react-table';
 import { AlignLeft, Link } from 'lucide-react';
 import React from 'react';
@@ -91,7 +91,9 @@ const Knowledges: React.FC<KnowledgesProps> = ({ selectColShow, selectionHandler
 					header: ({ column }) => <DataTableColumnHeader column={column} title="知识类型" />,
 					cell: ({ row }) => {
 						return (
-							<div className="w-[120px]">{typeMap[row.original.type] || row.original.type}</div>
+							<div className="w-[120px]">
+								{type_content_Map[row.original.type] || row.original.type}
+							</div>
 						);
 					}
 				},

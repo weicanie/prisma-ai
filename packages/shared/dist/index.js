@@ -21,6 +21,8 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var index_exports = {};
 __export(index_exports, {
   ErrorCode: () => ErrorCode,
+  FileTypeEnum: () => FileTypeEnum,
+  KnowledgeTypeEnum: () => KnowledgeTypeEnum,
   ProjectStatus: () => ProjectStatus,
   RequestTargetMap: () => RequestTargetMap,
   errorMessage: () => errorMessage,
@@ -38,7 +40,7 @@ __export(index_exports, {
   projectSchemaToMarkdown: () => projectSchemaToMarkdown,
   registformSchema: () => registformSchema,
   skillsToMarkdown: () => skillsToMarkdown,
-  typeMap: () => typeMap
+  type_content_Map: () => type_content_Map
 });
 module.exports = __toCommonJS(index_exports);
 
@@ -92,7 +94,7 @@ var errorMessage = {
 };
 
 // src/types/knowBase.ts
-var typeMap = {
+var type_content_Map = {
   userProjectDoc: "\u6211\u7684\u9879\u76EE\u6587\u6863",
   userProjectRepo: "\u6211\u7684\u9879\u76EEgithub\u4ED3\u5E93\u5730\u5740",
   openSourceProjectDoc: "\u5F00\u6E90\u9879\u76EE\u6587\u6863",
@@ -101,6 +103,22 @@ var typeMap = {
   interviewQuestion: "\u9762\u8BD5\u9898",
   other: "\u5176\u4ED6"
 };
+var KnowledgeTypeEnum = /* @__PURE__ */ ((KnowledgeTypeEnum2) => {
+  KnowledgeTypeEnum2["userProjectDoc"] = "userProjectDoc";
+  KnowledgeTypeEnum2["userProjectRepo"] = "userProjectRepo";
+  KnowledgeTypeEnum2["openSourceProjectDoc"] = "openSourceProjectDoc";
+  KnowledgeTypeEnum2["openSourceProjectRepo"] = "openSourceProjectRepo";
+  KnowledgeTypeEnum2["techDoc"] = "techDoc";
+  KnowledgeTypeEnum2["interviewQuestion"] = "interviewQuestion";
+  KnowledgeTypeEnum2["other"] = "other";
+  return KnowledgeTypeEnum2;
+})(KnowledgeTypeEnum || {});
+var FileTypeEnum = /* @__PURE__ */ ((FileTypeEnum2) => {
+  FileTypeEnum2["txt"] = "txt";
+  FileTypeEnum2["url"] = "url";
+  FileTypeEnum2["doc"] = "doc";
+  return FileTypeEnum2;
+})(FileTypeEnum || {});
 
 // src/types/login_regist.schema.ts
 var import_zod = require("zod");
@@ -153,20 +171,7 @@ var infoSchema = import_zod2.z.object({
   }),
   techStack: import_zod2.z.array(import_zod2.z.string()).describe("\u9879\u76EE\u7684\u6280\u672F\u6808").default([])
 }).describe("\u9879\u76EE\u4FE1\u606F\u7684\u7ED3\u6784\u5316\u63CF\u8FF0");
-function getLightspotSchema(item = import_zod2.z.string(), polish = false) {
-  if (polish) {
-    return import_zod2.z.object({
-      team: import_zod2.z.array(item).describe("\u56E2\u961F\u8D21\u732E\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
-      skill: import_zod2.z.array(item).describe("\u6280\u672F\u4EAE\u70B9/\u96BE\u70B9\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
-      user: import_zod2.z.array(item).describe("\u7528\u6237\u4F53\u9A8C/\u4E1A\u52A1\u4EF7\u503C\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
-      delete: import_zod2.z.array(
-        import_zod2.z.object({
-          content: import_zod2.z.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
-          reason: import_zod2.z.string().describe("\u4EAE\u70B9\u5220\u9664\u539F\u56E0").default("NONE")
-        })
-      ).describe("\u5220\u9664\u7684\u4EAE\u70B9").default([])
-    }).describe("\u9879\u76EE\u4EAE\u70B9\u7684\u7ED3\u6784\u5316\u63CF\u8FF0");
-  }
+function getLightspotSchema(item) {
   return import_zod2.z.object({
     team: import_zod2.z.array(item).describe("\u56E2\u961F\u8D21\u732E\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
     skill: import_zod2.z.array(item).describe("\u6280\u672F\u4EAE\u70B9/\u96BE\u70B9\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
@@ -175,29 +180,47 @@ function getLightspotSchema(item = import_zod2.z.string(), polish = false) {
 }
 var projectSchema = import_zod2.z.object({
   info: infoSchema,
-  lightspot: getLightspotSchema()
+  lightspot: getLightspotSchema(import_zod2.z.string())
 });
 var projectPolishedSchema = import_zod2.z.object({
   info: infoSchema,
   // polishedInfo: infoSchema.optional(),
-  lightspot: getLightspotSchema(
-    import_zod2.z.object({
-      content: import_zod2.z.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
-      advice: import_zod2.z.string().describe("\u4EAE\u70B9\u6539\u8FDB\u5EFA\u8BAE").default("NONE")
-    }),
-    true
-  )
+  lightspot: import_zod2.z.object({
+    team: import_zod2.z.array(
+      import_zod2.z.object({
+        content: import_zod2.z.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
+        advice: import_zod2.z.string().describe("\u4EAE\u70B9\u6539\u8FDB\u5EFA\u8BAE").default("NONE")
+      })
+    ).describe("\u56E2\u961F\u8D21\u732E\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
+    skill: import_zod2.z.array(
+      import_zod2.z.object({
+        content: import_zod2.z.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
+        advice: import_zod2.z.string().describe("\u4EAE\u70B9\u6539\u8FDB\u5EFA\u8BAE").default("NONE")
+      })
+    ).describe("\u6280\u672F\u4EAE\u70B9/\u96BE\u70B9\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
+    user: import_zod2.z.array(
+      import_zod2.z.object({
+        content: import_zod2.z.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
+        advice: import_zod2.z.string().describe("\u4EAE\u70B9\u6539\u8FDB\u5EFA\u8BAE").default("NONE")
+      })
+    ).describe("\u7528\u6237\u4F53\u9A8C/\u4E1A\u52A1\u4EF7\u503C\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
+    delete: import_zod2.z.array(
+      import_zod2.z.object({
+        content: import_zod2.z.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
+        reason: import_zod2.z.string().describe("\u4EAE\u70B9\u5220\u9664\u539F\u56E0").default("NONE")
+      })
+    ).describe("\u5220\u9664\u7684\u4EAE\u70B9").default([])
+  }).describe("\u9879\u76EE\u4EAE\u70B9\u7684\u7ED3\u6784\u5316\u63CF\u8FF0")
+});
+var lightspotAddedSchema = import_zod2.z.object({
+  content: import_zod2.z.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
+  reason: import_zod2.z.string().describe("\u4EAE\u70B9\u6DFB\u52A0\u539F\u56E0").default("NONE"),
+  tech: import_zod2.z.array(import_zod2.z.string()).describe("\u6D89\u53CA\u6280\u672F").default([])
 });
 var projectMinedSchema = import_zod2.z.object({
   info: infoSchema,
-  lightspot: getLightspotSchema(),
-  lightspotAdded: getLightspotSchema(
-    import_zod2.z.object({
-      content: import_zod2.z.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
-      reason: import_zod2.z.string().describe("\u4EAE\u70B9\u6DFB\u52A0\u539F\u56E0").default("NONE"),
-      tech: import_zod2.z.array(import_zod2.z.string()).describe("\u6D89\u53CA\u6280\u672F").default([])
-    })
-  )
+  lightspot: getLightspotSchema(import_zod2.z.string()),
+  lightspotAdded: getLightspotSchema(lightspotAddedSchema)
 });
 var lookupResultSchema = import_zod2.z.object({
   problem: import_zod2.z.array(
@@ -216,7 +239,7 @@ var lookupResultSchema = import_zod2.z.object({
 });
 var projectLookupedSchema = import_zod2.z.object({
   info: infoSchema,
-  lightspot: getLightspotSchema(),
+  lightspot: getLightspotSchema(import_zod2.z.string()),
   lookupResult: lookupResultSchema
 });
 
@@ -437,6 +460,8 @@ var markdownToSkills = (markdown) => {
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   ErrorCode,
+  FileTypeEnum,
+  KnowledgeTypeEnum,
   ProjectStatus,
   RequestTargetMap,
   errorMessage,
@@ -454,7 +479,7 @@ var markdownToSkills = (markdown) => {
   projectSchemaToMarkdown,
   registformSchema,
   skillsToMarkdown,
-  typeMap
+  type_content_Map
 });
 //! crepe编辑器中无序列表项 - 会转为 *: 统一用*,且会跟<br />
 //# sourceMappingURL=index.js.map

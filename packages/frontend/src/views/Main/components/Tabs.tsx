@@ -1,13 +1,6 @@
 import { Pyramid } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const tabs = [
-	{ name: 'My Account', href: '#', icon: Pyramid, current: false },
-	{ name: 'Company', href: '#', icon: Pyramid, current: false },
-	{ name: 'Team Members', href: '#', icon: Pyramid, current: true },
-	{ name: 'Billing', href: '#', icon: Pyramid, current: false }
-];
 
 interface Tab {
 	name: string;
@@ -19,15 +12,26 @@ function classNames(...classes: (string | boolean)[]) {
 	return classes.filter(Boolean).join(' ');
 }
 
-export default function Tabs() {
+interface TabsProps {
+	tabs: Tab[];
+}
+
+export default function Tabs({ tabs }: TabsProps) {
 	const [currentTab, setCurrentTab] = useState<Tab>(tabs[0]);
+	const hash = window.location.hash;
+	useEffect(() => {
+		const tab = tabs.find(t => t.href === hash);
+		if (tab) {
+			setCurrentTab(tab);
+		}
+	}, [hash]);
+
 	const navigate = useNavigate();
 	tabs.forEach(t => {
 		t.current = t.name === currentTab.name; //更新当前选中状态
 	});
 	//添加点击选中功能
 	const handleClick = (tab: Tab) => {
-		console.log('🚀 ~ handleClick ~ tab:', tab);
 		navigate(tab.href);
 		tabs.forEach(t => {
 			t.current = t.name === tab.name; //更新当前选中状态
@@ -58,7 +62,7 @@ export default function Tabs() {
 			{/* 在大屏幕如电脑上显示tab group */}
 			<div className="hidden sm:block">
 				<div className="border-b border-gray-200">
-					<nav aria-label="Tabs" className="-mb-px flex space-x-8">
+					<nav aria-label="Tabs" className="-mb-px flex justify-center space-x-8">
 						{tabs.map(tab => (
 							<a
 								key={tab.name}
@@ -70,6 +74,7 @@ export default function Tabs() {
 										: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
 									'group inline-flex items-center border-b-2 px-1 py-4 text-sm font-medium'
 								)}
+								onClick={() => handleClick(tab)}
 							>
 								<tab.icon
 									aria-hidden="true"

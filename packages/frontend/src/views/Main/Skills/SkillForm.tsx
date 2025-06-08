@@ -12,6 +12,7 @@ import {
 	FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import type { CreateSkillDto, SkillItem } from '@prism-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { throttle } from 'lodash';
 import { Plus, Trash2 } from 'lucide-react';
@@ -39,7 +40,7 @@ const skillFormSchema = z.object({
 type SkillFormData = z.infer<typeof skillFormSchema>;
 
 // dto 转 表单数据
-const convertToFormData = (data: any): SkillFormData => {
+const convertToFormData = (data: CreateSkillDto): SkillFormData => {
 	if (!data?.content || !Array.isArray(data.content)) {
 		return { types: [''], skills: [] };
 	}
@@ -47,7 +48,7 @@ const convertToFormData = (data: any): SkillFormData => {
 	const types: string[] = [];
 	const skills: { typeIndex: number; name: string }[] = [];
 
-	data.content.forEach((item: any, typeIndex: number) => {
+	data.content.forEach((item: SkillItem, typeIndex: number) => {
 		if (item.type) {
 			types.push(item.type);
 			if (item.content && Array.isArray(item.content)) {
@@ -103,7 +104,7 @@ export const SkillForm = memo(() => {
 	};
 
 	// 管理技能类型数组
-	//@ts-expect-error
+	//@ts-expect-error 内部体操的锅
 	const typesArray = useFieldArray<SkillFormData, 'types'>({
 		control: form.control,
 		name: 'types'
@@ -117,7 +118,9 @@ export const SkillForm = memo(() => {
 
 	// 添加技能类型
 	const addType = () => {
-		typesArray.append('');
+		typesArray.append('技能类型1');
+		typesArray.append('技能类型2');
+		typesArray.append('技能类型3');
 	};
 
 	// 删除技能类型（级联删除相关技能）
@@ -152,7 +155,9 @@ export const SkillForm = memo(() => {
 
 	// 添加技能
 	const addSkill = (typeIndex: number) => {
-		skillsArray.append({ typeIndex, name: '' });
+		skillsArray.append({ typeIndex, name: `技能${typeIndex + 1}-1` });
+		skillsArray.append({ typeIndex, name: `技能${typeIndex + 1}-2` });
+		skillsArray.append({ typeIndex, name: `技能${typeIndex + 1}-3` });
 	};
 
 	// 删除技能
@@ -168,7 +173,7 @@ export const SkillForm = memo(() => {
 	};
 
 	return (
-		<div className="flex justify-center items-center basis-180 max-w-3xl">
+		<div className="flex justify-center items-center w-full">
 			<div className="w-full h-full">
 				<Form {...form}>
 					<form

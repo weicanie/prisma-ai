@@ -1,6 +1,6 @@
 import { AnimatedCircularProgressBar } from '@/components/magicui/animated-circular-progress-bar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { lookupResultDto, projectLookupedDto } from '@prism-ai/shared';
 import { AlertTriangle, CheckCircle, Lightbulb, Pyramid } from 'lucide-react'; // Assuming lucide-react for icons
 import React, { useEffect, useState } from 'react';
@@ -29,7 +29,9 @@ export const ProjectAnalysisResultCard: React.FC<ProjectAnalysisResultCardProps>
 
 	useEffect(() => {
 		const animationTimeout = setTimeout(() => {
-			score && setAnimatedScore(score);
+			if (score) {
+				setAnimatedScore(score);
+			}
 		}, 500);
 
 		return () => clearTimeout(animationTimeout);
@@ -48,9 +50,11 @@ export const ProjectAnalysisResultCard: React.FC<ProjectAnalysisResultCardProps>
 	mergedData = mergedData as projectLookupedDto | null;
 
 	return (
-		<Card className={` ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+		<>
 			<CardHeader>
-				<CardTitle className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+				<CardTitle
+					className={`flex items-center justify-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
+				>
 					<Lightbulb className="w-5 h-5 text-yellow-500" />
 					Prisma 深度分析结果
 				</CardTitle>
@@ -146,6 +150,6 @@ export const ProjectAnalysisResultCard: React.FC<ProjectAnalysisResultCardProps>
 					</Button>
 				</div>
 			)}
-		</Card>
+		</>
 	);
 };

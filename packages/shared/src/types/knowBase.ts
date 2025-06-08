@@ -1,4 +1,4 @@
-export const typeMap: Record<string, string> = {
+export const type_content_Map: Record<string, string> = {
 	userProjectDoc: '我的项目文档',
 	userProjectRepo: '我的项目github仓库地址',
 	openSourceProjectDoc: '开源项目文档',
@@ -7,11 +7,26 @@ export const typeMap: Record<string, string> = {
 	interviewQuestion: '面试题',
 	other: '其他'
 };
+//上面的作为注释
+export enum KnowledgeTypeEnum {
+	userProjectDoc = 'userProjectDoc', //我的项目文档
+	userProjectRepo = 'userProjectRepo', //我的项目github仓库地址
+	openSourceProjectDoc = 'openSourceProjectDoc', //开源项目文档
+	openSourceProjectRepo = 'openSourceProjectRepo', //开源项目github仓库地址
+	techDoc = 'techDoc', //技术文档
+	interviewQuestion = 'interviewQuestion', //面试题
+	other = 'other' //其他
+}
+export enum FileTypeEnum {
+	txt = 'txt', //txt
+	url = 'url', //url
+	doc = 'doc' //文档
+}
 
 /* 用户知识库 */
 export interface CreateKnowledgeDto {
 	name: string; //知识名称
-	fileType: string; //文件类型 'txt' 'url' 'doc'（暂不支持）
+	fileType: `${FileTypeEnum}`; //文件类型 'txt' 'url' 'doc'
 	/* 知识标签-声明知识用途-目前由用户自定义
     项目经验优化
     简历匹配岗位
@@ -35,7 +50,7 @@ export interface CreateKnowledgeDto {
   4.其它 'other'
 
   */
-	type: keyof typeof typeMap; //知识类型
+	type: `${KnowledgeTypeEnum}`; //知识类型
 	content: string; //知识内容
 }
 
@@ -44,7 +59,7 @@ export type UpdateKnowledgeDto = Partial<CreateKnowledgeDto>;
 export interface KnowledgeVo {
 	id: string;
 	name: string;
-	type: keyof typeof typeMap;
+	type: `${KnowledgeTypeEnum}`;
 	createdAt: Date;
 	updatedAt: Date;
 	fileType: string; // Added missing field

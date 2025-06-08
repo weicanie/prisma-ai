@@ -16,25 +16,7 @@ const infoSchema = z
  * @param item 每个亮点的类型
  * @returns
  */
-export function getLightspotSchema(item: any = z.string(), polish = false) {
-	if (polish) {
-		return z
-			.object({
-				team: z.array(item).describe('团队贡献方面的亮点').default([]),
-				skill: z.array(item).describe('技术亮点/难点方面的亮点').default([]),
-				user: z.array(item).describe('用户体验/业务价值方面的亮点').default([]),
-				delete: z
-					.array(
-						z.object({
-							content: z.string().describe('亮点内容'),
-							reason: z.string().describe('亮点删除原因').default('NONE')
-						})
-					)
-					.describe('删除的亮点')
-					.default([])
-			})
-			.describe('项目亮点的结构化描述');
-	}
+export function getLightspotSchema<T extends z.ZodTypeAny = z.ZodType<string>>(item: T) {
 	return z
 		.object({
 			team: z.array(item).describe('团队贡献方面的亮点').default([]),
@@ -46,31 +28,62 @@ export function getLightspotSchema(item: any = z.string(), polish = false) {
 
 const projectSchema = z.object({
 	info: infoSchema,
-	lightspot: getLightspotSchema()
+	lightspot: getLightspotSchema(z.string())
 });
 
 const projectPolishedSchema = z.object({
 	info: infoSchema,
 	// polishedInfo: infoSchema.optional(),
-	lightspot: getLightspotSchema(
-		z.object({
-			content: z.string().describe('亮点内容'),
-			advice: z.string().describe('亮点改进建议').default('NONE')
-		}),
-		true
-	)
+	lightspot: z
+		.object({
+			team: z
+				.array(
+					z.object({
+						content: z.string().describe('亮点内容'),
+						advice: z.string().describe('亮点改进建议').default('NONE')
+					})
+				)
+				.describe('团队贡献方面的亮点')
+				.default([]),
+			skill: z
+				.array(
+					z.object({
+						content: z.string().describe('亮点内容'),
+						advice: z.string().describe('亮点改进建议').default('NONE')
+					})
+				)
+				.describe('技术亮点/难点方面的亮点')
+				.default([]),
+			user: z
+				.array(
+					z.object({
+						content: z.string().describe('亮点内容'),
+						advice: z.string().describe('亮点改进建议').default('NONE')
+					})
+				)
+				.describe('用户体验/业务价值方面的亮点')
+				.default([]),
+			delete: z
+				.array(
+					z.object({
+						content: z.string().describe('亮点内容'),
+						reason: z.string().describe('亮点删除原因').default('NONE')
+					})
+				)
+				.describe('删除的亮点')
+				.default([])
+		})
+		.describe('项目亮点的结构化描述')
 });
-
+const lightspotAddedSchema = z.object({
+	content: z.string().describe('亮点内容'),
+	reason: z.string().describe('亮点添加原因').default('NONE'),
+	tech: z.array(z.string()).describe('涉及技术').default([])
+});
 const projectMinedSchema = z.object({
 	info: infoSchema,
-	lightspot: getLightspotSchema(),
-	lightspotAdded: getLightspotSchema(
-		z.object({
-			content: z.string().describe('亮点内容'),
-			reason: z.string().describe('亮点添加原因').default('NONE'),
-			tech: z.array(z.string()).describe('涉及技术').default([])
-		})
-	)
+	lightspot: getLightspotSchema(z.string()),
+	lightspotAdded: getLightspotSchema<typeof lightspotAddedSchema>(lightspotAddedSchema)
 });
 
 const lookupResultSchema = z.object({
@@ -97,7 +110,7 @@ const lookupResultSchema = z.object({
 
 const projectLookupedSchema = z.object({
 	info: infoSchema,
-	lightspot: getLightspotSchema(),
+	lightspot: getLightspotSchema(z.string()),
 	lookupResult: lookupResultSchema
 });
 

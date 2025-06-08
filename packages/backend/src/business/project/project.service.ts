@@ -158,7 +158,7 @@ export class ProjectService {
 			const resultSave = { ...result, status, userInfo };
 			const resultSave_model = new model(resultSave);
 
-			let resultAfterMerge = results[1];
+			let resultAfterMerge: ProjectDto = results[1];
 			const inputValidationResult = inputSchema.safeParse(resultAfterMerge);
 			if (!inputValidationResult.success) {
 				const errorMessage = JSON.stringify(inputValidationResult.error.format());
@@ -166,10 +166,21 @@ export class ProjectService {
 				const projectPolishedStr = JSON.stringify(resultAfterMerge);
 				resultAfterMerge = await fomartFixChain.invoke({ input: projectPolishedStr });
 			}
-
-			const resultSaveAfterMerge = { ...resultAfterMerge, status: statusMerged };
 			/* 更新项目,包括评分 */
-			//TODO 提醒用户评分更新会有有延迟
+			//先删除原评分然后保存、返回, 异步更新评分-这样可以大大减少用户等待时间-但分析结果无法保证能用于下一次优化,比如mine
+			const resultSaveAfterMerge = { ...resultAfterMerge, status: statusMerged };
+			await this.projectModel.updateOne(
+				{ _id: existingProjectId.id },
+				{
+					$set: {
+						status: statusMerged,
+						info: resultAfterMerge.info,
+						lightspot: resultAfterMerge.lightspot,
+						lookupResult: null
+					}
+				}
+			);
+
 			this.updateProject(existingProjectId.id, resultSaveAfterMerge, userInfo);
 			await resultSave_model.save();
 		};
@@ -349,7 +360,7 @@ export class ProjectService {
 		if (existingPolishingProject) {
 			return from(
 				Promise.resolve({
-					content: `\`\`\`json\n[${JSON.stringify(existingProject)},${JSON.stringify(existingPolishingProject)}]\n\`\`\``, //与llm返回格式保持一致,前端统一解析
+					content: `\`\`\`json\n[${JSON.stringify(existingPolishingProject)},${JSON.stringify(existingProject)}]\n\`\`\``, //与llm返回格式保持一致,前端统一解析
 					done: true,
 					isReasoning: false
 				})
@@ -557,7 +568,7 @@ export class ProjectService {
 	/**
 	 * 非流式分析项目
 	 */
-	private async lookupProjectUnStream(project: ProjectDto, userInfo: UserInfoFromToken) {
+	private async lookupProjectUnStream(project: ProjectDocument, userInfo: UserInfoFromToken) {
 		const chain = await this.chainService.lookupChain();
 		const projectStr = JSON.stringify(project);
 		//TODO 这里只消费lookupResult,但使用了更多的prompt
@@ -587,12 +598,29 @@ export class ProjectService {
 			// 更新
 			await this.projectModel.updateOne(
 				{ 'info.name': project.info.name, 'userInfo.userId': userInfo.userId },
-				{ $set: { status: ProjectStatus.lookuped, lookupResult: lookupResultSave } }
+				{
+					$set: {
+						lookupResult: lookupResultSave,
+						status:
+							existingProject.status === ProjectStatus.committed
+								? ProjectStatus.lookuped
+								: existingProject.status
+					}
+				}
 			);
 		} else {
 			await this.projectModel.updateOne(
 				{ 'info.name': project.info.name, 'userInfo.userId': userInfo.userId },
-				{ $set: { status: ProjectStatus.lookuped, lookupResult: lookupResultSave } }
+				{
+					$set: {
+						lookupResult: lookupResultSave,
+						status: existingProject
+							? existingProject.status === ProjectStatus.committed
+								? ProjectStatus.lookuped
+								: existingProject.status
+							: ProjectStatus.lookuped
+					}
+				}
 			);
 		}
 	}
@@ -615,12 +643,8 @@ export class ProjectService {
 		if (!existingProject) {
 			throw new Error(`Project with ID "${id}" not found or user unauthorized.`);
 		}
-		const projectToLookup = {
-			info: existingProject.info,
-			lightspot: existingProject.lightspot
-		};
 
-		const lookupResult = await this.lookupProjectUnStream(projectToLookup as ProjectDto, userInfo);
+		const lookupResult = await this.lookupProjectUnStream(existingProject, userInfo);
 
 		return { ...existingProject, lookupResult } as ProjectVo;
 	}

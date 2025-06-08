@@ -91,7 +91,7 @@ const ResumeForm: React.FC<ResumeFormProps> = memo(({ onSubmit }) => {
 	};
 
 	return (
-		<div className="w-full sm:min-w-xl max-w-2xl">
+		<div className="w-full sm:min-w-xl max-w-2xl mt-7">
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
 					{/* 简历名称输入 */}

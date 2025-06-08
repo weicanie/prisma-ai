@@ -48,7 +48,7 @@ var errorMessage = {
 };
 
 // src/types/knowBase.ts
-var typeMap = {
+var type_content_Map = {
   userProjectDoc: "\u6211\u7684\u9879\u76EE\u6587\u6863",
   userProjectRepo: "\u6211\u7684\u9879\u76EEgithub\u4ED3\u5E93\u5730\u5740",
   openSourceProjectDoc: "\u5F00\u6E90\u9879\u76EE\u6587\u6863",
@@ -57,6 +57,22 @@ var typeMap = {
   interviewQuestion: "\u9762\u8BD5\u9898",
   other: "\u5176\u4ED6"
 };
+var KnowledgeTypeEnum = /* @__PURE__ */ ((KnowledgeTypeEnum2) => {
+  KnowledgeTypeEnum2["userProjectDoc"] = "userProjectDoc";
+  KnowledgeTypeEnum2["userProjectRepo"] = "userProjectRepo";
+  KnowledgeTypeEnum2["openSourceProjectDoc"] = "openSourceProjectDoc";
+  KnowledgeTypeEnum2["openSourceProjectRepo"] = "openSourceProjectRepo";
+  KnowledgeTypeEnum2["techDoc"] = "techDoc";
+  KnowledgeTypeEnum2["interviewQuestion"] = "interviewQuestion";
+  KnowledgeTypeEnum2["other"] = "other";
+  return KnowledgeTypeEnum2;
+})(KnowledgeTypeEnum || {});
+var FileTypeEnum = /* @__PURE__ */ ((FileTypeEnum2) => {
+  FileTypeEnum2["txt"] = "txt";
+  FileTypeEnum2["url"] = "url";
+  FileTypeEnum2["doc"] = "doc";
+  return FileTypeEnum2;
+})(FileTypeEnum || {});
 
 // src/types/login_regist.schema.ts
 import { z } from "zod";
@@ -109,20 +125,7 @@ var infoSchema = z2.object({
   }),
   techStack: z2.array(z2.string()).describe("\u9879\u76EE\u7684\u6280\u672F\u6808").default([])
 }).describe("\u9879\u76EE\u4FE1\u606F\u7684\u7ED3\u6784\u5316\u63CF\u8FF0");
-function getLightspotSchema(item = z2.string(), polish = false) {
-  if (polish) {
-    return z2.object({
-      team: z2.array(item).describe("\u56E2\u961F\u8D21\u732E\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
-      skill: z2.array(item).describe("\u6280\u672F\u4EAE\u70B9/\u96BE\u70B9\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
-      user: z2.array(item).describe("\u7528\u6237\u4F53\u9A8C/\u4E1A\u52A1\u4EF7\u503C\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
-      delete: z2.array(
-        z2.object({
-          content: z2.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
-          reason: z2.string().describe("\u4EAE\u70B9\u5220\u9664\u539F\u56E0").default("NONE")
-        })
-      ).describe("\u5220\u9664\u7684\u4EAE\u70B9").default([])
-    }).describe("\u9879\u76EE\u4EAE\u70B9\u7684\u7ED3\u6784\u5316\u63CF\u8FF0");
-  }
+function getLightspotSchema(item) {
   return z2.object({
     team: z2.array(item).describe("\u56E2\u961F\u8D21\u732E\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
     skill: z2.array(item).describe("\u6280\u672F\u4EAE\u70B9/\u96BE\u70B9\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
@@ -131,29 +134,47 @@ function getLightspotSchema(item = z2.string(), polish = false) {
 }
 var projectSchema = z2.object({
   info: infoSchema,
-  lightspot: getLightspotSchema()
+  lightspot: getLightspotSchema(z2.string())
 });
 var projectPolishedSchema = z2.object({
   info: infoSchema,
   // polishedInfo: infoSchema.optional(),
-  lightspot: getLightspotSchema(
-    z2.object({
-      content: z2.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
-      advice: z2.string().describe("\u4EAE\u70B9\u6539\u8FDB\u5EFA\u8BAE").default("NONE")
-    }),
-    true
-  )
+  lightspot: z2.object({
+    team: z2.array(
+      z2.object({
+        content: z2.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
+        advice: z2.string().describe("\u4EAE\u70B9\u6539\u8FDB\u5EFA\u8BAE").default("NONE")
+      })
+    ).describe("\u56E2\u961F\u8D21\u732E\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
+    skill: z2.array(
+      z2.object({
+        content: z2.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
+        advice: z2.string().describe("\u4EAE\u70B9\u6539\u8FDB\u5EFA\u8BAE").default("NONE")
+      })
+    ).describe("\u6280\u672F\u4EAE\u70B9/\u96BE\u70B9\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
+    user: z2.array(
+      z2.object({
+        content: z2.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
+        advice: z2.string().describe("\u4EAE\u70B9\u6539\u8FDB\u5EFA\u8BAE").default("NONE")
+      })
+    ).describe("\u7528\u6237\u4F53\u9A8C/\u4E1A\u52A1\u4EF7\u503C\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
+    delete: z2.array(
+      z2.object({
+        content: z2.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
+        reason: z2.string().describe("\u4EAE\u70B9\u5220\u9664\u539F\u56E0").default("NONE")
+      })
+    ).describe("\u5220\u9664\u7684\u4EAE\u70B9").default([])
+  }).describe("\u9879\u76EE\u4EAE\u70B9\u7684\u7ED3\u6784\u5316\u63CF\u8FF0")
+});
+var lightspotAddedSchema = z2.object({
+  content: z2.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
+  reason: z2.string().describe("\u4EAE\u70B9\u6DFB\u52A0\u539F\u56E0").default("NONE"),
+  tech: z2.array(z2.string()).describe("\u6D89\u53CA\u6280\u672F").default([])
 });
 var projectMinedSchema = z2.object({
   info: infoSchema,
-  lightspot: getLightspotSchema(),
-  lightspotAdded: getLightspotSchema(
-    z2.object({
-      content: z2.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
-      reason: z2.string().describe("\u4EAE\u70B9\u6DFB\u52A0\u539F\u56E0").default("NONE"),
-      tech: z2.array(z2.string()).describe("\u6D89\u53CA\u6280\u672F").default([])
-    })
-  )
+  lightspot: getLightspotSchema(z2.string()),
+  lightspotAdded: getLightspotSchema(lightspotAddedSchema)
 });
 var lookupResultSchema = z2.object({
   problem: z2.array(
@@ -172,7 +193,7 @@ var lookupResultSchema = z2.object({
 });
 var projectLookupedSchema = z2.object({
   info: infoSchema,
-  lightspot: getLightspotSchema(),
+  lightspot: getLightspotSchema(z2.string()),
   lookupResult: lookupResultSchema
 });
 
@@ -392,6 +413,8 @@ var markdownToSkills = (markdown) => {
 };
 export {
   ErrorCode,
+  FileTypeEnum,
+  KnowledgeTypeEnum,
   ProjectStatus,
   RequestTargetMap,
   errorMessage,
@@ -409,7 +432,7 @@ export {
   projectSchemaToMarkdown,
   registformSchema,
   skillsToMarkdown,
-  typeMap
+  type_content_Map
 };
 //! crepe编辑器中无序列表项 - 会转为 *: 统一用*,且会跟<br />
 //# sourceMappingURL=index.mjs.map

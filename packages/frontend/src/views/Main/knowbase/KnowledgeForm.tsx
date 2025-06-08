@@ -22,7 +22,7 @@ import {
 	SelectValue
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { typeMap, type CreateKnowledgeDto } from '@prism-ai/shared';
+import { KnowledgeTypeEnum, type_content_Map, type CreateKnowledgeDto } from '@prism-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { throttle } from 'lodash';
 import { X } from 'lucide-react';
@@ -69,9 +69,9 @@ export const KnowledgeForm = memo(() => {
 		resolver: zodResolver(knowledgeFormSchema),
 		defaultValues: {
 			name: knowledgeData.name || '',
-			fileType: (knowledgeData.fileType as any) || 'txt',
+			fileType: knowledgeData.fileType || 'txt',
 			tag: knowledgeData.tag || [],
-			type: knowledgeData.type as any,
+			type: knowledgeData.type as `${KnowledgeTypeEnum}`,
 			content: knowledgeData.content || ''
 		}
 	});
@@ -135,12 +135,12 @@ export const KnowledgeForm = memo(() => {
 	];
 
 	return (
-		<div className="w-full h-full sm:min-w-xl max-w-2xl">
+		<div className="w-full h-full sm:min-w-xl">
 			<Form {...form}>
 				<form
 					onSubmit={form.handleSubmit(onSubmit)}
 					onChange={() => onChange(form.getValues())}
-					className="space-y-6"
+					className="space-y-10"
 				>
 					{/* 知识名称 */}
 					<FormField
@@ -199,7 +199,7 @@ export const KnowledgeForm = memo(() => {
 										</SelectTrigger>
 									</FormControl>
 									<SelectContent>
-										{Object.entries(typeMap).map(([key, label]) => (
+										{Object.entries(type_content_Map).map(([key, label]) => (
 											<SelectItem key={key} value={key}>
 												{label}
 											</SelectItem>

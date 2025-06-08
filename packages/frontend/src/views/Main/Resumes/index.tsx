@@ -129,7 +129,7 @@ const Resumes: React.FC<ResumesProps> = () => {
 	const SkillsProps = {
 		selectColShow: true,
 		selectionHandler: (selectedRows: unknown[]) => {
-			dispatch(setResumeData({ skill: (selectedRows[0] as ResumeVo).id }));
+			dispatch(setResumeData({ skill: (selectedRows[0] as ResumeVo)?.id }));
 		},
 		title: '',
 		description: '选择一个职业技能'

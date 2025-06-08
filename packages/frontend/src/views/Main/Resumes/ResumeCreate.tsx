@@ -12,10 +12,8 @@ const ResumeCreate: React.FC<ResumeCreateProps> = () => {
 	const createResumeMutation = useCustomMutation(createResume);
 
 	const dialogContent = (
-		<div className="flex justify-center items-center max-w-2xl">
-			<div className="w-full">
-				<ResumeForm onSubmit={createResumeMutation.mutate} />
-			</div>
+		<div className="w-full flex justify-center items-center">
+			<ResumeForm onSubmit={createResumeMutation.mutate} />
 		</div>
 	);
 
