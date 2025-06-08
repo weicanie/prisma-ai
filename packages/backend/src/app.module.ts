@@ -29,12 +29,15 @@ import { UserModule } from './user/user.module';
 		ConfigModule.forRoot({
 			isGlobal: true,
 			envFilePath: [
+				//本地开发时不传入环境变量NODE_ENV即可
 				'.env',
 				process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development'
 			]
 		}),
 		/* mongodb数据库 */
-		MongooseModule.forRoot('mongodb://localhost:27017/prisma-ai'),
+		MongooseModule.forRoot(
+			`mongodb://${process.env.MONGO_HOST ?? 'localhost'}:${process.env.MONGO_PORT ?? '27017'}/prisma-ai`
+		),
 		SseModule,
 		SessionPoolModule,
 		EventBusModule,

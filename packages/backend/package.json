@@ -37,6 +37,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/mongoose": "^11.0.3",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/swagger": "^11.2.0",
     "@pinecone-database/pinecone": "^5.1.1",
     "@prism-ai/shared": "workspace:*",
     "@prisma/client": "^6.7.0",
@@ -62,7 +63,6 @@
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
-    "@nestjs/swagger": "^11.2.0",
     "@nestjs/testing": "^10.0.0",
     "@types/body-parser": "^1.19.5",
     "@types/express": "^5.0.0",

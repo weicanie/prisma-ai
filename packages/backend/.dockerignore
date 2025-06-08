@@ -33,6 +33,7 @@
 **/secrets.dev.yaml
 **/values.dev.yaml
 **/build
-**/dist
+# 只忽略后端的dist目录,以正确构建共享包
+packages/backend/dist
 LICENSE
 README.md

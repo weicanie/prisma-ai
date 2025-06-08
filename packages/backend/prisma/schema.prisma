@@ -7,10 +7,12 @@ generator client {
   // output        = "../generated/client"
 }
 
-generator docs {
-  provider = "node node_modules/prisma-docs-generator"
-  output   = "../generated/docs"
-}
+/**
+ * generator docs {
+ * provider = "node node_modules/prisma-docs-generator"
+ * output   = "../generated/docs"
+ * }
+ */
 
 datasource db {
   provider = "mysql"
