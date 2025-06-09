@@ -7,6 +7,7 @@ import {
 	Patch,
 	Post,
 	Query,
+	Sse,
 	ValidationPipe
 } from '@nestjs/common';
 import { UserInfoFromToken } from '@prism-ai/shared';
@@ -18,6 +19,16 @@ import { ResumeService } from './resume.service';
 @Controller('resume')
 export class ResumeController {
 	constructor(private readonly resumeService: ResumeService) {}
+
+	@RequireLogin()
+	@Sse('match')
+	async resumeMatchJob(
+		@Query('sessionId') sessionId: string,
+		@Query('recover') recover: boolean,
+		@UserInfo() userInfo: UserInfoFromToken
+	) {
+		return this.resumeService.SseMatchResult(sessionId, userInfo, recover);
+	}
 
 	@RequireLogin()
 	@Post()

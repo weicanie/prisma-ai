@@ -27,7 +27,7 @@ import { ProjectPolished, ProjectPolishedDocument } from './entities/projectPoli
 //FIXME 用validation pipe 结合 zodSchema生成的 dto验证用户上传的数据格式
 // 其它用于验证llm生成的数据格式和指定数据格式
 
-interface DeepSeekStreamChunk {
+export interface DeepSeekStreamChunk {
 	id: string;
 	content: string | ''; //生成内容
 	additional_kwargs: {
@@ -78,7 +78,8 @@ export class ProjectService {
 	public methodKeys = {
 		polishProject: 'polishProject',
 		mineProject: 'mineProject',
-		lookupProject: 'lookupProject'
+		lookupProject: 'lookupProject',
+		matchProject: 'matchProject'
 	};
 
 	constructor(
@@ -140,6 +141,7 @@ export class ProjectService {
 	 * @param status 结果应处于的状态
 	 * @param statusMerged 合并后的结果应处于的状态
 	 * @param inputSchema 输入数据的 zod schema
+	 * @param existingProjectId 已存在的项目ID
 	 * @returns 返回一个处理函数，接收redis存储的结果将其存储到数据库
 	 */
 	private async resultHandlerCreater(
@@ -254,7 +256,6 @@ export class ProjectService {
 		return { ...newModel.toObject() } as Omit<ProjectVo, 'lookupResult'>;
 	}
 
-	//TODO 从deepseek模型sse返回数据代码抽取封装
 	/**
 	 * 分析项目经验存在的问题和解决方案
 	 */
@@ -263,42 +264,6 @@ export class ProjectService {
 		userInfo: UserInfoFromToken,
 		taskId: string
 	): Promise<Observable<StreamingChunk>> {
-		const existingProject = await this.projectModel
-			.findOne({
-				'userInfo.userId': userInfo.userId,
-				'info.name': project.info.name
-			})
-			.exec();
-		const existingLookupResult = existingProject?.lookupResult;
-		//储存：新建或更新
-		const handler = async (resultRedis: redisStoreResult) => {
-			let lookupResult = jsonMd_obj(resultRedis.content); //分析的思考结果、结果
-			const validationResult = lookupResultSchema.safeParse(lookupResult);
-			if (!validationResult.success) {
-				const errorMessage = JSON.stringify(validationResult.error.format());
-				const fomartFixChain = await this.chainService.fomartFixChain(
-					lookupResultSchema,
-					errorMessage
-				);
-				const projectPolishedStr = JSON.stringify(lookupResult);
-				lookupResult = await fomartFixChain.invoke({ input: projectPolishedStr });
-			}
-			const lookupResultSave = { ...lookupResult, userInfo, projectName: project.info.name };
-			if (existingLookupResult) {
-				// 更新
-				await this.projectModel.updateOne(
-					{ 'info.name': project.info.name, 'userInfo.userId': userInfo.userId },
-					{ $set: { status: ProjectStatus.lookuped, lookupResult: lookupResultSave } }
-				);
-			} else {
-				// 新建
-				await this.projectModel.updateOne(
-					{ 'info.name': project.info.name, 'userInfo.userId': userInfo.userId },
-					{ $set: { status: ProjectStatus.lookuped, lookupResult: lookupResultSave } }
-				);
-			}
-		};
-
 		this.eventBusService.once(EventList.taskCompleted, ({ task }) => {
 			if (task.id !== taskId) {
 				return; // 确保只接收当前任务的结果
@@ -317,7 +282,7 @@ export class ProjectService {
 					}
 					return JSON.parse(redisStoreResult);
 				})
-				.then(result => handler.bind(this)(result))
+				.then(result => this._handleLookupResult(result, userInfo, project))
 				.catch(error => {
 					this.logger.error(`任务${task.resultKey}处理结果失败: ${error}`);
 				});
@@ -339,6 +304,48 @@ export class ProjectService {
 				};
 			})
 		);
+	}
+
+	/**
+	 *
+	 * @param resultRedis SSE任务完成后从redis中取出的结果
+	 * @param userInfo 用户信息
+	 * @param project 用户输入项目信息
+	 */
+	private async _handleLookupResult(
+		resultRedis: redisStoreResult,
+		userInfo: UserInfoFromToken,
+		project: ProjectDto
+	) {
+		// 1. 从Redis结果中解析出LLM的输出内容
+		let lookupResult = jsonMd_obj(resultRedis.content); // 从markdown代码块中提取json
+
+		// 2. 使用Zod Schema验证解析出的JSON对象格式
+		const validationResult = lookupResultSchema.safeParse(lookupResult);
+
+		// 3. 如果验证失败,尝试使用LLM进行格式修复
+		if (!validationResult.success) {
+			const errorMessage = JSON.stringify(validationResult.error.format()); // 获取详细的Zod验证错误信息
+			// 创建一个格式修复链
+			const fomartFixChain = await this.chainService.fomartFixChain(
+				lookupResultSchema,
+				errorMessage
+			);
+			const projectPolishedStr = JSON.stringify(lookupResult);
+			// 调用链来修复格式
+			lookupResult = await fomartFixChain.invoke({ input: projectPolishedStr });
+		}
+
+		// 4. 准备要存入数据库的数据
+		const lookupResultSave = { ...lookupResult, userInfo, projectName: project.info.name };
+
+		// 5. 根据是否存在旧记录，执行更新或新建操作
+		const updateOperation = {
+			$set: { status: ProjectStatus.lookuped, lookupResult: lookupResultSave }
+		};
+		const query = { 'info.name': project.info.name, 'userInfo.userId': userInfo.userId };
+
+		await this.projectModel.updateOne(query, updateOperation);
 	}
 
 	/**

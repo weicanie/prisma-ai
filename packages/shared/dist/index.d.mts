@@ -54,6 +54,7 @@ interface CreateJobDto {
     link?: string;
     status?: string;
 }
+type LLMJobDto = Pick<CreateJobDto, 'jobName' | 'companyName' | 'description'>;
 /**
  * 更新招聘信息的 DTO (CreateJobDto 的部分属性)
  */
@@ -63,7 +64,7 @@ type UpdateJobDto = Partial<CreateJobDto>;
  * 用于API响应和前端展示
  */
 interface JobVo {
-    id?: string;
+    id: string;
     jobName: string;
     companyName: string;
     description: string;
@@ -835,11 +836,11 @@ type ProjectDto = z.infer<typeof projectSchema>;
 type ProjectPolishedDto = z.infer<typeof projectPolishedSchema>;
 type ProjectMinedDto = z.infer<typeof projectMinedSchema>;
 interface ProjectVo extends z.infer<typeof projectSchema> {
-    id?: string;
+    id: string;
     name?: string;
     status: ProjectStatus;
-    createdAt?: string;
-    updatedAt?: string;
+    createdAt: string;
+    updatedAt: string;
     lookupResult?: z.infer<typeof lookupResultSchema>;
 }
 interface ProjectPolishedVo extends z.infer<typeof projectPolishedSchema> {
@@ -928,6 +929,158 @@ declare const projectSchemaForm: z.ZodObject<{
     };
 }>;
 
+declare const resumeMatchedSchema: z.ZodObject<{
+    name: z.ZodString;
+    skill: z.ZodObject<{
+        content: z.ZodArray<z.ZodObject<{
+            type: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+            content: z.ZodDefault<z.ZodOptional<z.ZodArray<z.ZodString, "many">>>;
+        }, "strip", z.ZodTypeAny, {
+            content: string[];
+            type: string;
+        }, {
+            content?: string[] | undefined;
+            type?: string | undefined;
+        }>, "many">;
+    }, "strip", z.ZodTypeAny, {
+        content: {
+            content: string[];
+            type: string;
+        }[];
+    }, {
+        content: {
+            content?: string[] | undefined;
+            type?: string | undefined;
+        }[];
+    }>;
+    projects: z.ZodArray<z.ZodObject<{
+        info: z.ZodObject<{
+            name: z.ZodString;
+            desc: z.ZodObject<{
+                role: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+                contribute: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+                bgAndTarget: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+            }, "strip", z.ZodTypeAny, {
+                role: string;
+                contribute: string;
+                bgAndTarget: string;
+            }, {
+                role?: string | undefined;
+                contribute?: string | undefined;
+                bgAndTarget?: string | undefined;
+            }>;
+            techStack: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+        }, "strip", z.ZodTypeAny, {
+            name: string;
+            desc: {
+                role: string;
+                contribute: string;
+                bgAndTarget: string;
+            };
+            techStack: string[];
+        }, {
+            name: string;
+            desc: {
+                role?: string | undefined;
+                contribute?: string | undefined;
+                bgAndTarget?: string | undefined;
+            };
+            techStack?: string[] | undefined;
+        }>;
+        lightspot: z.ZodObject<{
+            team: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+            skill: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+            user: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+        }, "strip", z.ZodTypeAny, {
+            skill: string[];
+            team: string[];
+            user: string[];
+        }, {
+            skill?: string[] | undefined;
+            team?: string[] | undefined;
+            user?: string[] | undefined;
+        }>;
+    }, "strip", z.ZodTypeAny, {
+        info: {
+            name: string;
+            desc: {
+                role: string;
+                contribute: string;
+                bgAndTarget: string;
+            };
+            techStack: string[];
+        };
+        lightspot: {
+            skill: string[];
+            team: string[];
+            user: string[];
+        };
+    }, {
+        info: {
+            name: string;
+            desc: {
+                role?: string | undefined;
+                contribute?: string | undefined;
+                bgAndTarget?: string | undefined;
+            };
+            techStack?: string[] | undefined;
+        };
+        lightspot: {
+            skill?: string[] | undefined;
+            team?: string[] | undefined;
+            user?: string[] | undefined;
+        };
+    }>, "many">;
+}, "strip", z.ZodTypeAny, {
+    name: string;
+    skill: {
+        content: {
+            content: string[];
+            type: string;
+        }[];
+    };
+    projects: {
+        info: {
+            name: string;
+            desc: {
+                role: string;
+                contribute: string;
+                bgAndTarget: string;
+            };
+            techStack: string[];
+        };
+        lightspot: {
+            skill: string[];
+            team: string[];
+            user: string[];
+        };
+    }[];
+}, {
+    name: string;
+    skill: {
+        content: {
+            content?: string[] | undefined;
+            type?: string | undefined;
+        }[];
+    };
+    projects: {
+        info: {
+            name: string;
+            desc: {
+                role?: string | undefined;
+                contribute?: string | undefined;
+                bgAndTarget?: string | undefined;
+            };
+            techStack?: string[] | undefined;
+        };
+        lightspot: {
+            skill?: string[] | undefined;
+            team?: string[] | undefined;
+            user?: string[] | undefined;
+        };
+    }[];
+}>;
+
 interface SkillItem {
     type?: string;
     content?: string[];
@@ -937,12 +1090,18 @@ interface CreateSkillDto {
 }
 type UpdateSkillDto = Partial<CreateSkillDto>;
 interface SkillVo {
-    id?: string;
+    id: string;
     content: SkillItem[];
-    createdAt?: string;
-    updatedAt?: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
+declare enum ResumeStatus {
+    committed = "committed",//初提交
+    matching = "matching",//llm已匹配岗位
+    matched = "matched"
+}
+type ResumeMatchedDto = z.infer<typeof resumeMatchedSchema>;
 /**
  * 创建简历的 DTO
  */
@@ -956,16 +1115,24 @@ interface CreateResumeDto {
  */
 type UpdateResumeDto = Partial<CreateResumeDto>;
 /**
+ * 简历匹配岗位的 DTO
+ */
+interface MatchJobDto {
+    resume: string;
+    job: string;
+}
+/**
  * 简历的 VO (View Object)
  * 用于API响应和前端展示
  */
 interface ResumeVo {
-    id?: string;
+    id: string;
     name: string;
+    status: ResumeStatus;
     skill: SkillVo;
     projects: ProjectVo[];
-    createdAt?: string;
-    updatedAt?: string;
+    createdAt: string;
+    updatedAt: string;
 }
 /**
  * 分页后的简历列表结果
@@ -982,6 +1149,39 @@ interface ServerDataFormat<TData = unknown> {
     message: string;
     data: TData;
 }
+
+declare const skillItemSchema: z.ZodObject<{
+    type: z.ZodDefault<z.ZodString>;
+    content: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+}, "strip", z.ZodTypeAny, {
+    type: string;
+    content: string[];
+}, {
+    type?: string | undefined;
+    content?: string[] | undefined;
+}>;
+declare const skillSchema: z.ZodObject<{
+    content: z.ZodArray<z.ZodObject<{
+        type: z.ZodDefault<z.ZodString>;
+        content: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+    }, "strip", z.ZodTypeAny, {
+        type: string;
+        content: string[];
+    }, {
+        type?: string | undefined;
+        content?: string[] | undefined;
+    }>, "many">;
+}, "strip", z.ZodTypeAny, {
+    content: {
+        type: string;
+        content: string[];
+    }[];
+}, {
+    content: {
+        type?: string | undefined;
+        content?: string[] | undefined;
+    }[];
+}>;
 
 interface StreamingChunk {
     content: string;
@@ -1051,4 +1251,4 @@ declare function projectSchemaToMarkdown(project: z.infer<typeof projectSchemaFo
 declare const skillsToMarkdown: (data: CreateSkillDto) => string;
 declare const markdownToSkills: (markdown: string) => CreateSkillDto;
 
-export { type CreateJobDto, type CreateKnowledgeDto, type CreateResumeDto, type CreateSkillDto, type DataChunkErrVO, type DataChunkVO, ErrorCode, FileTypeEnum, type JobVo, KnowledgeTypeEnum, type KnowledgeVo, type LLMSessionRequest, type LLMSessionResponse, type LLMSessionStatusResponse, type LoginFormType, type LoginResponse, type PaginatedJobsResult, type PaginatedKnsResult, type PaginatedResumesResult, type ProjectDto, type ProjectMinedDto, type ProjectMineddVo, type ProjectPolishedDto, type ProjectPolishedVo, ProjectStatus, type ProjectVo, type RegistFormType, type RegistResponse, RequestTargetMap, type ResumeVo, type ServerDataFormat, type SkillItem, type SkillVo, type StreamingChunk, type TRequestParams, type UpdateJobDto, type UpdateKnowledgeDto, type UpdateResumeDto, type UpdateSkillDto, type UserInfoFromToken, type VerifyMetaData, errorMessage, getLightspotSchema, jsonMd_obj, loginformSchema, type lookupResultDto, lookupResultSchema, markdownToProjectSchema, markdownToSkills, type projectLookupedDto, projectLookupedSchema, projectMinedSchema, projectPolishedSchema, projectSchema, projectSchemaForm, projectSchemaToMarkdown, registformSchema, skillsToMarkdown, type_content_Map };
+export { type CreateJobDto, type CreateKnowledgeDto, type CreateResumeDto, type CreateSkillDto, type DataChunkErrVO, type DataChunkVO, ErrorCode, FileTypeEnum, type JobVo, KnowledgeTypeEnum, type KnowledgeVo, type LLMJobDto, type LLMSessionRequest, type LLMSessionResponse, type LLMSessionStatusResponse, type LoginFormType, type LoginResponse, type MatchJobDto, type PaginatedJobsResult, type PaginatedKnsResult, type PaginatedResumesResult, type ProjectDto, type ProjectMinedDto, type ProjectMineddVo, type ProjectPolishedDto, type ProjectPolishedVo, ProjectStatus, type ProjectVo, type RegistFormType, type RegistResponse, RequestTargetMap, type ResumeMatchedDto, ResumeStatus, type ResumeVo, type ServerDataFormat, type SkillItem, type SkillVo, type StreamingChunk, type TRequestParams, type UpdateJobDto, type UpdateKnowledgeDto, type UpdateResumeDto, type UpdateSkillDto, type UserInfoFromToken, type VerifyMetaData, errorMessage, getLightspotSchema, jsonMd_obj, loginformSchema, type lookupResultDto, lookupResultSchema, markdownToProjectSchema, markdownToSkills, type projectLookupedDto, projectLookupedSchema, projectMinedSchema, projectPolishedSchema, projectSchema, projectSchemaForm, projectSchemaToMarkdown, registformSchema, resumeMatchedSchema, skillItemSchema, skillSchema, skillsToMarkdown, type_content_Map };

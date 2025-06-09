@@ -18,6 +18,7 @@ export class PromptService {
 	 */
 	private readonly polishT: string;
 	private readonly lookupT: string;
+	private readonly matchT: string;
 
 	/**
 	 * prompt插槽: fewShot、instructions
@@ -39,10 +40,14 @@ export class PromptService {
 		const lookupTStr = fs.readFileSync(path.join(process.cwd(), 'ai_data/prompt/lookup-T.md'), {
 			encoding: 'utf-8'
 		});
+		const matchTStr = fs.readFileSync(path.join(process.cwd(), 'ai_data/prompt/match-T.md'), {
+			encoding: 'utf-8'
+		});
 
 		this.polishT = polishStr;
 		this.lookupT = lookupTStr;
 		this.mineT = mineTStr;
+		this.matchT = matchTStr;
 		const mineFewShot = fs.readFileSync(
 			path.join(process.cwd(), 'ai_data/prompt/mine-fewshot.md'),
 			{
@@ -105,6 +110,15 @@ export class PromptService {
 	async lookupPrompt() {
 		const prompt = ChatPromptTemplate.fromMessages([
 			[`${role.SYSTEM}`, this.lookupT],
+			// [`${role.SYSTEM}`, `这是目前为止的聊天记录：{chat_history}`],
+			[`${role.HUMAN}`, '{input}']
+		]);
+		return prompt;
+	}
+
+	async matchPrompt() {
+		const prompt = ChatPromptTemplate.fromMessages([
+			[`${role.SYSTEM}`, this.matchT],
 			// [`${role.SYSTEM}`, `这是目前为止的聊天记录：{chat_history}`],
 			[`${role.HUMAN}`, '{input}']
 		]);

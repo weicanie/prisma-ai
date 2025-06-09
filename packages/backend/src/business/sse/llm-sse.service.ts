@@ -12,6 +12,7 @@ import { RedisService } from '../../redis/redis.service';
 import { LLMSseSessionPoolService } from '../../session/llm-sse-session-pool.service';
 import { PersistentTask, TaskQueueService, TaskStatus } from '../../task-queue/task-queue.service';
 import { ProjectService } from '../project/project.service';
+import { ResumeService } from '../resume/resume.service';
 import { LLMCacheService } from './LLMCache.service';
 /**
  * sse返回LLM生成内容的任务
@@ -79,7 +80,9 @@ export class LLMSseService implements OnApplicationBootstrap {
 		private readonly llmCache: LLMCacheService,
 		/* 模块间的 Provider 循环依赖,模块之间和 Provider 之间都需要 forwardRef */
 		@Inject(forwardRef(() => ProjectService))
-		public projectService: ProjectService
+		public projectService: ProjectService,
+		@Inject(forwardRef(() => ResumeService))
+		public resumeService: ResumeService
 	) {
 		/* 注册任务处理器 */
 		try {
@@ -91,13 +94,17 @@ export class LLMSseService implements OnApplicationBootstrap {
 	}
 
 	onApplicationBootstrap() {
-		/* 注册处理函数 */
+		/* 注册任务处理器内调用的业务函数 */
+		//project
 		this.funcPool[this.projectService.methodKeys.lookupProject] =
 			this.projectService.lookupProject.bind(this.projectService);
 		this.funcPool[this.projectService.methodKeys.polishProject] =
 			this.projectService.polishProject.bind(this.projectService);
 		this.funcPool[this.projectService.methodKeys.mineProject] =
 			this.projectService.mineProject.bind(this.projectService);
+		//resume
+		this.funcPool[this.resumeService.methodKeys.resumeMatchJob] =
+			this.resumeService.resumeMatchJob.bind(this.resumeService);
 	}
 
 	/* sse数据推送任务处理器

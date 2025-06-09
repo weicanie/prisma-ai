@@ -30,12 +30,12 @@ export type ProjectPolishedDto = z.infer<typeof projectPolishedSchema>;
 export type ProjectMinedDto = z.infer<typeof projectMinedSchema>;
 
 export interface ProjectVo extends z.infer<typeof projectSchema> {
-	id?: string; // 数据库中的ID
+	id: string; // 数据库中的ID
 	name?: string; //项目名称
 	status: ProjectStatus; //项目状态
 
-	createdAt?: string;
-	updatedAt?: string;
+	createdAt: string;
+	updatedAt: string;
 
 	//分析结果
 	lookupResult?: z.infer<typeof lookupResultSchema>;

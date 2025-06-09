@@ -20,7 +20,11 @@ export class Skill {
 	userInfo: UserInfo; // 用户信息
 }
 
-export type SkillDocument = HydratedDocument<Skill>;
+export type SkillDocument = HydratedDocument<Skill> & {
+	id: string;
+	createdAt: string;
+	updatedAt: string;
+};
 export const SkillSchema = SchemaFactory.createForClass(Skill);
 
 SkillSchema.set('toJSON', {

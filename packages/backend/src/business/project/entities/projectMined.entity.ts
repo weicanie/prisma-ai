@@ -47,7 +47,11 @@ export class ProjectMined {
 	reasonContent?: string; // 推理内容
 }
 
-export type ProjectMinedDocument = HydratedDocument<ProjectMined>;
+export type ProjectMinedDocument = HydratedDocument<ProjectMined> & {
+	id: string;
+	createdAt: string;
+	updatedAt: string;
+};
 export const ProjectMinedSchema = SchemaFactory.createForClass(ProjectMined);
 
 ProjectMinedSchema.index({ 'userInfo.userId': 1, status: 1 });

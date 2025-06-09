@@ -55,7 +55,11 @@ export class Job {
 	status?: string; //职位状态， "open", "closed"
 }
 
-export type JobDocument = HydratedDocument<Job>; //Job & Document
+export type JobDocument = HydratedDocument<Job> & {
+	id: string;
+	createdAt: string;
+	updatedAt: string;
+};
 export const JobSchema = SchemaFactory.createForClass(Job);
 
 JobSchema.pre('save', async function (this: JobDocument) {

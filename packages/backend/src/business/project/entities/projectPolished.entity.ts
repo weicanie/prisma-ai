@@ -53,7 +53,11 @@ export class ProjectPolished {
 	reasonContent?: string; // 推理内容
 }
 
-export type ProjectPolishedDocument = HydratedDocument<ProjectPolished>;
+export type ProjectPolishedDocument = HydratedDocument<ProjectPolished> & {
+	id: string;
+	createdAt: string;
+	updatedAt: string;
+};
 export const ProjectPolishedSchema = SchemaFactory.createForClass(ProjectPolished);
 
 ProjectPolishedSchema.index({ 'userInfo.userId': 1, status: 1 });

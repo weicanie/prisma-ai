@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { UserInfoFromToken } from '@prism-ai/shared';
+import { JobVo, UserInfoFromToken } from '@prism-ai/shared';
 import { Model } from 'mongoose';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
@@ -46,14 +46,14 @@ export class JobService {
 		};
 	}
 
-	async findOne(id: string, userInfoToken: UserInfoFromToken): Promise<Job> {
+	async findOne(id: string, userInfoToken: UserInfoFromToken): Promise<JobVo> {
 		const job = await this.jobModel
 			.findOne({ _id: id, 'userInfo.userId': userInfoToken.userId })
 			.exec();
 		if (!job) {
 			throw new NotFoundException(`Job with ID "${id}" not found or access denied`);
 		}
-		return job;
+		return job.toObject() as JobVo;
 	}
 
 	async update(

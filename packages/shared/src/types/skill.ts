@@ -13,9 +13,9 @@ export interface CreateSkillDto {
 export type UpdateSkillDto = Partial<CreateSkillDto>;
 
 export interface SkillVo {
-	id?: string;
+	id: string;
 	content: SkillItem[];
 
-	createdAt?: string;
-	updatedAt?: string;
+	createdAt: string;
+	updatedAt: string;
 }

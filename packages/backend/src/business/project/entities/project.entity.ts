@@ -95,7 +95,11 @@ export class Project {
 	lookupResult?: LookupResult;
 }
 
-export type ProjectDocument = HydratedDocument<Project>;
+export type ProjectDocument = HydratedDocument<Project> & {
+	id: string;
+	createdAt: string;
+	updatedAt: string;
+};
 
 export const ProjectSchema = SchemaFactory.createForClass(Project);
 

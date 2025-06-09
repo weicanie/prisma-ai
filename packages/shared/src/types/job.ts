@@ -13,6 +13,8 @@ export interface CreateJobDto {
 	status?: string; // 职位状态， "open", "closed"
 }
 
+export type LLMJobDto = Pick<CreateJobDto, 'jobName' | 'companyName' | 'description'>;
+
 /**
  * 更新招聘信息的 DTO (CreateJobDto 的部分属性)
  */
@@ -23,7 +25,7 @@ export type UpdateJobDto = Partial<CreateJobDto>;
  * 用于API响应和前端展示
  */
 export interface JobVo {
-	id?: string; // 数据库中的ID
+	id: string; // 数据库中的ID
 	jobName: string;
 	companyName: string;
 	description: string;

@@ -4,6 +4,7 @@ import type {
 	LLMSessionRequest,
 	LLMSessionResponse,
 	LLMSessionStatusResponse,
+	MatchJobDto,
 	ProjectDto,
 	ServerDataFormat as SDF
 } from '@prism-ai/shared';
@@ -12,8 +13,10 @@ import { instance } from '../config';
 
 /**
  * 创建sse请求的上下文中的输入
+ * @description ProjectDto 项目经验服务
+ * @description MatchJobDto 简历匹配岗位服务
  */
-export type contextInput = ProjectDto;
+export type contextInput = ProjectDto | MatchJobDto;
 /**
  * 提取会话状态
  */

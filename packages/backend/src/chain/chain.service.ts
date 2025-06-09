@@ -12,7 +12,9 @@ import {
 	projectMinedSchema,
 	ProjectPolishedDto,
 	projectPolishedSchema,
-	projectSchema
+	projectSchema,
+	ResumeMatchedDto,
+	resumeMatchedSchema
 } from '@prism-ai/shared';
 import { BufferMemory } from 'langchain/memory';
 import * as path from 'path';
@@ -247,6 +249,25 @@ export class ChainService {
 
 		const chain = await this.createChain<string, ProjectMinedDto>(llm, prompt, schema, schema0);
 		const streamChain = await this.createStreamChain<string>(llm, prompt, schema, schema0);
+		if (stream) {
+			return streamChain;
+		}
+		return chain;
+	}
+
+	/**
+	 * 将项目经验与岗位要求匹配
+	 * @description 项目经验 + 岗位信息 -> 为岗位定制的项目经验
+	 */
+	async matchChain(stream = false) {
+		const schema = resumeMatchedSchema;
+
+		const prompt = await this.promptService.matchPrompt();
+
+		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
+
+		const chain = await this.createChain<string, ResumeMatchedDto>(llm, prompt, schema);
+		const streamChain = await this.createStreamChain<string>(llm, prompt, schema);
 		if (stream) {
 			return streamChain;
 		}

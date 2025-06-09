@@ -1,18 +1,18 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ResumeStatus } from '@prism-ai/shared';
-import { HydratedDocument, Types } from 'mongoose';
-import { UserInfo } from '../../project/entities/project.entity';
-
+import { HydratedDocument } from 'mongoose';
+import { Project, UserInfo } from '../../project/entities/project.entity';
+import { Skill } from '../../skill/entities/skill.entity';
 @Schema({ timestamps: true })
-export class Resume {
+export class ResumeMatched {
 	@Prop({ required: true })
 	name: string; // 简历名称
 
-	@Prop({ type: Types.ObjectId, ref: 'Skill' })
-	skill: Types.ObjectId;
+	@Prop({ type: Skill })
+	skill: Skill;
 
-	@Prop({ type: [{ type: Types.ObjectId, ref: 'Project' }] })
-	projects: Types.ObjectId[];
+	@Prop({ type: [Project] })
+	projects: Project[];
 
 	@Prop({ type: UserInfo, required: true })
 	userInfo: UserInfo;
@@ -21,14 +21,14 @@ export class Resume {
 	status: ResumeStatus;
 }
 
-export type ResumeDocument = HydratedDocument<Resume> & {
+export type ResumeMatchedDocument = HydratedDocument<ResumeMatched> & {
 	id: string;
 	createdAt: string;
 	updatedAt: string;
 };
-export const ResumeSchema = SchemaFactory.createForClass(Resume);
+export const ResumeMatchedSchema = SchemaFactory.createForClass(ResumeMatched);
 
-ResumeSchema.set('toJSON', {
+ResumeMatchedSchema.set('toJSON', {
 	versionKey: false,
 	transform: function (doc, ret) {
 		ret.id = ret._id.toString();
@@ -36,7 +36,7 @@ ResumeSchema.set('toJSON', {
 		return ret;
 	}
 });
-ResumeSchema.set('toObject', {
+ResumeMatchedSchema.set('toObject', {
 	versionKey: false,
 	transform: function (doc, ret) {
 		ret.id = ret._id.toString();
@@ -45,5 +45,5 @@ ResumeSchema.set('toObject', {
 	}
 });
 
-ResumeSchema.index({ 'userInfo.userId': 1 });
-ResumeSchema.index({ 'userInfo.userId': 1, name: 1 }, { unique: true });
+ResumeMatchedSchema.index({ 'userInfo.userId': 1 });
+ResumeMatchedSchema.index({ 'userInfo.userId': 1, name: 1 }, { unique: true });

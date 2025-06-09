@@ -11,7 +11,7 @@ export class ProjectController {
 	@RequireLogin()
 	@Sse('lookup')
 	async lookupProject(
-		@Query('sessionId') sessionId,
+		@Query('sessionId') sessionId: string,
 		@Query('recover') recover: boolean,
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
@@ -27,7 +27,7 @@ export class ProjectController {
 	@RequireLogin()
 	@Sse('polish')
 	async polishProject(
-		@Query('sessionId') sessionId,
+		@Query('sessionId') sessionId: string,
 		@Query('recover') recover: boolean,
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
@@ -43,7 +43,7 @@ export class ProjectController {
 	@RequireLogin()
 	@Sse('mine')
 	async mineProject(
-		@Query('sessionId') sessionId,
+		@Query('sessionId') sessionId: string,
 		@Query('recover') recover: boolean,
 		@UserInfo() userInfo: UserInfoFromToken
 	) {

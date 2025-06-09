@@ -25,6 +25,7 @@ __export(index_exports, {
   KnowledgeTypeEnum: () => KnowledgeTypeEnum,
   ProjectStatus: () => ProjectStatus,
   RequestTargetMap: () => RequestTargetMap,
+  ResumeStatus: () => ResumeStatus,
   errorMessage: () => errorMessage,
   getLightspotSchema: () => getLightspotSchema,
   jsonMd_obj: () => jsonMd_obj,
@@ -39,6 +40,9 @@ __export(index_exports, {
   projectSchemaForm: () => projectSchemaForm,
   projectSchemaToMarkdown: () => projectSchemaToMarkdown,
   registformSchema: () => registformSchema,
+  resumeMatchedSchema: () => resumeMatchedSchema,
+  skillItemSchema: () => skillItemSchema,
+  skillSchema: () => skillSchema,
   skillsToMarkdown: () => skillsToMarkdown,
   type_content_Map: () => type_content_Map
 });
@@ -266,6 +270,34 @@ var projectSchemaForm = import_zod3.z.object({
   lightspot: getLightspotSchemaForm()
 });
 
+// src/types/resume.ts
+var ResumeStatus = /* @__PURE__ */ ((ResumeStatus2) => {
+  ResumeStatus2["committed"] = "committed";
+  ResumeStatus2["matching"] = "matching";
+  ResumeStatus2["matched"] = "matched";
+  return ResumeStatus2;
+})(ResumeStatus || {});
+
+// src/types/resume.schema.ts
+var import_zod5 = require("zod");
+
+// src/types/skill.schema.ts
+var import_zod4 = require("zod");
+var skillItemSchema = import_zod4.z.object({
+  type: import_zod4.z.string().default(""),
+  content: import_zod4.z.array(import_zod4.z.string()).default([])
+});
+var skillSchema = import_zod4.z.object({
+  content: import_zod4.z.array(skillItemSchema)
+});
+
+// src/types/resume.schema.ts
+var resumeMatchedSchema = import_zod5.z.object({
+  name: import_zod5.z.string().describe("\u7B80\u5386\u540D\u79F0"),
+  skill: skillSchema.describe("\u6280\u80FD\u6E05\u5355"),
+  projects: import_zod5.z.array(projectSchema).describe("\u9879\u76EE\u7ECF\u9A8C\u5217\u8868")
+});
+
 // src/types/sse.ts
 var RequestTargetMap = {
   polish: "/sse/project-generate",
@@ -464,6 +496,7 @@ var markdownToSkills = (markdown) => {
   KnowledgeTypeEnum,
   ProjectStatus,
   RequestTargetMap,
+  ResumeStatus,
   errorMessage,
   getLightspotSchema,
   jsonMd_obj,
@@ -478,6 +511,9 @@ var markdownToSkills = (markdown) => {
   projectSchemaForm,
   projectSchemaToMarkdown,
   registformSchema,
+  resumeMatchedSchema,
+  skillItemSchema,
+  skillSchema,
   skillsToMarkdown,
   type_content_Map
 });

@@ -220,6 +220,34 @@ var projectSchemaForm = z3.object({
   lightspot: getLightspotSchemaForm()
 });
 
+// src/types/resume.ts
+var ResumeStatus = /* @__PURE__ */ ((ResumeStatus2) => {
+  ResumeStatus2["committed"] = "committed";
+  ResumeStatus2["matching"] = "matching";
+  ResumeStatus2["matched"] = "matched";
+  return ResumeStatus2;
+})(ResumeStatus || {});
+
+// src/types/resume.schema.ts
+import { z as z5 } from "zod";
+
+// src/types/skill.schema.ts
+import { z as z4 } from "zod";
+var skillItemSchema = z4.object({
+  type: z4.string().default(""),
+  content: z4.array(z4.string()).default([])
+});
+var skillSchema = z4.object({
+  content: z4.array(skillItemSchema)
+});
+
+// src/types/resume.schema.ts
+var resumeMatchedSchema = z5.object({
+  name: z5.string().describe("\u7B80\u5386\u540D\u79F0"),
+  skill: skillSchema.describe("\u6280\u80FD\u6E05\u5355"),
+  projects: z5.array(projectSchema).describe("\u9879\u76EE\u7ECF\u9A8C\u5217\u8868")
+});
+
 // src/types/sse.ts
 var RequestTargetMap = {
   polish: "/sse/project-generate",
@@ -417,6 +445,7 @@ export {
   KnowledgeTypeEnum,
   ProjectStatus,
   RequestTargetMap,
+  ResumeStatus,
   errorMessage,
   getLightspotSchema,
   jsonMd_obj,
@@ -431,6 +460,9 @@ export {
   projectSchemaForm,
   projectSchemaToMarkdown,
   registformSchema,
+  resumeMatchedSchema,
+  skillItemSchema,
+  skillSchema,
   skillsToMarkdown,
   type_content_Map
 };
