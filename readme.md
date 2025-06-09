@@ -10,7 +10,7 @@
 
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/prisma-ai.git
+git clone https://github.com/weicanie/prisma-ai.git
 
 # 安装依赖
 pnpm install
@@ -22,6 +22,22 @@ pnpm install
 # 启动项目
 pnpm lerna dev --parallel
 ```
+
+## 🐳 Docker
+
+```bash
+# 克隆仓库
+git clone https://github.com/weicanie/prisma-ai.git
+```
+
+然后打开packages/backend, 配置.env、.env.production对应的环境变量。
+
+```bash
+# 构建服务,在仓库根目录执行
+docker compose -f compose.yaml up --build
+```
+
+然后浏览器访问localhost即可使用!
 
 ## 一、prisma-ai 介绍
 

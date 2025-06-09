@@ -1,5 +1,5 @@
 services:
-  nest-app:
+  prisma-ai-backend:
     build:
       context: .
       dockerfile: ./packages/backend/Dockerfile
@@ -12,7 +12,7 @@ services:
       mongo-container:
         condition: service_healthy
     restart: unless-stopped
-    container_name: nest-app
+    container_name: backend
     # 将指定的文件的环境变量加载到容器中
     env_file:
       - ./packages/backend/.env
@@ -74,15 +74,16 @@ services:
     image: docker.1ms.run/library/nginx:alpine
     ports:
       - '80:80' # HTTP
-      - '443:443' # HTTPS (如需启用)
+      # HTTPS (如需启用)
+      # - '443:443' 
     volumes:
-      - ./frontend-build:/usr/share/nginx/html # 前端静态文件
+      - ./packages/frontend/dist:/usr/share/nginx/html # 前端静态文件
       - ./nginx/conf/default.conf:/etc/nginx/conf.d/default.conf # Nginx 配置
       - ./nginx/logs:/var/log/nginx # Nginx 日志
       # 如果启用 HTTPS，还需要
       # - ./nginx/ssl:/etc/nginx/ssl
     restart: unless-stopped
     depends_on:
-      - nest-app
+      - prisma-ai-backend
     
 #使用默认桥接网络

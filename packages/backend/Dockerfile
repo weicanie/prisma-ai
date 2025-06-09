@@ -44,8 +44,9 @@ FROM docker.1ms.run/library/node:${NODE_VERSION}-alpine
 
 WORKDIR /app
 
-# 安装生产环境需要的pnpm
-RUN npm install -g pnpm@${PNPM_VERSION}
+# 安装 pnpm 和 bash
+# Alpine 默认没有 bash，但启动脚本需要它
+RUN npm install -g pnpm@${PNPM_VERSION} && apk add --no-cache bash
 
 # 从构建阶段的镜像中复制package.json和lock文件
 COPY --from=builder /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml* ./
@@ -64,18 +65,21 @@ COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 COPY --from=builder /app/packages/backend/prisma ./packages/backend/prisma
 # prompts
 COPY --from=builder /app/packages/backend/ai_data ./packages/backend/ai_data
+# 启动脚本
+COPY --from=builder /app/packages/backend/scripts ./packages/backend/scripts
 
-# 在生产环境中生成完整的Prisma客户端
+# 生成 Prisma 客户端 (在启动命令中migrate)
 RUN pnpm --filter backend exec prisma generate
+
+# 将 /app/packages/backend目录及其所有内容的所有权递归地更改为 node 用户。
+# 解决权限问题，允许 node 用户写入 node_modules（用于Prisma引擎）和 logs 等目录。
+RUN chown -R node:node /app/packages/backend
 
 # 切换到非root用户
 USER node
 
-# 设置工作目录到后端项目文件夹
-WORKDIR /app/packages/backend
-
 # 暴露后端服务端口
-EXPOSE 3303
+EXPOSE 3003
 
 # 启动服务
-CMD ["node", "dist/main.js"]
+CMD ["/app/packages/backend/scripts/start.sh"]

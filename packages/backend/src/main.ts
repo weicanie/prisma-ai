@@ -2,14 +2,13 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { MCPClientService } from './mcp-client/mcp-client.service';
 
-//TODO 统一的错误处理,采用全局的exceptionFilter,{code,message,data}
-//TODO 在适当的时候将业务与基建分离
 //TODO 服务器本身的高可用（请求队列放服务器更好,而不是放模型客户端）
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
-	// if (process.env.NODE_ENV === 'development')
-	app.enableCors(); //TODO 易受 DNS rebinding 攻击
+	if (process.env.NODE_ENV !== 'production') {
+		app.enableCors();
+	}
 	const PORT = process.env.PORT ?? 3000;
 	await app.listen(PORT);
 	try {
@@ -18,6 +17,6 @@ async function bootstrap() {
 	} catch (error) {
 		console.error('Application error:', error);
 	}
-	console.log(`Server with MCP support started on port ${PORT}`);
+	console.log(`Server started on port ${PORT}`);
 }
 bootstrap();

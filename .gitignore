@@ -3,3 +3,4 @@ ai_prompts/
 **/*.prompts.md
 packages/backend/generated
 /docker-data
+*.log
