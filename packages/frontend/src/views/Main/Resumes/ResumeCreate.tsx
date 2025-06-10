@@ -1,7 +1,9 @@
+import { useQueryClient } from '@tanstack/react-query';
 import React from 'react';
 import { useCustomMutation } from '../../../query/config';
+import { ResumeQueryKey } from '../../../query/keys';
 import { createResume } from '../../../services/resume';
-import { CreateBtn } from '../Projects/Create';
+import { CreateBtn } from '../components/CreateBtn';
 import ResumeForm from './ResumeForm';
 
 interface ResumeCreateProps {
@@ -9,7 +11,13 @@ interface ResumeCreateProps {
 }
 
 const ResumeCreate: React.FC<ResumeCreateProps> = () => {
-	const createResumeMutation = useCustomMutation(createResume);
+	const queryClient = useQueryClient();
+	//TODO 分页参数不写死
+	const createResumeMutation = useCustomMutation(createResume, {
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: [ResumeQueryKey.Resumes, 1, 10] });
+		}
+	});
 
 	const dialogContent = (
 		<div className="w-full flex justify-center items-center">

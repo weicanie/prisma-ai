@@ -3,6 +3,7 @@ import { ResumeStatus } from '@prism-ai/shared';
 import { HydratedDocument } from 'mongoose';
 import { Project, UserInfo } from '../../project/entities/project.entity';
 import { Skill } from '../../skill/entities/skill.entity';
+
 @Schema({ timestamps: true })
 export class ResumeMatched {
 	@Prop({ required: true })

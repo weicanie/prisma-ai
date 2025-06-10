@@ -14,7 +14,7 @@ interface KnowledgeReadProps {
 }
 
 const KnowledgeRead: React.FC<KnowledgeReadProps> = () => {
-	const { knowledgeIndex } = useParams();
+	const { knowledgeId } = useParams();
 	const { data, status } = useCustomQuery([KnowledgeQueryKey.Knowledges, 1, 10], ({ queryKey }) =>
 		findAllUserKnowledge({ page: queryKey[1] as number, limit: queryKey[2] as number })
 	);
@@ -27,9 +27,9 @@ const KnowledgeRead: React.FC<KnowledgeReadProps> = () => {
 	if (status === 'error') {
 		return <div>错误:{data?.message}</div>;
 	}
-	const knowledgeData = data.data?.data?.[+knowledgeIndex!];
+	const knowledgeData = data.data?.data?.find(knowledge => knowledge.id === knowledgeId);
 
-	if (!knowledgeData || knowledgeIndex === undefined) {
+	if (!knowledgeData || knowledgeId === undefined) {
 		return <div className="text-center text-gray-500">没有找到知识数据</div>;
 	}
 	const isUrl = knowledgeData.fileType === 'url';

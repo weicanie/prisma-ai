@@ -16,13 +16,13 @@ import { findAllProjects } from '../../../services/project';
 import { useSseAnswer } from '../../../services/sse/useSseAnswer';
 import { OriginalProject } from './Action-Result/OriginalProject';
 import { ProjectResult } from './Action-Result/ProjectResult';
-
+//TODO 将调用llm、获取sse返回过程封装成一个统一的组件
 interface ActionProps {
 	_?: string;
 }
 
 const Action: React.FC<ActionProps> = () => {
-	const { projectIndex } = useParams();
+	const { projectId } = useParams();
 	const { data, status } = useCustomQuery([ProjectQueryKey.Projects], findAllProjects);
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
@@ -86,9 +86,9 @@ const Action: React.FC<ActionProps> = () => {
 	}
 
 	const projectDatas = data.data;
-	const projectData = projectDatas?.[+projectIndex!];
+	const projectData = projectDatas?.find(project => project.id === projectId);
 
-	if (!projectData || projectIndex === undefined) {
+	if (!projectData || projectId === undefined) {
 		return <div className="text-center text-gray-500">没有找到项目经验数据</div>;
 	}
 
@@ -155,7 +155,6 @@ const Action: React.FC<ActionProps> = () => {
 
 	// 处理协作
 	const handleCollaborate = () => {
-		// TODO: 实现与项目经验优化 agent 的协作功能
 		console.log('启动与AI agent的协作');
 		navigate('#collaborate');
 	};
@@ -194,11 +193,7 @@ const Action: React.FC<ActionProps> = () => {
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 ">
 					{/* 左栏：原始项目信息 */}
 					<div className="overflow-y-auto">
-						<OriginalProject
-							projectData={projectData}
-							projectIndex={projectIndex}
-							isDark={isDark}
-						/>
+						<OriginalProject projectData={projectData} projectId={projectId} isDark={isDark} />
 					</div>
 
 					{/* 右栏：AI行动区域 */}

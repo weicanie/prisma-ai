@@ -40,7 +40,9 @@ const generateDefaultResumeName = () => {
 	const year = now.getFullYear();
 	const month = String(now.getMonth() + 1).padStart(2, '0');
 	const day = String(now.getDate()).padStart(2, '0');
-	return `我的简历-${year}-${month}-${day}`;
+	//随机生成6位数字
+	const randomNumber = Math.floor(100000 + Math.random() * 900000);
+	return `我的简历-${year}-${month}-${day}-${randomNumber}`;
 };
 
 const ResumeForm: React.FC<ResumeFormProps> = memo(({ onSubmit }) => {

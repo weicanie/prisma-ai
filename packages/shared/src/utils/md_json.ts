@@ -212,6 +212,7 @@ export const markdownToSkills = (markdown: string): CreateSkillDto => {
 	// 如果没有解析到任何内容，返回默认结构
 	if (content.length === 0) {
 		return {
+			name: '',
 			content: [
 				{ type: '前端', content: [] },
 				{ type: '后端', content: [] },
@@ -220,5 +221,5 @@ export const markdownToSkills = (markdown: string): CreateSkillDto => {
 		};
 	}
 
-	return { content };
+	return { name: '', content };
 };

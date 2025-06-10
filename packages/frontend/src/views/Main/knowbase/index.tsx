@@ -14,12 +14,15 @@ import { DataTableRowActions } from '../components/config-data-table/data-table/
 import { PageHeader } from '../components/PageHeader';
 import KnowledgeCreate from './KnowledgeCreate';
 
-interface KnowledgesProps {
+interface KnowledgesProps<TData> {
 	selectColShow?: boolean;
-	selectionHandler?: (...args: unknown[]) => void;
+	selectionHandler?: (rows: TData[]) => void;
 }
 
-const Knowledges: React.FC<KnowledgesProps> = ({ selectColShow, selectionHandler }) => {
+const Knowledges: React.FC<KnowledgesProps<KnowledgeVo>> = ({
+	selectColShow,
+	selectionHandler
+}) => {
 	const navigate = useNavigate();
 	const { data, status } = useCustomQuery([KnowledgeQueryKey.Knowledges], () =>
 		findAllUserKnowledge({ page: 1, limit: 10 })
@@ -145,7 +148,9 @@ const Knowledges: React.FC<KnowledgesProps> = ({ selectColShow, selectionHandler
 		},
 		onRowClick: (index: number) => {
 			return () => {
-				navigate(`/main/knowledge/detail/${index}`, { state: { param: index } });
+				navigate(`/main/knowledge/detail/${knowledgeData[index]?.id}`, {
+					state: { param: knowledgeData[index]?.id }
+				});
 			};
 		},
 		createBtn: <KnowledgeCreate />,
@@ -156,7 +161,7 @@ const Knowledges: React.FC<KnowledgesProps> = ({ selectColShow, selectionHandler
 		<>
 			<PageHeader
 				title="知识库"
-				description="上传信息以与 Prisma 共享, Prisma 在思考时会使用这些信息, 这很重要 "
+				description="上传信息来和 Prisma 共享, Prisma 在思考时会使用这些信息, 这很重要 "
 			></PageHeader>
 			<div className="pl-10 pr-10">
 				<ConfigDataTable dataTableConfig={dataTableConfig} data={knowledgeData} />

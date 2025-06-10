@@ -77,7 +77,6 @@ export class ModelService {
 			configuration: undefined
 		};
 		this.rawModels.set(JSON.stringify(this.deepseek_config), new ChatDeepSeek(deepseekConfig));
-		//TODO 这样能行? 不行就放onMuduleInit里
 		const LLM_openai = this.HAModelClientService.createClient({ modelConfig: this.openai_config });
 		const LLM_deepseek = this.HAModelClientService.createClient({
 			modelConfig: this.deepseek_config

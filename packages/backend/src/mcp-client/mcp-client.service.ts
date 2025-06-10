@@ -16,7 +16,7 @@ interface LocalServerStartCmd {
  * MCPClientService
  * 负责连接MCP服务器、getTools、callTool, 增加llm的tools
  */
-//TODO transport池（什么当key?）?、每次新连接新建一个Client实例（一个Client实例同一时间只能关联一个Transport、连接一个Server）
+//TODO transport池? 现在是每次新连接新建一个Transport实例（一个Client实例同一时间只能关联一个Transport、连接一个Server）
 @Injectable()
 export class MCPClientService {
 	clientInfo = {

@@ -1,0 +1,30 @@
+[
+  {
+    "type": "human",
+    "data": {
+      "content": "{\"info\":{\"name\":\"Green-School可视化平台\",\"desc\":{\"role\":\"负责前端架构设计、3D场景渲染实现和性能优化\",\"contribute\":\"独立开发核心模块，占项目代码量XX%，主导数据可视化和交互功能实现\",\"bgAndTarget\":\"该项目是一个3D可视化平台，用于实时展示校园能源消耗和环境数据，帮助学校管理层优化资源使用和提升可持续性。\",\"_id\":\"68482ae17f0c9e51116bb8c3\"},\"techStack\":[\"Vue\",\"ECharts\",\"Three.js\",\"Tween.js\",\"WebSocket\",\"Draco\",\"glTF-Transform\",\"Element UI\",\"Vue-Router\"],\"_id\":\"68482ae17f0c9e51116bb8c2\"},\"lightspot\":{\"team\":[],\"skill\":[\"使用Vue + ECharts和Three.js构建3D数字孪生平台，实现数据实时可视化和沉浸式交互，提升用户决策效率XX%\",\"利用Three.js和Tween.js渲染3D校园场景，实现VR教室360°漫游、动态模型剖切等交互动画\",\"通过懒加载和keep-alive优化页面性能，减少加载时间XX%，提升用户体验\"],\"user\":[\"采用Draco和glTF-Transform压缩模型，页面加载时间从10秒缩短至3秒，保持60帧渲染，显著提升性能\"],\"_id\":\"68482ae17f0c9e51116bb8c1\"},\"status\":\"polished\",\"userInfo\":{\"userId\":\"2\",\"username\":\"wei\",\"_id\":\"6848236fbd58802d5dcb9ed5\"},\"createdAt\":\"2025-06-10T12:22:07.315Z\",\"updatedAt\":\"2025-06-10T12:53:53.884Z\",\"lookupResult\":null,\"id\":\"6848236fbd58802d5dcb9ed1\",\"name\":\"Green-School可视化平台\"}",
+      "additional_kwargs": {},
+      "response_metadata": {}
+    }
+  },
+  {
+    "type": "ai",
+    "data": {
+      "tool_calls": [],
+      "invalid_tool_calls": [],
+      "additional_kwargs": {},
+      "response_metadata": {}
+    }
+  },
+  {
+    "type": "human",
+    "data": {
+      "content": "{\"info\":{\"name\":\"Green-School可视化平台\",\"desc\":{\"role\":\"负责前端架构设计、3D场景渲染实现和性能优化\",\"contribute\":\"独立开发核心模块，占项目代码量XX%，主导数据可视化和交互功能实现\",\"bgAndTarget\":\"该项目是一个3D可视化平台，用于实时展示校园能源消耗和环境数据，帮助学校管理层优化资源使用和提升可持续性。\",\"_id\":\"68482ce37f0c9e51116bb90b\"},\"techStack\":[\"Vue\",\"ECharts\",\"Three.js\",\"Tween.js\",\"WebSocket\",\"Draco\",\"glTF-Transform\",\"Element UI\",\"Vue-Router\"],\"_id\":\"68482ce37f0c9e51116bb90a\"},\"lightspot\":{\"team\":[\"制定Three.js渲染性能优化规范文档，指导团队成员实现LOD(层次细节)技术和视锥体剔除，提升团队协作效率XX%\",\"封装可复用的3D场景加载器组件库，减少团队重复开发工作量XX%\"],\"skill\":[\"使用Vue + ECharts和Three.js构建3D数字孪生平台，实现数据实时可视化和沉浸式交互，提升用户决策效率XX%\",\"利用Three.js和Tween.js渲染3D校园场景，实现VR教室360°漫游、动态模型剖切等交互动画\",\"通过懒加载和keep-alive优化页面性能，减少加载时间XX%，提升用户体验\",\"实现WebSocket数据分层更新机制，结合数据压缩算法，确保高频数据更新下仍保持60帧渲染性能\",\"开发基于glTF-Transform的自动化模型处理流水线，模型预处理效率提升XX%\"],\"user\":[\"采用Draco和glTF-Transform压缩模型，页面加载时间从10秒缩短至3秒，保持60帧渲染，显著提升性能\",\"通过能源消耗热力图可视化，帮助学校识别高能耗区域，年度能源成本降低XX万元\",\"3D漫游功能使非技术人员直观理解空间数据，决策效率提升XX%\"],\"_id\":\"68482ce37f0c9e51116bb909\"},\"status\":\"mined\",\"userInfo\":{\"userId\":\"2\",\"username\":\"wei\",\"_id\":\"6848236fbd58802d5dcb9ed5\"},\"createdAt\":\"2025-06-10T12:22:07.315Z\",\"updatedAt\":\"2025-06-10T13:02:27.201Z\",\"lookupResult\":null,\"id\":\"6848236fbd58802d5dcb9ed1\",\"name\":\"Green-School可视化平台\"}",
+      "additional_kwargs": {},
+      "response_metadata": {}
+    }
+  },
+  {
+    "type": "ai"
+  }
+]

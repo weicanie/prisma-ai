@@ -161,6 +161,7 @@ var ProjectStatus = /* @__PURE__ */ ((ProjectStatus2) => {
   ProjectStatus2["mining"] = "mining";
   ProjectStatus2["mined"] = "mined";
   ProjectStatus2["accepted"] = "accepted";
+  ProjectStatus2["matched"] = "matched";
   return ProjectStatus2;
 })(ProjectStatus || {});
 
@@ -273,7 +274,6 @@ var projectSchemaForm = import_zod3.z.object({
 // src/types/resume.ts
 var ResumeStatus = /* @__PURE__ */ ((ResumeStatus2) => {
   ResumeStatus2["committed"] = "committed";
-  ResumeStatus2["matching"] = "matching";
   ResumeStatus2["matched"] = "matched";
   return ResumeStatus2;
 })(ResumeStatus || {});
@@ -294,7 +294,7 @@ var skillSchema = import_zod4.z.object({
 // src/types/resume.schema.ts
 var resumeMatchedSchema = import_zod5.z.object({
   name: import_zod5.z.string().describe("\u7B80\u5386\u540D\u79F0"),
-  skill: skillSchema.describe("\u6280\u80FD\u6E05\u5355"),
+  skill: skillSchema.describe("\u4E13\u4E1A\u6280\u80FD\u6E05\u5355"),
   projects: import_zod5.z.array(projectSchema).describe("\u9879\u76EE\u7ECF\u9A8C\u5217\u8868")
 });
 
@@ -480,6 +480,7 @@ var markdownToSkills = (markdown) => {
   }
   if (content.length === 0) {
     return {
+      name: "",
       content: [
         { type: "\u524D\u7AEF", content: [] },
         { type: "\u540E\u7AEF", content: [] },
@@ -487,7 +488,7 @@ var markdownToSkills = (markdown) => {
       ]
     };
   }
-  return { content };
+  return { name: "", content };
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {

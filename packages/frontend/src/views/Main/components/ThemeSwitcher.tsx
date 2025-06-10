@@ -16,8 +16,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ className }) => {
 	const clickHandler = () => {
 		setThemeIDx((themeIdx + 1) % themeList.length);
 		const newTheme = themeList[(themeIdx + 1) % themeList.length];
-		//@ts-expect-error
-		setTheme(newTheme);
+		setTheme(newTheme as 'light' | 'dark');
 		document.documentElement.setAttribute('class', newTheme); //tailwind样式消费
 	};
 

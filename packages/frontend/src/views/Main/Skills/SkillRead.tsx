@@ -13,7 +13,7 @@ interface SkillReadProps {
 }
 
 const SkillRead: React.FC<SkillReadProps> = () => {
-	const { skillIndex } = useParams();
+	const { skillId } = useParams();
 	const { data, status } = useCustomQuery([SkillQueryKey.Skills], findAllUserSkills);
 
 	const { resolvedTheme } = useTheme();
@@ -26,9 +26,9 @@ const SkillRead: React.FC<SkillReadProps> = () => {
 		return <div>错误:{data?.message}</div>;
 	}
 	const skillDatas = data.data;
-	const skillData = skillDatas?.[+skillIndex!];
+	const skillData = skillDatas?.find(skill => skill.id === skillId);
 
-	if (!skillData || skillIndex === undefined) {
+	if (!skillData || skillId === undefined) {
 		return <div className="text-center text-gray-500">没有找到职业技能数据</div>;
 	}
 

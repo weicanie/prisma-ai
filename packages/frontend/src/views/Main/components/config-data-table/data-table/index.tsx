@@ -39,7 +39,9 @@ export function DataTable<TData, TValue = unknown>({
 	options,
 	onRowClick,
 	createBtn,
-	selectionHandler
+	actionBtn,
+	selectionHandler,
+	mainTable = true
 }: DataTableProps<TData, TValue>) {
 	/* rowSelection的key储存当前选中行在data中的原始index, 其不随排序的变化而变化 */
 	const [rowSelection, setRowSelection] = React.useState({});
@@ -56,7 +58,6 @@ export function DataTable<TData, TValue = unknown>({
 	}, [rowSelection]);
 
 	const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-	//FIXME UI搜索不出来UI 组件库
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
 	const [sorting, setSorting] = React.useState<SortingState>([]);
 
@@ -91,6 +92,8 @@ export function DataTable<TData, TValue = unknown>({
 					filterDataCols={filterDataCols}
 					searchColId={options.toolbar.searchColId}
 					createBtn={createBtn}
+					actionBtn={actionBtn}
+					mainTable={mainTable}
 				/>
 			)}
 			{/* 表格 */}
@@ -141,8 +144,10 @@ export function DataTable<TData, TValue = unknown>({
 					</TableBody>
 				</Table>
 			</div>
-			{/* 分页 */}
-			{options.pagination && <DataTablePagination table={table} />}
+			{/* 分页,当行数超过7行时显示 */}
+			{options.pagination && table.getRowModel().rows.length > 7 && (
+				<DataTablePagination table={table} />
+			)}
 		</div>
 	);
 }

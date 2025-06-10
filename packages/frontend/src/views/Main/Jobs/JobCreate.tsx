@@ -1,5 +1,5 @@
 import React from 'react';
-import { CreateBtn } from '../Projects/Create';
+import { CreateBtn } from '../components/CreateBtn';
 import { JobForm } from './JobForm';
 
 interface JobCreateProps {

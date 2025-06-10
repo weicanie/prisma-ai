@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useCustomMutation } from '../../query/config';
 import {
 	getSessionStatusAndDecide,
@@ -16,6 +16,7 @@ import {
  */
 export function useSseAnswer(input: contextInput | object, path: string) {
 	const doNotStart = typeof input === 'object' && Object.getOwnPropertyNames(input).length === 0;
+
 	const [content, setContent] = useState('');
 	const [reasonContent, setReasonContent] = useState('');
 	const [done, setDone] = useState(false);
@@ -26,13 +27,13 @@ export function useSseAnswer(input: contextInput | object, path: string) {
 	const [errorMsg, setErrorMsg] = useState('');
 	/* 控制同一时间只有一个对话,避免反复执行mutate */
 	const [answering, setAnswering] = useState(false);
-	console.log('🚀 ~ useSseAnswer ~ answering:', answering);
-
+	/* EventSource清理函数 */
+	const cleanupRef = useRef<() => void>(() => {});
 	/* 上传prompt建立会话, 开始接收llm流式返回 */
 	function useCeateSession() {
 		return useCustomMutation<string, contextInput>(getSessionStatusAndDecide, {
 			onSuccess() {
-				getSseData(
+				cleanupRef.current = getSseData(
 					path,
 					setContent,
 					setReasonContent,
@@ -71,7 +72,7 @@ export function useSseAnswer(input: contextInput | object, path: string) {
 				if (curPath === null) console.error('path不存在,断点接传失败');
 
 				//进行断点接传
-				getSseData(
+				cleanupRef.current = getSseData(
 					curPath!,
 					setContent,
 					setReasonContent,
@@ -84,6 +85,9 @@ export function useSseAnswer(input: contextInput | object, path: string) {
 				);
 			}
 		});
+		return () => {
+			cleanupRef.current?.();
+		};
 	}, []);
 	return { content, reasonContent, done, isReasoning, error, errorCode, errorMsg };
 }

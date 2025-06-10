@@ -1,4 +1,3 @@
-//TODO 升级用户系统
 // 第三方登录信息（OAuth）
 // 支持多个提供商（如Google、GitHub等）
 // User ↔ Account: 一对多 一个用户可以关联多个第三方账户

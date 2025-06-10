@@ -7,11 +7,8 @@ import { SkillVo } from './skill';
 
 export enum ResumeStatus {
 	committed = 'committed', //初提交
-	matching = 'matching', //llm已匹配岗位
 	matched = 'matched' //用户已合并匹配
 }
-
-export type ResumeMatchedDto = z.infer<typeof resumeMatchedSchema>;
 
 /**
  * 创建简历的 DTO
@@ -35,6 +32,7 @@ export interface MatchJobDto {
 	job: string; // 岗位的id
 }
 
+export type ResumeMatchedDto = z.infer<typeof resumeMatchedSchema>;
 /**
  * 简历的 VO (View Object)
  * 用于API响应和前端展示

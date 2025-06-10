@@ -52,7 +52,7 @@ const ProjectForm: React.FC<PropsType> = ({ setIsUseMdEditor }) => {
 			console.error('项目上传失败:', error);
 		}
 	});
-	//FIXME 用type="submit"的提交按钮,到第二步时就会提交,此时提交按钮应该才刚渲染
+	//FIXME 用type="submit"的提交按钮,到第二步时就会提交,此时提交按钮应该才刚渲染(分步表单支持有问题？)
 	async function onSubmit(values: z.infer<typeof projectSchemaForm>) {
 		// 只有点击了提交按钮才允许提交
 		if (currentStep !== totalSteps) {
@@ -332,7 +332,6 @@ const ProjectForm: React.FC<PropsType> = ({ setIsUseMdEditor }) => {
 				return null;
 		}
 	};
-	//FIXME 动态数组项使用tooltip中的词会显示异常的白色背景且难以去除
 
 	return (
 		<div className="flex justify-center items-center basis-180 max-w-3xl">

@@ -11,20 +11,22 @@ import { ProjectAnalysisResultCard } from './ProjectAnalysisResultCard';
 interface OriginalProjectProps {
 	projectData: ProjectVo;
 	isDark: boolean;
-	projectIndex: string;
+	projectId: string;
+	jump?: boolean; //点击后是否跳转
 }
 
 export const OriginalProject: React.FC<OriginalProjectProps> = ({
 	projectData,
 	isDark,
-	projectIndex
+	projectId,
+	jump = true
 }) => {
 	const navigate = useNavigate();
 
 	/* lookup过了就直接跳转到 polish 和 mined */
 	useEffect(() => {
-		if (projectData.status !== ProjectStatus.committed) {
-			navigate(`/main/projects/action/${projectIndex}`);
+		if (projectData.status !== ProjectStatus.committed && jump) {
+			navigate(`/main/projects/action/${projectId}`);
 		}
 	}, [projectData.status]);
 	return (
@@ -39,7 +41,7 @@ export const OriginalProject: React.FC<OriginalProjectProps> = ({
 					</CardTitle>
 					<CardDescription className={`flex gap-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
 						<h1 className="font-bold">{projectData.info.name}</h1>
-						<StatusBadge status={projectData.status} />
+						<StatusBadge status={projectData.status} type="project" />
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-6">

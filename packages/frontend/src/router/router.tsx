@@ -2,7 +2,6 @@ import { lazy } from 'react';
 import { Outlet } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
 import UpdateBreadRouter from './UpdateBreadRouter';
-
 const LoginRegist = lazy(() => import('../views/LoginRegist/LoginRegist'));
 const Main = lazy(() => import('../views/Main'));
 const Jobs = lazy(() => import('../views/Main/Jobs'));
@@ -11,7 +10,9 @@ const Knowledges = lazy(() => import('../views/Main/knowbase'));
 const KnowledgeRead = lazy(() => import('../views/Main/knowbase/KnowledgeRead'));
 const Projects = lazy(() => import('../views/Main/Projects'));
 const Resumes = lazy(() => import('../views/Main/Resumes'));
+const ResumeActions = lazy(() => import('../views/Main/Resumes/Action'));
 const ResumeRead = lazy(() => import('../views/Main/Resumes/ResumeRead'));
+
 const Test = lazy(() => import('../views/MyTest/Test'));
 const Action = lazy(() => import('../views/Main/Projects/Action'));
 const Skills = lazy(() => import('../views/Main/Skills'));
@@ -69,7 +70,7 @@ export const routes = [
 						)
 					},
 					{
-						path: 'detail/:skillIndex',
+						path: 'detail/:skillId',
 						element: (
 							<UpdateBreadRouter>
 								<SkillRead></SkillRead>
@@ -96,7 +97,7 @@ export const routes = [
 						)
 					},
 					{
-						path: 'detail/:projectIndex',
+						path: 'detail/:projectId',
 						element: (
 							<UpdateBreadRouter>
 								<Action></Action>
@@ -104,7 +105,7 @@ export const routes = [
 						)
 					},
 					{
-						path: 'action/:projectIndex',
+						path: 'action/:projectId',
 						element: (
 							<UpdateBreadRouter>
 								<Action></Action>
@@ -131,10 +132,18 @@ export const routes = [
 						)
 					},
 					{
-						path: 'detail/:resumeIndex',
+						path: 'detail/:resumeId',
 						element: (
 							<UpdateBreadRouter>
 								<ResumeRead></ResumeRead>
+							</UpdateBreadRouter>
+						)
+					},
+					{
+						path: 'action/:resumeId/:jobId',
+						element: (
+							<UpdateBreadRouter>
+								<ResumeActions></ResumeActions>
 							</UpdateBreadRouter>
 						)
 					}
@@ -158,7 +167,7 @@ export const routes = [
 						)
 					},
 					{
-						path: '/main/job/detail/:jobIndex',
+						path: '/main/job/detail/:jobId',
 						element: (
 							<UpdateBreadRouter>
 								<JobRead></JobRead>
@@ -184,7 +193,7 @@ export const routes = [
 						)
 					},
 					{
-						path: 'detail/:knowledgeIndex',
+						path: 'detail/:knowledgeId',
 						element: (
 							<UpdateBreadRouter>
 								<KnowledgeRead></KnowledgeRead>
@@ -252,6 +261,7 @@ export const path_name: Record<string, string> = {
 
 	'/main/resumes': '简历',
 	'/main/resumes/detail': '简历-详情',
+	'/main/resumes/action': '简历-AI优化',
 
 	'/main/job': '岗位',
 	'/main/job/detail': '岗位-详情',

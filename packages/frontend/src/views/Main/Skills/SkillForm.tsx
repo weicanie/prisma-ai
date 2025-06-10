@@ -28,6 +28,7 @@ import { resetSkillData, selectSkillData, setSkillDataFromDto } from '../../../s
 相比dto, content嵌套数组分解成 types 和 skills数组 来避免嵌套动态数组`
 */
 const skillFormSchema = z.object({
+	name: z.string().min(1, '技能清单名称不能为空'),
 	types: z.array(z.string().min(1, '技能类型不能为空')).min(1, '至少需要一个技能类型'),
 	skills: z.array(
 		z.object({
@@ -42,7 +43,7 @@ type SkillFormData = z.infer<typeof skillFormSchema>;
 // dto 转 表单数据
 const convertToFormData = (data: CreateSkillDto): SkillFormData => {
 	if (!data?.content || !Array.isArray(data.content)) {
-		return { types: [''], skills: [] };
+		return { name: '', types: [''], skills: [] };
 	}
 
 	const types: string[] = [];
@@ -61,7 +62,7 @@ const convertToFormData = (data: CreateSkillDto): SkillFormData => {
 		}
 	});
 
-	return { types: types.length > 0 ? types : [''], skills };
+	return { name: data.name, types: types.length > 0 ? types : [''], skills };
 };
 
 // 表单数据 转 dto
@@ -71,7 +72,7 @@ const convertToOriginalFormat = (formData: SkillFormData) => {
 		content: formData.skills.filter(skill => skill.typeIndex === typeIndex).map(skill => skill.name)
 	}));
 
-	return { content };
+	return { name: formData.name, content };
 };
 
 export const SkillForm = memo(() => {
@@ -184,6 +185,23 @@ export const SkillForm = memo(() => {
 					>
 						<div className="space-y-8">
 							<h3 className="text-2xl font-bold">职业技能</h3>
+
+							{/* 简历名称输入 */}
+							<div className="space-y-4">
+								<FormField
+									control={form.control}
+									name="name"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>清单名称</FormLabel>
+											<FormControl>
+												<Input placeholder="请输入清单名称" {...field} />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</div>
 
 							{/* 添加技能类型按钮 */}
 							<div className="flex justify-between items-center">

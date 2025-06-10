@@ -159,7 +159,7 @@ function getSseData(
 			/* 
 			 让外部组件处理useSseAnswer状态的重置
 			 因为外部组件会依赖useSseAnswer状态控制流程
-			 不重置也ok,每次新的sse此组件会在一开始重置
+			 且不重置也ok,每次新的sse此组件会在一开始重置
 			*/
 		}
 	};
@@ -168,13 +168,13 @@ function getSseData(
 	const token = localStorage.getItem('token');
 	if (!token) {
 		setTupError('2006', '登录已过期，请重新登录');
-		return;
+		return cleanup;
 	}
 
 	// 验证会话是否存在
 	const sessionId = localStorage.getItem(llmSessionKey);
 	if (!sessionId) {
-		return;
+		return cleanup;
 	}
 
 	// 根据当前会话状态决策
@@ -182,7 +182,7 @@ function getSseData(
 
 	// 如果会话已完成或不存在，不需要建立连接
 	if (status === 'notfound' || status === 'bothdone') {
-		return;
+		return cleanup;
 	}
 
 	// 根据会话状态确定要请求的接口
@@ -195,7 +195,7 @@ function getSseData(
 	} else if (status === 'tasknotfound') {
 		// 创建新任务 - 开始新的生成
 		url = `${baseUrl}${path}?sessionId=${localStorage.getItem(llmSessionKey)}&token=${token}`;
-	} else return;
+	} else return cleanup;
 
 	try {
 		// 创建连接
@@ -250,7 +250,7 @@ function getSseData(
 		cleanup();
 	}
 
-	return;
+	return cleanup;
 }
 
 /* 

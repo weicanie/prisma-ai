@@ -10,16 +10,20 @@ import { DataTableViewOptions } from './view-options';
 
 interface DataTableToolbarProps<TData> {
 	table: Table<TData>;
-	filterDataCols?: DataColWithFilter<any>[];
+	filterDataCols?: DataColWithFilter<TData>[];
 	searchColId?: string; // 用于搜索的列ID
 	createBtn?: React.ReactNode; //带创建弹窗的创建按钮
+	actionBtn?: React.ReactNode; //点击后跳转到操作页面或者弹出操作弹窗的按钮
+	mainTable?: boolean; //是否为主表格,非主表格不展示新建按钮
 }
 
 export function DataTableToolbar<TData>({
 	table,
 	filterDataCols,
 	searchColId,
-	createBtn
+	createBtn,
+	actionBtn,
+	mainTable = true
 }: DataTableToolbarProps<TData>) {
 	const isFiltered = table.getState().columnFilters.length > 0;
 	return (
@@ -54,9 +58,12 @@ export function DataTableToolbar<TData>({
 					</Button>
 				)}
 			</div>
-			{/* <DataTableViewOptions table={table} /> */}
+			{/* 操作按钮 */}
+			{actionBtn && actionBtn}
 			{/* 创建按钮 */}
-			{createBtn ? createBtn : <DataTableViewOptions table={table} />}
+			{mainTable && createBtn && createBtn}
+			{/* 不传入按钮时显示视图选项 */}
+			{mainTable && !createBtn && !actionBtn && <DataTableViewOptions table={table} />}
 		</div>
 	);
 }

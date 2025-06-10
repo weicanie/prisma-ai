@@ -20,7 +20,10 @@ export enum ProjectStatus {
 	mining = 'mining', //llm已挖掘
 
 	mined = 'mined', //用户已合并挖掘
-	accepted = 'accepted' //完成
+	accepted = 'accepted', //完成
+
+	/* 仅在ResumeMatched中 */
+	matched = 'matched' //已匹配岗位
 }
 export type lookupResultDto = z.infer<typeof lookupResultSchema>;
 /* 含lookupResult的projectDto */

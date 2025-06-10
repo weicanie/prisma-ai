@@ -828,7 +828,8 @@ declare enum ProjectStatus {
     polished = "polished",//用户已合并打磨
     mining = "mining",//llm已挖掘
     mined = "mined",//用户已合并挖掘
-    accepted = "accepted"
+    accepted = "accepted",//完成
+    matched = "matched"
 }
 type lookupResultDto = z.infer<typeof lookupResultSchema>;
 type projectLookupedDto = z.infer<typeof projectLookupedSchema>;
@@ -933,24 +934,24 @@ declare const resumeMatchedSchema: z.ZodObject<{
     name: z.ZodString;
     skill: z.ZodObject<{
         content: z.ZodArray<z.ZodObject<{
-            type: z.ZodDefault<z.ZodOptional<z.ZodString>>;
-            content: z.ZodDefault<z.ZodOptional<z.ZodArray<z.ZodString, "many">>>;
+            type: z.ZodDefault<z.ZodString>;
+            content: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
         }, "strip", z.ZodTypeAny, {
-            content: string[];
             type: string;
+            content: string[];
         }, {
-            content?: string[] | undefined;
             type?: string | undefined;
+            content?: string[] | undefined;
         }>, "many">;
     }, "strip", z.ZodTypeAny, {
         content: {
-            content: string[];
             type: string;
+            content: string[];
         }[];
     }, {
         content: {
-            content?: string[] | undefined;
             type?: string | undefined;
+            content?: string[] | undefined;
         }[];
     }>;
     projects: z.ZodArray<z.ZodObject<{
@@ -992,12 +993,12 @@ declare const resumeMatchedSchema: z.ZodObject<{
             skill: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
             user: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
         }, "strip", z.ZodTypeAny, {
-            skill: string[];
             team: string[];
+            skill: string[];
             user: string[];
         }, {
-            skill?: string[] | undefined;
             team?: string[] | undefined;
+            skill?: string[] | undefined;
             user?: string[] | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
@@ -1011,8 +1012,8 @@ declare const resumeMatchedSchema: z.ZodObject<{
             techStack: string[];
         };
         lightspot: {
-            skill: string[];
             team: string[];
+            skill: string[];
             user: string[];
         };
     }, {
@@ -1026,8 +1027,8 @@ declare const resumeMatchedSchema: z.ZodObject<{
             techStack?: string[] | undefined;
         };
         lightspot: {
-            skill?: string[] | undefined;
             team?: string[] | undefined;
+            skill?: string[] | undefined;
             user?: string[] | undefined;
         };
     }>, "many">;
@@ -1035,8 +1036,8 @@ declare const resumeMatchedSchema: z.ZodObject<{
     name: string;
     skill: {
         content: {
-            content: string[];
             type: string;
+            content: string[];
         }[];
     };
     projects: {
@@ -1050,8 +1051,8 @@ declare const resumeMatchedSchema: z.ZodObject<{
             techStack: string[];
         };
         lightspot: {
-            skill: string[];
             team: string[];
+            skill: string[];
             user: string[];
         };
     }[];
@@ -1059,8 +1060,8 @@ declare const resumeMatchedSchema: z.ZodObject<{
     name: string;
     skill: {
         content: {
-            content?: string[] | undefined;
             type?: string | undefined;
+            content?: string[] | undefined;
         }[];
     };
     projects: {
@@ -1074,8 +1075,8 @@ declare const resumeMatchedSchema: z.ZodObject<{
             techStack?: string[] | undefined;
         };
         lightspot: {
-            skill?: string[] | undefined;
             team?: string[] | undefined;
+            skill?: string[] | undefined;
             user?: string[] | undefined;
         };
     }[];
@@ -1086,11 +1087,13 @@ interface SkillItem {
     content?: string[];
 }
 interface CreateSkillDto {
+    name: string;
     content: SkillItem[];
 }
 type UpdateSkillDto = Partial<CreateSkillDto>;
 interface SkillVo {
     id: string;
+    name: string;
     content: SkillItem[];
     createdAt: string;
     updatedAt: string;
@@ -1098,10 +1101,8 @@ interface SkillVo {
 
 declare enum ResumeStatus {
     committed = "committed",//初提交
-    matching = "matching",//llm已匹配岗位
     matched = "matched"
 }
-type ResumeMatchedDto = z.infer<typeof resumeMatchedSchema>;
 /**
  * 创建简历的 DTO
  */
@@ -1121,6 +1122,7 @@ interface MatchJobDto {
     resume: string;
     job: string;
 }
+type ResumeMatchedDto = z.infer<typeof resumeMatchedSchema>;
 /**
  * 简历的 VO (View Object)
  * 用于API响应和前端展示

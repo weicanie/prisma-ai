@@ -17,7 +17,13 @@ const UpdateBreadRouter: React.FC<UpdateBreadRouterProps> = ({ children }) => {
 
 	//去除路由参数
 	if (location.state && location.state.param !== undefined) {
-		path = path.replace('/' + location.state.param, '');
+		if (Array.isArray(location.state.param)) {
+			for (const param of location.state.param) {
+				path = path.replace('/' + param, '');
+			}
+		} else {
+			path = path.replace('/' + location.state.param, '');
+		}
 	}
 
 	useEffect(() => {

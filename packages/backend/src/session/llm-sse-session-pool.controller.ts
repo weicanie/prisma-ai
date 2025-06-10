@@ -66,7 +66,9 @@ export class LLMSessionPoolController {
 		if (!existingSession) return { status: 'notfound' };
 
 		if (!curTaskId) return { status: 'tasknotfound' };
-		if (existingSession.fontendDone && existingSession.done) return { status: 'bothdone' };
+		//FIXME 有时候done会标记不上
+		// if (existingSession.fontendDone && existingSession.done) return { status: 'bothdone' };
+		if (existingSession.fontendDone) return { status: 'bothdone' };
 
 		if (existingSession.done) return { status: 'backdone' };
 

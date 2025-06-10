@@ -14,14 +14,21 @@ import { DataTableRowActions } from '../components/config-data-table/data-table/
 import { PageHeader } from '../components/PageHeader';
 import { SkillCreate } from './SkillCreate';
 
-interface SkillsProps {
+interface SkillsProps<TData> {
 	selectColShow?: boolean; // 是否显示选择列
-	selectionHandler?: (rows: unknown[]) => void; //储存选中状态到store
+	selectionHandler?: (rows: TData[]) => void; //储存选中状态到store
 	title?: string; // 页面标题
 	description?: string; // 页面描述
+	mainTable?: boolean; // 是否为主表格
 }
 
-const Skills: React.FC<SkillsProps> = ({ selectColShow, selectionHandler, title, description }) => {
+const Skills: React.FC<SkillsProps<SkillVo>> = ({
+	selectColShow,
+	selectionHandler,
+	title,
+	description,
+	mainTable = true
+}) => {
 	const navigate = useNavigate();
 	const { data, status } = useCustomQuery([SkillQueryKey.Skills], findAllUserSkills);
 
@@ -141,11 +148,14 @@ const Skills: React.FC<SkillsProps> = ({ selectColShow, selectionHandler, title,
 		},
 		onRowClick: (index: number) => {
 			return () => {
-				navigate(`/main/skills/detail/${index}`, { state: { param: index } });
+				navigate(`/main/skills/detail/${skillDatas[index]?.id}`, {
+					state: { param: skillDatas[index]?.id }
+				});
 			};
 		},
 		createBtn: <SkillCreate />,
-		selectionHandler
+		selectionHandler,
+		mainTable
 	};
 
 	return (

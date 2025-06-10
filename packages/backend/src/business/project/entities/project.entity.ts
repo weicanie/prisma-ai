@@ -46,7 +46,6 @@ export class UserInfo {
 	username: string;
 }
 
-//TODO lookup分表改为嵌套文档
 @Schema()
 export class Problem {
 	@Prop({ required: true })

@@ -1,6 +1,8 @@
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import type { ResumeVo } from '@prism-ai/shared';
-import React from 'react';
+import type { Row, Table } from '@tanstack/react-table';
+import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useCustomQuery } from '../../../query/config';
@@ -15,12 +17,21 @@ import { PageHeader } from '../components/PageHeader';
 import Projects from '../Projects';
 import Skills from '../Skills';
 import ResumeCreate from './ResumeCreate';
-
-interface ResumesProps {
-	_?: string;
+interface ResumesProps<TData> {
+	selectColShow?: boolean; // 是否显示选择列
+	selectionHandler?: (rows: TData[]) => void; //储存选中状态到store
+	title?: string; // 页面标题
+	description?: string; // 页面描述
+	mainTable?: boolean; // 是否为主表格
 }
 
-const Resumes: React.FC<ResumesProps> = () => {
+const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
+	selectColShow,
+	selectionHandler,
+	title,
+	description,
+	mainTable = true
+}) => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
@@ -29,6 +40,11 @@ const Resumes: React.FC<ResumesProps> = () => {
 		return findAllUserResumes(page as number, limit as number);
 	});
 
+	/* 挂载和卸载时重置选中的职业技能和项目经验 */
+	useEffect(() => {
+		dispatch(setResumeData({ skill: '', projects: [] }));
+	}, []);
+
 	if (status === 'pending') {
 		return <div>Loading...</div>;
 	}
@@ -36,6 +52,36 @@ const Resumes: React.FC<ResumesProps> = () => {
 		return <div>错误:{data?.message}</div>;
 	}
 	const resumeDatas = data.data.data;
+
+	const selectCol = selectColShow
+		? [
+				{
+					id: '_select' as const,
+
+					header: ({ table }: { table: Table<ResumeVo> }) => (
+						<Checkbox
+							checked={
+								table.getIsAllPageRowsSelected() ||
+								(table.getIsSomePageRowsSelected() && 'indeterminate')
+							}
+							onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
+							aria-label="Select all"
+							className="translate-y-[2px]"
+						/>
+					),
+					cell: ({ row }: { row: Row<ResumeVo> }) => (
+						<Checkbox
+							checked={row.getIsSelected()}
+							onCheckedChange={value => row.toggleSelected(!!value)}
+							aria-label="Select row"
+							className="translate-y-[2px]"
+						/>
+					),
+					enableSorting: false,
+					enableHiding: false
+				}
+			]
+		: [];
 
 	const dataTableConfig: DataTableConfig<ResumeVo> = {
 		columns: {
@@ -57,8 +103,22 @@ const Resumes: React.FC<ResumesProps> = () => {
 						if (!skill?.content?.length) {
 							return <div className="text-gray-500">未关联技能</div>;
 						}
-						const firstType = skill.content[0]?.type || '未分类';
-						return <div className="w-[120px]">{firstType}</div>;
+						const displaySkill = skill.content.slice(0, 2);
+						const remainingCount = skill.content.length - 2;
+						return (
+							<div className="flex flex-wrap gap-1 max-w-[300px]">
+								{displaySkill.map((skill, index) => (
+									<Badge key={skill.type || index} variant="secondary" className="text-xs">
+										{skill.type || '未分类'}
+									</Badge>
+								))}
+								{remainingCount > 0 && (
+									<Badge variant="default" className="text-xs">
+										+{remainingCount}个技能
+									</Badge>
+								)}
+							</div>
+						);
 					},
 					enableHiding: false,
 					enableSorting: false
@@ -102,7 +162,7 @@ const Resumes: React.FC<ResumesProps> = () => {
 				}
 			],
 
-			selectCol: [],
+			selectCol,
 
 			rowActionsCol: [
 				{
@@ -121,21 +181,30 @@ const Resumes: React.FC<ResumesProps> = () => {
 		},
 		onRowClick: (index: number) => {
 			return () => {
-				navigate(`/main/resumes/detail/${index}`, { state: { param: index } });
+				navigate(`/main/resumes/detail/${resumeDatas[index]?.id}`, {
+					state: { param: resumeDatas[index]?.id }
+				});
 			};
 		},
-		createBtn: <ResumeCreate />
+		createBtn: <ResumeCreate />,
+		selectionHandler,
+		mainTable
 	};
+	//添加选择列
 	const SkillsProps = {
 		selectColShow: true,
+		//将选中状态存储到store
 		selectionHandler: (selectedRows: unknown[]) => {
 			dispatch(setResumeData({ skill: (selectedRows[0] as ResumeVo)?.id }));
 		},
 		title: '',
-		description: '选择一个职业技能'
+		description: '选择一个职业技能',
+		mainTable: false
 	};
+	//添加选择列
 	const ProjectsProps = {
 		selectColShow: true,
+		//将选中状态存储到store
 		selectionHandler: (selectedRows: unknown[]) => {
 			dispatch(
 				setResumeData({
@@ -144,20 +213,26 @@ const Resumes: React.FC<ResumesProps> = () => {
 			);
 		},
 		title: '',
-		description: '选择若干项目经验'
+		description: '选择若干项目经验',
+		mainTable: false
 	};
 
 	return (
 		<>
 			<PageHeader
-				title="简历"
-				description="选择一个职业技能, 若干项目经验, 组合成您的简历"
+				title={title ?? '简历'}
+				description={description ?? '选择一个职业技能, 若干项目经验, 组合成您的简历'}
 			></PageHeader>
 			<div className="pl-10 pr-10">
 				<ConfigDataTable dataTableConfig={dataTableConfig} data={resumeDatas} />
 			</div>
-			<Skills {...SkillsProps}></Skills>
-			<Projects {...ProjectsProps}></Projects>
+			{/* 作为主表格时，显示专业技能和项目经验表格 */}
+			{mainTable && (
+				<>
+					<Skills {...SkillsProps}></Skills>
+					<Projects {...ProjectsProps}></Projects>
+				</>
+			)}
 		</>
 	);
 };

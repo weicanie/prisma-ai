@@ -14,9 +14,8 @@ const Prism: React.FC<PrismProps> = ({ light: externalLight = false, className, 
 	const [showLight, setShowLight] = useState(externalLight);
 	//用于控制动画从左到右完成
 	const [animationComplete, setAnimationComplete] = useState(false);
-	const { theme } = useTheme();
-	//FIXME 现在会保持system
-	const lightColor = theme === 'dark' ? 'rgb(233, 251, 251)' : 'rgb(233, 251, 251)';
+	const { resolvedTheme } = useTheme();
+	const lightColor = resolvedTheme === 'dark' ? 'rgb(233, 251, 251)' : 'rgb(233, 251, 251)';
 	useEffect(() => {
 		setShowLight(externalLight);
 		if (!externalLight) {

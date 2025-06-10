@@ -4,6 +4,7 @@ import {
 	jsonMd_obj,
 	MatchJobDto,
 	PaginatedResumesResult,
+	ResumeMatchedDto,
 	resumeMatchedSchema,
 	ResumeStatus,
 	ResumeVo,
@@ -135,15 +136,16 @@ export class ResumeService {
 	 *
 	 * @param resultRedis SSE任务完成后从redis中取出的结果
 	 * @param userInfo 用户信息
-	 * @param project 用户输入项目信息
+	 * @param resume 用户输入简历信息
 	 */
 	private async _handleMatchResult(
 		resultRedis: redisStoreResult,
 		userInfo: UserInfoFromToken,
 		resume: ResumeVo
 	) {
+		console.log('🚀 ~ ResumeService ~ resume:', resume);
 		// 1. 从Redis结果中解析出LLM的输出内容
-		let matchedResume = jsonMd_obj(resultRedis.content); // 从markdown代码块中提取json
+		let matchedResume: ResumeMatchedDto = jsonMd_obj(resultRedis.content); // 从markdown代码块中提取json
 
 		// 2. 使用Zod Schema验证解析出的JSON对象格式
 		const validationResult = resumeMatchedSchema.safeParse(matchedResume);
@@ -163,10 +165,29 @@ export class ResumeService {
 
 		// 4. 准备要存入数据库的数据
 		const dataToSave = {
-			...matchedResume,
+			name: matchedResume.name,
+			// 构建符合Skill schema的skill对象
+			skill: {
+				name: resume.skill.name, // 使用原始简历的技能名称
+				content: matchedResume.skill.content, // 使用LLM优化后的技能内容
+				userInfo // 添加必需的userInfo字段
+			},
+			// 构建符合Project schema的projects数组
+			projects: matchedResume.projects.map((matchedProject, index) => {
+				const originalProject = resume.projects[index];
+				return {
+					info: matchedProject.info, // 使用LLM优化后的项目信息
+					lightspot: matchedProject.lightspot, // 使用LLM优化后的项目亮点
+					status: 'matched', // 设置状态为matched
+					userInfo, // 添加必需的userInfo字段
+					// 如果原始项目有lookupResult，保留它
+					...(originalProject?.lookupResult && { lookupResult: originalProject.lookupResult })
+				};
+			}),
 			userInfo,
 			status: ResumeStatus.matched
 		};
+		console.log('🚀 ~ ResumeService ~ dataToSave:', dataToSave);
 
 		const newMatchedResume = new this.resumeMatchedModel(dataToSave);
 		await newMatchedResume.save();

@@ -1,27 +1,45 @@
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import type { JobVo } from '@prism-ai/shared';
+import type { JobVo, ResumeVo } from '@prism-ai/shared';
 import type { Row, Table } from '@tanstack/react-table';
 import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useCustomQuery } from '../../../query/config';
 import { JobQueryKey } from '../../../query/keys';
 import { findAllUserJobs } from '../../../services/job';
+import { selectResumeData, setResumeData } from '../../../store/resume';
 import { ConfigDataTable } from '../components/config-data-table';
 import type { DataTableConfig } from '../components/config-data-table/config.type';
 import { DataTableColumnHeader } from '../components/config-data-table/data-table/columns/header';
 import { DataTableRowActions } from '../components/config-data-table/data-table/columns/row-actions';
 import { PageHeader } from '../components/PageHeader';
+import Resumes from '../Resumes';
 import JobCreate from './JobCreate';
 
-interface JobsProps {
+interface JobsProps<TData> {
 	selectColShow?: boolean; // 是否显示选择列
-	selectionHandler?: (...args: unknown[]) => void; //储存选中状态到store
+	selectionHandler?: (rows: TData[]) => void; //储存选中状态到store
+	title?: string; // 页面标题
+	description?: string; // 页面描述
+	mainTable?: boolean; // 是否为主表格
 }
 
-const Jobs: React.FC<JobsProps> = ({ selectColShow, selectionHandler }) => {
+const Jobs: React.FC<JobsProps<JobVo>> = ({
+	selectColShow,
+	selectionHandler,
+	title,
+	description
+}) => {
 	const navigate = useNavigate();
+	const dispatch = useDispatch();
+
 	const { data, status } = useCustomQuery([JobQueryKey.Jobs], () => findAllUserJobs(1, 100));
+
+	// 从store获取选中的简历和岗位
+	const selectedIds = useSelector(selectResumeData);
+	const selectedResumeId = selectedIds?.resumeId;
+	const selectedJobId = selectedIds?.jobId;
 
 	if (status === 'pending') {
 		return <div>Loading...</div>;
@@ -59,6 +77,12 @@ const Jobs: React.FC<JobsProps> = ({ selectColShow, selectionHandler }) => {
 				}
 			]
 		: [];
+
+	const handleMatchClick = () => {
+		navigate(`/main/resumes/action/${selectedResumeId}/${selectedJobId}`, {
+			state: { param: [selectedResumeId, selectedJobId] }
+		});
+	};
 
 	const dataTableConfig: DataTableConfig<JobVo> = {
 		columns: {
@@ -136,24 +160,76 @@ const Jobs: React.FC<JobsProps> = ({ selectColShow, selectionHandler }) => {
 		},
 		onRowClick: (index: number) => {
 			return () => {
-				navigate(`/main/job/detail/${index}`, { state: { param: index } });
+				navigate(`/main/job/detail/${jobDatas[index]?.id}`, {
+					state: { param: jobDatas[index]?.id }
+				});
 			};
 		},
 		createBtn: <JobCreate />,
+		actionBtn: (
+			<div className="sm:ml-16 sm:flex-none">
+				<button
+					type="button"
+					className="block rounded-md bg-secondary px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 min-w-25 transition-colors duration-200"
+					onClick={handleMatchClick}
+				>
+					定制岗位专用简历
+				</button>
+			</div>
+		),
 		selectionHandler
+	};
+
+	//添加选择列
+	const ResumeProps = {
+		selectColShow: true,
+		//将选中状态存储到store
+		selectionHandler: (selectedRows: unknown[]) => {
+			dispatch(
+				setResumeData({
+					resumeId: (selectedRows[0] as ResumeVo)?.id
+				})
+			);
+		},
+		title: '',
+		description: '选择要匹配的简历',
+		mainTable: false
 	};
 
 	return (
 		<>
 			<PageHeader
-				title="岗位"
-				description="追踪岗位, 并借助 Prisma 将您的简历与岗位信息进行匹配"
+				title={title ?? '岗位'}
+				description={description ?? '追踪岗位, 并借助 Prisma 将您的简历与岗位信息进行匹配'}
 			></PageHeader>
 			<div className="pl-10 pr-10">
 				<ConfigDataTable dataTableConfig={dataTableConfig} data={jobDatas} />
 			</div>
+			<Resumes {...ResumeProps}></Resumes>
 		</>
 	);
 };
 
-export default Jobs;
+const JobsPage = () => {
+	const dispatch = useDispatch();
+	const JobsProps = {
+		title: '岗位',
+		description: '追踪岗位, 并借助 Prisma 将您的简历与岗位信息进行匹配',
+		mainTable: true,
+		selectColShow: true,
+		selectionHandler: (selectedRows: unknown[]) => {
+			dispatch(
+				setResumeData({
+					jobId: (selectedRows[0] as JobVo)?.id
+				})
+			);
+		}
+	};
+	return (
+		<>
+			<Jobs {...JobsProps} />
+		</>
+	);
+};
+
+export default JobsPage;

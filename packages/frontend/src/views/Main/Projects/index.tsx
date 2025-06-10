@@ -14,18 +14,20 @@ import { DataTableRowActions } from '../components/config-data-table/data-table/
 import { PageHeader } from '../components/PageHeader';
 import CreateProject from './Create';
 
-interface ProjectsProps {
+interface ProjectsProps<TData> {
 	selectColShow?: boolean; // 是否显示选择列
-	selectionHandler?: (rows: unknown[]) => void; //储存选中状态到store
+	selectionHandler?: (rows: TData[]) => void; //储存选中状态到store
 	title?: string; // 页面标题
 	description?: string; // 页面描述
+	mainTable?: boolean; // 是否为主表格
 }
 
-const Projects: React.FC<ProjectsProps> = ({
+const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 	selectColShow,
 	selectionHandler,
 	title,
-	description
+	description,
+	mainTable = true
 }) => {
 	const { data, status } = useCustomQuery([ProjectQueryKey.Projects], findAllProjects);
 	const navigate = useNavigate();
@@ -35,6 +37,8 @@ const Projects: React.FC<ProjectsProps> = ({
 	if (status === 'error') {
 		return <div>错误:{data?.message}</div>;
 	}
+
+	const projectDatas = data.data;
 
 	const selectCol = selectColShow
 		? [
@@ -136,12 +140,15 @@ const Projects: React.FC<ProjectsProps> = ({
 		},
 		onRowClick: (index: number) => {
 			return () => {
-				navigate(`/main/projects/detail/${index}`, { state: { param: index } });
+				navigate(`/main/projects/detail/${projectDatas[index]?.id}`, {
+					state: { param: projectDatas[index]?.id }
+				});
 			};
 		},
 		createBtn: <CreateProject></CreateProject>,
 
-		selectionHandler
+		selectionHandler,
+		mainTable
 	};
 
 	return (
@@ -154,7 +161,7 @@ const Projects: React.FC<ProjectsProps> = ({
 				}
 			></PageHeader>
 			<div className="pl-10 pr-10 ">
-				<ConfigDataTable dataTableConfig={dataTableConfig} data={data!.data}></ConfigDataTable>
+				<ConfigDataTable dataTableConfig={dataTableConfig} data={projectDatas}></ConfigDataTable>
 			</div>
 		</>
 	);

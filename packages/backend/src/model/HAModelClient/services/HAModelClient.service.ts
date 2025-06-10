@@ -147,7 +147,7 @@ export class HAModelClientService {
 			},
 			circuitBreakerConfig: {
 				failureThreshold: 40,
-				resetTimeout: 20000 //FIXME 长回答没问题?
+				resetTimeout: 20000
 			},
 			rateLimiterConfig: {
 				maxRequestsPerMinute: 60

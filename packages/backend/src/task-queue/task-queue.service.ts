@@ -269,7 +269,7 @@ export class TaskQueueService {
 		// Redis队列（用于持久化）
 		const queueKey = `${this.PREFIX.QUEUE}main`;
 		await this.redisService.getClient().lPush(queueKey, taskId);
-
+		await this.redisService.getClient().expire(queueKey, this.TASK_TTL);
 		// 开始处理队列
 		this.processQueue();
 	}

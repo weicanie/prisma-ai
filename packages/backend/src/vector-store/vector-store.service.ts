@@ -10,7 +10,6 @@ import * as fs from 'fs';
  *  取用：index -> retriever -> record
  * */
 
-//TODO 可以把配置项抽取到配置文件中
 enum pineconeIndexs {
 	KYJ = 'my-index', //《孔乙己》
 	QIU = 'qiu-index' //《球状闪电》

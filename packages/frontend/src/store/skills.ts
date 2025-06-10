@@ -19,8 +19,19 @@ const initialMd = `## 职业技能
 
 
 `;
+// 生成默认简历名称
+const generateDefaultSkillName = () => {
+	const now = new Date();
+	const year = now.getFullYear();
+	const month = String(now.getMonth() + 1).padStart(2, '0');
+	const day = String(now.getDate()).padStart(2, '0');
+	//随机生成6位数字
+	const randomNumber = Math.floor(100000 + Math.random() * 900000);
+	return `我的职业技能-${year}-${month}-${day}-${randomNumber}`;
+};
 const initialState: SkillState = {
 	data: {
+		name: generateDefaultSkillName(),
 		content: []
 	},
 	dataMd: initialMd

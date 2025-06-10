@@ -55,7 +55,9 @@ export interface DataTableConfig<TRow = unknown> {
 		};
 		pagination: boolean; //是否启用分页
 	};
-	onRowClick?: (...args: any) => any; //行点击事件处理函数
+	onRowClick?: (index: number) => () => void; //行点击事件处理函数
 	createBtn?: React.ReactNode; //带创建弹窗的创建按钮
+	actionBtn?: React.ReactNode; //点击后跳转到操作页面或者弹出操作弹窗的按钮,用于llm操作
 	selectionHandler?: (selectedRows: TRow[]) => void; //行选择变化事件处理函数
+	mainTable?: boolean; //是否为主表格,非主表格不展示新建按钮,默认为主表格
 }

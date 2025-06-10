@@ -13,6 +13,9 @@ export class SkillItem {
 
 @Schema({ timestamps: true })
 export class Skill {
+	@Prop({ required: true })
+	name: string; // 技能清单名称
+
 	@Prop({ type: [SkillItem], required: true })
 	content: SkillItem[]; // 职业技能描述
 

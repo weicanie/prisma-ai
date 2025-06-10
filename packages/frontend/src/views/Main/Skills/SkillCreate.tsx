@@ -3,8 +3,8 @@ import React from 'react';
 import { useCustomMutation } from '../../../query/config';
 import { createSkill } from '../../../services/skill';
 import { selectSkillMd, setSkillDataFromMd } from '../../../store/skills';
+import { CreateBtn } from '../components/CreateBtn';
 import MilkdownEditor from '../components/Editor';
-import { CreateBtn } from '../Projects/Create';
 import { SkillForm } from './SkillForm';
 
 interface SkillCreateProps {
