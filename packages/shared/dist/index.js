@@ -22,6 +22,8 @@ var index_exports = {};
 __export(index_exports, {
   ErrorCode: () => ErrorCode,
   FileTypeEnum: () => FileTypeEnum,
+  JobOpenStatus: () => JobOpenStatus,
+  JobStatus: () => JobStatus,
   KnowledgeTypeEnum: () => KnowledgeTypeEnum,
   ProjectStatus: () => ProjectStatus,
   RequestTargetMap: () => RequestTargetMap,
@@ -96,6 +98,19 @@ var errorMessage = {
   //3、项目经验
   ["4005" /* FORMAT_ERROR */]: "\u9519\u8BEF\u7684\u6570\u636E\u683C\u5F0F"
 };
+
+// src/types/job.ts
+var JobOpenStatus = /* @__PURE__ */ ((JobOpenStatus2) => {
+  JobOpenStatus2["OPEN"] = "open";
+  JobOpenStatus2["CLOSED"] = "closed";
+  return JobOpenStatus2;
+})(JobOpenStatus || {});
+var JobStatus = /* @__PURE__ */ ((JobStatus2) => {
+  JobStatus2["COMMITTED"] = "committed";
+  JobStatus2["EMBEDDED"] = "embedded";
+  JobStatus2["MATCHED"] = "matched";
+  return JobStatus2;
+})(JobStatus || {});
 
 // src/types/knowBase.ts
 var type_content_Map = {
@@ -494,6 +509,8 @@ var markdownToSkills = (markdown) => {
 0 && (module.exports = {
   ErrorCode,
   FileTypeEnum,
+  JobOpenStatus,
+  JobStatus,
   KnowledgeTypeEnum,
   ProjectStatus,
   RequestTargetMap,

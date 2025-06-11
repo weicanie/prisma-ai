@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { JobOpenStatus, JobStatus } from '@prism-ai/shared';
 import { HydratedDocument } from 'mongoose';
 import { UserInfo } from '../../project/entities/project.entity';
 
@@ -50,9 +51,17 @@ export class Job {
 
 	@Prop({
 		type: String,
-		trim: true
+		trim: true,
+		default: JobOpenStatus.OPEN
 	})
-	status?: string; //职位状态， "open", "closed"
+	job_status?: string; //职位外界状态， "open", "closed"
+
+	@Prop({
+		type: String,
+		trim: true,
+		default: JobStatus.COMMITTED
+	})
+	status?: string; //职位内部状态，"committed", "embedded", "matched" 未处理、已embedding、已被用户简历追踪
 }
 
 export type JobDocument = HydratedDocument<Job> & {

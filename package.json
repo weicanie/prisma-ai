@@ -4,12 +4,21 @@
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
+    "concurrently": "^9.1.2",
     "husky": "^9.1.7",
     "lerna": "^8.2.2",
-    "madge": "^8.0.0"
+    "madge": "^8.0.0",
+    "prettier": "^3.0.0"
   },
   "scripts": {
     "prepare": "husky",
-    "dev":"pnpm lerna run dev --parallel"
+    "dev": "concurrently --kill-others-on-fail --kill-timeout 30000 --prefix \"[{name}]\" --names \"backend,frontend,mcp-server,shared\" --prefix-colors \"blue,green,yellow,purple\" \"cd packages/backend && npm run dev\" \"cd packages/frontend && npm run dev\" \"cd packages/mcp-server && npm run dev\" \"cd packages/shared && npm run dev\"",
+    "dev:lerna": "pnpm lerna run dev --stream",
+    "dev:backend": "cd packages/backend && npm run dev",
+    "dev:frontend": "cd packages/frontend && npm run dev",
+    "dev:mcp": "cd packages/mcp-server && npm run dev",
+    "dev:shared": "cd packages/shared && npm run dev",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
   }
 }

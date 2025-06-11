@@ -11,6 +11,8 @@ services:
         condition: service_healthy
       mongo-container:
         condition: service_healthy
+      minio-container:
+        condition: service_healthy
     restart: unless-stopped
     container_name: backend
     # 将指定的文件的环境变量加载到容器中
@@ -70,6 +72,21 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  minio-container:
+    image: docker.1ms.run/library/bitnami/minio
+    ports:
+      - '9000:9000'
+    volumes:
+      - ./docker-data/minio:/bitnami/minio/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: admin123
   nginx-container:
     image: docker.1ms.run/library/nginx:alpine
     ports:

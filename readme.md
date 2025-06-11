@@ -19,8 +19,8 @@ pnpm install
 然后打开packages/backend, 配置.env、.env.development对应的环境变量。
 
 ```bash
-# 启动项目
-pnpm lerna dev --parallel
+# 启动项目,在仓库根目录执行
+pnpm run dev
 ```
 
 ## 🐳 Docker

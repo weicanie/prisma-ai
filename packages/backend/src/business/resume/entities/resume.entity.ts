@@ -19,6 +19,10 @@ export class Resume {
 
 	@Prop({ type: String, enum: ResumeStatus, default: ResumeStatus.committed })
 	status: ResumeStatus;
+
+	/* 一对多：一份简历 对应多个专用简历 (一份简历可以追踪多个岗位) */
+	@Prop({ type: [{ type: Types.ObjectId, ref: 'ResumeMatched', default: [] }] })
+	resumeMatcheds?: Types.ObjectId[];
 }
 
 export type ResumeDocument = HydratedDocument<Resume> & {

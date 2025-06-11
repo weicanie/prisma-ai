@@ -8,7 +8,8 @@ export enum SkillQueryKey {
 	Skills = 'skills'
 }
 export enum ResumeQueryKey {
-	Resumes = 'resumes'
+	Resumes = 'resumes',
+	ResumeMatched = 'resumeMatched'
 }
 export enum JobQueryKey {
 	Jobs = 'jobs'

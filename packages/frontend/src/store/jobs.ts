@@ -1,4 +1,4 @@
-import type { CreateJobDto } from '@prism-ai/shared';
+import { JobOpenStatus, type CreateJobDto } from '@prism-ai/shared';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 interface JobState {
@@ -13,7 +13,7 @@ const initialState: JobState = {
 		location: '',
 		salary: '',
 		link: '',
-		status: 'open' // 默认状态为 "open"
+		job_status: JobOpenStatus.OPEN // 默认状态为 "open"
 	}
 };
 

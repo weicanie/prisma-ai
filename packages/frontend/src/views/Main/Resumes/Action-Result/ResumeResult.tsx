@@ -27,6 +27,10 @@ export const headerMap = {
 	match: {
 		title: 'AI 智能匹配结果',
 		desc: 'AI 正在分析您的简历并匹配合适的岗位'
+	},
+	collaborate: {
+		title: 'AI协作结果',
+		desc: '与AI Agent协作的结果'
 	}
 };
 

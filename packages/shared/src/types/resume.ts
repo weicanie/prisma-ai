@@ -44,6 +44,11 @@ export interface ResumeVo {
 	skill: SkillVo; // 关联的技能详细信息 (populated)
 	projects: ProjectVo[]; // 关联的项目经验详细信息 (populated)
 
+	/* 专用简历才有 */
+	jobId?: string; // 岗位ID
+	/* 普通简历才有 */
+	resumeMatcheds?: string[]; // 派生的专用简历ID数组
+
 	createdAt: string; // 创建时间
 	updatedAt: string; // 最后更新时间
 }

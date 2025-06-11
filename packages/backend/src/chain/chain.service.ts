@@ -6,6 +6,7 @@ import type { ChatOpenAI } from '@langchain/openai';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+	JobVo,
 	lookupResultSchema,
 	projectLookupedSchema,
 	ProjectMinedDto,
@@ -14,7 +15,8 @@ import {
 	projectPolishedSchema,
 	projectSchema,
 	ResumeMatchedDto,
-	resumeMatchedSchema
+	resumeMatchedSchema,
+	ResumeVo
 } from '@prism-ai/shared';
 import { BufferMemory } from 'langchain/memory';
 import * as path from 'path';
@@ -23,6 +25,17 @@ import { AgentService } from '../agent/agent.service';
 import { MCPClientService } from '../mcp-client/mcp-client.service';
 import { ModelService } from '../model/model.service';
 import { PromptService, role } from '../prompt/prompt.service';
+
+export const hjmRerankSchema = z.object({
+	ranked_jobs: z
+		.array(
+			z.object({
+				job_id: z.string().describe('岗位的唯一标识符'),
+				reason: z.string().describe('该岗位与简历匹配的具体原因')
+			})
+		)
+		.describe('按匹配度从高到低排序的岗位列表')
+});
 
 @Injectable()
 export class ChainService {
@@ -271,6 +284,43 @@ export class ChainService {
 		if (stream) {
 			return streamChain;
 		}
+		return chain;
+	}
+
+	/**
+	 * 创建人岗匹配的重排链
+	 * @description LLM接收简历和多个岗位，返回排序后的岗位列表和匹配原因
+	 * @returns 返回一个可执行的链，输入为 { resume: ResumeVo, jobs: JobVo[] }
+	 */
+	async hjmRerankChain() {
+		const schema = hjmRerankSchema;
+		const prompt = await this.promptService.hjmRerankPrompt();
+		const llm = this.modelService.getLLMDeepSeekRaw('deepseek-chat'); // 使用通用模型即可
+
+		const chain = RunnableSequence.from([
+			{
+				input: (input: { resume: ResumeVo; jobs: JobVo[] }) => {
+					// 将输入对象转换为符合prompt格式的字符串
+					const resumeText = `技能: ${input.resume.skill.content
+						.map(s => s.content?.join(','))
+						.join('; ')}. 项目经验: ${input.resume.projects
+						.map(p => `${p.info.name} - ${p.lightspot.skill.join(',')}`)
+						.join('; ')}`;
+					const jobsText = input.jobs.map(j => ({
+						id: j.id,
+						description: j.description
+					}));
+					return JSON.stringify({
+						resume: resumeText,
+						jobs: jobsText
+					});
+				}
+			},
+			prompt,
+			llm,
+			new StructuredOutputParser(schema)
+		]);
+
 		return chain;
 	}
 

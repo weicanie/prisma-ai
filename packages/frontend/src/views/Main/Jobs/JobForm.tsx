@@ -20,6 +20,7 @@ import {
 	SelectValue
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { JobOpenStatus, type CreateJobDto } from '@prism-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { throttle } from 'lodash';
 import { memo } from 'react';
@@ -37,7 +38,7 @@ const jobFormSchema = z.object({
 	location: z.string().optional(),
 	salary: z.string().optional(),
 	link: z.string().url('请输入有效的URL').or(z.literal('')),
-	status: z.enum(['open', 'closed'])
+	job_status: z.enum(['open', 'closed']).optional()
 });
 
 type JobFormData = z.infer<typeof jobFormSchema>;
@@ -53,13 +54,14 @@ export const JobForm = memo(() => {
 			description: values.description || '',
 			location: values.location || '',
 			salary: values.salary || '',
-			link: values.link || ''
+			link: values.link || '',
+			job_status: values.job_status || JobOpenStatus.OPEN
 		}
 	});
 
 	const dispatch = useDispatch();
 	const onChange = throttle((formData: JobFormData) => {
-		dispatch(setData(formData));
+		dispatch(setData(formData as CreateJobDto));
 	}, 1000);
 
 	const queryClient = useQueryClient();
@@ -72,7 +74,7 @@ export const JobForm = memo(() => {
 
 	const onSubmit = (data: JobFormData) => {
 		console.log('通过表单提交的岗位数据:', data);
-		uploadJobMutation.mutate(data);
+		uploadJobMutation.mutate(data as CreateJobDto);
 	};
 
 	return (
@@ -165,7 +167,7 @@ export const JobForm = memo(() => {
 
 								<FormField
 									control={form.control}
-									name="status"
+									name="job_status"
 									render={({ field }) => (
 										<FormItem>
 											<FormLabel>状态</FormLabel>

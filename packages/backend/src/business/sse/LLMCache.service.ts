@@ -28,7 +28,7 @@ export class LLMCacheService {
 			const exists = await this.vectorStoreService.indexExists(this.CACHE_INDEX);
 			if (!exists) {
 				// 创建一个空索引
-				await this.vectorStoreService.createEmptyIndex(
+				await this.vectorStoreService.createEmptyIndexWithModel(
 					this.CACHE_INDEX,
 					this.modelService.embedModel_openai
 				);

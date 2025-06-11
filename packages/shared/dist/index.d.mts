@@ -42,6 +42,15 @@ declare const errorMessage: {
     "4005": string;
 };
 
+declare enum JobOpenStatus {
+    OPEN = "open",//招聘中
+    CLOSED = "closed"
+}
+declare enum JobStatus {
+    COMMITTED = "committed",//存储了但未处理
+    EMBEDDED = "embedded",//已embedding
+    MATCHED = "matched"
+}
 /**
  * 创建招聘信息的 DTO
  */
@@ -52,7 +61,8 @@ interface CreateJobDto {
     location?: string;
     salary?: string;
     link?: string;
-    status?: string;
+    job_status?: JobOpenStatus;
+    status?: JobStatus;
 }
 type LLMJobDto = Pick<CreateJobDto, 'jobName' | 'companyName' | 'description'>;
 /**
@@ -71,7 +81,8 @@ interface JobVo {
     location?: string;
     salary?: string;
     link?: string;
-    status?: string;
+    job_status?: JobOpenStatus;
+    status?: JobStatus;
     createdAt: string;
     updatedAt: string;
 }
@@ -1133,6 +1144,8 @@ interface ResumeVo {
     status: ResumeStatus;
     skill: SkillVo;
     projects: ProjectVo[];
+    jobId?: string;
+    resumeMatcheds?: string[];
     createdAt: string;
     updatedAt: string;
 }
@@ -1253,4 +1266,4 @@ declare function projectSchemaToMarkdown(project: z.infer<typeof projectSchemaFo
 declare const skillsToMarkdown: (data: CreateSkillDto) => string;
 declare const markdownToSkills: (markdown: string) => CreateSkillDto;
 
-export { type CreateJobDto, type CreateKnowledgeDto, type CreateResumeDto, type CreateSkillDto, type DataChunkErrVO, type DataChunkVO, ErrorCode, FileTypeEnum, type JobVo, KnowledgeTypeEnum, type KnowledgeVo, type LLMJobDto, type LLMSessionRequest, type LLMSessionResponse, type LLMSessionStatusResponse, type LoginFormType, type LoginResponse, type MatchJobDto, type PaginatedJobsResult, type PaginatedKnsResult, type PaginatedResumesResult, type ProjectDto, type ProjectMinedDto, type ProjectMineddVo, type ProjectPolishedDto, type ProjectPolishedVo, ProjectStatus, type ProjectVo, type RegistFormType, type RegistResponse, RequestTargetMap, type ResumeMatchedDto, ResumeStatus, type ResumeVo, type ServerDataFormat, type SkillItem, type SkillVo, type StreamingChunk, type TRequestParams, type UpdateJobDto, type UpdateKnowledgeDto, type UpdateResumeDto, type UpdateSkillDto, type UserInfoFromToken, type VerifyMetaData, errorMessage, getLightspotSchema, jsonMd_obj, loginformSchema, type lookupResultDto, lookupResultSchema, markdownToProjectSchema, markdownToSkills, type projectLookupedDto, projectLookupedSchema, projectMinedSchema, projectPolishedSchema, projectSchema, projectSchemaForm, projectSchemaToMarkdown, registformSchema, resumeMatchedSchema, skillItemSchema, skillSchema, skillsToMarkdown, type_content_Map };
+export { type CreateJobDto, type CreateKnowledgeDto, type CreateResumeDto, type CreateSkillDto, type DataChunkErrVO, type DataChunkVO, ErrorCode, FileTypeEnum, JobOpenStatus, JobStatus, type JobVo, KnowledgeTypeEnum, type KnowledgeVo, type LLMJobDto, type LLMSessionRequest, type LLMSessionResponse, type LLMSessionStatusResponse, type LoginFormType, type LoginResponse, type MatchJobDto, type PaginatedJobsResult, type PaginatedKnsResult, type PaginatedResumesResult, type ProjectDto, type ProjectMinedDto, type ProjectMineddVo, type ProjectPolishedDto, type ProjectPolishedVo, ProjectStatus, type ProjectVo, type RegistFormType, type RegistResponse, RequestTargetMap, type ResumeMatchedDto, ResumeStatus, type ResumeVo, type ServerDataFormat, type SkillItem, type SkillVo, type StreamingChunk, type TRequestParams, type UpdateJobDto, type UpdateKnowledgeDto, type UpdateResumeDto, type UpdateSkillDto, type UserInfoFromToken, type VerifyMetaData, errorMessage, getLightspotSchema, jsonMd_obj, loginformSchema, type lookupResultDto, lookupResultSchema, markdownToProjectSchema, markdownToSkills, type projectLookupedDto, projectLookupedSchema, projectMinedSchema, projectPolishedSchema, projectSchema, projectSchemaForm, projectSchemaToMarkdown, registformSchema, resumeMatchedSchema, skillItemSchema, skillSchema, skillsToMarkdown, type_content_Map };

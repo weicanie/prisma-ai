@@ -66,7 +66,7 @@ export class McpController {
   */
 	//客户端需要在'mcp-session-id'headers中上传会话ID, 以复用原会话（stateful）
 	@Post('session')
-	async handleMcpRequestSession(@Req() req: Request, @Res() res: Response, @Body() body: any) {
+	async handleMcpRequestSession(@Req() req: Request, @Res() res: Response) {
 		const sessionId = req.headers['mcp-session-id'] as string | undefined;
 		let transport: StreamableHTTPServerTransport;
 

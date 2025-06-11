@@ -1,6 +1,7 @@
 import { useTheme } from '@/utils/theme';
 import {
 	jsonMd_obj,
+	ResumeStatus,
 	type JobVo,
 	type MatchJobDto,
 	type ResumeMatchedDto,
@@ -12,7 +13,7 @@ import { toast } from 'sonner';
 import { useCustomQuery } from '../../../query/config';
 import { JobQueryKey, ResumeQueryKey } from '../../../query/keys';
 import { findAllUserJobs } from '../../../services/job';
-import { findAllUserResumes } from '../../../services/resume';
+import { findAllUserResumes, findResumeMatchedByJobId } from '../../../services/resume';
 import { useSseAnswer } from '../../../services/sse/useSseAnswer';
 import JobCard from '../Jobs/JobCard';
 import { OriginalResume } from './Action-Result/OriginalResume';
@@ -38,6 +39,12 @@ const ResumeActions: React.FC<ResumeActionsProps> = () => {
 	const { data: jobDataResult, status: jobStatus } = useCustomQuery([JobQueryKey.Jobs], () =>
 		findAllUserJobs(1, 100)
 	);
+	const { data: resumeMatchedData, status: resumeMatchedStatus } = useCustomQuery(
+		[ResumeQueryKey.ResumeMatched, jobId],
+		() => findResumeMatchedByJobId(jobId as string)
+	);
+	console.log('🚀 ~ resumeMatchedStatus:', resumeMatchedStatus);
+	console.log('🚀 ~ resumeMatchedData:', resumeMatchedData);
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
 	const navigate = useNavigate();
@@ -59,7 +66,7 @@ const ResumeActions: React.FC<ResumeActionsProps> = () => {
 	useEffect(() => {
 		if (done) {
 			const result = jsonMd_obj(content);
-			console.log('🚀 ~ useEffect ~ result:', result);
+			console.log('🚀 ~ sse最终结果', result);
 			setResultData(result);
 			setInput({}); // 清空输入防止sse重复请求
 			//setState异步, 需要等待setState执行完再执行navigate
@@ -90,8 +97,22 @@ const ResumeActions: React.FC<ResumeActionsProps> = () => {
 		return <div className="text-center text-gray-500">没有找到岗位数据</div>;
 	}
 
-	const availableActions = ['match'] as const;
-	const actionType = availableActions[0];
+	const getAvailableActions = (status: ResumeStatus) => {
+		switch (status) {
+			case ResumeStatus.committed:
+				return ['match'];
+			case ResumeStatus.matched:
+				return ['collaborate'];
+			default:
+				return [];
+		}
+	};
+
+	const availableActions = getAvailableActions(resumeData.status);
+	const actionType: 'match' | 'collaborate' | null = availableActions[0] as
+		| 'match'
+		| 'collaborate'
+		| null;
 
 	/**
 	 * 处理简历与岗位的匹配操作
@@ -112,6 +133,10 @@ const ResumeActions: React.FC<ResumeActionsProps> = () => {
 		setUrlPath('/resume/match');
 		navigate('#reasoning');
 	};
+
+	// const handleCollaborate = () => {
+	// 	console.log('handleCollaborate');
+	// };
 
 	const ResumeResultProps = {
 		resultData,

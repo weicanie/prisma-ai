@@ -59,8 +59,8 @@ const Action: React.FC<ActionProps> = () => {
 			const result = jsonMd_obj(content);
 			if (Array.isArray(result)) {
 				const [resultData, mergedData] = result;
-				console.log('🚀 ~ useEffect ~ mergedData:', mergedData);
-				console.log('🚀 ~ useEffect ~ resultData:', resultData);
+				console.log('🚀 ~ sse最终结果:', result);
+
 				setResultData(resultData);
 				if (mergedData) {
 					setMergedData(mergedData); //[结果]支持

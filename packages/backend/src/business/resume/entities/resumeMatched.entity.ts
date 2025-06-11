@@ -1,9 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ResumeStatus } from '@prism-ai/shared';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 import { Project, UserInfo } from '../../project/entities/project.entity';
 import { Skill } from '../../skill/entities/skill.entity';
-
 @Schema({ timestamps: true })
 export class ResumeMatched {
 	@Prop({ required: true })
@@ -20,6 +19,10 @@ export class ResumeMatched {
 
 	@Prop({ type: String, enum: ResumeStatus, default: ResumeStatus.committed })
 	status: ResumeStatus;
+	/* 一对一：一份专用简历 对应一个岗位 */
+
+	@Prop({ type: Types.ObjectId, ref: 'Job', required: true })
+	jobId: Types.ObjectId;
 }
 
 export type ResumeMatchedDocument = HydratedDocument<ResumeMatched> & {

@@ -40,10 +40,10 @@ const JobCard: React.FC<JobCardProps> = ({ jobData }) => {
 								</CardDescription>
 							</div>
 							<Badge
-								variant={jobData.status === 'open' ? 'default' : 'secondary'}
+								variant={jobData.job_status === 'open' ? 'default' : 'secondary'}
 								className="text-sm text-foreground"
 							>
-								{jobData.status === 'open' ? '招聘中' : '停止招聘'}
+								{jobData.job_status === 'open' ? '招聘中' : '停止招聘'}
 							</Badge>
 						</div>
 						<div
@@ -134,7 +134,7 @@ const JobCard: React.FC<JobCardProps> = ({ jobData }) => {
 							</div>
 							<div className="text-center p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20">
 								<div className="text-xl font-bold text-orange-600 dark:text-orange-400">
-									{jobData.status === 'open' ? '活跃' : '关闭'}
+									{jobData.job_status === 'open' ? '活跃' : '关闭'}
 								</div>
 								<div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
 									当前状态

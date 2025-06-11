@@ -1,5 +1,16 @@
 // 定义招聘信息相关的 DTO 和 VO
 
+export enum JobOpenStatus {
+	OPEN = 'open', //招聘中
+	CLOSED = 'closed' //已停止招聘
+}
+
+export enum JobStatus {
+	COMMITTED = 'committed', //存储了但未处理
+	EMBEDDED = 'embedded', //已embedding
+	MATCHED = 'matched' //已被用户简历追踪
+}
+
 /**
  * 创建招聘信息的 DTO
  */
@@ -10,7 +21,8 @@ export interface CreateJobDto {
 	location?: string; // 工作地点
 	salary?: string; // 薪资范围
 	link?: string; // 职位链接
-	status?: string; // 职位状态， "open", "closed"
+	job_status?: JobOpenStatus; // 职位状态， "open", "closed"
+	status?: JobStatus; // 职位内部状态，"committed", "embedded", "matched" 未处理、已embedding、已被用户简历追踪
 }
 
 export type LLMJobDto = Pick<CreateJobDto, 'jobName' | 'companyName' | 'description'>;
@@ -32,7 +44,8 @@ export interface JobVo {
 	location?: string;
 	salary?: string;
 	link?: string;
-	status?: string; // 职位状态， "open", "closed"
+	job_status?: JobOpenStatus; // 职位状态， "open", "closed"
+	status?: JobStatus; // 职位内部状态，"committed", "embedded", "matched" 未处理、已embedding、已被用户简历追踪
 	createdAt: string;
 	updatedAt: string;
 }

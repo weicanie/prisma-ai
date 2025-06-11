@@ -58,6 +58,12 @@ export class ResumeController {
 	}
 
 	@RequireLogin()
+	@Get('matched/:jobId')
+	findResumeMatchedByJobId(@Param('jobId') jobId: string, @UserInfo() userInfo: UserInfoFromToken) {
+		return this.resumeService.findResumeMatchedByJobId(jobId);
+	}
+
+	@RequireLogin()
 	@Patch(':id')
 	update(
 		@Param('id') id: string,

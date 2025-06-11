@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { JobVo, UserInfoFromToken } from '@prism-ai/shared';
+import { JobStatus, JobVo, UserInfoFromToken } from '@prism-ai/shared';
 import { Model } from 'mongoose';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { Job, JobDocument } from './entities/job.entity';
 
 export interface PaginatedJobsResult {
-	data: Job[];
+	data: JobVo[];
 	total: number;
 	page: number;
 	limit: number;
@@ -28,15 +28,20 @@ export class JobService {
 	async findAll(
 		userInfoToken: UserInfoFromToken,
 		page: number = 1,
-		limit: number = 10
+		limit: number = 10,
+		status?: JobStatus
 	): Promise<PaginatedJobsResult> {
 		const skip = (page - 1) * limit;
-		const query = { 'userInfo.userId': userInfoToken.userId };
+		const query = status
+			? { 'userInfo.userId': userInfoToken.userId, status }
+			: { 'userInfo.userId': userInfoToken.userId };
 		//并行查询
-		const [data, total] = await Promise.all([
+		const [jobs, total] = await Promise.all([
 			this.jobModel.find(query).skip(skip).limit(limit).sort({ createdAt: -1 }).exec(), // 按创建日期排序
 			this.jobModel.countDocuments(query).exec()
 		]);
+
+		const data = jobs.map(job => job.toObject() as JobVo);
 
 		return {
 			data,

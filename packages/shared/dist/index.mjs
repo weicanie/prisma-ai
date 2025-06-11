@@ -47,6 +47,19 @@ var errorMessage = {
   ["4005" /* FORMAT_ERROR */]: "\u9519\u8BEF\u7684\u6570\u636E\u683C\u5F0F"
 };
 
+// src/types/job.ts
+var JobOpenStatus = /* @__PURE__ */ ((JobOpenStatus2) => {
+  JobOpenStatus2["OPEN"] = "open";
+  JobOpenStatus2["CLOSED"] = "closed";
+  return JobOpenStatus2;
+})(JobOpenStatus || {});
+var JobStatus = /* @__PURE__ */ ((JobStatus2) => {
+  JobStatus2["COMMITTED"] = "committed";
+  JobStatus2["EMBEDDED"] = "embedded";
+  JobStatus2["MATCHED"] = "matched";
+  return JobStatus2;
+})(JobStatus || {});
+
 // src/types/knowBase.ts
 var type_content_Map = {
   userProjectDoc: "\u6211\u7684\u9879\u76EE\u6587\u6863",
@@ -443,6 +456,8 @@ var markdownToSkills = (markdown) => {
 export {
   ErrorCode,
   FileTypeEnum,
+  JobOpenStatus,
+  JobStatus,
   KnowledgeTypeEnum,
   ProjectStatus,
   RequestTargetMap,

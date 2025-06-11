@@ -15,6 +15,7 @@ import { DbModule } from './DB/db.module';
 import { GlobalFilter } from './errorHandle.filter';
 import { EventBusModule } from './EventBus/event-bus.module';
 import { GraphModule } from './graph/graph.module';
+import { HjmModule } from './human-job-match/hjm.module';
 import { IsLoginGuard } from './isLogin.guard';
 import { SessionPoolModule } from './session/session-pool.module';
 import { UserModule } from './user/user.module';
@@ -45,7 +46,8 @@ import { UserModule } from './user/user.module';
 		ResumeModule,
 		JobModule,
 		CopilotModule,
-		KnowledgebaseModule
+		KnowledgebaseModule,
+		HjmModule
 	],
 	providers: [
 		{

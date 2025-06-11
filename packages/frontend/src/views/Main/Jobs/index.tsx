@@ -118,13 +118,13 @@ const Jobs: React.FC<JobsProps<JobVo>> = ({
 					}
 				},
 				{
-					accessorKey: 'status',
+					accessorKey: 'jon_status',
 					header: ({ column }) => <DataTableColumnHeader column={column} title="状态" />,
 					cell: ({ row }) => {
-						const status = row.original.status;
+						const job_status = row.original.job_status;
 						return (
-							<Badge variant={status === 'open' ? 'default' : 'secondary'}>
-								{status === 'open' ? '开放' : '关闭'}
+							<Badge variant={job_status === 'open' ? 'default' : 'secondary'}>
+								{job_status === 'open' ? '开放' : '关闭'}
 							</Badge>
 						);
 					}

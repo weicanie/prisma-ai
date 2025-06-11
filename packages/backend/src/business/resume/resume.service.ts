@@ -1,13 +1,16 @@
 import { forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
+	JobVo,
 	jsonMd_obj,
 	MatchJobDto,
 	PaginatedResumesResult,
+	ProjectVo,
 	ResumeMatchedDto,
 	resumeMatchedSchema,
 	ResumeStatus,
 	ResumeVo,
+	SkillVo,
 	UserInfoFromToken
 } from '@prism-ai/shared';
 import { Model, Types } from 'mongoose';
@@ -92,7 +95,7 @@ export class ResumeService {
 					return JSON.parse(redisStoreResult);
 				})
 				.then(result => {
-					this._handleMatchResult(result, userInfo, resumeVo);
+					this._handleMatchResult(result, userInfo, resumeVo, jobVo);
 				})
 				.catch(error => {
 					this.logger.error(`任务${task.resultKey}处理结果失败: ${error}`);
@@ -141,9 +144,9 @@ export class ResumeService {
 	private async _handleMatchResult(
 		resultRedis: redisStoreResult,
 		userInfo: UserInfoFromToken,
-		resume: ResumeVo
+		resume: ResumeVo,
+		job: JobVo
 	) {
-		console.log('🚀 ~ ResumeService ~ resume:', resume);
 		// 1. 从Redis结果中解析出LLM的输出内容
 		let matchedResume: ResumeMatchedDto = jsonMd_obj(resultRedis.content); // 从markdown代码块中提取json
 
@@ -185,12 +188,37 @@ export class ResumeService {
 				};
 			}),
 			userInfo,
-			status: ResumeStatus.matched
+			status: ResumeStatus.matched,
+			jobId: new Types.ObjectId(job.id)
 		};
-		console.log('🚀 ~ ResumeService ~ dataToSave:', dataToSave);
 
 		const newMatchedResume = new this.resumeMatchedModel(dataToSave);
 		await newMatchedResume.save();
+	}
+
+	/**
+	 * 根据岗位ID查询专用简历
+	 * @param jobId 岗位ID
+	 * @returns 返回该岗位专用的简历,和普通简历格式是一样的,只是多了jobId字段
+	 */
+	async findResumeMatchedByJobId(jobId: string): Promise<ResumeVo> {
+		const resumeMatched = await this.resumeMatchedModel
+			.findOne({ jobId: new Types.ObjectId(jobId) })
+			.exec();
+		const resumeMatchedObj = resumeMatched?.toObject();
+		if (!resumeMatchedObj) {
+			throw new Error(`Resume matched with jobId "${jobId}" not found`);
+		}
+		const result = {
+			id: resumeMatchedObj.id as string,
+			name: resumeMatchedObj.name,
+			status: resumeMatchedObj.status,
+			skill: resumeMatchedObj.skill as unknown as SkillVo,
+			projects: resumeMatchedObj.projects as unknown as ProjectVo[],
+			createdAt: resumeMatchedObj.createdAt,
+			updatedAt: resumeMatchedObj.updatedAt
+		};
+		return result as ResumeVo;
 	}
 
 	async create(createResumeDto: CreateResumeDto, userInfo: UserInfoFromToken): Promise<Resume> {
@@ -226,6 +254,7 @@ export class ResumeService {
 			limit
 		};
 	}
+
 	async findOne(id: string, userInfo: UserInfoFromToken): Promise<ResumeVo> {
 		if (!Types.ObjectId.isValid(id)) {
 			throw new NotFoundException(`Invalid ID format: "${id}"`);
@@ -247,9 +276,7 @@ export class ResumeService {
 			throw new NotFoundException(`Resume with ID "${id}" not found or access denied`);
 		}
 
-		const result = { ...resume.toObject() };
-
-		return result as unknown as PopulateFields<ResumeDocument, 'projects' | 'skill', ResumeVo>;
+		return resume as ResumeVo;
 	}
 
 	async update(

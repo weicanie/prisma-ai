@@ -19,6 +19,7 @@ export class PromptService {
 	private readonly polishT: string;
 	private readonly lookupT: string;
 	private readonly matchT: string;
+	private readonly hjmRerankT: string;
 
 	/**
 	 * prompt插槽: fewShot、instructions
@@ -43,11 +44,18 @@ export class PromptService {
 		const matchTStr = fs.readFileSync(path.join(process.cwd(), 'ai_data/prompt/match-T.md'), {
 			encoding: 'utf-8'
 		});
+		const hjmRerankTStr = fs.readFileSync(
+			path.join(process.cwd(), 'ai_data/prompt/hjm_rerank-T.md'),
+			{
+				encoding: 'utf-8'
+			}
+		);
 
 		this.polishT = polishStr;
 		this.lookupT = lookupTStr;
 		this.mineT = mineTStr;
 		this.matchT = matchTStr;
+		this.hjmRerankT = hjmRerankTStr;
 		const mineFewShot = fs.readFileSync(
 			path.join(process.cwd(), 'ai_data/prompt/mine-fewshot.md'),
 			{
@@ -121,6 +129,17 @@ export class PromptService {
 			[`${role.SYSTEM}`, this.matchT],
 			// [`${role.SYSTEM}`, `这是目前为止的聊天记录：{chat_history}`],
 			[`${role.HUMAN}`, '{input}']
+		]);
+		return prompt;
+	}
+	/**
+	 * @return prompt：{input}
+	 *
+	 */
+	async hjmRerankPrompt() {
+		const prompt = ChatPromptTemplate.fromMessages([
+			[`${role.SYSTEM}`, this.hjmRerankT]
+			// human role 的 {input} 由 chain service 传入
 		]);
 		return prompt;
 	}

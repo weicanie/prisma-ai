@@ -63,3 +63,12 @@ export async function removeResume(id: string) {
 	const res = await instance.delete<SDF<null>>(`/resume/${id}`);
 	return res.data;
 }
+/**
+ * 获取指定岗位的专用简历
+ * @param jobId 岗位ID
+ * @returns 返回该岗位专用的简历,和普通简历格式是一样的,只是多了jobId字段
+ */
+export async function findResumeMatchedByJobId(jobId: string) {
+	const res = await instance.get<SDF<ResumeVo>>(`/resume/matched/${jobId}`);
+	return res.data;
+}
