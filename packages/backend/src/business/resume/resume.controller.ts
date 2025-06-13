@@ -64,6 +64,18 @@ export class ResumeController {
 	}
 
 	@RequireLogin()
+	@Get('matched/all')
+	findAllResumeMatched(
+		@UserInfo() userInfo: UserInfoFromToken,
+		@Query('page') page?: string,
+		@Query('limit') limit?: string
+	) {
+		const pageNumber = page ? parseInt(page, 10) : 1;
+		const limitNumber = limit ? parseInt(limit, 10) : 10;
+		return this.resumeService.findAllResumeMatched(userInfo, pageNumber, limitNumber);
+	}
+
+	@RequireLogin()
 	@Patch(':id')
 	update(
 		@Param('id') id: string,

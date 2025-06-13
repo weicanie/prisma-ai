@@ -1,34 +1,23 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ProjectStatus, type ProjectVo } from '@prism-ai/shared';
+import { type ProjectVo } from '@prism-ai/shared';
 import { ArrowRight, Code, Sparkles, Target, Users } from 'lucide-react';
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import { StatusBadge } from '../../components/StatusBadge';
 import { ProjectAnalysisResultCard } from './ProjectAnalysisResultCard';
 
 interface OriginalProjectProps {
 	projectData: ProjectVo;
 	isDark: boolean;
-	projectId: string;
-	jump?: boolean; //点击后是否跳转
+	showAnalysis?: boolean; //是否展示分析结果
 }
 
 export const OriginalProject: React.FC<OriginalProjectProps> = ({
 	projectData,
 	isDark,
-	projectId,
-	jump = true
+	showAnalysis = true
 }) => {
-	const navigate = useNavigate();
-
-	/* lookup过了就直接跳转到 polish 和 mined */
-	useEffect(() => {
-		if (projectData.status !== ProjectStatus.committed && jump) {
-			navigate(`/main/projects/action/${projectId}`);
-		}
-	}, [projectData.status]);
 	return (
 		<>
 			<Card className={` ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
@@ -184,7 +173,7 @@ export const OriginalProject: React.FC<OriginalProjectProps> = ({
 									</div>
 								)}
 
-								{projectData.lookupResult && (
+								{projectData.lookupResult && showAnalysis && (
 									<>
 										<Separator />
 										<ProjectAnalysisResultCard

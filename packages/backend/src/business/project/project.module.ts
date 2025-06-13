@@ -17,7 +17,7 @@ import { ProjectService } from './project.service';
 	//Schema 注入模块作为 Model,然后实例化以操控mongodb数据库
 	imports: [
 		ChainModule,
-		EventBusModule,
+		forwardRef(() => EventBusModule),
 		RedisModule,
 		forwardRef(() => SseModule),
 		MongooseModule.forFeature([

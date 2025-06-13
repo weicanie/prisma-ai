@@ -69,6 +69,11 @@ export class TaskQueueService {
 		TASK: 'task:', // 任务详情
 		RESULT: 'task_result:', // 任务结果
 
+		/* 映射关系
+		任务上下文
+		taskId -> sessionId -> sessionData
+		taskId -> metadata
+		*/
 		USER_TASKS: 'user_tasks:', // 用户任务映射
 		SESSION_TASK: 'session_task:' // 会话任务映射
 	};

@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { useCustomQuery } from '../../../query/config';
 import { JobQueryKey, ResumeQueryKey } from '../../../query/keys';
 import { findAllUserJobs } from '../../../services/job';
-import { findAllUserResumes, findResumeMatchedByJobId } from '../../../services/resume';
+import { findAllUserResumes } from '../../../services/resume';
 import { useSseAnswer } from '../../../services/sse/useSseAnswer';
 import JobCard from '../Jobs/JobCard';
 import { OriginalResume } from './Action-Result/OriginalResume';
@@ -39,12 +39,11 @@ const ResumeActions: React.FC<ResumeActionsProps> = () => {
 	const { data: jobDataResult, status: jobStatus } = useCustomQuery([JobQueryKey.Jobs], () =>
 		findAllUserJobs(1, 100)
 	);
-	const { data: resumeMatchedData, status: resumeMatchedStatus } = useCustomQuery(
-		[ResumeQueryKey.ResumeMatched, jobId],
-		() => findResumeMatchedByJobId(jobId as string)
-	);
-	console.log('🚀 ~ resumeMatchedStatus:', resumeMatchedStatus);
-	console.log('🚀 ~ resumeMatchedData:', resumeMatchedData);
+	// const { data: resumeMatchedData, status: resumeMatchedStatus } = useCustomQuery(
+	// 	[ResumeQueryKey.ResumeMatched, jobId],
+	// 	() => findResumeMatchedByJobId(jobId as string)
+	// );
+
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
 	const navigate = useNavigate();

@@ -1,5 +1,6 @@
 import type {
 	CreateResumeDto,
+	PaginatedResumeMatchedResult,
 	PaginatedResumesResult,
 	ResumeVo,
 	ServerDataFormat as SDF,
@@ -70,5 +71,18 @@ export async function removeResume(id: string) {
  */
 export async function findResumeMatchedByJobId(jobId: string) {
 	const res = await instance.get<SDF<ResumeVo>>(`/resume/matched/${jobId}`);
+	return res.data;
+}
+
+/**
+ * 获取所有岗位专用简历
+ * @param page 页码
+ * @param limit 每页数量
+ * @returns 返回所有岗位专用简历
+ */
+export async function findAllResumeMatched(page?: number, limit?: number) {
+	const res = await instance.get<SDF<PaginatedResumeMatchedResult>>(
+		`/resume/matched/all?page=${page}&limit=${limit}`
+	);
 	return res.data;
 }

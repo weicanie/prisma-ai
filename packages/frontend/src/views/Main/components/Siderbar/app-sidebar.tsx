@@ -80,7 +80,8 @@ const data = {
 			icon: Rocket,
 			url: '/main/offer',
 			items: [
-				{ title: '学习路线', url: '/main/offer/road' },
+				{ title: '技术学习路线', url: '/main/offer/road' },
+				{ title: '项目亮点实现', url: '/main/offer/doit' },
 				{ title: '简历延申八股', url: '/main/offer/questions' },
 				{ title: '模拟面试', url: '/main/offer/mock-interview' }
 			]

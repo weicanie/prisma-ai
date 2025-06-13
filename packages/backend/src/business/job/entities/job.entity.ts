@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { JobOpenStatus, JobStatus } from '@prism-ai/shared';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 import { UserInfo } from '../../project/entities/project.entity';
 
 @Schema({ timestamps: true })
@@ -62,6 +62,9 @@ export class Job {
 		default: JobStatus.COMMITTED
 	})
 	status?: string; //职位内部状态，"committed", "embedded", "matched" 未处理、已embedding、已被用户简历追踪
+
+	@Prop({ type: Types.ObjectId, ref: 'ResumeMatched' })
+	resumeMatchedId?: Types.ObjectId;
 }
 
 export type JobDocument = HydratedDocument<Job> & {
@@ -85,6 +88,15 @@ JobSchema.set('toJSON', {
 	transform: function (doc, ret) {
 		ret.id = ret._id.toString(); // Convert _id to id string
 		delete ret._id;
+		return ret;
+	}
+});
+
+JobSchema.set('toObject', {
+	transform: function (doc, ret) {
+		ret.id = ret._id.toString(); // Convert _id to id string
+		delete ret._id;
+		return ret;
 	}
 });
 

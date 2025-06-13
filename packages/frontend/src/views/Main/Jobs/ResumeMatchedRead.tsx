@@ -6,19 +6,18 @@ import React, { Fragment } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCustomQuery } from '../../../query/config';
 import { ResumeQueryKey } from '../../../query/keys';
-import { findAllUserResumes } from '../../../services/resume';
+import { findAllResumeMatched } from '../../../services/resume';
 import { OriginalProject } from '../Projects/Action-Result/OriginalProject';
 
-interface ResumeReadProps {
+interface ResumeMatchedReadProps {
 	_?: string;
 }
 
-const ResumeRead: React.FC<ResumeReadProps> = () => {
-	const { resumeId } = useParams();
-	const { data, status } = useCustomQuery([ResumeQueryKey.Resumes, 1, 10], ({ queryKey }) => {
-		const [, page, limit] = queryKey; // 从 queryKey 中解构分页参数
-		return findAllUserResumes(page as number, limit as number);
-	});
+const ResumeMatchedRead: React.FC<ResumeMatchedReadProps> = () => {
+	const { resumeMatchedId } = useParams();
+	const { data, status } = useCustomQuery([ResumeQueryKey.ResumeMatched, 1, 10], () =>
+		findAllResumeMatched(1, 10)
+	);
 
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
@@ -30,9 +29,9 @@ const ResumeRead: React.FC<ResumeReadProps> = () => {
 		return <div>错误:{data?.message}</div>;
 	}
 	const resumeDatas = data.data.data;
-	const resumeData = resumeDatas?.find(resume => resume.id === resumeId);
+	const resumeData = resumeDatas?.find(resume => resume.id === resumeMatchedId);
 
-	if (!resumeData || resumeId === undefined) {
+	if (!resumeData || resumeMatchedId === undefined) {
 		return <div className="text-center text-gray-500">没有找到简历数据</div>;
 	}
 
@@ -119,4 +118,4 @@ const ResumeRead: React.FC<ResumeReadProps> = () => {
 	);
 };
 
-export default ResumeRead;
+export default ResumeMatchedRead;

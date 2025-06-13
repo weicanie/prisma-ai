@@ -16,6 +16,8 @@ export const ResumeMatchResultCard: React.FC<ResumeMatchResultCardProps> = ({
 	resultData,
 	resumeData
 }) => {
+	console.log('🚀 ~ resumeData~ResumeMatchResultCard卡片:', resumeData);
+
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
 
@@ -30,17 +32,20 @@ export const ResumeMatchResultCard: React.FC<ResumeMatchResultCardProps> = ({
 		return (
 			<div className="text-center text-gray-500 py-10">
 				<p>未能找到匹配的岗位或返回数据格式不正确。</p>
-				<p>请稍后重试或优化您的简历。</p>
 			</div>
 		);
 	}
 
 	const resultDataVo: ResumeVo = {
 		...resumeData,
-		skill: resumeData.skill,
-		projects: resumeData.projects
+		skill: { ...resumeData.skill, content: resultData.skill.content },
+		projects: resumeData.projects.map((project, index) => ({
+			...project,
+			info: resultData.projects[index].info,
+			lightspot: resultData.projects[index].lightspot
+		}))
 	};
-
+	console.log('🚀 ~ resultDataVo~ResumeMatchResultCard卡片:', resultDataVo);
 	return (
 		<>
 			<OriginalResume resumeData={resultDataVo} isDark={isDark} />

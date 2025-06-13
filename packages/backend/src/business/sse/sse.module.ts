@@ -19,7 +19,7 @@ import { LLMCacheService } from './LLMCache.service';
 		RedisModule,
 		ModelModule,
 		SessionPoolModule,
-		TaskQueueModule,
+		forwardRef(() => TaskQueueModule),
 		VectorStoreModule,
 		forwardRef(() => EventBusModule)
 	],

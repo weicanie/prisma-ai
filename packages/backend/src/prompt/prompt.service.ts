@@ -20,6 +20,7 @@ export class PromptService {
 	private readonly lookupT: string;
 	private readonly matchT: string;
 	private readonly hjmRerankT: string;
+	private readonly diffLearnT: string;
 
 	/**
 	 * prompt插槽: fewShot、instructions
@@ -50,12 +51,19 @@ export class PromptService {
 				encoding: 'utf-8'
 			}
 		);
+		const diffLearnTStr = fs.readFileSync(
+			path.join(process.cwd(), 'ai_data/prompt/diff_learn-T.md'),
+			{
+				encoding: 'utf-8'
+			}
+		);
 
 		this.polishT = polishStr;
 		this.lookupT = lookupTStr;
 		this.mineT = mineTStr;
 		this.matchT = matchTStr;
 		this.hjmRerankT = hjmRerankTStr;
+		this.diffLearnT = diffLearnTStr;
 		const mineFewShot = fs.readFileSync(
 			path.join(process.cwd(), 'ai_data/prompt/mine-fewshot.md'),
 			{
@@ -133,13 +141,27 @@ export class PromptService {
 		return prompt;
 	}
 	/**
-	 * @return prompt：{input}
+	 * @return prompt：{instructions}、{top_n }、{input}、{chat_history}
 	 *
 	 */
 	async hjmRerankPrompt() {
 		const prompt = ChatPromptTemplate.fromMessages([
-			[`${role.SYSTEM}`, this.hjmRerankT]
-			// human role 的 {input} 由 chain service 传入
+			[`${role.SYSTEM}`, this.hjmRerankT],
+			// [`${role.SYSTEM}`, `这是目前为止的聊天记录：{chat_history}`],
+			[`${role.HUMAN}`, '{input}']
+		]);
+		return prompt;
+	}
+
+	/**
+	 * @return prompt：{instructions}、{input}、{chat_history}
+	 *
+	 */
+	async diffLearnPrompt() {
+		const prompt = ChatPromptTemplate.fromMessages([
+			[`${role.SYSTEM}`, this.diffLearnT],
+			// [`${role.SYSTEM}`, `这是目前为止的聊天记录：{chat_history}`],
+			[`${role.HUMAN}`, '{input}']
 		]);
 		return prompt;
 	}

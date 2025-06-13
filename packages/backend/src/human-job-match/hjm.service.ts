@@ -27,34 +27,55 @@ export class HjmService {
 	async syncJobsToVectorDB(
 		userInfo: UserInfoFromToken
 	): Promise<{ message: string; count: number }> {
-		// 1. 从数据库获取所有岗位数据
-		// TODO: 后续优化为分页处理，避免一次性加载过多数据
-		// FIXME 嵌入状态和追踪状态会相互覆盖,考虑将嵌入状态和追踪状态分开、或者确保二者存在时序关系,即追踪的一定是已经嵌入的
-		const allJobsResult = await this.jobService.findAll(userInfo, 1, 1000, JobStatus.COMMITTED);
-		const allJobs = allJobsResult.data;
+		let done = false;
+		let doneCount = 0;
+		while (!done) {
+			// 1. 从数据库获取未处理的岗位数据
+			const allJobsResult = await this.jobService.findAll(userInfo, 1, 1000, JobStatus.COMMITTED); //已追踪当然就没必要考虑有没有嵌入
+			const allJobs = allJobsResult.data;
+			if (allJobs.length === 0) {
+				done = true;
+			} else {
+				doneCount += allJobs.length;
+				// 2. 将岗位数据转换为 Document 格式
+				const documents = allJobs.map(
+					job =>
+						new Document({
+							pageContent: `职位: ${job.jobName}, 公司: ${job.companyName}. 职位要求: ${job.description}`,
+							metadata: {
+								jobId: job.id,
+								jobName: job.jobName,
+								companyName: job.companyName
+							}
+						})
+				);
 
-		if (allJobs.length === 0) {
+				// 3. 使用SEBRT模型进行向量化并存储
+				const embeddings = this.vectorStoreService.getLocalEmbeddings();
+				try {
+					await this.vectorStoreService.addDocumentsToIndex(
+						documents,
+						PineconeIndex.JOBS,
+						embeddings
+					);
+				} catch (error) {
+					console.error('使用SEBRT模型进行向量化失败', error);
+					throw error;
+				}
+				/* 4. 更新刚刚处理的岗位数据的状态为EMBEDDED */
+				const allJobUpdate = allJobs.map(job =>
+					this.jobService.update(job.id, { status: JobStatus.EMBEDDED }, userInfo)
+				);
+				const promiseAll = Promise.allSettled(allJobUpdate);
+				await promiseAll;
+			}
+		}
+
+		if (doneCount === 0) {
 			return { message: '没有需要同步的岗位数据', count: 0 };
 		}
 
-		// 2. 将岗位数据转换为 Document 格式
-		const documents = allJobs.map(
-			job =>
-				new Document({
-					pageContent: `职位: ${job.jobName}, 公司: ${job.companyName}. 职位要求: ${job.description}`,
-					metadata: {
-						jobId: job.id,
-						jobName: job.jobName,
-						companyName: job.companyName
-					}
-				})
-		);
-
-		// 3. 使用本地模型进行向量化并存储
-		const embeddings = this.vectorStoreService.getLocalEmbeddings();
-		await this.vectorStoreService.addDocumentsToIndex(documents, PineconeIndex.JOBS, embeddings);
-
-		return { message: '岗位数据同步成功', count: allJobs.length };
+		return { message: '岗位数据同步成功', count: doneCount };
 	}
 
 	/**
@@ -76,7 +97,16 @@ export class HjmService {
 
 		// 2. 将简历内容转换为文本并生成向量 (召回)
 		const resumeText = this.formatResumeToText(resume);
-		const resumeVector = await this.vectorStoreService.getLocalEmbeddings().embedQuery(resumeText);
+		let resumeVector: number[];
+		try {
+			resumeVector = await this.vectorStoreService.getLocalEmbeddings().embedQuery(resumeText);
+		} catch (error) {
+			const errorMessage = (error as Error).message;
+			if (errorMessage.includes('网络连接失败') || errorMessage.includes('连接超时')) {
+				throw new Error(`简历向量化失败: ${errorMessage}`);
+			}
+			throw new Error(`简历向量化失败: ${errorMessage}`);
+		}
 
 		// 3. 在向量数据库中查找最相似的 topK 个岗位
 		const candidateJobDocs = await this.vectorStoreService.findSimilarJobs(resumeVector, topK);

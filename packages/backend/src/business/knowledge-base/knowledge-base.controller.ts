@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { UserInfoFromToken } from '@prism-ai/shared';
 
-import { PaginatedKnsResult, UpdateKnowledgeDto } from '@prism-ai/shared/src/types/knowBase';
+import { PaginatedKnsResult, UpdateKnowledgeDto } from '@prism-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { CreateKnowledgebaseDto } from './dto/create-knowledgebase.dto';
 import { KnowledgebaseService } from './knowledge-base.service';

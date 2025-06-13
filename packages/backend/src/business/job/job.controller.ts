@@ -11,13 +11,25 @@ import {
 } from '@nestjs/common';
 import { UserInfoFromToken } from '@prism-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
+import { CrawlJobService } from './crawl-job.service';
 import { CreateJobDto } from './dto/create-job.dto';
+import { StartCrawlDto } from './dto/start-crawl.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { JobService } from './job.service';
 
 @Controller('job')
 export class JobController {
-	constructor(private readonly jobService: JobService) {}
+	constructor(
+		private readonly jobService: JobService,
+		private readonly crawlJobService: CrawlJobService
+	) {}
+
+	@RequireLogin()
+	@Post('crawl')
+	startCrawl(@Body(new ValidationPipe()) startCrawlDto: StartCrawlDto) {
+		this.crawlJobService.startCrawlTask(startCrawlDto);
+		return { message: '爬虫任务已启动，请稍后查看结果。' };
+	}
 
 	@RequireLogin()
 	@Post()

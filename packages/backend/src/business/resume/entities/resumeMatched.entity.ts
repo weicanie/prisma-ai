@@ -49,5 +49,5 @@ ResumeMatchedSchema.set('toObject', {
 	}
 });
 
+ResumeMatchedSchema.index({ 'userInfo.userId': 1, name: 1 });
 ResumeMatchedSchema.index({ 'userInfo.userId': 1 });
-ResumeMatchedSchema.index({ 'userInfo.userId': 1, name: 1 }, { unique: true });

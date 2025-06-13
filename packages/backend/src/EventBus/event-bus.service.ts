@@ -9,7 +9,8 @@ export enum EventList {
 	taskFailed = 'taskFailed',
 	taskAborted = 'taskAborted',
 	/* sse */
-	chunkGenerated = 'chunkGenerated'
+	chunkGenerated = 'chunkGenerated',
+	SBERT_INIT = 'SBERT_INIT'
 }
 
 /* 事件名到payload类型的映射 */
@@ -26,6 +27,7 @@ export interface Event_Payload {
 		taskId: string;
 		eventData: StreamingChunk;
 	};
+	[EventList.SBERT_INIT]: void;
 }
 
 /**

@@ -154,6 +154,7 @@ export const ResumeResult: React.FC<ResumeResultProps> = ({
 			</CardContent>
 		</>
 	);
+	console.log('🚀 ~ resultCardSection ~ actionType:', actionType);
 
 	const resultCardSection = () => {
 		if (!resultData || !actionType)
@@ -176,8 +177,6 @@ export const ResumeResult: React.FC<ResumeResultProps> = ({
 	const renderComponent = () => {
 		switch (hash) {
 			case '#next-action':
-			case '':
-			case '#':
 				return <PreflightBtns availableActions={availableActions} handleMatch={handleMatch} />;
 			case '#reasoning':
 				return reasonContentSection();

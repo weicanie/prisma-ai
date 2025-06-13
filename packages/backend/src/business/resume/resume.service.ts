@@ -4,10 +4,12 @@ import {
 	JobVo,
 	jsonMd_obj,
 	MatchJobDto,
+	PaginatedResumeMatchedResult,
 	PaginatedResumesResult,
 	ProjectVo,
 	ResumeMatchedDto,
 	resumeMatchedSchema,
+	ResumeMatchedVo,
 	ResumeStatus,
 	ResumeVo,
 	SkillVo,
@@ -54,8 +56,11 @@ export class ResumeService {
 		public chainService: ChainService,
 		public eventBusService: EventBusService,
 		public redisService: RedisService,
+		@Inject(forwardRef(() => ProjectService))
 		private readonly projectService: ProjectService,
+		@Inject(forwardRef(() => JobService))
 		private readonly jobService: JobService,
+		@Inject(forwardRef(() => SkillService))
 		private readonly skillService: SkillService,
 		@Inject(forwardRef(() => LLMSseService))
 		public LLMSseService: LLMSseService
@@ -194,6 +199,20 @@ export class ResumeService {
 
 		const newMatchedResume = new this.resumeMatchedModel(dataToSave);
 		await newMatchedResume.save();
+		/* 更新关联数据*/
+		await this.resumeModel.updateOne(
+			{ _id: new Types.ObjectId(resume.id) },
+			{
+				$set: {
+					status: ResumeStatus.matched,
+					resumeMatcheds: [...(resume.resumeMatcheds || []), newMatchedResume.id]
+				}
+			}
+		);
+		await this.jobModel.updateOne(
+			{ _id: new Types.ObjectId(job.id) },
+			{ $set: { resumeMatchedId: newMatchedResume.id } }
+		);
 	}
 
 	/**
@@ -247,6 +266,48 @@ export class ResumeService {
 
 		const promises = result.map(resume => this.findOne(resume._id.toString(), userInfo));
 		let data = await Promise.all(promises);
+		return {
+			data,
+			total,
+			page,
+			limit
+		};
+	}
+
+	/**
+	 * 分页查询用户的所有专用简历（ResumeMatched）
+	 * @param userInfo 用户信息
+	 * @param page 页码，默认为1
+	 * @param limit 每页数量，默认为10
+	 * @returns 返回分页后的专用简历列表
+	 */
+	async findAllResumeMatched(
+		userInfo: UserInfoFromToken,
+		page: number = 1,
+		limit: number = 10
+	): Promise<PaginatedResumeMatchedResult> {
+		const skip = (page - 1) * limit;
+		const query = { 'userInfo.userId': userInfo.userId };
+
+		const [result, total] = await Promise.all([
+			this.resumeMatchedModel.find(query).skip(skip).limit(limit).sort({ createdAt: -1 }).exec(),
+			this.resumeMatchedModel.countDocuments(query).exec()
+		]);
+
+		const data: ResumeMatchedVo[] = result.map(resumeMatched => {
+			const resumeMatchedObj = resumeMatched.toObject();
+			return {
+				id: resumeMatchedObj.id as string,
+				name: resumeMatchedObj.name,
+				status: resumeMatchedObj.status,
+				skill: resumeMatchedObj.skill as unknown as SkillVo,
+				projects: resumeMatchedObj.projects as unknown as ProjectVo[],
+				jobId: resumeMatchedObj.jobId.toString(),
+				createdAt: resumeMatchedObj.createdAt,
+				updatedAt: resumeMatchedObj.updatedAt
+			};
+		});
+
 		return {
 			data,
 			total,

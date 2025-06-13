@@ -39,6 +39,19 @@ docker compose -f compose.yaml up --build
 
 然后浏览器访问localhost即可使用!
 
+## 🤖本地模型配置
+
+```bash
+# 下载模型到本地
+git clone https://hf-mirror.com/moka-ai/m3e-base models/moka-ai/m3e-base
+# 配置python环境
+./python-setup.sh
+# 获取模型onnx文件
+./model-onnx.sh
+```
+
+然后就可以使用本项目的人岗匹配服务了！
+
 ## 一、prisma-ai 介绍
 
 一个实现`agent(代理) + mcp(模型上下文协议)`等 `llm(大语言模型)` 应用开发范式的平台，以及在此基础上实现的`llm`应用——**简历灵感菇**——帮助用户把简历变成offer。

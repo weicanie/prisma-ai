@@ -200,7 +200,6 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 		mergedData,
 		handleMerge
 	};
-	console.log('🚀 ~ resultCardProps.actionType:', resultCardProps.actionType);
 	const proejctResultCard = <ProejctPMResultCard {...resultCardProps} />;
 	const contentMap = {
 		lookup: <ProjectAnalysisResultCard {...resultCardProps} isDark={isDark} />,

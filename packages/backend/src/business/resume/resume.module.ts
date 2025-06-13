@@ -25,7 +25,7 @@ import { ResumeService } from './resume.service';
 			{ name: Job.name, schema: JobSchema }
 		]),
 		forwardRef(() => ProjectModule),
-		JobModule,
+		forwardRef(() => JobModule),
 		SkillModule,
 		ChainModule,
 		forwardRef(() => EventBusModule),

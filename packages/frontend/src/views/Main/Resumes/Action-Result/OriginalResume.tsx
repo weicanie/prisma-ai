@@ -94,8 +94,7 @@ export const OriginalResume: React.FC<OriginalResumeProps> = ({ resumeData, isDa
 									key={index}
 									projectData={project}
 									isDark={isDark}
-									projectId={project.id}
-									jump={false}
+									showAnalysis={false}
 								/>
 							</ClickCollapsible>
 						</Fragment>

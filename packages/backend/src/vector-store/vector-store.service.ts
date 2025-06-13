@@ -1,4 +1,3 @@
-import { HuggingFaceTransformersEmbeddings } from '@langchain/community/embeddings/huggingface_transformers';
 import { Document } from '@langchain/core/documents';
 import { Embeddings } from '@langchain/core/embeddings';
 import { OpenAIEmbeddings } from '@langchain/openai';
@@ -7,6 +6,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Pinecone, ServerlessSpecCloudEnum } from '@pinecone-database/pinecone';
 import * as fs from 'fs';
+import { NodejsM3eService } from './nodejs-m3e.service';
 /**pinecone云向量数据库的使用
  *  储存：带有向量和数据的record -> index（数据库,需要预先建立!需要VPN!）
  *  取用：index -> retriever -> record
@@ -29,33 +29,45 @@ interface RetriverConfig {
 @Injectable()
 export class VectorStoreService implements OnModuleInit {
 	private pinecone: Pinecone;
-	private localEmbeddings: HuggingFaceTransformersEmbeddings;
+
 	private logger = new Logger(VectorStoreService.name);
 
-	constructor(private configService: ConfigService) {
+	constructor(
+		private configService: ConfigService,
+		private nodejsM3eService: NodejsM3eService
+	) {
 		// 初始化 Pinecone 客户端
 		this.pinecone = new Pinecone({
 			apiKey: this.configService.get('PINECONE_API_KEY')!
 		});
 		this.logger.log('Pinecone 客户端初始化成功');
-
-		// 初始化本地 SBERT 嵌入模型
-		// moka-ai/m3e-base 是一个优秀的中英双语稠密检索模型
-		this.localEmbeddings = new HuggingFaceTransformersEmbeddings({
-			model: 'moka-ai/m3e-base'
-		});
-		this.logger.log(`本地 SBERT 嵌入模型${this.localEmbeddings.model}初始化成功`);
 	}
 
 	/**
 	 * 确保要用到的向量数据库索引存在, 不存在则创建
 	 */
 	async onModuleInit() {
-		const jobsIndexExists = await this.indexExists(PineconeIndex.JOBS);
-		if (!jobsIndexExists) {
-			console.log(`索引 '${PineconeIndex.JOBS}' 不存在，将自动创建...`);
-			// m3e-base 模型的维度是 768
-			await this.createEmptyIndex(PineconeIndex.JOBS, 768);
+		try {
+			this.logger.log('正在检查 Pinecone 连接...');
+			const jobsIndexExists = await this.indexExists(PineconeIndex.JOBS);
+			if (!jobsIndexExists) {
+				console.log(`索引 '${PineconeIndex.JOBS}' 不存在，将自动创建...`);
+				// m3e-base 模型的维度是 768
+				await this.createEmptyIndex(PineconeIndex.JOBS, 768);
+			}
+			this.logger.log('Pinecone 连接验证成功');
+		} catch (error) {
+			const errorMsg = `
+Pinecone 连接失败。可能的原因:
+1. 网络连接问题 - 请检查网络连接
+2. API密钥错误 - 请检查 PINECONE_API_KEY 环境变量
+3. 需要VPN - Pinecone 在某些地区可能需要VPN访问
+4. 服务器区域问题 - 当前配置为 ${serverlessConfig.region}
+
+错误详情: ${(error as Error).message}
+			`.trim();
+			this.logger.error(errorMsg);
+			throw new Error(errorMsg);
 		}
 	}
 
@@ -95,8 +107,20 @@ export class VectorStoreService implements OnModuleInit {
 			await pineconeStore.addDocuments(documents);
 			console.log(`成功添加 ${documents.length} 个文档到索引 ${indexName}`);
 		} catch (error) {
+			const errorMessage = (error as Error).message;
 			console.error(`向索引 ${indexAlias} 添加文档失败:`, error);
-			throw new Error(`添加文档失败: ${(error as Error).message}`);
+
+			if (errorMessage.includes('ENOTFOUND') || errorMessage.includes('ECONNREFUSED')) {
+				throw new Error(
+					`网络连接失败: 无法连接到 Pinecone 或 HuggingFace 服务器。请检查网络连接或VPN设置。`
+				);
+			} else if (errorMessage.includes('timeout')) {
+				throw new Error(`操作超时: 网络连接不稳定或文档过大，请重试或检查VPN连接。`);
+			} else if (errorMessage.includes('401') || errorMessage.includes('Unauthorized')) {
+				throw new Error(`认证失败: 请检查 PINECONE_API_KEY 或 HUGGINGFACE_API_KEY 是否正确配置。`);
+			}
+
+			throw new Error(`添加文档失败: ${errorMessage}`);
 		}
 	}
 
@@ -127,26 +151,41 @@ export class VectorStoreService implements OnModuleInit {
 	 * @returns {Promise<Document[]>} 包含岗位信息的文档列表
 	 */
 	async findSimilarJobs(resumeVector: number[], k: number): Promise<Document[]> {
-		const indexName = this.getIndexName(PineconeIndex.JOBS);
-		const index = this.pinecone.Index(indexName);
+		try {
+			const indexName = this.getIndexName(PineconeIndex.JOBS);
+			const index = this.pinecone.Index(indexName);
 
-		const queryResult = await index.query({
-			vector: resumeVector,
-			topK: k,
-			includeMetadata: true // 确保返回元数据，其中包含岗位信息
-		});
+			const queryResult = await index.query({
+				vector: resumeVector,
+				topK: k,
+				includeMetadata: true // 确保返回元数据，其中包含岗位信息
+			});
 
-		// 将查询结果转换为 LangChain 的 Document 格式
-		const documents =
-			queryResult.matches?.map(
-				match =>
-					new Document({
-						pageContent: match.metadata?.pageContent as string,
-						metadata: match.metadata || {}
-					})
-			) || [];
+			// 将查询结果转换为 LangChain 的 Document 格式
+			const documents =
+				queryResult.matches?.map(
+					match =>
+						new Document({
+							pageContent: match.metadata?.pageContent as string,
+							metadata: match.metadata || {}
+						})
+				) || [];
 
-		return documents;
+			return documents;
+		} catch (error) {
+			const errorMessage = (error as Error).message;
+			console.error('查找相似岗位失败:', error);
+
+			if (errorMessage.includes('ENOTFOUND') || errorMessage.includes('ECONNREFUSED')) {
+				throw new Error(
+					`网络连接失败: 无法连接到 Pinecone 服务器进行查询。请检查网络连接或VPN设置。`
+				);
+			} else if (errorMessage.includes('timeout')) {
+				throw new Error(`查询超时: 网络连接不稳定，请重试或检查VPN连接。`);
+			}
+
+			throw new Error(`查询向量数据库失败: ${errorMessage}`);
+		}
 	}
 
 	/**
@@ -155,17 +194,43 @@ export class VectorStoreService implements OnModuleInit {
 	 * @returns {Promise<boolean>} 是否存在的布尔值
 	 */
 	async indexExists(indexAlias: string): Promise<boolean> {
-		try {
-			const indexName = this.getIndexName(indexAlias);
-			const indexes = (await this.pinecone.listIndexes()).indexes;
-			if (!indexes || indexes.length === 0) {
-				return false;
+		let retryCount = 0;
+		const maxRetries = 3;
+
+		while (retryCount < maxRetries) {
+			try {
+				const indexName = this.getIndexName(indexAlias);
+				const indexes = (await this.pinecone.listIndexes()).indexes;
+				if (!indexes || indexes.length === 0) {
+					return false;
+				}
+				return indexes.some(index => index.name === indexName);
+			} catch (error) {
+				retryCount++;
+				const errorMessage = (error as Error).message;
+
+				if (retryCount >= maxRetries) {
+					console.error(`检查索引 ${indexAlias} 是否存在时出错 (最终失败):`, error);
+
+					// 提供详细的网络错误诊断
+					if (errorMessage.includes('ENOTFOUND') || errorMessage.includes('ECONNREFUSED')) {
+						throw new Error(`网络连接失败: 无法连接到 Pinecone 服务器。请检查网络连接或VPN设置。`);
+					} else if (errorMessage.includes('401') || errorMessage.includes('Unauthorized')) {
+						throw new Error(`认证失败: 请检查 PINECONE_API_KEY 是否正确配置。`);
+					} else if (errorMessage.includes('timeout')) {
+						throw new Error(`连接超时: 网络连接不稳定，请检查网络状况或尝试使用VPN。`);
+					}
+
+					throw error;
+				}
+
+				console.warn(`检查索引失败，正在重试 (${retryCount}/${maxRetries}):`, errorMessage);
+				// 指数退避重试
+				await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000));
 			}
-			return indexes.some(index => index.name === indexName);
-		} catch (error) {
-			console.error(`检查索引 ${indexAlias} 是否存在时出错:`, error);
-			return false;
 		}
+
+		return false;
 	}
 
 	/**
@@ -234,8 +299,8 @@ export class VectorStoreService implements OnModuleInit {
 	 * 获取本地嵌入模型实例
 	 * @returns {HuggingFaceTransformersEmbeddings} 本地 SBERT 模型实例
 	 */
-	getLocalEmbeddings(): HuggingFaceTransformersEmbeddings {
-		return this.localEmbeddings;
+	getLocalEmbeddings(): Embeddings {
+		return this.nodejsM3eService;
 	}
 
 	/**

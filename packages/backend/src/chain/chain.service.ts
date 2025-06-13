@@ -6,6 +6,7 @@ import type { ChatOpenAI } from '@langchain/openai';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+	hjmRerankSchema,
 	JobVo,
 	lookupResultSchema,
 	projectLookupedSchema,
@@ -16,7 +17,9 @@ import {
 	projectSchema,
 	ResumeMatchedDto,
 	resumeMatchedSchema,
-	ResumeVo
+	ResumeVo,
+	RoadFromDiffDto,
+	roadFromDiffSchema
 } from '@prism-ai/shared';
 import { BufferMemory } from 'langchain/memory';
 import * as path from 'path';
@@ -25,17 +28,6 @@ import { AgentService } from '../agent/agent.service';
 import { MCPClientService } from '../mcp-client/mcp-client.service';
 import { ModelService } from '../model/model.service';
 import { PromptService, role } from '../prompt/prompt.service';
-
-export const hjmRerankSchema = z.object({
-	ranked_jobs: z
-		.array(
-			z.object({
-				job_id: z.string().describe('岗位的唯一标识符'),
-				reason: z.string().describe('该岗位与简历匹配的具体原因')
-			})
-		)
-		.describe('按匹配度从高到低排序的岗位列表')
-});
 
 @Injectable()
 export class ChainService {
@@ -211,6 +203,43 @@ export class ChainService {
 	}
 
 	/**
+	 * 将query关键词扩展为关键词数组,用于爬取岗位信息时扩大搜索范围
+	 * @returns
+	 */
+	async queryExpandChain() {
+		const schema = z.array(z.string());
+		const llm = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+		const outputParser = StructuredOutputParser.fromZodSchema(schema);
+		const prompt = ChatPromptTemplate.fromMessages([
+			[
+				`${role.SYSTEM}`,
+				`
+				用户将给你一个岗位关键词，你需要返回尽可能多的能映射到现实世界存在的相关岗位的岗位关键词。
+				比如用户输入"前端"，你返回:
+				岗位类别相近词: 前端工程师、web前端工程师、前端开发、react工程师、vue工程师...
+				岗位领域相关词: web前端、小程序、低代码...
+				带状态的岗位关键词: 前端工程师(居家办公)/前端开发(远程)/web前端(转正实习)...
+				...
+
+				输出格式说明:{instructions}
+				注意：1、按和用户输入的岗位关键词的相关程度从高到低排序; 2、你必须使用中文输出。
+				`
+			],
+			[`${role.HUMAN}`, '{input}']
+		]);
+		const chain = RunnableSequence.from<{ input: string }, z.infer<typeof schema>>([
+			{
+				input: input => input.input,
+				instructions: () => outputParser.getFormatInstructions()
+			},
+			prompt,
+			llm,
+			outputParser
+		]);
+		return chain;
+	}
+
+	/**
 	 * 分析项目经验的问题和解决方案
 	 */
 	async lookupChain(stream = false) {
@@ -277,7 +306,7 @@ export class ChainService {
 
 		const prompt = await this.promptService.matchPrompt();
 
-		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
+		const llm = this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
 
 		const chain = await this.createChain<string, ResumeMatchedDto>(llm, prompt, schema);
 		const streamChain = await this.createStreamChain<string>(llm, prompt, schema);
@@ -288,14 +317,35 @@ export class ChainService {
 	}
 
 	/**
-	 * 创建人岗匹配的重排链
-	 * @description LLM接收简历和多个岗位，返回排序后的岗位列表和匹配原因
+	 * 对比简历A、B, B由A优化而来, 生成学习路线
+	 * @description 简历A + 简历B -> 学习路线
+	 */
+	async roadChain(stream = false) {
+		const schema = roadFromDiffSchema;
+
+		const prompt = await this.promptService.diffLearnPrompt();
+
+		const llm = this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
+
+		const chain = await this.createChain<string, RoadFromDiffDto>(llm, prompt, schema);
+		const streamChain = await this.createStreamChain<string>(llm, prompt, schema);
+		if (stream) {
+			return streamChain;
+		}
+		return chain;
+	}
+
+	/**
+	 * 创建人岗匹配的rerank链
+	 * @description LLM接收简历和多个岗位，返回rerank后的岗位列表和匹配原因
+	 * @param top_n 返回的岗位数量,默认5
 	 * @returns 返回一个可执行的链，输入为 { resume: ResumeVo, jobs: JobVo[] }
 	 */
-	async hjmRerankChain() {
+	async hjmRerankChain(top_n = 5) {
 		const schema = hjmRerankSchema;
 		const prompt = await this.promptService.hjmRerankPrompt();
 		const llm = this.modelService.getLLMDeepSeekRaw('deepseek-chat'); // 使用通用模型即可
+		const outputParser = StructuredOutputParser.fromZodSchema(schema);
 
 		const chain = RunnableSequence.from([
 			{
@@ -314,11 +364,15 @@ export class ChainService {
 						resume: resumeText,
 						jobs: jobsText
 					});
-				}
+				},
+				instructions: async () => {
+					return outputParser.getFormatInstructions();
+				},
+				top_n: () => top_n
 			},
 			prompt,
 			llm,
-			new StructuredOutputParser(schema)
+			outputParser
 		]);
 
 		return chain;

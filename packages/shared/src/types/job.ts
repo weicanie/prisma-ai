@@ -22,7 +22,6 @@ export interface CreateJobDto {
 	salary?: string; // 薪资范围
 	link?: string; // 职位链接
 	job_status?: JobOpenStatus; // 职位状态， "open", "closed"
-	status?: JobStatus; // 职位内部状态，"committed", "embedded", "matched" 未处理、已embedding、已被用户简历追踪
 }
 
 export type LLMJobDto = Pick<CreateJobDto, 'jobName' | 'companyName' | 'description'>;

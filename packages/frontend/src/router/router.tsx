@@ -6,8 +6,8 @@ const LoginRegist = lazy(() => import('../views/LoginRegist/LoginRegist'));
 const Main = lazy(() => import('../views/Main'));
 const Jobs = lazy(() => import('../views/Main/Jobs'));
 const JobRead = lazy(() => import('../views/Main/Jobs/JobRead'));
-const Knowledges = lazy(() => import('../views/Main/knowbase'));
-const KnowledgeRead = lazy(() => import('../views/Main/knowbase/KnowledgeRead'));
+const Knowledges = lazy(() => import('../views/Main/Knowbase'));
+const KnowledgeRead = lazy(() => import('../views/Main/Knowbase/KnowledgeRead'));
 const Projects = lazy(() => import('../views/Main/Projects'));
 const Resumes = lazy(() => import('../views/Main/Resumes'));
 const ResumeActions = lazy(() => import('../views/Main/Resumes/Action'));
@@ -97,14 +97,6 @@ export const routes = [
 						)
 					},
 					{
-						path: 'detail/:projectId',
-						element: (
-							<UpdateBreadRouter>
-								<Action></Action>
-							</UpdateBreadRouter>
-						)
-					},
-					{
 						path: 'action/:projectId',
 						element: (
 							<UpdateBreadRouter>
@@ -173,6 +165,14 @@ export const routes = [
 								<JobRead></JobRead>
 							</UpdateBreadRouter>
 						)
+					},
+					{
+						path: '/main/job/resumeMatched/:resumeMatchedId',
+						element: (
+							<UpdateBreadRouter>
+								<ResumeRead></ResumeRead>
+							</UpdateBreadRouter>
+						)
 					}
 				]
 			}, // 知识库
@@ -223,7 +223,15 @@ export const routes = [
 						path: 'road',
 						element: (
 							<UpdateBreadRouter>
-								<>学习路线</>
+								<>技术学习路线</>
+							</UpdateBreadRouter>
+						)
+					},
+					{
+						path: 'doit',
+						element: (
+							<UpdateBreadRouter>
+								<>项目亮点实现</>
 							</UpdateBreadRouter>
 						)
 					},
@@ -256,7 +264,6 @@ export const path_name: Record<string, string> = {
 	'/main/skills': '职业技能',
 	'/main/skills/detail': '职业技能-详情',
 	'/main/projects': '项目经验',
-	'/main/projects/detail': '项目经验-详情',
 	'/main/projects/action': '项目经验-AI优化',
 
 	'/main/resumes': '简历',
@@ -269,8 +276,8 @@ export const path_name: Record<string, string> = {
 	'/main/knowledge': '知识库',
 	'/main/knowledge/detail': '知识库-详情',
 
-	'/main/offer': '面向offer学习',
-	'/main/offer/road': '面向offer学习-学习路线',
+	'/main/offer/road': '面向offer学习-技术学习路线',
+	'/main/offer/doit': '面向offer学习-项目亮点实现',
 	'/main/offer/questions': '面向offer学习-简历延申八股',
 	'/main/offer/mock-interview': '面向offer学习-模拟面试'
 };
