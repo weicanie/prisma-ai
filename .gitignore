@@ -3,7 +3,8 @@ ai_prompts/
 **/*.prompts.md
 packages/backend/generated
 /docker-data
-*.log
+**/*.log
+/nginx/logs/*
 
 # Node.js
 /node_modules
@@ -18,6 +19,8 @@ yarn-error.log*
 
 # VSCode
 .vscode/
+
+
 
 # Python
 # Ignore virtual environments anywhere in the project
