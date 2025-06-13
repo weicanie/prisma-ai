@@ -20,6 +20,7 @@ export class PromptService {
 	private readonly lookupT: string;
 	private readonly matchT: string;
 	private readonly hjmRerankT: string;
+	private readonly hjmTransformT: string;
 	private readonly diffLearnT: string;
 
 	/**
@@ -51,6 +52,12 @@ export class PromptService {
 				encoding: 'utf-8'
 			}
 		);
+		const hjmTransformTStr = fs.readFileSync(
+			path.join(process.cwd(), 'ai_data/prompt/hjm_transform-T.md'),
+			{
+				encoding: 'utf-8'
+			}
+		);
 		const diffLearnTStr = fs.readFileSync(
 			path.join(process.cwd(), 'ai_data/prompt/diff_learn-T.md'),
 			{
@@ -63,6 +70,7 @@ export class PromptService {
 		this.mineT = mineTStr;
 		this.matchT = matchTStr;
 		this.hjmRerankT = hjmRerankTStr;
+		this.hjmTransformT = hjmTransformTStr;
 		this.diffLearnT = diffLearnTStr;
 		const mineFewShot = fs.readFileSync(
 			path.join(process.cwd(), 'ai_data/prompt/mine-fewshot.md'),
@@ -89,6 +97,7 @@ export class PromptService {
 		return stringT;
 	}
 	/**
+	 * 对项目经验进行亮点挖掘的prompt
 	 * 返回的prompt待填充的插槽：{instructions}、{instructions0}、{chat_history}、{input}
 	 *
 	 */
@@ -108,6 +117,7 @@ export class PromptService {
 	}
 
 	/**
+	 * 在项目经验的分析结果的基础上对项目经验进行优化的prompt
 	 * @return prompt：{instructions}、{instructions0}、{chat_history}、{input}
 	 *
 	 */
@@ -120,6 +130,7 @@ export class PromptService {
 		return prompt;
 	}
 	/**
+	 * 对项目经验进行分析的prompt
 	 * @return prompt：{instructions}、{instructions0}、{chat_history}、{input}
 	 *
 	 */
@@ -131,7 +142,10 @@ export class PromptService {
 		]);
 		return prompt;
 	}
-
+	/**
+	 * 将简历转化为岗位定制简历的prompt
+	 * @return prompt：{instructions}、{input}、{chat_history}
+	 */
 	async matchPrompt() {
 		const prompt = ChatPromptTemplate.fromMessages([
 			[`${role.SYSTEM}`, this.matchT],
@@ -141,6 +155,7 @@ export class PromptService {
 		return prompt;
 	}
 	/**
+	 * 对召回的岗位信息进行重排、分析的prompt
 	 * @return prompt：{instructions}、{top_n }、{input}、{chat_history}
 	 *
 	 */
@@ -152,8 +167,21 @@ export class PromptService {
 		]);
 		return prompt;
 	}
+	/**
+	 * 将简历转化为岗位描述的prompt
+	 * @return prompt：{instructions}、{input}、{chat_history}
+	 */
+	async hjmTransformPrompt() {
+		const prompt = ChatPromptTemplate.fromMessages([
+			[`${role.SYSTEM}`, this.hjmTransformT],
+			// [`${role.SYSTEM}`, `这是目前为止的聊天记录：{chat_history}`],
+			[`${role.HUMAN}`, '{input}']
+		]);
+		return prompt;
+	}
 
 	/**
+	 * 对简历原始版本、当前版本进行diff分析出学习路线的prompt
 	 * @return prompt：{instructions}、{input}、{chat_history}
 	 *
 	 */

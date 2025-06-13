@@ -71,6 +71,14 @@ var JobStatus = /* @__PURE__ */ ((JobStatus2) => {
   return JobStatus2;
 })(JobStatus || {});
 
+// src/types/job.schema.ts
+import { z as z2 } from "zod";
+var llmJobSchema = z2.object({
+  jobName: z2.string().describe("\u804C\u4F4D\u540D\u79F0"),
+  companyName: z2.string().describe("\u516C\u53F8\u540D\u79F0"),
+  description: z2.string().describe("\u804C\u4F4D\u63CF\u8FF0")
+});
+
 // src/types/knowBase.ts
 var type_content_Map = {
   userProjectDoc: "\u6211\u7684\u9879\u76EE\u6587\u6863",
@@ -99,52 +107,52 @@ var FileTypeEnum = /* @__PURE__ */ ((FileTypeEnum2) => {
 })(FileTypeEnum || {});
 
 // src/types/learn.schema.ts
-import { z as z2 } from "zod";
-var techItemSchema = z2.object({
-  name: z2.string().describe("\u6280\u672F\u540D\u79F0"),
-  desc: z2.string().describe("\u5B66\u4E60\u6216\u5B9E\u73B0\u8BE5\u6280\u672F\u7684\u7B80\u8981\u8BF4\u660E")
+import { z as z3 } from "zod";
+var techItemSchema = z3.object({
+  name: z3.string().describe("\u6280\u672F\u540D\u79F0"),
+  desc: z3.string().describe("\u5B66\u4E60\u6216\u5B9E\u73B0\u8BE5\u6280\u672F\u7684\u7B80\u8981\u8BF4\u660E")
 });
-var lightspotItemSchema = z2.object({
-  name: z2.string().describe("\u4EAE\u70B9\u540D\u79F0"),
-  desc: z2.string().describe("\u5B9E\u73B0\u8BE5\u4EAE\u70B9\u7684\u7B80\u8981\u8BF4\u660E")
+var lightspotItemSchema = z3.object({
+  name: z3.string().describe("\u4EAE\u70B9\u540D\u79F0"),
+  desc: z3.string().describe("\u5B9E\u73B0\u8BE5\u4EAE\u70B9\u7684\u7B80\u8981\u8BF4\u660E")
 });
-var skillRoadItemSchema = z2.object({
-  tech: z2.array(techItemSchema).describe("\u9700\u8981\u5B66\u4E60\u7684\u65B0\u6280\u672F\u5217\u8868")
+var skillRoadItemSchema = z3.object({
+  tech: z3.array(techItemSchema).describe("\u9700\u8981\u5B66\u4E60\u7684\u65B0\u6280\u672F\u5217\u8868")
 });
-var projectRoadItemSchema = z2.object({
-  name: z2.string().describe("\u9879\u76EE\u540D\u79F0"),
-  tech: z2.array(techItemSchema).describe("\u9879\u76EE\u4E2D\u9700\u8981\u5B66\u4E60\u7684\u65B0\u6280\u672F\u5217\u8868"),
-  lightspot: z2.array(lightspotItemSchema).describe("\u9879\u76EE\u4E2D\u9700\u8981\u5B9E\u73B0\u7684\u65B0\u4EAE\u70B9\u5217\u8868")
+var projectRoadItemSchema = z3.object({
+  name: z3.string().describe("\u9879\u76EE\u540D\u79F0"),
+  tech: z3.array(techItemSchema).describe("\u9879\u76EE\u4E2D\u9700\u8981\u5B66\u4E60\u7684\u65B0\u6280\u672F\u5217\u8868"),
+  lightspot: z3.array(lightspotItemSchema).describe("\u9879\u76EE\u4E2D\u9700\u8981\u5B9E\u73B0\u7684\u65B0\u4EAE\u70B9\u5217\u8868")
 });
-var roadFromDiffSchema = z2.object({
+var roadFromDiffSchema = z3.object({
   skill: skillRoadItemSchema.describe("\u4ECE\u804C\u4E1A\u6280\u80FD\u5BF9\u6BD4\u4E2D\u5F97\u51FA\u7684\u5B66\u4E60\u8DEF\u7EBF"),
-  project: z2.array(projectRoadItemSchema).describe("\u4ECE\u9879\u76EE\u7ECF\u9A8C\u5BF9\u6BD4\u4E2D\u5F97\u51FA\u7684\u5B66\u4E60\u8DEF\u7EBF")
+  project: z3.array(projectRoadItemSchema).describe("\u4ECE\u9879\u76EE\u7ECF\u9A8C\u5BF9\u6BD4\u4E2D\u5F97\u51FA\u7684\u5B66\u4E60\u8DEF\u7EBF")
 });
 
 // src/types/login_regist.schema.ts
-import { z as z3 } from "zod";
-var loginformSchema = z3.object({
-  username: z3.string().min(2, {
+import { z as z4 } from "zod";
+var loginformSchema = z4.object({
+  username: z4.string().min(2, {
     message: "\u7528\u6237\u540D\u81F3\u5C11\u9700\u89812\u4E2A\u5B57\u7B26"
   }),
-  password: z3.string().min(6, {
+  password: z4.string().min(6, {
     message: "\u5BC6\u7801\u81F3\u5C11\u9700\u89816\u4E2A\u5B57\u7B26"
   })
 });
-var registformSchema = z3.object({
-  username: z3.string().min(2, {
+var registformSchema = z4.object({
+  username: z4.string().min(2, {
     message: "\u7528\u6237\u540D\u81F3\u5C11\u9700\u89812\u4E2A\u5B57\u7B26"
   }),
-  password: z3.string().min(6, {
+  password: z4.string().min(6, {
     message: "\u5BC6\u7801\u81F3\u5C11\u9700\u89816\u4E2A\u5B57\u7B26"
   }),
-  confirmPassword: z3.string().min(6, {
+  confirmPassword: z4.string().min(6, {
     message: "\u8BF7\u518D\u6B21\u8F93\u5165\u5BC6\u7801"
   }),
-  email: z3.string().email({
+  email: z4.string().email({
     message: "\u8BF7\u8F93\u5165\u6B63\u786E\u7684\u90AE\u7BB1\u5730\u5740"
   }),
-  captcha: z3.string().min(6, {
+  captcha: z4.string().min(6, {
     message: "\u8BF7\u8F93\u5165\u6B63\u786E\u7684\u9A8C\u8BC1\u7801"
   })
 });
@@ -163,107 +171,107 @@ var ProjectStatus = /* @__PURE__ */ ((ProjectStatus2) => {
 })(ProjectStatus || {});
 
 // src/types/project.schema.ts
-import { z as z4 } from "zod";
-var infoSchema = z4.object({
-  name: z4.string().min(2).max(100).describe("\u9879\u76EE\u540D\u79F0"),
-  desc: z4.object({
-    role: z4.string().describe("\u7528\u6237\u5728\u9879\u76EE\u4E2D\u7684\u89D2\u8272\u548C\u804C\u8D23").optional().default(""),
-    contribute: z4.string().describe("\u7528\u6237\u7684\u6838\u5FC3\u8D21\u732E\u548C\u53C2\u4E0E\u7A0B\u5EA6").optional().default(""),
-    bgAndTarget: z4.string().describe("\u9879\u76EE\u7684\u80CC\u666F\u548C\u76EE\u7684").optional().default("")
+import { z as z5 } from "zod";
+var infoSchema = z5.object({
+  name: z5.string().min(2).max(100).describe("\u9879\u76EE\u540D\u79F0"),
+  desc: z5.object({
+    role: z5.string().describe("\u7528\u6237\u5728\u9879\u76EE\u4E2D\u7684\u89D2\u8272\u548C\u804C\u8D23").optional().default(""),
+    contribute: z5.string().describe("\u7528\u6237\u7684\u6838\u5FC3\u8D21\u732E\u548C\u53C2\u4E0E\u7A0B\u5EA6").optional().default(""),
+    bgAndTarget: z5.string().describe("\u9879\u76EE\u7684\u80CC\u666F\u548C\u76EE\u7684").optional().default("")
   }),
-  techStack: z4.array(z4.string()).describe("\u9879\u76EE\u7684\u6280\u672F\u6808").default([])
+  techStack: z5.array(z5.string()).describe("\u9879\u76EE\u7684\u6280\u672F\u6808").default([])
 }).describe("\u9879\u76EE\u4FE1\u606F\u7684\u7ED3\u6784\u5316\u63CF\u8FF0");
 function getLightspotSchema(item) {
-  return z4.object({
-    team: z4.array(item).describe("\u56E2\u961F\u8D21\u732E\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
-    skill: z4.array(item).describe("\u6280\u672F\u4EAE\u70B9/\u96BE\u70B9\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
-    user: z4.array(item).describe("\u7528\u6237\u4F53\u9A8C/\u4E1A\u52A1\u4EF7\u503C\u65B9\u9762\u7684\u4EAE\u70B9").default([])
+  return z5.object({
+    team: z5.array(item).describe("\u56E2\u961F\u8D21\u732E\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
+    skill: z5.array(item).describe("\u6280\u672F\u4EAE\u70B9/\u96BE\u70B9\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
+    user: z5.array(item).describe("\u7528\u6237\u4F53\u9A8C/\u4E1A\u52A1\u4EF7\u503C\u65B9\u9762\u7684\u4EAE\u70B9").default([])
   }).describe("\u9879\u76EE\u4EAE\u70B9\u7684\u7ED3\u6784\u5316\u63CF\u8FF0");
 }
-var projectSchema = z4.object({
+var projectSchema = z5.object({
   info: infoSchema,
-  lightspot: getLightspotSchema(z4.string())
+  lightspot: getLightspotSchema(z5.string())
 });
-var projectPolishedSchema = z4.object({
+var projectPolishedSchema = z5.object({
   info: infoSchema,
   // polishedInfo: infoSchema.optional(),
-  lightspot: z4.object({
-    team: z4.array(
-      z4.object({
-        content: z4.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
-        advice: z4.string().describe("\u4EAE\u70B9\u6539\u8FDB\u5EFA\u8BAE").default("NONE")
+  lightspot: z5.object({
+    team: z5.array(
+      z5.object({
+        content: z5.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
+        advice: z5.string().describe("\u4EAE\u70B9\u6539\u8FDB\u5EFA\u8BAE").default("NONE")
       })
     ).describe("\u56E2\u961F\u8D21\u732E\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
-    skill: z4.array(
-      z4.object({
-        content: z4.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
-        advice: z4.string().describe("\u4EAE\u70B9\u6539\u8FDB\u5EFA\u8BAE").default("NONE")
+    skill: z5.array(
+      z5.object({
+        content: z5.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
+        advice: z5.string().describe("\u4EAE\u70B9\u6539\u8FDB\u5EFA\u8BAE").default("NONE")
       })
     ).describe("\u6280\u672F\u4EAE\u70B9/\u96BE\u70B9\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
-    user: z4.array(
-      z4.object({
-        content: z4.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
-        advice: z4.string().describe("\u4EAE\u70B9\u6539\u8FDB\u5EFA\u8BAE").default("NONE")
+    user: z5.array(
+      z5.object({
+        content: z5.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
+        advice: z5.string().describe("\u4EAE\u70B9\u6539\u8FDB\u5EFA\u8BAE").default("NONE")
       })
     ).describe("\u7528\u6237\u4F53\u9A8C/\u4E1A\u52A1\u4EF7\u503C\u65B9\u9762\u7684\u4EAE\u70B9").default([]),
-    delete: z4.array(
-      z4.object({
-        content: z4.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
-        reason: z4.string().describe("\u4EAE\u70B9\u5220\u9664\u539F\u56E0").default("NONE")
+    delete: z5.array(
+      z5.object({
+        content: z5.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
+        reason: z5.string().describe("\u4EAE\u70B9\u5220\u9664\u539F\u56E0").default("NONE")
       })
     ).describe("\u5220\u9664\u7684\u4EAE\u70B9").default([])
   }).describe("\u9879\u76EE\u4EAE\u70B9\u7684\u7ED3\u6784\u5316\u63CF\u8FF0")
 });
-var lightspotAddedSchema = z4.object({
-  content: z4.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
-  reason: z4.string().describe("\u4EAE\u70B9\u6DFB\u52A0\u539F\u56E0").default("NONE"),
-  tech: z4.array(z4.string()).describe("\u6D89\u53CA\u6280\u672F").default([])
+var lightspotAddedSchema = z5.object({
+  content: z5.string().describe("\u4EAE\u70B9\u5185\u5BB9"),
+  reason: z5.string().describe("\u4EAE\u70B9\u6DFB\u52A0\u539F\u56E0").default("NONE"),
+  tech: z5.array(z5.string()).describe("\u6D89\u53CA\u6280\u672F").default([])
 });
-var projectMinedSchema = z4.object({
+var projectMinedSchema = z5.object({
   info: infoSchema,
-  lightspot: getLightspotSchema(z4.string()),
+  lightspot: getLightspotSchema(z5.string()),
   lightspotAdded: getLightspotSchema(lightspotAddedSchema)
 });
-var lookupResultSchema = z4.object({
-  problem: z4.array(
-    z4.object({
-      name: z4.string().describe("\u95EE\u9898\u540D\u79F0"),
-      desc: z4.string().describe("\u95EE\u9898\u63CF\u8FF0")
+var lookupResultSchema = z5.object({
+  problem: z5.array(
+    z5.object({
+      name: z5.string().describe("\u95EE\u9898\u540D\u79F0"),
+      desc: z5.string().describe("\u95EE\u9898\u63CF\u8FF0")
     })
   ).describe("\u5B58\u5728\u7684\u95EE\u9898").default([]),
-  solution: z4.array(
-    z4.object({
-      name: z4.string().describe("\u89E3\u51B3\u65B9\u6848\u540D\u79F0"),
-      desc: z4.string().describe("\u89E3\u51B3\u65B9\u6848\u63CF\u8FF0")
+  solution: z5.array(
+    z5.object({
+      name: z5.string().describe("\u89E3\u51B3\u65B9\u6848\u540D\u79F0"),
+      desc: z5.string().describe("\u89E3\u51B3\u65B9\u6848\u63CF\u8FF0")
     })
   ).describe("\u89E3\u51B3\u65B9\u6848").default([]),
-  score: z4.number().describe("\u9879\u76EE\u63CF\u8FF0\u8BC4\u5206, 0-100\u5206").default(0)
+  score: z5.number().describe("\u9879\u76EE\u63CF\u8FF0\u8BC4\u5206, 0-100\u5206").default(0)
 });
-var projectLookupedSchema = z4.object({
+var projectLookupedSchema = z5.object({
   info: infoSchema,
-  lightspot: getLightspotSchema(z4.string()),
+  lightspot: getLightspotSchema(z5.string()),
   lookupResult: lookupResultSchema
 });
 
 // src/types/project.schema-form.ts
-import { z as z5 } from "zod";
-var infoSchemaForm = z5.object({
-  name: z5.string().min(2).max(100).describe("\u9879\u76EE\u540D\u79F0"),
-  desc: z5.object({
-    role: z5.string().describe("\u7528\u6237\u5728\u9879\u76EE\u4E2D\u7684\u89D2\u8272\u548C\u804C\u8D23"),
-    contribute: z5.string().describe("\u7528\u6237\u7684\u6838\u5FC3\u8D21\u732E\u548C\u53C2\u4E0E\u7A0B\u5EA6"),
-    bgAndTarget: z5.string().describe("\u9879\u76EE\u7684\u80CC\u666F\u548C\u76EE\u7684")
+import { z as z6 } from "zod";
+var infoSchemaForm = z6.object({
+  name: z6.string().min(2).max(100).describe("\u9879\u76EE\u540D\u79F0"),
+  desc: z6.object({
+    role: z6.string().describe("\u7528\u6237\u5728\u9879\u76EE\u4E2D\u7684\u89D2\u8272\u548C\u804C\u8D23"),
+    contribute: z6.string().describe("\u7528\u6237\u7684\u6838\u5FC3\u8D21\u732E\u548C\u53C2\u4E0E\u7A0B\u5EA6"),
+    bgAndTarget: z6.string().describe("\u9879\u76EE\u7684\u80CC\u666F\u548C\u76EE\u7684")
   }),
-  techStack: z5.array(z5.string()).describe("\u9879\u76EE\u7684\u6280\u672F\u6808")
+  techStack: z6.array(z6.string()).describe("\u9879\u76EE\u7684\u6280\u672F\u6808")
 }).describe("\u9879\u76EE\u4FE1\u606F\u7684\u7ED3\u6784\u5316\u63CF\u8FF0");
-function getLightspotSchemaForm(item = z5.string()) {
-  return z5.object({
-    team: z5.array(item).describe("\u56E2\u961F\u8D21\u732E\u65B9\u9762\u7684\u4EAE\u70B9"),
-    skill: z5.array(item).describe("\u6280\u672F\u4EAE\u70B9/\u96BE\u70B9\u65B9\u9762\u7684\u4EAE\u70B9"),
-    user: z5.array(item).describe("\u7528\u6237\u4F53\u9A8C/\u4E1A\u52A1\u4EF7\u503C\u65B9\u9762\u7684\u4EAE\u70B9")
+function getLightspotSchemaForm(item = z6.string()) {
+  return z6.object({
+    team: z6.array(item).describe("\u56E2\u961F\u8D21\u732E\u65B9\u9762\u7684\u4EAE\u70B9"),
+    skill: z6.array(item).describe("\u6280\u672F\u4EAE\u70B9/\u96BE\u70B9\u65B9\u9762\u7684\u4EAE\u70B9"),
+    user: z6.array(item).describe("\u7528\u6237\u4F53\u9A8C/\u4E1A\u52A1\u4EF7\u503C\u65B9\u9762\u7684\u4EAE\u70B9")
   }).describe("\u9879\u76EE\u4EAE\u70B9\u7684\u7ED3\u6784\u5316\u63CF\u8FF0");
 }
-var projectSchemaForm = z5.object({
+var projectSchemaForm = z6.object({
   info: infoSchemaForm,
   lightspot: getLightspotSchemaForm()
 });
@@ -276,23 +284,23 @@ var ResumeStatus = /* @__PURE__ */ ((ResumeStatus2) => {
 })(ResumeStatus || {});
 
 // src/types/resume.schema.ts
-import { z as z7 } from "zod";
+import { z as z8 } from "zod";
 
 // src/types/skill.schema.ts
-import { z as z6 } from "zod";
-var skillItemSchema = z6.object({
-  type: z6.string().default(""),
-  content: z6.array(z6.string()).default([])
+import { z as z7 } from "zod";
+var skillItemSchema = z7.object({
+  type: z7.string().default(""),
+  content: z7.array(z7.string()).default([])
 });
-var skillSchema = z6.object({
-  content: z6.array(skillItemSchema)
+var skillSchema = z7.object({
+  content: z7.array(skillItemSchema)
 });
 
 // src/types/resume.schema.ts
-var resumeMatchedSchema = z7.object({
-  name: z7.string().describe("\u7B80\u5386\u540D\u79F0"),
+var resumeMatchedSchema = z8.object({
+  name: z8.string().describe("\u7B80\u5386\u540D\u79F0"),
   skill: skillSchema.describe("\u4E13\u4E1A\u6280\u80FD\u6E05\u5355"),
-  projects: z7.array(projectSchema).describe("\u9879\u76EE\u7ECF\u9A8C\u5217\u8868")
+  projects: z8.array(projectSchema).describe("\u9879\u76EE\u7ECF\u9A8C\u5217\u8868")
 });
 
 // src/types/sse.ts
@@ -500,6 +508,7 @@ export {
   getLightspotSchema,
   hjmRerankSchema,
   jsonMd_obj,
+  llmJobSchema,
   loginformSchema,
   lookupResultSchema,
   markdownToProjectSchema,

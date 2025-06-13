@@ -6,7 +6,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Pinecone, ServerlessSpecCloudEnum } from '@pinecone-database/pinecone';
 import * as fs from 'fs';
-import { NodejsM3eService } from './nodejs-m3e.service';
+import { EmbeddingModelService } from './embedding-model.service';
 /**pinecone云向量数据库的使用
  *  储存：带有向量和数据的record -> index（数据库,需要预先建立!需要VPN!）
  *  取用：index -> retriever -> record
@@ -34,7 +34,7 @@ export class VectorStoreService implements OnModuleInit {
 
 	constructor(
 		private configService: ConfigService,
-		private nodejsM3eService: NodejsM3eService
+		private embeddingModelService: EmbeddingModelService
 	) {
 		// 初始化 Pinecone 客户端
 		this.pinecone = new Pinecone({
@@ -300,7 +300,7 @@ Pinecone 连接失败。可能的原因:
 	 * @returns {HuggingFaceTransformersEmbeddings} 本地 SBERT 模型实例
 	 */
 	getLocalEmbeddings(): Embeddings {
-		return this.nodejsM3eService;
+		return this.embeddingModelService;
 	}
 
 	/**

@@ -1,6 +1,6 @@
 import { Document } from '@langchain/core/documents';
 import { Injectable } from '@nestjs/common';
-import { JobStatus, JobVo, ResumeVo, UserInfoFromToken } from '@prism-ai/shared';
+import { JobStatus, JobVo, LLMJobDto, ResumeVo, UserInfoFromToken } from '@prism-ai/shared';
 import { JobService } from '../business/job/job.service';
 import { ResumeService } from '../business/resume/resume.service';
 import { ChainService } from '../chain/chain.service';
@@ -96,7 +96,7 @@ export class HjmService {
 		const resume = await this.resumeService.findOne(resumeId, userInfo);
 
 		// 2. 将简历内容转换为文本并生成向量 (召回)
-		const resumeText = this.formatResumeToText(resume);
+		const resumeText = await this.formatResumeToText(resume);
 		let resumeVector: number[];
 		try {
 			resumeVector = await this.vectorStoreService.getLocalEmbeddings().embedQuery(resumeText);
@@ -148,18 +148,10 @@ export class HjmService {
 	 * @param resume - 简历VO对象
 	 * @returns {string} - 用于向量化的文本
 	 */
-	private formatResumeToText(resume: ResumeVo): string {
-		const skills = resume.skill.content
-			.map(s => `${s.type || '技能'}: ${s.content?.join(', ')}`)
-			.join('; ');
-
-		const projects = resume.projects
-			.map(
-				p =>
-					`项目名: ${p.info.name}. 描述: ${p.info.desc?.role || ''} ${p.info.desc?.contribute || ''}. 技术栈: ${p.info.techStack.join(', ')}. 技术亮点: ${p.lightspot.skill.join(', ')}.`
-			)
-			.join('; ');
-
-		return `硬实力技能: ${skills}. 项目经验和软实力: ${projects}`;
+	private async formatResumeToText(resume: ResumeVo): Promise<string> {
+		const toTextChain = await this.chainService.hjmTransformChain();
+		const result: LLMJobDto = await toTextChain.invoke(JSON.stringify(resume));
+		const text = `职位: ${result.jobName}, 公司: ${result.companyName}. 职位要求: ${result.description}`;
+		return text;
 	}
 }

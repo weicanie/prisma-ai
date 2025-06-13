@@ -8,6 +8,8 @@ import { ConfigService } from '@nestjs/config';
 import {
 	hjmRerankSchema,
 	JobVo,
+	LLMJobDto,
+	llmJobSchema,
 	lookupResultSchema,
 	projectLookupedSchema,
 	ProjectMinedDto,
@@ -375,6 +377,23 @@ export class ChainService {
 			outputParser
 		]);
 
+		return chain;
+	}
+
+	/**
+	 * 将简历转化为岗位描述
+	 * @description 简历 -> 岗位描述
+	 */
+	async hjmTransformChain(stream = false) {
+		const schema = llmJobSchema;
+		const prompt = await this.promptService.hjmTransformPrompt();
+		const llm = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+
+		const chain = await this.createChain<string, LLMJobDto>(llm, prompt, schema);
+		const streamChain = await this.createStreamChain<string>(llm, prompt, schema);
+		if (stream) {
+			return streamChain;
+		}
 		return chain;
 	}
 

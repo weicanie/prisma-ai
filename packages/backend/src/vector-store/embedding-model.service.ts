@@ -3,11 +3,9 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import * as path from 'path';
 
 /**
- * @class NodejsM3eService
+ * @class EmbeddingModelService
  * @description
- * 这是一个集成的服务类，负责管理本地M3E嵌入模型的生命周期和使用。
- * 它作为一个 NestJS 的可注入服务 (Provider)，同时直接继承了 LangChain 的 `Embeddings` 类。
- * 这样的设计使得该服务可以直接被 LangChain 的相关模块（如 VectorStore）使用，无需任何适配器。
+ * 负责集成本地M3E等嵌入模型。
  *
  * 主要职责:
  * 1. 在模块初始化时（`onModuleInit`），异步加载和初始化本地的 ONNX 模型。
@@ -15,15 +13,14 @@ import * as path from 'path';
  * 3. 封装了模型加载的复杂性，包括处理路径问题和确保模型只被加载一次（单例模式）。
  */
 @Injectable()
-export class NodejsM3eService extends Embeddings implements OnModuleInit {
-	private readonly logger = new Logger(NodejsM3eService.name);
+export class EmbeddingModelService extends Embeddings implements OnModuleInit {
+	private readonly logger = new Logger(EmbeddingModelService.name);
 	private embeddingPipeline: any = null; // 用于存储已初始化的模型管道
 
 	// 本地模型的标识符，对应 `models` 文件夹下的路径
 	private readonly modelName = 'moka-ai/m3e-base';
 
 	constructor() {
-		// 调用父类（Embeddings）的构造函数
 		super({});
 	}
 
@@ -88,20 +85,19 @@ export class NodejsM3eService extends Embeddings implements OnModuleInit {
 			normalize: true
 		});
 		// .tolist() 方法将 Tensor 转换为标准的 JS 数组
-		return result.tolist();
+		return result.tolist()[0];
 	}
 }
 
 /**
  * @class EmbeddingPipeline
  * @description
- * 一个内部辅助类，使用单例模式来确保模型在整个应用生命周期中只被加载一次。
- * 这对于内存和性能至关重要，因为加载模型是一个昂贵的操作。
+ * 使用单例模式来确保模型在整个应用生命周期中只被加载一次。
  */
 class EmbeddingPipeline {
 	private static instance: any; // 存储管道的单例实例
 	private static readonly task = 'feature-extraction' as const; // 定义任务类型
-
+	private static readonly logger = new Logger(EmbeddingPipeline.name);
 	/**
 	 * @description
 	 * 获取模型管道的单例实例。如果实例不存在，则创建它。
@@ -115,17 +111,16 @@ class EmbeddingPipeline {
 			// 计算 'models' 文件夹的绝对路径
 			let modelsPath = path.join(__dirname, '..', '..', '..', '..', 'models');
 
-			// 兼容 Windows 路径：将反斜杠（\）替换为正斜杠（/）
+			// 适配库内部env路径：将反斜杠（\）替换为正斜杠（/）
 			if (process.platform === 'win32') {
 				modelsPath = modelsPath.replace(/\\/g, '/');
 			}
-
-			// 直接在库的配置对象上设置参数，这是最可靠的方式
+			//环境配置
 			transformerEnv.localModelPath = modelsPath; // 指定本地模型的根目录
 			transformerEnv.allowRemoteModels = false; // 禁止从远程下载模型
 			transformerEnv.allowLocalModels = true; // 允许加载本地模型
 
-			console.log(`[EmbeddingPipeline] 已设置本地模型路径: ${modelsPath}`);
+			this.logger.log(`[EmbeddingPipeline] 已设置本地模型路径: ${modelsPath}`);
 
 			// 创建管道实例
 			// `quantized: false` 确保它加载我们转换的 `model.onnx` 而不是 `model_quantized.onnx`

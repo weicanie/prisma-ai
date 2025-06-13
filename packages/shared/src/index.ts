@@ -1,6 +1,7 @@
 export * from './constant/error';
 export * from './types/hjm.schema';
 export * from './types/job';
+export * from './types/job.schema';
 export * from './types/knowBase';
 export * from './types/learn';
 export * from './types/learn.schema';

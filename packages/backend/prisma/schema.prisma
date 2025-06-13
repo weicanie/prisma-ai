@@ -27,4 +27,21 @@ model user {
   create_at DateTime? @default(now()) @db.Timestamp(0)
   update_at DateTime? @default(now()) @db.Timestamp(0)
   email     String    @db.VarChar(100)
+  article   article[]
+}
+
+//面试题
+model article {
+  id        Int       @id @default(autoincrement())
+  user_id   Int
+  create_at DateTime? @default(now()) @db.Timestamp(0)
+  update_at DateTime? @default(now()) @db.Timestamp(0)
+  title     String    @db.VarChar(255)
+  content   String    @db.LongText
+  gist      String    @db.LongText
+  type      String    @db.VarChar(255)
+  hard      Int
+  user      user      @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "article_ibfk_1")
+
+  @@index([user_id], map: "user_id")
 }
