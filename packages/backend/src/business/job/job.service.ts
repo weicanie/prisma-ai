@@ -52,9 +52,7 @@ export class JobService {
 	}
 
 	async findOne(id: string, userInfoToken: UserInfoFromToken): Promise<JobVo> {
-		const job = await this.jobModel
-			.findOne({ _id: id, 'userInfo.userId': userInfoToken.userId })
-			.exec();
+		const job = await this.jobModel.findOne({ _id: id }).exec();
 		if (!job) {
 			throw new NotFoundException(`Job with ID "${id}" not found or access denied`);
 		}

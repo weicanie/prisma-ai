@@ -82,9 +82,6 @@ export class TaskQueueService {
 	public readonly TASK_TTL = 24 * 60 * 60;
 
 	constructor(private readonly redisService: RedisService) {
-		// 启动时恢复队列状态
-		this.initialize();
-
 		// 注册默认任务处理器
 		this.registerTaskHandler('default', async task => {
 			this.logger.log(`对${task.type}任务${task.id}执行默认任务处理器`);
@@ -96,7 +93,7 @@ export class TaskQueueService {
 	/**
 	 * 服务初始化，从redis恢复队列状态
 	 */
-	private async initialize() {
+	async initialize() {
 		try {
 			// 从redis中获得所有任务
 			const queueKey = `${this.PREFIX.QUEUE}main`;

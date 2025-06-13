@@ -17,6 +17,16 @@ pnpm install
 ```
 
 然后打开packages/backend, 配置.env、.env.development对应的环境变量。
+然后配置人岗匹配用到的模型：
+
+```bash
+# 下载模型到本地
+git clone https://hf-mirror.com/moka-ai/m3e-base models/moka-ai/m3e-base
+# 配置python环境
+./python-setup.sh
+# 获取模型onnx文件
+./model-onnx.sh
+```
 
 ```bash
 # 启动项目,在仓库根目录执行
@@ -31,17 +41,7 @@ git clone https://github.com/weicanie/prisma-ai.git
 ```
 
 然后打开packages/backend, 配置.env、.env.production对应的环境变量。
-
-```bash
-# 构建服务,在仓库根目录执行
-docker compose -f compose.yaml up --build
-```
-
-然后浏览器访问localhost即可使用!
-
-注意：你需要先将本地模型配置完毕,以在容器中使用模型
-
-## 🤖本地模型配置
+然后配置人岗匹配用到的模型：
 
 ```bash
 # 下载模型到本地
@@ -52,7 +52,14 @@ git clone https://hf-mirror.com/moka-ai/m3e-base models/moka-ai/m3e-base
 ./model-onnx.sh
 ```
 
-然后就可以使用本项目的人岗匹配服务了！
+注意：你需要先将本地模型配置完毕,以在容器中使用模型
+
+```bash
+# 构建服务,在仓库根目录执行
+docker compose -f compose.yaml up --build
+```
+
+然后浏览器访问localhost即可使用!
 
 ## 一、prisma-ai 介绍
 
@@ -153,8 +160,8 @@ git clone https://hf-mirror.com/moka-ai/m3e-base models/moka-ai/m3e-base
 
 ## 三、技术价值
 
-| 领域         | 成果                                                                                                                                                                                      |
-| :----------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **AI 范式**  | ▶️ 实现 **RAG 工业化流程**：Pinecone + OpenAI Embedding + LangChain ▶️ 提供 **Agent+MCP 融合架构**：扩展 LangChain 支持 MCP 协议，开发 mcp-client 实现跨环境工具调用                      |
-| **工程架构** | ▶️ 前后端分离：React（前端） + Nest（后端） ▶️ 高可用设计：任务队列 + Redis 缓存 + 熔断限流 ▶️ **SSE 流式响应 + 异常恢复**：解耦 HTTP 连接与会话状态，支持异常恢复                        |
-| **开发范式** | ▶️ **Monorepo 管理**：pnpm + lerna + tsup 构建共享库 ▶️ **统一类型生态**：TS + Zod Schema → DTO/VO 全链路类型安全 ▶️ **双数据库方案**：MySQL（关系型）+ MongoDB（文档型）精准匹配业务场景 |
+| 领域         | 成果                                                                                                                                                                                                   |
+| :----------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **AI应用**   | ▶️ 提供 **Agent+MCP 融合架构**：扩展 LangChain 支持 MCP 协议，开发 mcp-client 实现跨环境工具调用▶️ 实现 **RAG 工业化流程**：Pinecone + OpenAI Embedding + LangChain▶️SBERT+llm实现高效高质量的人岗匹配 |
+| **工程架构** | ▶️ 前后端分离：React（前端） + Nest（后端）▶️ **SSE 流式响应 + 异常恢复**：解耦 HTTP 连接与会话状态，支持异常恢复▶️完全支持docker部署                                                                  |
+| **开发范式** | ▶️ **Monorepo 管理**：pnpm + lerna + tsup 构建共享库 ▶️ **统一类型生态**：TS + Zod Schema → DTO/VO 全链路类型安全 ▶️ **双数据库方案**：MySQL（关系型）+ MongoDB（文档型）精准匹配业务场景              |

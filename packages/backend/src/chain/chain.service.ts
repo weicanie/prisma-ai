@@ -352,19 +352,9 @@ export class ChainService {
 		const chain = RunnableSequence.from([
 			{
 				input: (input: { resume: ResumeVo; jobs: JobVo[] }) => {
-					// 将输入对象转换为符合prompt格式的字符串
-					const resumeText = `技能: ${input.resume.skill.content
-						.map(s => s.content?.join(','))
-						.join('; ')}. 项目经验: ${input.resume.projects
-						.map(p => `${p.info.name} - ${p.lightspot.skill.join(',')}`)
-						.join('; ')}`;
-					const jobsText = input.jobs.map(j => ({
-						id: j.id,
-						description: j.description
-					}));
 					return JSON.stringify({
-						resume: resumeText,
-						jobs: jobsText
+						用户简历: input.resume,
+						岗位列表: input.jobs
 					});
 				},
 				instructions: async () => {
@@ -387,7 +377,7 @@ export class ChainService {
 	async hjmTransformChain(stream = false) {
 		const schema = llmJobSchema;
 		const prompt = await this.promptService.hjmTransformPrompt();
-		const llm = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+		const llm = this.modelService.getLLMDeepSeekRaw('deepseek-chat'); // 使用通用模型即可
 
 		const chain = await this.createChain<string, LLMJobDto>(llm, prompt, schema);
 		const streamChain = await this.createStreamChain<string>(llm, prompt, schema);

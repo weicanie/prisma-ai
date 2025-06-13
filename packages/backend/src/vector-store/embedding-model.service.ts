@@ -16,6 +16,7 @@ import * as path from 'path';
 export class EmbeddingModelService extends Embeddings implements OnModuleInit {
 	private readonly logger = new Logger(EmbeddingModelService.name);
 	private embeddingPipeline: any = null; // 用于存储已初始化的模型管道
+	public dimensions: number | undefined;
 
 	// 本地模型的标识符，对应 `models` 文件夹下的路径
 	private readonly modelName = 'moka-ai/m3e-base';
@@ -38,7 +39,8 @@ export class EmbeddingModelService extends Embeddings implements OnModuleInit {
 
 			// 执行一次测试嵌入，以验证模型是否正常工作
 			const testVector = await this.embedQuery('test');
-			this.logger.log(`模型测试成功。向量维度: ${testVector.length}`);
+			this.dimensions = testVector.length;
+			this.logger.log(`模型测试成功。向量维度: ${this.dimensions}`);
 		} catch (error) {
 			this.logger.error('初始化本地 M3E 嵌入模型失败。', error.stack);
 			// 抛出错误，阻止应用启动，因为这是一个关键服务
@@ -58,11 +60,23 @@ export class EmbeddingModelService extends Embeddings implements OnModuleInit {
 			this.logger.error('嵌入管道未初始化，无法生成文档向量。');
 			throw new Error('嵌入管道不可用');
 		}
+
+		// 防御性检查：如果传入的文档数组为空，直接返回空数组，避免ONNX模型出错。
+		if (!documents || documents.length === 0) {
+			this.logger.warn('embedDocuments 接收到空数组，直接返回。');
+			return [];
+		}
+		let results: any;
 		// 库的 pipeline 方法支持批处理，这比循环调用更高效
-		const results = await this.embeddingPipeline(documents, {
-			pooling: 'mean',
-			normalize: true
-		});
+		try {
+			results = await this.embeddingPipeline(documents, {
+				pooling: 'mean',
+				normalize: true
+			});
+		} catch (error) {
+			this.logger.error('embedDocuments 处理文档时出错。', error);
+			throw error;
+		}
 		// .tolist() 方法将 Tensor 转换为标准的 JS 嵌套数组
 		return results.tolist();
 	}

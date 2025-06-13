@@ -52,8 +52,11 @@ export class VectorStoreService implements OnModuleInit {
 			const jobsIndexExists = await this.indexExists(PineconeIndex.JOBS);
 			if (!jobsIndexExists) {
 				console.log(`索引 '${PineconeIndex.JOBS}' 不存在，将自动创建...`);
-				// m3e-base 模型的维度是 768
-				await this.createEmptyIndex(PineconeIndex.JOBS, 768);
+				const dimension = this.embeddingModelService.dimensions;
+				if (!dimension) {
+					throw new Error('无法从 embeddingModelService 获取向量维度，初始化失败。');
+				}
+				await this.createEmptyIndex(PineconeIndex.JOBS, dimension);
 			}
 			this.logger.log('Pinecone 连接验证成功');
 		} catch (error) {
@@ -85,7 +88,7 @@ Pinecone 连接失败。可能的原因:
 	}
 
 	/**
-	 * 文档向量化并储存：到已有索引
+	 * 文档向量化并储存到已有索引
 	 * @param documents 要添加的文档数组
 	 * @param indexAlias 索引别名或索引名
 	 * @param embeddings 用于向量化的嵌入模型
@@ -104,6 +107,7 @@ Pinecone 连接失败。可能的原因:
 			const pineconeStore = await PineconeStore.fromExistingIndex(embeddings, {
 				pineconeIndex: index
 			});
+			//会去调用embeddings的embedDocuments方法
 			await pineconeStore.addDocuments(documents);
 			console.log(`成功添加 ${documents.length} 个文档到索引 ${indexName}`);
 		} catch (error) {
