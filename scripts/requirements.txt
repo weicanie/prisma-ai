@@ -1,6 +1,3 @@
-# ONNX Model Conversion Dependencies
-
-# Core libraries for model handling and conversion
 torch
 transformers
 optimum[onnxruntime]

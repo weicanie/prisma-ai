@@ -5,10 +5,12 @@
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
     "concurrently": "^9.1.2",
-    "husky": "^9.1.7",
     "lerna": "^8.2.2",
     "madge": "^8.0.0",
     "prettier": "^3.0.0"
+  },
+  "dependencies": {
+    "husky": "^9.1.7"
   },
   "scripts": {
     "prepare": "husky",

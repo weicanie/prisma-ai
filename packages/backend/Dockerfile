@@ -1,12 +1,12 @@
-ARG NODE_VERSION=22.11.0
+ARG NODE_VERSION=20.11.0
 ARG PNPM_VERSION=9.15.4
 
-FROM docker.1ms.run/library/node:${NODE_VERSION}-alpine AS builder
+FROM docker.1ms.run/library/node:${NODE_VERSION} AS builder
 
 # 设置生产环境
 # ENV NODE_ENV=production
 
-# 安装pnpm
+# 安装 pnpm 
 RUN npm install -g pnpm@${PNPM_VERSION}
 
 # 设置工作目录（容器内部）
@@ -26,6 +26,8 @@ RUN pnpm install --frozen-lockfile
 # 复制后端项目和共享包目录下所有文件（.dockerignore中忽略的文件不会被复制）
 COPY ./packages/backend ./packages/backend
 COPY ./packages/shared ./packages/shared
+# 复制本地部署模型要用到的文件
+COPY ./models ./models
 
 # 首先构建共享包
 RUN pnpm --filter @prism-ai/shared build
@@ -37,24 +39,25 @@ RUN pnpm --filter backend exec prisma generate --no-engine
 RUN pnpm --filter backend build
 
 # 第二阶段：构建生产镜像
-FROM docker.1ms.run/library/node:${NODE_VERSION}-alpine
+FROM docker.1ms.run/library/node:${NODE_VERSION}
 
 # 保持生产环境设置
 # ENV NODE_ENV=production
 
 WORKDIR /app
 
-# 安装 pnpm 和 bash
-# Alpine 默认没有 bash，但启动脚本需要它
-RUN npm install -g pnpm@${PNPM_VERSION} && apk add --no-cache bash
+# 安装 pnpm 
+RUN npm install -g pnpm@${PNPM_VERSION}
 
 # 从构建阶段的镜像中复制package.json和lock文件
 COPY --from=builder /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml* ./
 COPY --from=builder /app/packages/backend/package.json ./packages/backend/
 COPY --from=builder /app/packages/shared/package.json ./packages/shared/
+# 复制模型文件
+COPY --from=builder /app/models ./models
 
-# 只安装生产依赖（忽略生命周期scripts,比如prepare触发husky, 否则会报错因为husky是开发依赖此阶段不安装）
-RUN pnpm install --prod --frozen-lockfile --ignore-scripts
+#只安装生产依赖
+RUN pnpm install --prod --frozen-lockfile
 
 # 从构建阶段复制编译后的代码
 COPY --from=builder /app/packages/backend/dist ./packages/backend/dist

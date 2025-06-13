@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      husky:
+        specifier: ^9.1.7
+        version: 9.1.7
     devDependencies:
       '@commitlint/cli':
         specifier: ^19.8.0
@@ -17,9 +21,6 @@ importers:
       concurrently:
         specifier: ^9.1.2
         version: 9.1.2
-      husky:
-        specifier: ^9.1.7
-        version: 9.1.7
       lerna:
         specifier: ^8.2.2
         version: 8.2.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(encoding@0.1.13)
@@ -158,6 +159,9 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.2
+      sharp:
+        specifier: ^0.34.2
+        version: 0.34.2
       zod:
         specifier: ^3.24.3
         version: 3.24.3
@@ -22720,7 +22724,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 20.17.31
+      '@types/node': 22.15.18
       long: 5.3.2
     optional: true
 
@@ -23623,7 +23627,6 @@ snapshots:
       '@img/sharp-win32-arm64': 0.34.2
       '@img/sharp-win32-ia32': 0.34.2
       '@img/sharp-win32-x64': 0.34.2
-    optional: true
 
   shebang-command@2.0.0:
     dependencies:

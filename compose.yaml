@@ -73,9 +73,9 @@ services:
       timeout: 5s
       retries: 5
   minio-container:
-    image: docker.1ms.run/library/bitnami/minio
+    image: docker.1ms.run/bitnami/minio
     ports:
-      - '9000:9000'
+      - '9003:9000'
     volumes:
       - ./docker-data/minio:/bitnami/minio/data
     restart: unless-stopped

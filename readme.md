@@ -39,6 +39,8 @@ docker compose -f compose.yaml up --build
 
 然后浏览器访问localhost即可使用!
 
+注意：你需要先将本地模型配置完毕,以在容器中使用模型
+
 ## 🤖本地模型配置
 
 ```bash
