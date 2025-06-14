@@ -8,39 +8,20 @@
 
 ## ⚡快速开始
 
-```bash
-# 克隆仓库
-git clone https://github.com/weicanie/prisma-ai.git
+建议使用`docker`构建、启动本项目,除了你的 apikey 外零配置。
 
-# 安装依赖
-pnpm install
-```
+没有安装`docker`环境的可以按照[1分钟学会Win/Linux/Mac上安装Docker，零失败](https://www.bilibili.com/video/BV1vm421T7Kw/?spm_id_from=333.337.search-card.all.click&vd_source=fb073c2174b0ff1ae25a8042f5eaf690)来安装。
 
-然后打开packages/backend, 配置.env、.env.development对应的环境变量。
-然后配置人岗匹配用到的模型：
+本地启动需要安装`node`环境和必要的数据库。
 
-```bash
-# 下载模型到本地
-git clone https://hf-mirror.com/moka-ai/m3e-base models/moka-ai/m3e-base
-# 配置python环境
-./python-setup.sh
-# 获取模型onnx文件
-./model-onnx.sh
-```
-
-```bash
-# 启动项目,在仓库根目录执行
-pnpm run dev
-```
-
-## 🐳 Docker
+### 🐳 Docker
 
 ```bash
 # 克隆仓库
 git clone https://github.com/weicanie/prisma-ai.git
 ```
 
-然后打开packages/backend, 配置.env、.env.production对应的环境变量。
+然后打开`packages/backend`, 配置`.env、.env.production`对应的环境变量。
 然后配置人岗匹配用到的模型：
 
 ```bash
@@ -59,7 +40,34 @@ git clone https://hf-mirror.com/moka-ai/m3e-base models/moka-ai/m3e-base
 docker compose -f compose.yaml up --build
 ```
 
-然后浏览器访问localhost即可使用!
+然后浏览器访问`localhost`即可使用!
+
+### 👨‍💻本地启动
+
+```bash
+# 克隆仓库
+git clone https://github.com/weicanie/prisma-ai.git
+
+# 安装依赖
+pnpm install
+```
+
+然后打开`packages/backend`, 配置`.env、.env.development`对应的环境变量。
+然后配置人岗匹配用到的模型：
+
+```bash
+# 下载模型到本地
+git clone https://hf-mirror.com/moka-ai/m3e-base models/moka-ai/m3e-base
+# 配置python环境
+./python-setup.sh
+# 获取模型onnx文件
+./model-onnx.sh
+```
+
+```bash
+# 启动项目,在仓库根目录执行
+pnpm run dev
+```
 
 ## 1、项目的核心价值/解决的痛点
 
