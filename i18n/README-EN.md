@@ -1,129 +1,145 @@
-![1749374923051](../images/readme/1749374923051.png)
+![logo](../images/readme/logo.png)
 
-# prisma-ai - From Resume to Offer
+# prisma-ai: Free & Open Source, One-Stop Solution for Resume Optimization and Job Matching
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](...)
 
-[简体中文](readme.md) | English
+[简体中文](../README.md) | English
 
-## ⚡ Quick Start
+## ⚡Quick Start
 
 ```bash
-# Clone repository
-git clone https://github.com/yourusername/prisma-ai.git
+# Clone the repository
+git clone https://github.com/weicanie/prisma-ai.git
 
 # Install dependencies
 pnpm install
 ```
 
-Then open packages/backend and configure the corresponding environment variables in .env and .env.development.
+Then navigate to packages/backend and configure the environment variables in .env and .env.development.
+Next, configure the models for job matching:
 
 ```bash
-# Start project
-pnpm lerna dev --parallel
+# Download models locally
+git clone https://hf-mirror.com/moka-ai/m3e-base models/moka-ai/m3e-base
+# Set up Python environment
+./python-setup.sh
+# Get model ONNX files
+./model-onnx.sh
 ```
 
-## I. Introduction to prisma-ai
+```bash
+# Start the project (run from repository root)
+pnpm run dev
+```
 
-A platform that implements LLM (Large Language Model) application development paradigms such as `agent (agent) + mcp (Model Context Protocol)`, and builds upon this foundation to create an LLM application - **Resume Inspiration Mushroom** - that helps users transform their resumes into offers.
+## 🐳 Docker
 
-### ⚡ 1. Solving Core Pain Points
+```bash
+# Clone the repository
+git clone https://github.com/weicanie/prisma-ai.git
+```
 
-#### 🎯 You're Worse at Writing Resumes Than You Think, and Even Worse at Maximizing Their Value!
+Then navigate to packages/backend and configure the environment variables in .env and .env.production.
+Next, configure the models for job matching:
 
-You're a `project experience novice`, struggling to highlight key points and identify challenges.
+```bash
+# Download models locally
+git clone https://hf-mirror.com/moka-ai/m3e-base models/moka-ai/m3e-base
+# Set up Python environment
+./python-setup.sh
+# Get model ONNX files
+./model-onnx.sh
+```
 
-You're like Jiang Taigong fishing for interview questions - waiting for questions to bite, unaware that `80% of interview questions` stem from your resume.
+Note: You need to configure the local models first to use them in the container
 
-You're a 3-day resume speedster, unaware that crafting an excellent resume requires weeks or more of dedicated effort.
+```bash
+# Build and start services (run from repository root)
+docker compose -f compose.yaml up --build
+```
 
-You're a mass-applicant who sends thousands of applications for a few interviews, unaware that you must `customize your resume for each position`.
+Then visit localhost in your browser to start using the application!
 
-You're a "pragmatist" who learns whatever the company uses, unaware that in the brutal internet job market, there's only one path: `learning for offers`.
+## 1. Core Value & Pain Points Solved
 
-**prisma-ai** aims to provide a `ready-to-use one-stop solution platform`,
+**Pain Point 1**: Project experience lacks highlights, only lists common technologies and business logic 😤  
+**Solution**: DeepSeek-R1 performs in-depth analysis and improvement, deeply mining highlights 👌
 
-making you marvel at how valuable a resume can be, and once fully utilized, you'll be like `fish in the offer sea, birds in the high-salary sky` - no longer constrained!
+**Pain Point 2**: Mass resume submissions without job matching, sending thousands with few interviews! 😤  
+**Solution 1**: DeepSeek-R1 customizes resumes for specific positions, making them more targeted and relevant 👌  
+**Solution 2**: Crawl job data from recruitment websites, use SBERT model + DeepSeek-V3 for job-candidate matching 👌
 
-#### 🎯 Lowering LLM Application Development Threshold, Providing Ready-to-Use Agent + MCP Capabilities
+**Pain Point 3**: Too many interview questions to memorize, forget after learning, learn after forgetting 😤  
+**Solution 1**: Crawl interview question data, extend details based on resume, match relevant questions 👌 (since interviewers usually chat based on your resume, though basic knowledge must be solid)  
+**Solution 2**: Anki-style scientific review system, Feynman learning method to tackle difficult concepts 👌 (with LLM assistance)
 
-The `MCP protocol` has been hot for a while, but under various vendors' marketing, it has clearly been distorted, with factual errors like "no MCP means no tool calling" and "MCP protocol vs RESTful which is better" being quite amusing.
-The root cause is the lag in AI Q&A services and the threshold for new technologies.
-This project provides ready-to-use, completely hand-written `mcp client` and `mcp server`, allowing you to directly engage with the `agent + mcp` development paradigm.
+## 2. Can You Use It Right Now?
 
-### 📝 2. Resume Inspiration Mushroom
+Yes, absolutely yes.
 
-#### ✨ Resume Analysis, Optimization, and Highlight Mining
+Free and open source, continuously updated.  
+Project repository: [GitHub Link]
 
-Resume Inspiration Mushroom uses the latest `deepseek r1 5/28` model, with deeper thinking capabilities, stronger output capabilities, and a series of `prompt engineering` to implement the powerful resume optimization assistant **Prisma**.
+Demo website: ICP filing approved, currently undergoing public security filing.
 
-**Prisma** can efficiently and effectively analyze, optimize user resumes, and mine resume highlights.
+One-command Docker build and start 🥰.  
+Zero configuration except for your DeepSeek and other API keys.
 
-#### 💼 Resume Position Matching and Alignment (Coming Soon)
+Also supports local Node.js environment startup.
 
-#### 🚀 Learning Path Planning and Interview Question Knowledge Base Management (Coming Soon)
+If this helps you, please give it a star, it really means a lot to me 😉.
 
-### 👨‍💻 3. Developer Platform
+Welcome to submit issues and feature requests, I'll implement anything 🥺.
 
-#### 🤖 Agent + MCP Paradigm Support
+## 3. How Is the Core Value Implemented?
 
-The `prisma-ai` platform extends `langchain` capabilities to implement `agent` support for `mcp`. Through `mcp-sdk`, it developed an `mcp client` that supports both local and remote `mcp server` interactions.
+1. Excellent resume quality metrics and process design, inspired by a teacher whose name starts with 'C', specifically designed for IT positions. I mainly abstracted the entire process into prompts and further extended it 🧐.
 
-#### 🔄 RAG Paradigm Support
+2. Primarily based on DeepSeek R1 5/28, high-quality prompts, full-process data structuring, high-quality output 🤩.
 
-Supports the `rag` paradigm through `langchain`, `pinecone`, and `openai`'s `embedding model`.
+3. Built-in crawler to scrape job data from Boss Zhipin, using SBERT dual-tower model for recall and LLM for reranking 🥴.
 
-#### 📊 QAG Paradigm (Coming Soon)
+4. Learning path generation (offer-oriented learning), project highlight implementation (current approach reads your codebase, understands it, then generates solutions as prompts and context for professional code generation tools like Cursor and Windsurf - specialization and no reinventing the wheel)
 
-A development paradigm that builds structured knowledge bases through `sql` and `nosql` databases, where `llm agent` uses provided `tools` for structured queries and enhanced generation.
+## 4. Current Project Progress
 
-This project currently supports `llm agent` querying `mongodb` databases.
+1. (✓) Project experience analysis, optimization, and highlight mining
+2. (✓) Resume customization based on job requirements
+3. (✓) Built-in crawler for job data scraping (tested with ~2000 entries, IP got blocked for a day 😂, sad, now greatly improved disguise but not yet tested)
+4. (✓) Local deployment of SBERT model for job information embedding, Pinecone database for job information recall, LLM for reranking and analysis
+5. ( ) Frontend implementation for job matching
+   ...
 
-## II. prisma-ai Feature Usage Examples
+## 5. What's Coming Next?
 
-### 📝 1. Resume Inspiration Mushroom
+My project team (9 people, both undergrad and grad students) is conducting extensive enterprise and individual interviews and job-candidate data collection and analysis. The insights and data gained from this process will be continuously updated to this project 🧐.
 
-#### 🔍 1. Project Experience Analysis
+## 6. Welcome to Contribute
 
-![Analysis in Progress](../images/readme/分析中.png)
+Welcome any form of contribution, welcome stars, issues, and PRs 😉.
 
-Analysis Results ✨:
+**Backend**: Nest.js (TypeScript), MySQL, MongoDB, Redis, LangChain, CopilotKit
 
-![Analysis Results](../images/readme/分析结果.png)
+**Frontend**: React (TypeScript), Vite, React-Query, Redux, Tailwind
 
-#### ⚡ 2. Project Experience Optimization
+1. Full-stack type safety with DTOs and VOs
+2. Clear and unified response handling and full-stack error handling
+3. Clear module separation and component encapsulation
 
-![Optimization in Progress](../images/readme/优化中.png)
+## 7. Welcome to Join Our Discussion Group
 
-Optimization Results ✨:
+QQ Group: 930291816
 
-![Optimization Results](../images/readme/优化结果.png)
+<img src="../images/readme/qq.jpg" alt="930291816" style="zoom: 25%;position:relative;left:0;" />
 
-#### 💎 3. Project Experience Highlight Mining
+## 8. Disclaimer
 
-![Mining Highlights](../images/readme/挖掘亮点.png)
+I oppose any form of resume fraud. Any data generated by running this project should only be used for reference and learning path planning.
 
-Mining Results ✨:
+## 9. F&Q
 
-![Mining Results](../images/readme/挖掘结果.png)
+**Q1: What's the project's goal?**  
+The most effective one-stop IT employment solution.
 
-### 👨‍💻 2. Developer Platform
-
-### 🤖 Agent + MCP Paradigm
-
-For example, using the built-in mcp client to provide mongodb database query tools for llm:
-
-1. Configure mcp server ⚙️:
-   ![mcp server configuration](../images/readme/mcpserver配置.png)
-
-2. deepseek v3 agent successfully calls mcp server tool to query mongodb database 🚀:
-
-![mcp test](../images/readme/mcp%20测试.png)
-
-## III. Technical Value
-
-| Domain                       | Achievements                                                                                                                                                                                                                                                                             |
-| :--------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **AI Paradigm**              | ▶️ Implemented **RAG Industrial Process**: Pinecone + OpenAI Embedding + LangChain ▶️ Provided **Agent+MCP Fusion Architecture**: Extended LangChain for MCP protocol, developed mcp-client for cross-environment tool calls                                                             |
-| **Engineering Architecture** | ▶️ Frontend-Backend Separation: React (Frontend) + Nest (Backend) ▶️ High Availability Design: Task Queue + Redis Cache + Circuit Breaker Rate Limiting ▶️ **SSE Streaming Response + Exception Recovery**: Decoupled HTTP connections from session state, supporting exception recovery |
-| **Development Paradigm**     | ▶️ **Monorepo Management**: pnpm + lerna + tsup building shared libraries ▶️ **Unified Type Ecosystem**: TS + Zod Schema → DTO/VO full-chain type safety ▶️ **Dual Database Solution**: MySQL (Relational) + MongoDB (Document) precisely matching business scenarios                    |
+The project will add more customization features in the future, such as integrating Flowise for visual workflow customization. Also MCP functionality (which is already well-supported).
