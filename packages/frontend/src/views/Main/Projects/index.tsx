@@ -4,9 +4,10 @@ import type { ProjectVo } from '@prism-ai/shared';
 import type { Row, Table } from '@tanstack/react-table';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCustomQuery } from '../../../query/config';
+import { toast } from 'sonner';
+import { useCustomMutation, useCustomQuery } from '../../../query/config';
 import { ProjectQueryKey } from '../../../query/keys';
-import { findAllProjects } from '../../../services/project';
+import { findAllProjects, removeProject } from '../../../services/project';
 import { ConfigDataTable } from '../components/config-data-table';
 import type { DataTableConfig } from '../components/config-data-table/config.type';
 import { DataTableColumnHeader } from '../components/config-data-table/data-table/columns/header';
@@ -30,6 +31,14 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 	mainTable = true
 }) => {
 	const { data, status } = useCustomQuery([ProjectQueryKey.Projects], findAllProjects);
+	const removeMutation = useCustomMutation(removeProject,{
+		onSuccess: () => {
+			toast.success('删除成功');
+		},
+		onError: () => {
+			toast.error('删除失败');
+		}
+	})
 	const navigate = useNavigate();
 	if (status === 'pending') {
 		return <div>Loading...</div>;
@@ -123,10 +132,13 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 
 			selectCol,
 
+			//TODO 添加编辑功能
 			rowActionsCol: [
 				{
 					id: 'actions',
-					cell: ({ row }) => <DataTableRowActions row={row} />
+					cell: ({ row }) => <DataTableRowActions row={row} onDelete={() => {
+						removeMutation.mutate(row.original.id);
+					}} />
 				}
 			]
 		},

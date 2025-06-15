@@ -4,9 +4,10 @@ import type { Row, Table } from '@tanstack/react-table';
 import { AlignLeft, Link } from 'lucide-react';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCustomQuery } from '../../../query/config';
+import { toast } from 'sonner';
+import { useCustomMutation, useCustomQuery } from '../../../query/config';
 import { KnowledgeQueryKey } from '../../../query/keys';
-import { findAllUserKnowledge } from '../../../services/knowbase';
+import { findAllUserKnowledge, removeKnowledge } from '../../../services/knowbase';
 import { ConfigDataTable } from '../components/config-data-table';
 import type { DataTableConfig } from '../components/config-data-table/config.type';
 import { DataTableColumnHeader } from '../components/config-data-table/data-table/columns/header';
@@ -27,6 +28,14 @@ const Knowledges: React.FC<KnowledgesProps<KnowledgeVo>> = ({
 	const { data, status } = useCustomQuery([KnowledgeQueryKey.Knowledges], () =>
 		findAllUserKnowledge({ page: 1, limit: 10 })
 	);
+	const removeMutation = useCustomMutation(removeKnowledge,{
+		onSuccess: () => {
+			toast.success('删除成功');
+		},
+		onError: () => {
+			toast.error('删除失败');
+		}
+	})
 
 	if (status === 'pending') {
 		return <div>Loading...</div>;
@@ -134,7 +143,9 @@ const Knowledges: React.FC<KnowledgesProps<KnowledgeVo>> = ({
 			rowActionsCol: [
 				{
 					id: 'actions',
-					cell: ({ row }) => <DataTableRowActions row={row} />
+					cell: ({ row }) => <DataTableRowActions row={row} onDelete={() => {
+						removeMutation.mutate(row.original.id);
+					}} />
 				}
 			]
 		},

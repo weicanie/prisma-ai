@@ -5,9 +5,10 @@ import type { Row, Table } from '@tanstack/react-table';
 import React, { memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { useCustomQuery } from '../../../query/config';
+import { toast } from 'sonner';
+import { useCustomMutation, useCustomQuery } from '../../../query/config';
 import { JobQueryKey, ResumeQueryKey } from '../../../query/keys';
-import { findAllUserJobs } from '../../../services/job';
+import { findAllUserJobs, removeJob } from '../../../services/job';
 import { findAllResumeMatched } from '../../../services/resume';
 import { selectResumeData, setResumeData } from '../../../store/resume';
 import { ConfigDataTable } from '../components/config-data-table';
@@ -37,6 +38,14 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 			[ResumeQueryKey.ResumeMatched, 1, 10],
 			() => findAllResumeMatched(1, 10)
 		);
+		const removeMutation = useCustomMutation(removeJob,{
+			onSuccess: () => {
+				toast.success('删除成功');
+			},
+			onError: () => {
+				toast.error('删除失败');
+			}
+		})
 
 		// 从store获取选中的简历和岗位
 		const selectedIds = useSelector(selectResumeData);
@@ -149,7 +158,9 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 				rowActionsCol: [
 					{
 						id: 'actions',
-						cell: ({ row }) => <DataTableRowActions row={row} />
+						cell: ({ row }) => <DataTableRowActions row={row} onDelete={() => {
+							removeMutation.mutate(row.original.id);
+						}} />
 					}
 				]
 			},

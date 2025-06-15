@@ -83,7 +83,7 @@ export async function updateProject(id: string, projectUpdateDto: Partial<Projec
  * 删除项目经验
  * @param id 项目ID
  */
-export async function deleteProject(id: string) {
+export async function removeProject(id: string) {
 	const res = await instance.delete<SDF<null>>(`/project/${id}`);
 	return res.data;
 }

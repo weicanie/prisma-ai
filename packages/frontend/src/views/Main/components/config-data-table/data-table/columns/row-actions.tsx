@@ -11,9 +11,10 @@ import {
 
 interface DataTableRowActionsProps<TData> {
 	row: Row<TData>;
+	onDelete?: (row: TData) => void;
 }
 /* 数据行的操作选项,单独作为一列 */
-export function DataTableRowActions<TData>({}: DataTableRowActionsProps<TData>) {
+export function DataTableRowActions<TData>({ row, onDelete }: DataTableRowActionsProps<TData>) {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -23,7 +24,7 @@ export function DataTableRowActions<TData>({}: DataTableRowActionsProps<TData>) 
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-[160px]">
-				<DropdownMenuItem>编辑</DropdownMenuItem>
+				{/* <DropdownMenuItem>编辑</DropdownMenuItem> */}
 				{/* <DropdownMenuSub>
 					<DropdownMenuSubTrigger>编辑标签</DropdownMenuSubTrigger>
 					<DropdownMenuSubContent>
@@ -36,7 +37,7 @@ export function DataTableRowActions<TData>({}: DataTableRowActionsProps<TData>) 
 						</DropdownMenuRadioGroup>
 					</DropdownMenuSubContent>
 				</DropdownMenuSub> */}
-				<DropdownMenuItem>删除</DropdownMenuItem>
+				<DropdownMenuItem onClick={() => onDelete?.(row.original)}>删除</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

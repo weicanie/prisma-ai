@@ -4,9 +4,10 @@ import type { SkillVo } from '@prism-ai/shared';
 import type { Row, Table } from '@tanstack/react-table';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCustomQuery } from '../../../query/config';
+import type { toast } from 'sonner';
+import { useCustomMutation, useCustomQuery } from '../../../query/config';
 import { SkillQueryKey } from '../../../query/keys';
-import { findAllUserSkills } from '../../../services/skill';
+import { findAllUserSkills, removeSkill } from '../../../services/skill';
 import { ConfigDataTable } from '../components/config-data-table';
 import type { DataTableConfig } from '../components/config-data-table/config.type';
 import { DataTableColumnHeader } from '../components/config-data-table/data-table/columns/header';
@@ -31,6 +32,14 @@ const Skills: React.FC<SkillsProps<SkillVo>> = ({
 }) => {
 	const navigate = useNavigate();
 	const { data, status } = useCustomQuery([SkillQueryKey.Skills], findAllUserSkills);
+	const removeMutation = useCustomMutation(removeSkill,{
+		onSuccess: () => {
+			toast.success('删除成功');
+		},
+		onError: () => {
+			toast.error('删除失败');
+		}
+	})
 
 	if (status === 'pending') {
 		return <div>Loading...</div>;
@@ -134,7 +143,14 @@ const Skills: React.FC<SkillsProps<SkillVo>> = ({
 			rowActionsCol: [
 				{
 					id: 'actions',
-					cell: ({ row }) => <DataTableRowActions row={row} />
+					cell: ({ row }) => (
+						<DataTableRowActions
+							row={row}
+							onDelete={() => {
+								removeMutation.mutate(row.original.id);
+							}}
+						/>
+					)
 				}
 			]
 		},

@@ -5,9 +5,10 @@ import type { Row, Table } from '@tanstack/react-table';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { useCustomQuery } from '../../../query/config';
+import { toast } from 'sonner';
+import { useCustomMutation, useCustomQuery } from '../../../query/config';
 import { ResumeQueryKey } from '../../../query/keys';
-import { findAllUserResumes } from '../../../services/resume';
+import { findAllUserResumes, removeResume } from '../../../services/resume';
 import { setResumeData } from '../../../store/resume';
 import { ConfigDataTable } from '../components/config-data-table';
 import type { DataTableConfig } from '../components/config-data-table/config.type';
@@ -39,6 +40,14 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 		const [, page, limit] = queryKey; // 从 queryKey 中解构分页参数
 		return findAllUserResumes(page as number, limit as number);
 	});
+	const removeMutation = useCustomMutation(removeResume,{
+		onSuccess: () => {
+			toast.success('删除成功');
+		},
+		onError: () => {
+			toast.error('删除失败');
+		}
+	})
 
 	/* 挂载和卸载时重置选中的职业技能和项目经验 */
 	useEffect(() => {
@@ -167,7 +176,9 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 			rowActionsCol: [
 				{
 					id: 'actions',
-					cell: ({ row }) => <DataTableRowActions row={row} />
+					cell: ({ row }) => <DataTableRowActions row={row} onDelete={() => {
+						removeMutation.mutate(row.original.id);
+					}} />
 				}
 			]
 		},
