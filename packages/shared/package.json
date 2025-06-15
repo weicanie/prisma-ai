@@ -1,26 +1,25 @@
 {
-  "name": "@prism-ai/shared",
-  "version": "1.0.0",
-  "description": "Shared types and utilities",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "tsup src/index.ts --dts",
-    "dev": "tsup src/index.ts --dts --watch"
-  },
-  "devDependencies": {
-    "tsup": "^8.5.0"
-  },
-  "exports": {
-    ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
-  },
-  "dependencies": {}
+	"name": "@prism-ai/shared",
+	"version": "1.0.0",
+	"description": "Shared types and utilities",
+	"main": "dist/index.js",
+	"module": "dist/index.mjs",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "tsup src/index.ts --dts",
+		"dev": "tsup src/index.ts --dts --watch"
+	},
+	"devDependencies": {
+		"tsup": "^8.5.0"
+	},
+	"exports": {
+		".": {
+			"import": "./dist/index.mjs",
+			"require": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
+	}
 }
