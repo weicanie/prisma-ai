@@ -60,8 +60,8 @@ function useTaskPolling(taskId: string | null) {
 export function DataCrawl() {
 	const [crawlInputs, setCrawlInputs] = useState<StartCrawlDto>({
 		totalCount: 10,
-		city: '上海',
-		query: '前端工程师'
+		city: 'c101020100',
+		query: '前端'
 	});
 	const [crawlTaskId, setCrawlTaskId] = useState<string | null>(null);
 	const [syncTaskId, setSyncTaskId] = useState<string | null>(null);
