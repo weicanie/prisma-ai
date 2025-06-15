@@ -1,4 +1,4 @@
-import type { ServerDataFormat as SDF } from '@prism-ai/shared';
+import { DEFAULT_MESSAGE, type ServerDataFormat as SDF } from '@prism-ai/shared';
 import {
 	type MutationFunction,
 	type QueryFunction,
@@ -34,7 +34,7 @@ export function useCustomQuery<SD>( //SD: Response Data
 		queryFn,
 		staleTime: 1 * 60 * 1000, //1分钟后过时
 		retry: failureCount => {
-			return failureCount < 3;
+			return failureCount < 2;
 		},
 		...options,
 		/* 统一的错误处理	 
@@ -50,9 +50,11 @@ export function useCustomQuery<SD>( //SD: Response Data
 					navigate('/login');
 				} else {
 					toast.error(data.message || '系统繁忙，请稍后再试');
+					throw new Error(data.message);
 				}
 			}
-			if (data.message && data.message !== 'ok') {
+			/* 返回默认的'ok'时，不显示toast，交给外部组件来决定toast */
+			if (data.message && data.message !== DEFAULT_MESSAGE) {
 				toast.success(data.message);
 			}
 			if (outerSelect) {
@@ -107,9 +109,11 @@ export function useCustomMutation<TData, TVariables, TContext = unknown>(
 					return;
 				} else {
 					toast.error(data.message || '系统繁忙，请稍后再试');
+					throw new Error(data.message);
 				}
 			} else {
-				if (data.message && data.message !== 'ok') {
+				/* 返回默认的'ok'时，不显示toast，交给外部组件来决定toast */
+				if (data.message && data.message !== DEFAULT_MESSAGE) {
 					toast.success(data.message);
 				}
 				if (outerOnSuccess) {

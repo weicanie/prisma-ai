@@ -58,7 +58,7 @@ export class ResumeController {
   }
 
   @RequireLogin()
-  @Get('matched/:jobId')
+  @Get('matched/one/:jobId')
   findResumeMatchedByJobId(
     @Param('jobId') jobId: string,
     @UserInfo() userInfo: UserInfoFromToken,

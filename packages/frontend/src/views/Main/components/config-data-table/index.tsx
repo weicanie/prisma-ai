@@ -8,6 +8,7 @@ interface ConfigDataTableProps<TData> {
 }
 
 export function ConfigDataTable<TData>({ dataTableConfig, data }: ConfigDataTableProps<TData>) {
+	if (!data) return;
 	const { dataCols, selectCol, rowActionsCol } = dataTableConfig.columns;
 	const columns = [...selectCol, ...dataCols, ...rowActionsCol] as ColumnDef<TData>[];
 	const filterDataCols = dataTableConfig.columns.dataCols.filter(

@@ -24,72 +24,75 @@ import { useNavigate } from 'react-router-dom';
 import { NavMain } from './nav-main';
 import { NavUser } from './nav-user';
 import { TeamSwitcher } from './team-switcher';
-//流程、分组
-const data = {
-	user: {
-		name: '示例用户',
-		email: 'user@example.com',
-		avatar: '/avatars/shadcn.jpg'
-	},
-	teams: [
-		{
-			name: '简历灵感菇',
-			logo: Pyramid,
-			plan: '从简历到offer'
-		}
-	],
-	navMain: [
-		{
-			title: '首页',
-			url: '/main/home',
-			icon: House
-		},
-		{
-			title: '职业技能',
-			url: '/main/skills',
-			isOpen: true,
-			icon: ListChecks
-		},
-		{
-			title: '项目经验',
-			url: '/main/projects',
-			icon: Sparkles,
-			isOpen: true
-		},
-		{
-			title: '简历',
-			icon: FileText,
-			url: '/main/resumes'
-		},
-		{
-			title: '岗位',
-			icon: Target,
-			url: '/main/job'
-			// items: [
-			// 	{ title: '简历匹配', url: '/main/job/match' },
-			// 	{ title: '我的岗位专用简历', url: '/main/job/list' }
-			// ]
-		},
-		{
-			title: '知识库',
-			icon: LibraryBig,
-			url: '/main/knowledge'
-		},
-		{
-			title: '面向offer学习',
-			icon: Rocket,
-			url: '/main/offer',
-			items: [
-				{ title: '技术学习路线', url: '/main/offer/road' },
-				{ title: '项目亮点实现', url: '/main/offer/doit' },
-				{ title: '简历延申八股', url: '/main/offer/questions' },
-				{ title: '模拟面试', url: '/main/offer/mock-interview' }
-			]
-		}
-	]
-};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+	const navigate = useNavigate();
+	const userInfoData = localStorage.getItem('userInfo');
+	const userInfo = JSON.parse(userInfoData || '{}')?.data;
+	//流程、分组
+	const data = {
+		user: {
+			name: userInfo?.username || '示例用户',
+			email: userInfo?.email || 'user@example.com',
+			avatar: userInfo?.avatar || '/avatars/shadcn.jpg'
+		},
+		teams: [
+			{
+				name: '简历灵感菇',
+				logo: Pyramid,
+				plan: '从简历到offer'
+			}
+		],
+		navMain: [
+			{
+				title: '首页',
+				url: '/main/home',
+				icon: House
+			},
+			{
+				title: '职业技能',
+				url: '/main/skills',
+				isOpen: true,
+				icon: ListChecks
+			},
+			{
+				title: '项目经验',
+				url: '/main/projects',
+				icon: Sparkles,
+				isOpen: true
+			},
+			{
+				title: '简历',
+				icon: FileText,
+				url: '/main/resumes'
+			},
+			{
+				title: '岗位',
+				icon: Target,
+				url: '/main/job'
+				// items: [
+				// 	{ title: '简历匹配', url: '/main/job/match' },
+				// 	{ title: '我的岗位专用简历', url: '/main/job/list' }
+				// ]
+			},
+			{
+				title: '知识库',
+				icon: LibraryBig,
+				url: '/main/knowledge'
+			},
+			{
+				title: '面向offer学习',
+				icon: Rocket,
+				url: '/main/offer',
+				items: [
+					{ title: '技术学习路线', url: '/main/offer/road' },
+					{ title: '项目亮点实现', url: '/main/offer/doit' },
+					{ title: '简历延申八股', url: '/main/offer/questions' },
+					{ title: '模拟面试', url: '/main/offer/mock-interview' }
+				]
+			}
+		]
+	};
 	// const { state, open, setOpen, openMobile, setOpenMobile, isMobile, toggleSidebar } = useSidebar();
 	const { isMobile, toggleSidebar } = useSidebar();
 	const [selectedGroupIndex, setSelectedGroupIndex] = React.useState(0);
@@ -132,7 +135,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 		}
 	}, []);
 
-	const navigate = useNavigate();
 	const handleNavItemClick = (groupIndex: number, itemIndex: number, url: string) => {
 		setSelectedGroupIndex(groupIndex);
 		setSelectedItemIndex(itemIndex);

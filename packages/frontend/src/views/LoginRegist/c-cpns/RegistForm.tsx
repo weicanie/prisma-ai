@@ -12,9 +12,14 @@ import {
 	FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import type { RegistResponse } from '@prism-ai/shared';
 import type { Dispatch, PropsWithChildren, SetStateAction } from 'react';
 import { toast } from 'sonner';
-import { registformSchema } from '../../../../../shared/src/types/login_regist.schema';
+import {
+	registformSchema,
+	type RegistFormType
+} from '../../../../../shared/src/types/login_regist.schema';
+import { useCustomMutation } from '../../../query/config';
 import { register, registerCaptcha } from '../../../services/login_regist';
 
 type PropsType = PropsWithChildren<{
@@ -28,35 +33,30 @@ export function RegistForm({ setIsLoginCard }: PropsType) {
 			username: ''
 		}
 	});
+	const registerMutation = useCustomMutation<RegistResponse, RegistFormType>(register, {
+		onSuccess: () => {
+			toast.success('注册成功');
+			setIsLoginCard(true);
+		}
+	});
+	const registerCaptchaMutation = useCustomMutation<string, string>(registerCaptcha, {
+		onSuccess: () => {
+			toast.success('发送成功');
+		}
+	});
 	async function sendCaptcha() {
 		const address = form.getValues('email');
 		if (!address) {
 			return toast.error('请输入邮箱地址');
 		}
 
-		try {
-			const res = await registerCaptcha(address);
-			if (res.data.code === '0') {
-				toast.success('发送成功');
-			}
-		} catch (e: any) {
-			toast.error(e.response?.data?.message || '系统繁忙，请稍后再试');
-		}
+		registerCaptchaMutation.mutate(address);
 	}
 	async function onSubmit(values: z.infer<typeof registformSchema>) {
 		if (values.password !== values.confirmPassword) {
 			return toast.error('两次密码不一致');
 		}
-		try {
-			const res = await register(values);
-
-			if (res.data.code === '0') {
-				toast.success('注册成功');
-				setIsLoginCard(true);
-			}
-		} catch (e: any) {
-			toast.error(e.response?.data?.message || '系统繁忙，请稍后再试');
-		}
+		registerMutation.mutate(values);
 	}
 
 	const items: Array<{
@@ -74,11 +74,7 @@ export function RegistForm({ setIsLoginCard }: PropsType) {
 		<Form {...form}>
 			<form
 				onSubmit={form.handleSubmit(onSubmit)}
-				className="space-y-8"
-				style={{
-					color: 'rgba(236, 29, 39, 0.777)',
-					fontSize: '2rem'
-				}}
+				className="space-y-8 text-2xl text-[rgba(236,29,39,0.777)]"
 			>
 				{items.map(item => (
 					<FormField
@@ -87,23 +83,9 @@ export function RegistForm({ setIsLoginCard }: PropsType) {
 						name={item.name}
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel
-									style={{
-										fontSize: '1.5rem',
-										fontWeight: '600'
-									}}
-								>
-									{item.label}
-								</FormLabel>
+								<FormLabel className="text-2xl font-semibold">{item.label}</FormLabel>
 								<FormControl>
-									<Input
-										placeholder=""
-										{...field}
-										style={{
-											fontSize: '1.5rem',
-											fontWeight: '600'
-										}}
-									/>
+									<Input placeholder="" {...field} className="text-2xl font-semibold" />
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -112,12 +94,7 @@ export function RegistForm({ setIsLoginCard }: PropsType) {
 				))}
 				<Button
 					type="submit"
-					style={{
-						color: 'rgba(236, 29, 39, 0.777)',
-						backgroundColor: 'rgb(34,179,71)',
-						fontSize: '1.3rem',
-						fontWeight: '600'
-					}}
+					className="bg-[rgb(34,179,71)] text-xl font-semibold text-[rgba(236,29,39,0.777)]"
 				>
 					regist
 				</Button>
@@ -125,24 +102,14 @@ export function RegistForm({ setIsLoginCard }: PropsType) {
 
 			<Button
 				onClick={sendCaptcha}
-				style={{
-					color: 'rgba(236, 29, 39, 0.777)',
-					backgroundColor: 'rgb(34,179,71)',
-					fontSize: '1.3rem',
-					fontWeight: '600'
-				}}
+				className="bg-[rgb(34,179,71)] text-xl font-semibold text-[rgba(236,29,39,0.777)]"
 			>
 				send aptcha
 			</Button>
 
 			<Button
 				onClick={() => setIsLoginCard(true)}
-				style={{
-					color: 'rgba(236, 29, 39, 0.777)',
-					backgroundColor: 'rgb(28,160,188)',
-					fontSize: '1.3rem',
-					fontWeight: '600'
-				}}
+				className="bg-[rgb(28,160,188)] text-xl font-semibold text-[rgba(236,29,39,0.777)]"
 			>
 				go to login
 			</Button>

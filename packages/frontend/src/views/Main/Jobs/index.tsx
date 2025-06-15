@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { JobVo, ResumeVo } from '@prism-ai/shared';
 import type { Row, Table } from '@tanstack/react-table';
-import React from 'react';
+import React, { memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useCustomQuery } from '../../../query/config';
@@ -26,309 +26,309 @@ interface JobsProps<TData> {
 	mainTable?: boolean; // 是否为主表格
 }
 
-const Jobs: React.FC<JobsProps<JobVo>> = ({
-	selectColShow,
-	selectionHandler,
-	title,
-	description
-}) => {
-	const navigate = useNavigate();
-	const dispatch = useDispatch();
+const Jobs: React.FC<JobsProps<JobVo>> = memo(
+	({ selectColShow, selectionHandler, title, description }) => {
+		const navigate = useNavigate();
+		const dispatch = useDispatch();
 
-	const { data, status } = useCustomQuery([JobQueryKey.Jobs], () => findAllUserJobs(1, 100));
+		const { data, status } = useCustomQuery([JobQueryKey.Jobs], () => findAllUserJobs(1, 100));
 
-	const { data: resumeMatchedData, status: resumeMatchedStatus } = useCustomQuery(
-		[ResumeQueryKey.ResumeMatched, 1, 10],
-		() => findAllResumeMatched(1, 10)
-	);
+		const { data: resumeMatchedData, status: resumeMatchedStatus } = useCustomQuery(
+			[ResumeQueryKey.ResumeMatched, 1, 10],
+			() => findAllResumeMatched(1, 10)
+		);
 
-	// 从store获取选中的简历和岗位
-	const selectedIds = useSelector(selectResumeData);
-	const selectedResumeId = selectedIds?.resumeId;
-	const selectedJobId = selectedIds?.jobId;
+		// 从store获取选中的简历和岗位
+		const selectedIds = useSelector(selectResumeData);
+		const selectedResumeId = selectedIds?.resumeId;
+		const selectedJobId = selectedIds?.jobId;
 
-	if (status === 'pending' || resumeMatchedStatus === 'pending') {
-		return <div>Loading...</div>;
-	}
-	if (status === 'error' || resumeMatchedStatus === 'error') {
-		return <div>错误:{data?.message}</div>;
-	}
-	const jobDatas = data.data?.data || [];
-	const resumeMatchedDatas = resumeMatchedData.data?.data || [];
+		if (status === 'pending' || resumeMatchedStatus === 'pending') {
+			return <div>Loading...</div>;
+		}
+		if (status === 'error' || resumeMatchedStatus === 'error') {
+			return <div>错误:{data?.message}</div>;
+		}
+		const jobDatas = data.data?.data || [];
+		const resumeMatchedDatas = resumeMatchedData.data?.data || [];
 
-	const selectCol = selectColShow
-		? [
-				{
-					id: '_select' as const,
-					header: ({ table }: { table: Table<JobVo> }) => (
-						<Checkbox
-							checked={
-								table.getIsAllPageRowsSelected() ||
-								(table.getIsSomePageRowsSelected() && 'indeterminate')
+		const selectCol = selectColShow
+			? [
+					{
+						id: '_select' as const,
+						header: ({ table }: { table: Table<JobVo> }) => (
+							<Checkbox
+								checked={
+									table.getIsAllPageRowsSelected() ||
+									(table.getIsSomePageRowsSelected() && 'indeterminate')
+								}
+								onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
+								aria-label="Select all"
+								className="translate-y-[2px]"
+							/>
+						),
+						cell: ({ row }: { row: Row<JobVo> }) => (
+							<Checkbox
+								checked={row.getIsSelected()}
+								onCheckedChange={value => row.toggleSelected(!!value)}
+								aria-label="Select row"
+								className="translate-y-[2px]"
+							/>
+						),
+						enableSorting: false,
+						enableHiding: false
+					}
+				]
+			: [];
+
+		const handleMatchClick = () => {
+			navigate(`/main/resumes/action/${selectedResumeId}/${selectedJobId}`, {
+				state: { param: [selectedResumeId, selectedJobId] }
+			});
+		};
+
+		const dataTableConfig: DataTableConfig<JobVo> = {
+			columns: {
+				dataCols: [
+					{
+						accessorKey: 'jobName',
+						header: ({ column }) => <DataTableColumnHeader column={column} title="职位名称" />,
+						cell: ({ row }) => {
+							return <div className="w-[120px] font-medium">{row.original.jobName}</div>;
+						},
+						enableHiding: false,
+						enableSorting: false
+					},
+					{
+						accessorKey: 'companyName',
+						header: ({ column }) => <DataTableColumnHeader column={column} title="公司名称" />,
+						cell: ({ row }) => {
+							return <div className="w-[120px]">{row.original.companyName}</div>;
+						}
+					},
+					{
+						accessorKey: 'location',
+						header: ({ column }) => <DataTableColumnHeader column={column} title="工作地点" />,
+						cell: ({ row }) => {
+							return <div className="w-[100px]">{row.original.location || '未知'}</div>;
+						}
+					},
+					{
+						accessorKey: 'salary',
+						header: ({ column }) => <DataTableColumnHeader column={column} title="薪资范围" />,
+						cell: ({ row }) => {
+							return <div className="w-[100px]">{row.original.salary || '面议'}</div>;
+						}
+					},
+					{
+						accessorKey: 'jon_status',
+						header: ({ column }) => <DataTableColumnHeader column={column} title="状态" />,
+						cell: ({ row }) => {
+							const job_status = row.original.job_status;
+							return (
+								<Badge variant={job_status === 'open' ? 'default' : 'secondary'}>
+									{job_status === 'open' ? '开放' : '关闭'}
+								</Badge>
+							);
+						}
+					},
+					{
+						accessorKey: 'updatedAt',
+						header: ({ column }) => <DataTableColumnHeader column={column} title="更新时间" />,
+						cell: ({ row }) => {
+							const date = row.original.updatedAt
+								? new Date(row.original.updatedAt).toLocaleDateString()
+								: '未知';
+							return <div className="text-sm text-gray-500">{date}</div>;
+						}
+					}
+				],
+
+				selectCol,
+
+				rowActionsCol: [
+					{
+						id: 'actions',
+						cell: ({ row }) => <DataTableRowActions row={row} />
+					}
+				]
+			},
+
+			options: {
+				toolbar: {
+					enable: true,
+					searchColId: 'jobName'
+				},
+				pagination: true
+			},
+			onRowClick: (index: number) => {
+				return () => {
+					navigate(`/main/job/detail/${jobDatas[index]?.id}`, {
+						state: { param: jobDatas[index]?.id }
+					});
+				};
+			},
+			createBtn: <JobCreate />,
+			actionBtn: (
+				<div className="sm:ml-16 sm:flex-none">
+					<button
+						type="button"
+						className="block rounded-md bg-secondary px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 min-w-25 transition-colors duration-200"
+						onClick={handleMatchClick}
+					>
+						定制岗位专用简历
+					</button>
+				</div>
+			),
+			selectionHandler
+		};
+
+		//添加选择列
+		const ResumeProps = {
+			selectColShow: true,
+			//将选中状态存储到store
+			selectionHandler: (selectedRows: unknown[]) => {
+				dispatch(
+					setResumeData({
+						resumeId: (selectedRows[0] as ResumeVo)?.id
+					})
+				);
+			},
+			title: '',
+			description: '选择要匹配的简历',
+			mainTable: false
+		};
+
+		const dataTableConfigResumeMatched: DataTableConfig<ResumeVo> = {
+			columns: {
+				dataCols: [
+					{
+						accessorKey: 'name',
+						header: ({ column }) => <DataTableColumnHeader column={column} title="简历名称" />,
+						cell: ({ row }) => {
+							return <div className="w-[200px] font-medium">{row.original.name}</div>;
+						},
+						enableHiding: false,
+						enableSorting: true
+					},
+					{
+						accessorKey: 'skill',
+						header: ({ column }) => <DataTableColumnHeader column={column} title="职业技能" />,
+						cell: ({ row }) => {
+							const skill = row.original.skill;
+							if (!skill?.content?.length) {
+								return <div className="text-gray-500">未关联技能</div>;
 							}
-							onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
-							aria-label="Select all"
-							className="translate-y-[2px]"
-						/>
-					),
-					cell: ({ row }: { row: Row<JobVo> }) => (
-						<Checkbox
-							checked={row.getIsSelected()}
-							onCheckedChange={value => row.toggleSelected(!!value)}
-							aria-label="Select row"
-							className="translate-y-[2px]"
-						/>
-					),
-					enableSorting: false,
-					enableHiding: false
-				}
-			]
-		: [];
-
-	const handleMatchClick = () => {
-		navigate(`/main/resumes/action/${selectedResumeId}/${selectedJobId}`, {
-			state: { param: [selectedResumeId, selectedJobId] }
-		});
-	};
-
-	const dataTableConfig: DataTableConfig<JobVo> = {
-		columns: {
-			dataCols: [
-				{
-					accessorKey: 'jobName',
-					header: ({ column }) => <DataTableColumnHeader column={column} title="职位名称" />,
-					cell: ({ row }) => {
-						return <div className="w-[120px] font-medium">{row.original.jobName}</div>;
+							const displaySkill = skill.content.slice(0, 2);
+							const remainingCount = skill.content.length - 2;
+							return (
+								<div className="flex flex-wrap gap-1 max-w-[300px]">
+									{displaySkill.map((skill, index) => (
+										<Badge key={skill.type || index} variant="secondary" className="text-xs">
+											{skill.type || '未分类'}
+										</Badge>
+									))}
+									{remainingCount > 0 && (
+										<Badge variant="default" className="text-xs">
+											+{remainingCount}个技能
+										</Badge>
+									)}
+								</div>
+							);
+						},
+						enableHiding: false,
+						enableSorting: false
 					},
-					enableHiding: false,
-					enableSorting: false
-				},
-				{
-					accessorKey: 'companyName',
-					header: ({ column }) => <DataTableColumnHeader column={column} title="公司名称" />,
-					cell: ({ row }) => {
-						return <div className="w-[120px]">{row.original.companyName}</div>;
-					}
-				},
-				{
-					accessorKey: 'location',
-					header: ({ column }) => <DataTableColumnHeader column={column} title="工作地点" />,
-					cell: ({ row }) => {
-						return <div className="w-[100px]">{row.original.location || '未知'}</div>;
-					}
-				},
-				{
-					accessorKey: 'salary',
-					header: ({ column }) => <DataTableColumnHeader column={column} title="薪资范围" />,
-					cell: ({ row }) => {
-						return <div className="w-[100px]">{row.original.salary || '面议'}</div>;
-					}
-				},
-				{
-					accessorKey: 'jon_status',
-					header: ({ column }) => <DataTableColumnHeader column={column} title="状态" />,
-					cell: ({ row }) => {
-						const job_status = row.original.job_status;
-						return (
-							<Badge variant={job_status === 'open' ? 'default' : 'secondary'}>
-								{job_status === 'open' ? '开放' : '关闭'}
-							</Badge>
-						);
-					}
-				},
-				{
-					accessorKey: 'updatedAt',
-					header: ({ column }) => <DataTableColumnHeader column={column} title="更新时间" />,
-					cell: ({ row }) => {
-						const date = row.original.updatedAt
-							? new Date(row.original.updatedAt).toLocaleDateString()
-							: '未知';
-						return <div className="text-sm text-gray-500">{date}</div>;
-					}
-				}
-			],
+					{
+						accessorKey: 'projects',
+						header: ({ column }) => <DataTableColumnHeader column={column} title="项目经验" />,
+						cell: ({ row }) => {
+							const projects = row.original.projects || [];
+							if (projects.length === 0) {
+								return <div className="text-gray-500">无项目经验</div>;
+							}
+							const displayProjects = projects.slice(0, 2);
+							const remainingCount = projects.length - 2;
 
-			selectCol,
-
-			rowActionsCol: [
-				{
-					id: 'actions',
-					cell: ({ row }) => <DataTableRowActions row={row} />
-				}
-			]
-		},
-
-		options: {
-			toolbar: {
-				enable: true,
-				searchColId: 'jobName'
-			},
-			pagination: true
-		},
-		onRowClick: (index: number) => {
-			return () => {
-				navigate(`/main/job/detail/${jobDatas[index]?.id}`, {
-					state: { param: jobDatas[index]?.id }
-				});
-			};
-		},
-		createBtn: <JobCreate />,
-		actionBtn: (
-			<div className="sm:ml-16 sm:flex-none">
-				<button
-					type="button"
-					className="block rounded-md bg-secondary px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 min-w-25 transition-colors duration-200"
-					onClick={handleMatchClick}
-				>
-					定制岗位专用简历
-				</button>
-			</div>
-		),
-		selectionHandler
-	};
-
-	//添加选择列
-	const ResumeProps = {
-		selectColShow: true,
-		//将选中状态存储到store
-		selectionHandler: (selectedRows: unknown[]) => {
-			dispatch(
-				setResumeData({
-					resumeId: (selectedRows[0] as ResumeVo)?.id
-				})
-			);
-		},
-		title: '',
-		description: '选择要匹配的简历',
-		mainTable: false
-	};
-
-	const dataTableConfigResumeMatched: DataTableConfig<ResumeVo> = {
-		columns: {
-			dataCols: [
-				{
-					accessorKey: 'name',
-					header: ({ column }) => <DataTableColumnHeader column={column} title="简历名称" />,
-					cell: ({ row }) => {
-						return <div className="w-[200px] font-medium">{row.original.name}</div>;
-					},
-					enableHiding: false,
-					enableSorting: true
-				},
-				{
-					accessorKey: 'skill',
-					header: ({ column }) => <DataTableColumnHeader column={column} title="职业技能" />,
-					cell: ({ row }) => {
-						const skill = row.original.skill;
-						if (!skill?.content?.length) {
-							return <div className="text-gray-500">未关联技能</div>;
+							return (
+								<div className="flex flex-wrap gap-1 max-w-[300px]">
+									{displayProjects.map((project, index) => (
+										<Badge key={project.id || index} variant="secondary" className="text-xs">
+											{project.name || project.info?.name || '未命名项目'}
+										</Badge>
+									))}
+									{remainingCount > 0 && (
+										<Badge variant="default" className="text-xs">
+											+{remainingCount}个项目
+										</Badge>
+									)}
+								</div>
+							);
 						}
-						const displaySkill = skill.content.slice(0, 2);
-						const remainingCount = skill.content.length - 2;
-						return (
-							<div className="flex flex-wrap gap-1 max-w-[300px]">
-								{displaySkill.map((skill, index) => (
-									<Badge key={skill.type || index} variant="secondary" className="text-xs">
-										{skill.type || '未分类'}
-									</Badge>
-								))}
-								{remainingCount > 0 && (
-									<Badge variant="default" className="text-xs">
-										+{remainingCount}个技能
-									</Badge>
-								)}
-							</div>
-						);
 					},
-					enableHiding: false,
-					enableSorting: false
-				},
-				{
-					accessorKey: 'projects',
-					header: ({ column }) => <DataTableColumnHeader column={column} title="项目经验" />,
-					cell: ({ row }) => {
-						const projects = row.original.projects || [];
-						if (projects.length === 0) {
-							return <div className="text-gray-500">无项目经验</div>;
+					{
+						accessorKey: 'updatedAt',
+						header: ({ column }) => <DataTableColumnHeader column={column} title="更新时间" />,
+						cell: ({ row }) => {
+							const date = row.original.updatedAt
+								? new Date(row.original.updatedAt).toLocaleDateString()
+								: '未知';
+							return <div className="text-sm text-gray-500">{date}</div>;
 						}
-						const displayProjects = projects.slice(0, 2);
-						const remainingCount = projects.length - 2;
-
-						return (
-							<div className="flex flex-wrap gap-1 max-w-[300px]">
-								{displayProjects.map((project, index) => (
-									<Badge key={project.id || index} variant="secondary" className="text-xs">
-										{project.name || project.info?.name || '未命名项目'}
-									</Badge>
-								))}
-								{remainingCount > 0 && (
-									<Badge variant="default" className="text-xs">
-										+{remainingCount}个项目
-									</Badge>
-								)}
-							</div>
-						);
 					}
-				},
-				{
-					accessorKey: 'updatedAt',
-					header: ({ column }) => <DataTableColumnHeader column={column} title="更新时间" />,
-					cell: ({ row }) => {
-						const date = row.original.updatedAt
-							? new Date(row.original.updatedAt).toLocaleDateString()
-							: '未知';
-						return <div className="text-sm text-gray-500">{date}</div>;
+				],
+
+				selectCol: [],
+
+				rowActionsCol: [
+					{
+						id: 'actions',
+						cell: ({ row }) => <DataTableRowActions row={row} />
 					}
-				}
-			],
-
-			selectCol: [],
-
-			rowActionsCol: [
-				{
-					id: 'actions',
-					cell: ({ row }) => <DataTableRowActions row={row} />
-				}
-			]
-		},
-
-		options: {
-			toolbar: {
-				enable: true,
-				searchColId: 'name'
+				]
 			},
-			pagination: true
-		},
-		onRowClick: (index: number) => {
-			return () => {
-				navigate(`/main/job/resumeMatched/${resumeMatchedDatas[index]?.id}`, {
-					state: { param: resumeMatchedDatas[index]?.id }
-				});
-			};
-		},
-		mainTable: false
-	};
 
-	return (
-		<>
-			<PageHeader
-				title={title ?? '岗位'}
-				description={description ?? '追踪岗位, 并借助 Prisma 将您的简历与岗位信息进行匹配'}
-			></PageHeader>
-			<div className="pl-10 pr-10">
-				<ConfigDataTable dataTableConfig={dataTableConfig} data={jobDatas} />
-			</div>
-			<Resumes {...ResumeProps}></Resumes>
-			<PageHeader
-				title={'岗位专用简历'}
-				description={'已定制的契合、匹配岗位的专用简历'}
-			></PageHeader>
-			<div className="pl-10 pr-10">
-				<ConfigDataTable dataTableConfig={dataTableConfigResumeMatched} data={resumeMatchedDatas} />
-			</div>
-		</>
-	);
-};
+			options: {
+				toolbar: {
+					enable: true,
+					searchColId: 'name'
+				},
+				pagination: true
+			},
+			onRowClick: (index: number) => {
+				return () => {
+					navigate(`/main/job/resumeMatched/${resumeMatchedDatas[index]?.id}`, {
+						state: { param: resumeMatchedDatas[index]?.id }
+					});
+				};
+			},
+			mainTable: false
+		};
+
+		return (
+			<>
+				<PageHeader
+					title={title ?? '岗位'}
+					description={description ?? '追踪岗位, 并借助 Prisma 将您的简历与岗位信息进行匹配'}
+				></PageHeader>
+				<div className="pl-10 pr-10">
+					<ConfigDataTable dataTableConfig={dataTableConfig} data={jobDatas} />
+				</div>
+				<Resumes {...ResumeProps}></Resumes>
+				<PageHeader
+					title={'岗位专用简历'}
+					description={'已定制的契合、匹配岗位的专用简历'}
+				></PageHeader>
+				<div className="pl-10 pr-10">
+					<ConfigDataTable
+						dataTableConfig={dataTableConfigResumeMatched}
+						data={resumeMatchedDatas}
+					/>
+				</div>
+			</>
+		);
+	}
+);
 
 const JobsPage = () => {
 	const dispatch = useDispatch();

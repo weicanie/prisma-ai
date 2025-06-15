@@ -3,17 +3,13 @@ import { instance } from '../config';
 /**
  * 前端通过后端直传文件到OSS
  * @param files 文件列表
- * @param token 令牌(用于身份验证)
+ * @param token
  */
-export async function uploadFilesToOSS(files: File[], token: string) {
+export async function uploadFilesToOSS(files: File[]) {
 	for (const file of files) {
 		const {
 			data: { data: url }
-		} = await instance.get<ServerDataFormat<string>>(`/oss/presignedUrl?name=${file.name}`, {
-			headers: {
-				Authorization: token
-			}
-		});
+		} = await instance.get<ServerDataFormat<string>>(`/oss/presignedUrl?name=${file.name}`);
 		try {
 			await instance.put(url, file);
 		} catch (error) {

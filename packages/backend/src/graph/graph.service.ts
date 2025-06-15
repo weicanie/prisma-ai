@@ -9,7 +9,7 @@ import {
   projectSchema,
 } from '@prism-ai/shared';
 import EventBus from '../EventBus/EventBus';
-import { DiyStateGraph } from './DiyStateGraph';
+import { DiyStateGraph } from './diyStateGraph';
 
 @Injectable()
 export class GraphService {

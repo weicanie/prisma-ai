@@ -1,5 +1,5 @@
+import classNames from 'classnames';
 import React from 'react';
-import styled from 'styled-components';
 
 interface WallAProps {
 	play: boolean;
@@ -8,31 +8,6 @@ interface WallAProps {
 	width?: number;
 	height?: number;
 }
-const WallWrapper = styled.div`
-	.wallGrid {
-		display: grid;
-		width: 100%;
-		height: 100vh;
-		background-color: transparent;
-		position: absolute;
-		overflow: hidden;
-		z-index: -1;
-		top: 0;
-		bottom: 0;
-		left: 0;
-		right: 0;
-
-		filter: url(#roughpaper);
-	}
-
-	.gridCell {
-		border-bottom: 2px solid rgb(151, 170, 184);
-	}
-
-	.withBorder {
-		border-right: 2px solid rgb(151, 170, 184);
-	}
-`;
 const Wall: React.FC<WallAProps> = ({ play, duration = 1500, delay = 1000 }) => {
 	const rows = 30;
 	const cols = 24;
@@ -57,7 +32,7 @@ const Wall: React.FC<WallAProps> = ({ play, duration = 1500, delay = 1000 }) => 
 	};
 	//墙体线条手写效果
 	const SvgFilter = () => (
-		<svg style={{ position: 'absolute', width: 0, height: 0 }}>
+		<svg className="absolute h-0 w-0">
 			<filter id="roughpaper">
 				{/* 创建噪点 - 模拟污渍和划痕 */}
 				<feTurbulence
@@ -90,25 +65,35 @@ const Wall: React.FC<WallAProps> = ({ play, duration = 1500, delay = 1000 }) => 
 		</svg>
 	);
 	return (
-		<WallWrapper>
+		<div>
 			<SvgFilter />
 			<div
-				className="wallGrid"
+				className={classNames(
+					'grid h-screen w-full absolute top-0 bottom-0 left-0 right-0 z-[-1] overflow-hidden bg-transparent [filter:url(#roughpaper)] transition-opacity ease-in-out',
+					{ 'opacity-100': play, 'opacity-0': !play }
+				)}
 				style={{
 					gridTemplateRows: `repeat(${rows}, 1fr)`,
 					gridTemplateColumns: `repeat(${cols}, 1fr)`,
-					opacity: play ? 1 : 0,
-					transition: `opacity ${duration}ms ease-in-out ${delay}ms`
+					transitionDuration: `${duration}ms`,
+					transitionDelay: `${delay}ms`
 				}}
 			>
 				{Array.from({ length: getEvenRows() * getEvenCols() }).map((_, index) => {
 					const isEvenRow = Math.floor(index / getEvenCols()) % 2 === 0;
 					const isGap = isEvenRow ? index % 2 === 1 : index % 2 === 0;
 
-					return <div key={index} className={`gridCell ${!isGap ? 'withBorder' : ''}`} />;
+					return (
+						<div
+							key={index}
+							className={classNames('border-b-2 border-[rgb(151,170,184)]', {
+								'border-r-2': !isGap
+							})}
+						/>
+					);
 				})}
 			</div>
-		</WallWrapper>
+		</div>
 	);
 };
 

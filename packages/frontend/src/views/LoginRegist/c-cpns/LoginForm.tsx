@@ -12,10 +12,12 @@ import {
 	FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import type { LoginFormType, LoginResponse } from '@prism-ai/shared';
 import type { Dispatch, PropsWithChildren, SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { loginformSchema } from '../../../../../shared/src/types/login_regist.schema';
+import { useCustomMutation } from '../../../query/config';
 import { login } from '../../../services/login_regist';
 
 type PropsType = PropsWithChildren<{
@@ -31,20 +33,18 @@ export function LoginForm({ setIsLoginCard }: PropsType) {
 	});
 
 	const navigate = useNavigate();
-
-	async function onSubmit(values: z.infer<typeof loginformSchema>) {
-		try {
-			const res = await login({ username: values.username, password: values.password });
-			if (res.data.code === '0') {
-				toast.success('登录成功');
-				res.data.data.userId = res.data.data.id;
-				localStorage.setItem('token', res.data.data.token);
-				localStorage.setItem('userInfo', JSON.stringify(res.data));
-				navigate('/');
-			}
-		} catch (e: any) {
-			toast.error(e.response?.data?.message || '系统繁忙，请稍后再试');
+	const loginMutation = useCustomMutation<LoginResponse, LoginFormType>(login, {
+		onSuccess: res => {
+			toast.success('登录成功');
+			res.data.userId = res.data.id;
+			localStorage.setItem('token', res.data.token);
+			localStorage.setItem('userInfo', JSON.stringify(res.data));
+			navigate('/');
 		}
+	});
+
+	async function onSubmit(values: LoginFormType) {
+		loginMutation.mutate({ username: values.username, password: values.password });
 	}
 
 	const items: Array<{
@@ -59,11 +59,7 @@ export function LoginForm({ setIsLoginCard }: PropsType) {
 		<Form {...form}>
 			<form
 				onSubmit={form.handleSubmit(onSubmit)}
-				className="space-y-8"
-				style={{
-					color: 'rgba(236, 29, 39, 0.777)',
-					fontSize: '2rem'
-				}}
+				className="space-y-8 text-2xl text-[var(--orange-prisma)]"
 			>
 				{items.map(item => (
 					<FormField
@@ -72,52 +68,30 @@ export function LoginForm({ setIsLoginCard }: PropsType) {
 						name={item.name}
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel
-									style={{
-										fontSize: '1.5rem',
-										fontWeight: '600'
-									}}
-								>
-									{item.label}
-								</FormLabel>
+								<FormLabel className="text-3xl font-semibold">{item.label}</FormLabel>
 								<FormControl>
-									<Input
-										placeholder=""
-										{...field}
-										style={{
-											fontSize: '1.5rem',
-											fontWeight: '600'
-										}}
-									/>
+									<Input placeholder="" {...field} className="text-3xl font-semibold" />
 								</FormControl>
 								<FormMessage />
 							</FormItem>
 						)}
 					/>
 				))}
-				<Button
-					type="submit"
-					style={{
-						color: 'rgba(236, 29, 39, 0.777)',
-						backgroundColor: 'rgb(28,160,188)',
-						fontSize: '1.3rem',
-						fontWeight: '600'
-					}}
-				>
-					login
-				</Button>
+				<div className="flex justify-between">
+					<Button
+						type="submit"
+						className="bg-[rgb(28,160,188)] text-2xl font-semibold text-[var(--orange-prisma)]"
+					>
+						login
+					</Button>
+					<Button
+						onClick={() => setIsLoginCard(false)}
+						className="bg-[rgb(34,179,71)] text-2xl font-semibold text-[var(--orange-prisma)]"
+					>
+						go to regist
+					</Button>
+				</div>
 			</form>
-			<Button
-				onClick={() => setIsLoginCard(false)}
-				style={{
-					color: 'rgba(236, 29, 39, 0.777)',
-					backgroundColor: 'rgb(34,179,71)',
-					fontSize: '1.3rem',
-					fontWeight: '600'
-				}}
-			>
-				go to regist
-			</Button>
 		</Form>
 	);
 }

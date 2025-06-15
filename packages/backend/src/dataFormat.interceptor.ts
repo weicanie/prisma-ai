@@ -8,7 +8,6 @@ import { ErrorCode, ServerDataFormat } from '@prism-ai/shared';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 //统一返回数据的格式
-
 @Injectable()
 export class GlobalInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {

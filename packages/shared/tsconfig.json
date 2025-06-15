@@ -9,8 +9,9 @@
     "esModuleInterop": true,          
     "strict": true,                   // 启用所有严格检查
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node"]
   },
-  "include": ["src/**/*", "../backend/src/utils/zodToMongooseModel.ts", "../backend/src/utils/generate.ts"],            
+  "include": ["src/**/*"],            
   "exclude": ["node_modules", "dist", "**/*.test.ts"]
 }

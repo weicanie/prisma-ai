@@ -1,9 +1,9 @@
 /* 
-  基于 styled-components 实现主题设置、系统主题监听、实际应用主题查询、当前主题列表
+  基于 React Context 实现主题设置、系统主题监听、实际应用主题查询、当前主题列表
 
   通过localStorage持久化存取当前主题, 以在页面刷新后维持
 
-  需要预先设置好主题对象：如darkTheme, lightTheme
+  通过给html根节点添加 'light' or 'dark' class,配合tailwind的dark mode使用
 
 	theme名字 -> 提供的主题对象
 */
@@ -27,7 +27,6 @@ function getSystemTheme(): 'light' | 'dark' {
 	}
 	return 'light';
 }
-//拓展 styled-components 的 ThemeProvider
 export const ThemeProviderDiy: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	const [theme, setThemeState] = useState<ThemeType>(() => {
 		// 从localStorage读取
