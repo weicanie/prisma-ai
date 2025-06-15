@@ -1,2 +1,25 @@
-module.exports = {};
-//FIXME 这里有设置规则时,子包 eslint 有用;没有时则没用了。查一下monorepo中的eslint配置
+import js from '@eslint/js';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
+
+export default tseslint.config(
+	{
+		ignores: ['**/dist/**', '**/node_modules/**', '**/build/**']
+	},
+	js.configs.recommended,
+	...tseslint.configs.recommended,
+	{
+		languageOptions: {
+			globals: {
+				...globals.node,
+				...globals.browser
+			}
+		}
+	},
+	{
+		rules: {
+			'@typescript-eslint/no-explicit-any': 'off',
+			'@typescript-eslint/no-unused-vars': 'warn'
+		}
+	}
+);
