@@ -3,8 +3,9 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 interface Resume {
 	data: CreateResumeDto & {
-		resumeId: string; //当前选中的简历ID
-		jobId: string; //当前选中的岗位ID
+		resumeId: string; //当前选中的简历ID(简历定制)
+		jobId: string; //当前选中的岗位ID(简历定制)
+		resuemIdToMatch: string; //当前选中的简历ID(简历匹配岗位)
 	};
 }
 
@@ -13,8 +14,9 @@ const initialState: Resume = {
 		name: '',
 		skill: '', //当前选中的职业技能
 		projects: [], //当前选中的项目经验
-		resumeId: '',
-		jobId: ''
+		resumeId: '',//当前选中的简历ID(简历定制)
+		jobId: '',//当前选中的岗位ID(简历定制)
+		resuemIdToMatch: '',//当前选中的简历ID(简历匹配岗位)
 	}
 };
 

@@ -1,6 +1,7 @@
 'use client';
 
 import {
+	Briefcase,
 	FileText,
 	House,
 	LibraryBig,
@@ -67,8 +68,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				url: '/main/resumes'
 			},
 			{
-				title: '岗位',
+				title: '匹配',
 				icon: Target,
+				url: '/main/hjm',
+				items: [
+					{ title: '岗位数据获取', url: '/main/hjm/get-jobs' },
+					{ title: '简历匹配岗位', url: '/main/hjm/match-jobs' },
+				]
+			},
+			{
+				title: '岗位',
+				icon: Briefcase,
 				url: '/main/job'
 				// items: [
 				// 	{ title: '简历匹配', url: '/main/job/match' },
@@ -88,7 +98,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 					{ title: '技术学习路线', url: '/main/offer/road' },
 					{ title: '项目亮点实现', url: '/main/offer/doit' },
 					{ title: '简历延申八股', url: '/main/offer/questions' },
-					{ title: '模拟面试', url: '/main/offer/mock-interview' }
 				]
 			}
 		]

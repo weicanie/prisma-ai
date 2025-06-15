@@ -198,7 +198,6 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 			description: '选择要匹配的简历',
 			mainTable: false
 		};
-
 		const dataTableConfigResumeMatched: DataTableConfig<ResumeVo> = {
 			columns: {
 				dataCols: [

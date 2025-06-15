@@ -84,7 +84,7 @@ export function DataTable<TData, TValue = unknown>({
 	});
 
 	return (
-		<div className="space-y-4">
+		<div className="space-y-4 ">
 			{/* toolbar */}
 			{options.toolbar.enable && (
 				<DataTableToolbar

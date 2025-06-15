@@ -3,17 +3,26 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTheme } from '@/utils/theme';
 import type { JobVo } from '@prism-ai/shared';
-import { Briefcase, Building, Calendar, DollarSign, ExternalLink, MapPin } from 'lucide-react';
+import { Briefcase, Building, Calendar, DollarSign, ExternalLink, MapPin, Plus } from 'lucide-react';
 import React from 'react';
+import { toast } from 'sonner';
+import { useCustomMutation } from '../../../query/config';
+import { becomeUserJob } from '../../../services/hjm';
 import ClickCollapsible from '../components/ClickCollapsible';
 
 interface JobCardProps {
 	jobData: JobVo;
+	addBtn?: boolean;//是否显示“添加到我的岗位”按钮
 }
 
-const JobCard: React.FC<JobCardProps> = ({ jobData }) => {
+const JobCard: React.FC<JobCardProps> = ({ jobData,addBtn=false }) => {
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
+	const becomeMutation = useCustomMutation(becomeUserJob,{
+		onSuccess: () => {
+			toast.success('添加成功');
+		}
+	})
 
 	return (
 		<div className={`min-h-screen transition-colors duration-200 bg-global`}>
@@ -82,6 +91,12 @@ const JobCard: React.FC<JobCardProps> = ({ jobData }) => {
 									查看原始职位
 								</a>
 							</Button>
+							{addBtn && (
+								<Button variant="outline" className="flex items-center gap-2 bg-primary text-white" onClick={() => becomeMutation.mutate(jobData.id)}>
+										<Plus className="w-4 h-4" />
+										添加到我的岗位
+								</Button>
+							)}
 						</CardContent>
 					)}
 
@@ -101,7 +116,7 @@ const JobCard: React.FC<JobCardProps> = ({ jobData }) => {
 
 					{/* 职位统计信息 */}
 
-					<CardHeader>
+					{/* <CardHeader>
 						<CardTitle className={`${isDark ? 'text-white' : 'text-gray-900'}`}>
 							职位信息统计
 						</CardTitle>
@@ -141,7 +156,7 @@ const JobCard: React.FC<JobCardProps> = ({ jobData }) => {
 								</div>
 							</div>
 						</div>
-					</CardContent>
+					</CardContent> */}
 				</Card>
 			</div>
 		</div>

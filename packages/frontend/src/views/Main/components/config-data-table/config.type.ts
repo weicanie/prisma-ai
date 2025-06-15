@@ -38,7 +38,7 @@ export type SelectCol<TRow> = Pick<
 	DataCol<TRow>,
 	'id' | 'header' | 'cell' | 'enableSorting' | 'enableHiding'
 >;
-
+//TODO 将不涉及hook的项抽取到外部,以减少重复代码
 export interface DataTableConfig<TRow = unknown> {
 	columns: {
 		//数据列,过滤功能可选

@@ -1,11 +1,14 @@
 import type {
 	CreateJobDto,
 	JobVo,
+	MatchedJobVo,
 	PaginatedJobsResult,
 	ServerDataFormat as SDF,
 	UpdateJobDto
 } from '@prism-ai/shared'; // 假设shared包中已定义这些类型
 import { instance } from './config';
+
+
 
 /**
  * 创建新的招聘信息
@@ -35,6 +38,16 @@ export async function findAllUserJobs(page?: number, limit?: number) {
  */
 export async function findOneUserJob(id: string) {
 	const res = await instance.get<SDF<JobVo>>(`/job/one/${id}`);
+	return res.data;
+}
+
+/**
+ * 根据简历ID查询所有匹配的岗位
+ * @param resumeId 简历ID
+ * @returns 返回匹配的岗位列表，包含匹配原因
+ */
+export async function findAllMatchedJobs(resumeId: string) {
+	const res = await instance.get<SDF<MatchedJobVo[]>>(`/job/matched/${resumeId}`);
 	return res.data;
 }
 

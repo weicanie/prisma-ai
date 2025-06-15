@@ -17,6 +17,8 @@ const Test = lazy(() => import('../views/MyTest/Test'));
 const Action = lazy(() => import('../views/Main/Projects/Action'));
 const Skills = lazy(() => import('../views/Main/Skills'));
 const SkillRead = lazy(() => import('../views/Main/Skills/SkillRead'));
+const DataCrawl = lazy(() => import('../views/Main/Hjm/DataCrawl'));
+const JobMatch = lazy(() => import('../views/Main/Hjm/JobMatch'));
 
 export const routes = [
 	{
@@ -48,7 +50,7 @@ export const routes = [
 				path: '/main/home',
 				element: (
 					<UpdateBreadRouter>
-						<>首页</>
+						<>这是首页</>
 					</UpdateBreadRouter>
 				)
 			},
@@ -136,6 +138,33 @@ export const routes = [
 						element: (
 							<UpdateBreadRouter>
 								<ResumeActions></ResumeActions>
+							</UpdateBreadRouter>
+						)
+					}
+				]
+			},
+			// 人岗匹配
+			{
+				path: '/main/hjm',
+				element: (
+					<UpdateBreadRouter>
+						<Outlet />
+					</UpdateBreadRouter>
+				),
+				children: [
+					{
+						path: '/main/hjm/get-jobs',
+						element: (
+							<UpdateBreadRouter>
+								<DataCrawl />
+							</UpdateBreadRouter>
+						)
+					},
+					{
+						path: '/main/hjm/match-jobs',
+						element: (
+							<UpdateBreadRouter>
+								<JobMatch />
 							</UpdateBreadRouter>
 						)
 					}
