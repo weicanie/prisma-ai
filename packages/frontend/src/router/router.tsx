@@ -4,6 +4,7 @@ import PrivateRoute from './PrivateRoute';
 import UpdateBreadRouter from './UpdateBreadRouter';
 const LoginRegist = lazy(() => import('../views/LoginRegist/LoginRegist'));
 const Main = lazy(() => import('../views/Main'));
+const Home = lazy(() => import('../views/Main/Home'));
 const Jobs = lazy(() => import('../views/Main/Jobs'));
 const JobRead = lazy(() => import('../views/Main/Jobs/JobRead'));
 const Knowledges = lazy(() => import('../views/Main/Knowbase'));
@@ -13,7 +14,6 @@ const Resumes = lazy(() => import('../views/Main/Resumes'));
 const ResumeActions = lazy(() => import('../views/Main/Resumes/Action'));
 const ResumeRead = lazy(() => import('../views/Main/Resumes/ResumeRead'));
 
-const Test = lazy(() => import('../views/MyTest/Test'));
 const Action = lazy(() => import('../views/Main/Projects/Action'));
 const Skills = lazy(() => import('../views/Main/Skills'));
 const SkillRead = lazy(() => import('../views/Main/Skills/SkillRead'));
@@ -29,10 +29,7 @@ export const routes = [
 			</PrivateRoute>
 		)
 	},
-	{
-		path: '/test',
-		element: <Test />
-	},
+
 	{
 		path: '/login',
 		element: <LoginRegist />
@@ -50,7 +47,7 @@ export const routes = [
 				path: '/main/home',
 				element: (
 					<UpdateBreadRouter>
-						<>这是首页</>
+						<Home />
 					</UpdateBreadRouter>
 				)
 			},
@@ -301,6 +298,9 @@ export const path_name: Record<string, string> = {
 
 	'/main/job': '岗位',
 	'/main/job/detail': '岗位-详情',
+
+	'/main/hjm/get-jobs': '人岗匹配-爬取岗位',
+	'/main/hjm/match-jobs': '人岗匹配-匹配岗位',
 
 	'/main/knowledge': '知识库',
 	'/main/knowledge/detail': '知识库-详情',

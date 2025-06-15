@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { updateAction } from '../store/bread-router';
 interface UpdateBreadRouterProps {
-	children: React.ReactElement;
+	children: React.ReactNode;
 }
 
 /* 使用redux管理面包屑导航的路由状态

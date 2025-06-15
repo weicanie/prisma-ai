@@ -1,12 +1,11 @@
 'use client';
 
-import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from 'lucide-react';
+import { ChevronsUpDown, LogOut } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
-	DropdownMenuGroup,
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
@@ -18,6 +17,8 @@ import {
 	SidebarMenuItem,
 	useSidebar
 } from '@/components/ui/sidebar';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export function NavUser({
 	user
@@ -28,6 +29,13 @@ export function NavUser({
 		avatar: string;
 	};
 }) {
+	const navigate = useNavigate();
+	const logout = () => {
+		localStorage.removeItem('token');
+		localStorage.removeItem('userInfo');
+		navigate('/login');
+		toast.success('退出登录成功');
+	}
 	const { isMobile } = useSidebar();
 
 	return (
@@ -68,14 +76,7 @@ export function NavUser({
 								</div>
 							</div>
 						</DropdownMenuLabel>
-						<DropdownMenuSeparator />
-						<DropdownMenuGroup>
-							<DropdownMenuItem>
-								<Sparkles />
-								Upgrade to Pro
-							</DropdownMenuItem>
-						</DropdownMenuGroup>
-						<DropdownMenuSeparator />
+						{/* <DropdownMenuSeparator />
 						<DropdownMenuGroup>
 							<DropdownMenuItem>
 								<BadgeCheck />
@@ -89,11 +90,11 @@ export function NavUser({
 								<Bell />
 								Notifications
 							</DropdownMenuItem>
-						</DropdownMenuGroup>
+						</DropdownMenuGroup> */}
 						<DropdownMenuSeparator />
-						<DropdownMenuItem>
+						<DropdownMenuItem onClick={() => logout()}>
 							<LogOut />
-							Log out
+							退出登录
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
