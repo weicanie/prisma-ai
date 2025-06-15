@@ -11,18 +11,18 @@ import { ResumeModule } from '../resume/resume.module';
 import { LLMSseService } from './llm-sse.service';
 import { LLMCacheService } from './LLMCache.service';
 @Module({
-	controllers: [LLMSessionPoolController],
-	providers: [LLMCacheService, LLMSseService],
-	imports: [
-		forwardRef(() => ProjectModule),
-		forwardRef(() => ResumeModule),
-		RedisModule,
-		ModelModule,
-		SessionPoolModule,
-		forwardRef(() => TaskQueueModule),
-		VectorStoreModule,
-		forwardRef(() => EventBusModule)
-	],
-	exports: [LLMSseService]
+  controllers: [LLMSessionPoolController],
+  providers: [LLMCacheService, LLMSseService],
+  imports: [
+    forwardRef(() => ProjectModule),
+    forwardRef(() => ResumeModule),
+    RedisModule,
+    ModelModule,
+    SessionPoolModule,
+    forwardRef(() => TaskQueueModule),
+    VectorStoreModule,
+    forwardRef(() => EventBusModule),
+  ],
+  exports: [LLMSseService],
 })
 export class SseModule {}

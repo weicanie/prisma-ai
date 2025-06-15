@@ -4,9 +4,9 @@ import { CacheExampleController } from './cache-example.controller';
 import { CacheInterceptor } from './cache.interceptor';
 
 @Module({
-	imports: [RedisModule],
-	controllers: [CacheExampleController],
-	providers: [CacheInterceptor],
-	exports: [CacheInterceptor]
+  imports: [RedisModule],
+  controllers: [CacheExampleController],
+  providers: [CacheInterceptor],
+  exports: [CacheInterceptor],
 })
 export class CacheModule {}

@@ -95,7 +95,7 @@ export class RagService {
 			verbose: true
 		});
 
-		for await (let chunk of result) {
+		for await (const chunk of result) {
 			console.log(chunk);
 		}
 	}

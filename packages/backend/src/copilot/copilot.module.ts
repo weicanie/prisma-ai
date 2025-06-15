@@ -3,9 +3,9 @@ import { ModelModule } from '../model/model.module';
 import { CopilotkitController } from './copilotkit.controller';
 
 @Module({
-	imports: [ModelModule],
-	controllers: [CopilotkitController],
-	providers: [],
-	exports: []
+  imports: [ModelModule],
+  controllers: [CopilotkitController],
+  providers: [],
+  exports: [],
 })
 export class CopilotModule {}

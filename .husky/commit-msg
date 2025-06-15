@@ -1,2 +1,2 @@
 
-pnpm commitlint --edit 
+pnpm exec commitlint --edit 

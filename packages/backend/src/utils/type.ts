@@ -8,9 +8,9 @@ import { Types } from 'mongoose';
  * R: 可选的映射类型，用于指定转换后的类型
  */
 export type PopulateFields<T, K extends keyof T, R = unknown> = Omit<T, K> & {
-	[P in K]: T[P] extends Types.ObjectId | Types.ObjectId[]
-		? P extends keyof R
-			? R[P]
-			: unknown
-		: T[P];
+  [P in K]: T[P] extends Types.ObjectId | Types.ObjectId[]
+    ? P extends keyof R
+      ? R[P]
+      : unknown
+    : T[P];
 };

@@ -5,9 +5,9 @@ import { LLMSessionPoolController } from './llm-sse-session-pool.controller';
 import { LLMSseSessionPoolService } from './llm-sse-session-pool.service';
 
 @Module({
-	controllers: [LLMSessionPoolController],
-	providers: [LLMSseSessionPoolService],
-	imports: [RedisModule, forwardRef(() => TaskQueueModule)],
-	exports: [LLMSseSessionPoolService]
+  controllers: [LLMSessionPoolController],
+  providers: [LLMSseSessionPoolService],
+  imports: [RedisModule, forwardRef(() => TaskQueueModule)],
+  exports: [LLMSseSessionPoolService],
 })
 export class SessionPoolModule {}

@@ -6,20 +6,20 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 
 @Module({
-	controllers: [UserController],
-	providers: [UserService],
-	exports: [UserService],
-	imports: [
-		RedisModule,
-		EmailModule,
-		JwtModule.registerAsync({
-			global: true,
-			useFactory() {
-				return {
-					signOptions: {}
-				};
-			}
-		})
-	]
+  controllers: [UserController],
+  providers: [UserService],
+  exports: [UserService],
+  imports: [
+    RedisModule,
+    EmailModule,
+    JwtModule.registerAsync({
+      global: true,
+      useFactory() {
+        return {
+          signOptions: {},
+        };
+      },
+    }),
+  ],
 })
 export class UserModule {}

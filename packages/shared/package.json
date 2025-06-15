@@ -13,9 +13,7 @@
     "dev": "tsup src/index.ts --dts --watch"
   },
   "devDependencies": {
-    "@types/node": "^22.15.18",
-    "tsup": "^8.5.0",
-    "typescript": "^5.8.3"
+    "tsup": "^8.5.0"
   },
   "exports": {
     ".": {
@@ -24,7 +22,5 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "dependencies": {
-    "zod": "^3.24.3"
-  }
+  "dependencies": {}
 }

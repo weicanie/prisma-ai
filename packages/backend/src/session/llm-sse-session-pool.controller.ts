@@ -9,35 +9,40 @@ import { LLMSseSessionPoolService } from './llm-sse-session-pool.service';
  */
 @Controller('llm-session')
 export class LLMSessionPoolController {
-	constructor(
-		private readonly sessionPool: LLMSseSessionPoolService,
-		private readonly taskQueueService: TaskQueueService
-	) {}
+  constructor(
+    private readonly sessionPool: LLMSseSessionPoolService,
+    private readonly taskQueueService: TaskQueueService,
+  ) {}
 
-	/* 创建新会话 */
-	@RequireLogin()
-	@Post('context')
-	async createLLMSession(
-		@Body() contextData: LLMSessionRequest,
-		@UserInfo() userInfo: UserInfoFromToken
-	) {
-		/* 确保一个用户同一时间只能进行一次会话（需要多类型再引入会话池,值变成表罢了）*/
-		if (await this.sessionPool.getUserSessionId(userInfo.userId)) {
-			return { sessionId: await this.sessionPool.getUserSessionId(userInfo.userId) };
-		}
-		try {
-			/* 创建会话、存储上下文 */
-			const sessionId = crypto.randomUUID();
-			await this.sessionPool.createSession(sessionId);
-			await this.sessionPool.setContext(sessionId, { ...contextData, userInfo });
-			await this.sessionPool.setUserSessionId(userInfo.userId, sessionId);
-			return { sessionId };
-		} catch (error) {
-			throw new Error('设置上下文失败');
-		}
-	}
+  /* 创建新会话 */
+  @RequireLogin()
+  @Post('context')
+  async createLLMSession(
+    @Body() contextData: LLMSessionRequest,
+    @UserInfo() userInfo: UserInfoFromToken,
+  ) {
+    /* 确保一个用户同一时间只能进行一次会话（需要多类型再引入会话池,值变成表罢了）*/
+    if (await this.sessionPool.getUserSessionId(userInfo.userId)) {
+      return {
+        sessionId: await this.sessionPool.getUserSessionId(userInfo.userId),
+      };
+    }
+    try {
+      /* 创建会话、存储上下文 */
+      const sessionId = crypto.randomUUID();
+      await this.sessionPool.createSession(sessionId);
+      await this.sessionPool.setContext(sessionId, {
+        ...contextData,
+        userInfo,
+      });
+      await this.sessionPool.setUserSessionId(userInfo.userId, sessionId);
+      return { sessionId };
+    } catch (error) {
+      throw new Error('设置上下文失败');
+    }
+  }
 
-	/* 
+  /* 
   前端在创建会话前,如localStorage的sessionId存在,需要获取当前会话状态再决策
     如不存在,则直接创建会话（说明还没进行过会话）
 
@@ -55,51 +60,51 @@ export class LLMSessionPoolController {
 
     后端是否完成：session.done或者task.status（统一用session.done）
   */
-	@RequireLogin()
-	@Get('status')
-	async getSessionStatus(
-		@Query('sessionId') sessionId: string,
-		@UserInfo() userInfo: UserInfoFromToken
-	) {
-		const existingSession = await this.sessionPool.getSession(sessionId);
-		const curTaskId = await this.taskQueueService.getSessionTaskId(sessionId);
-		if (!existingSession) return { status: 'notfound' };
+  @RequireLogin()
+  @Get('status')
+  async getSessionStatus(
+    @Query('sessionId') sessionId: string,
+    @UserInfo() userInfo: UserInfoFromToken,
+  ) {
+    const existingSession = await this.sessionPool.getSession(sessionId);
+    const curTaskId = await this.taskQueueService.getSessionTaskId(sessionId);
+    if (!existingSession) return { status: 'notfound' };
 
-		if (!curTaskId) return { status: 'tasknotfound' };
-		//FIXME 有时候done会标记不上
-		// if (existingSession.fontendDone && existingSession.done) return { status: 'bothdone' };
-		if (existingSession.fontendDone) return { status: 'bothdone' };
+    if (!curTaskId) return { status: 'tasknotfound' };
+    //FIXME 有时候done会标记不上
+    // if (existingSession.fontendDone && existingSession.done) return { status: 'bothdone' };
+    if (existingSession.fontendDone) return { status: 'bothdone' };
 
-		if (existingSession.done) return { status: 'backdone' };
+    if (existingSession.done) return { status: 'backdone' };
 
-		return { status: 'running' };
-	}
+    return { status: 'running' };
+  }
 
-	/* 前端在接收完SSE数据后时上报
+  /* 前端在接收完SSE数据后时上报
   会话的前端完成：设置会话为前端完成状态
   用户的会话释放：释放用户当前会话,可以进行新会话
   */
-	@RequireLogin()
-	@Get('frontend-over')
-	async frontendOver(
-		@Query('sessionId') sessionId: string,
-		@UserInfo() userInfo: UserInfoFromToken
-	) {
-		/* 前端完成 */
-		await this.sessionPool.setFrontendDone(sessionId);
-		/* 
+  @RequireLogin()
+  @Get('frontend-over')
+  async frontendOver(
+    @Query('sessionId') sessionId: string,
+    @UserInfo() userInfo: UserInfoFromToken,
+  ) {
+    /* 前端完成 */
+    await this.sessionPool.setFrontendDone(sessionId);
+    /* 
       释放用户当前会话：删除userId ->sessionId的映射
       保留sessionId -> session的映射, 以供断点续传
     */
-		await this.sessionPool.delUserSessionId(userInfo.userId);
-		return '成功设置';
-	}
+    await this.sessionPool.delUserSessionId(userInfo.userId);
+    return '成功设置';
+  }
 
-	/* 用户主动中断 */
-	@RequireLogin()
-	@Get('abort')
-	async abortSession() {
-		//TODO中断功能
-		//停止正在进行的生成、删除会话
-	}
+  /* 用户主动中断 */
+  @RequireLogin()
+  @Get('abort')
+  async abortSession() {
+    //TODO中断功能
+    //停止正在进行的生成、删除会话
+  }
 }

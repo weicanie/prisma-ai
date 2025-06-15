@@ -5,10 +5,10 @@ import RagController from './Rag.controller';
 import { RagService } from './Rag.service';
 
 @Module({
-	controllers: [RagController],
-	providers: [RagService],
-	exports: [RagService],
-	imports: [ModelModule, VectorStoreModule]
+  controllers: [RagController],
+  providers: [RagService],
+  exports: [RagService],
+  imports: [ModelModule, VectorStoreModule],
 })
 class RagModule {}
 

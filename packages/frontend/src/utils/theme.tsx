@@ -8,8 +8,6 @@
 	theme名字 -> 提供的主题对象
 */
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-import { darkTheme, lightTheme } from '../assets/theme';
 
 type ThemeType = 'light' | 'dark' | 'system';
 
@@ -53,7 +51,6 @@ export const ThemeProviderDiy: React.FC<{ children: React.ReactNode }> = ({ chil
 
 	// 计算实际主题
 	const resolvedTheme = theme === 'system' ? systemTheme : theme; //不设置时默认使用系统主题
-	const themeObject = resolvedTheme === 'dark' ? darkTheme : lightTheme;
 
 	//页面刷新后重新设置主题
 	useEffect(() => {
@@ -73,7 +70,7 @@ export const ThemeProviderDiy: React.FC<{ children: React.ReactNode }> = ({ chil
 				themes: ['light', 'dark', 'system']
 			}}
 		>
-			<StyledThemeProvider theme={themeObject}>{children}</StyledThemeProvider>
+			{children}
 		</ThemeContext.Provider>
 	);
 };

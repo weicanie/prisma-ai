@@ -1,4 +1,9 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import {
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor,
+} from '@nestjs/common';
 import { ErrorCode, ServerDataFormat } from '@prism-ai/shared';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -6,16 +11,16 @@ import { map } from 'rxjs/operators';
 
 @Injectable()
 export class GlobalInterceptor implements NestInterceptor {
-	intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-		return next.handle().pipe(
-			map(data => {
-				const result: ServerDataFormat = {
-					code: data?.code ?? ErrorCode.SUCCESS,
-					message: data?.message ?? 'ok',
-					data
-				};
-				return result;
-			})
-		);
-	}
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    return next.handle().pipe(
+      map((data) => {
+        const result: ServerDataFormat = {
+          code: data?.code ?? ErrorCode.SUCCESS,
+          message: data?.message ?? 'ok',
+          data,
+        };
+        return result;
+      }),
+    );
+  }
 }

@@ -72,49 +72,55 @@
  * ```
  */
 export function patchSchemaArrays(
-	schema: any,
-	options: {
-		defaultItems?: any; // 无 items 属性,则以 defaultItems 作为 items 属性
-		log?: boolean;
-	} = { log: true, defaultItems: undefined }
+  schema: any,
+  options: {
+    defaultItems?: any; // 无 items 属性,则以 defaultItems 作为 items 属性
+    log?: boolean;
+  } = { log: true, defaultItems: undefined },
 ): any {
-	const { log, defaultItems } = options;
-	const newSchema = JSON.parse(JSON.stringify(schema));
+  const { log, defaultItems } = options;
+  const newSchema = JSON.parse(JSON.stringify(schema));
 
-	/**
-	 *
-	 * @param node 用于递归处理对象
-	 * @param path 用于记录路径
-	 */
-	function processObject(node: any, path: string[]) {
-		if (node?.properties) {
-			Object.entries(node.properties).forEach(([key, prop]: [string, any]) => {
-				if (Array.isArray(prop.type) && prop.type.length > 1) {
-					prop.type = prop.type[0];
-				}
-				if (prop.type === 'array' && !prop.items) {
-					prop.items = defaultItems;
-					if (log) {
-						console.log(`[SimplePatcher] 修补属性: ${path.join('.')}.${key}`, prop);
-					}
-				}
-				if (prop.type === 'object') {
-					processObject(prop, [...path, key]);
-				}
-			});
-		}
+  /**
+   *
+   * @param node 用于递归处理对象
+   * @param path 用于记录路径
+   */
+  function processObject(node: any, path: string[]) {
+    if (node?.properties) {
+      Object.entries(node.properties).forEach(([key, prop]: [string, any]) => {
+        if (Array.isArray(prop.type) && prop.type.length > 1) {
+          prop.type = prop.type[0];
+        }
+        if (prop.type === 'array' && !prop.items) {
+          prop.items = defaultItems;
+          if (log) {
+            console.log(
+              `[SimplePatcher] 修补属性: ${path.join('.')}.${key}`,
+              prop,
+            );
+          }
+        }
+        if (prop.type === 'object') {
+          processObject(prop, [...path, key]);
+        }
+      });
+    }
 
-		if (node?.items && node.items.type === 'array' && !node.items.items) {
-			node.items.items = defaultItems;
-			if (log) {
-				console.log(`[SimplePatcher] 修补嵌套数组: ${path.join('.')}.items`, node.items);
-			}
-		}
-	}
+    if (node?.items && node.items.type === 'array' && !node.items.items) {
+      node.items.items = defaultItems;
+      if (log) {
+        console.log(
+          `[SimplePatcher] 修补嵌套数组: ${path.join('.')}.items`,
+          node.items,
+        );
+      }
+    }
+  }
 
-	if (newSchema.type === 'object') {
-		processObject(newSchema, []);
-	}
+  if (newSchema.type === 'object') {
+    processObject(newSchema, []);
+  }
 
-	return newSchema;
+  return newSchema;
 }

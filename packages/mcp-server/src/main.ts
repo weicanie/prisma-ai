@@ -8,14 +8,14 @@ import { AppModule } from './app.module';
  * 包含 MCP Server 服务，支持无状态模式处理请求
  */
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+	const app = await NestFactory.create(AppModule);
 
-  app.enableCors();
+	app.enableCors();
 
-  const PORT = process.env.PORT ?? 3000;
-  await app.listen(PORT);
-  console.log(`Server with MCP support started on port ${PORT}`);
-  console.log(`MCP 请求入口: http://localhost:${PORT}/mcp`);
+	const PORT = process.env.PORT ?? 3000;
+	await app.listen(PORT);
+	console.log(`Server with MCP support started on port ${PORT}`);
+	console.log(`MCP 请求入口: http://localhost:${PORT}/mcp`);
 }
 
 bootstrap();

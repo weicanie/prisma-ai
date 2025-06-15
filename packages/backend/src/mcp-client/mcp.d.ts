@@ -1,13 +1,16 @@
 // 为 readline/promises 提供类型声明
 declare module 'readline/promises' {
-	import type { ReadStream, WriteStream } from 'fs';
+  import type { ReadStream, WriteStream } from 'fs';
 
-	interface Interface {
-		question(query: string): Promise<string>;
-		close(): void;
-	}
+  interface Interface {
+    question(query: string): Promise<string>;
+    close(): void;
+  }
 
-	export function createInterface(options: { input: ReadStream; output: WriteStream }): Interface;
+  export function createInterface(options: {
+    input: ReadStream;
+    output: WriteStream;
+  }): Interface;
 }
 
 /* sdk内置了类型声明,只是引入方式要注意手动、加.js（esm和cjs兼容问题）

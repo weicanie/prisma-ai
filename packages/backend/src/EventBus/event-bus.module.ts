@@ -5,9 +5,9 @@ import { EventBusService } from './event-bus.service';
 
 @Global()
 @Module({
-	controllers: [],
-	providers: [EventBusService],
-	exports: [EventBusService],
-	imports: [forwardRef(() => SseModule), forwardRef(() => TaskQueueModule)]
+  controllers: [],
+  providers: [EventBusService],
+  exports: [EventBusService],
+  imports: [forwardRef(() => SseModule), forwardRef(() => TaskQueueModule)],
 })
 export class EventBusModule {}
