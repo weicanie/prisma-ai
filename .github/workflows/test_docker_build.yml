@@ -1,0 +1,25 @@
+name: Test Docker Build # 工作流名称：测试 Docker 构建
+
+on:
+    push:
+        branches:
+            - main # 当有代码推送到 main 分支时触发
+
+    pull_request:
+        branches:
+            - '*' # 当有新的拉取请求（Pull Request）到任何分支时触发
+
+jobs:
+    build:
+        runs-on: ubuntu-latest # 运行环境：使用最新的 Ubuntu 系统
+        env:
+            PUPPETEER_SKIP_DOWNLOAD: true # 设置环境变量，跳过 Puppeteer 下载
+        steps:
+            # 步骤1：检出代码
+            - uses: actions/checkout@v3
+
+            # 步骤2：构建 Docker 镜像
+            # 这个步骤只构建镜像用于测试，并不会将其推送到任何仓库。
+            # --no-cache 禁用了构建缓存，确保每次都是全新构建。
+            # -t flowise 为镜像打上一个临时的本地标签。
+            - run: docker build --no-cache -t flowise .

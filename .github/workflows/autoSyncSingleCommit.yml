@@ -1,0 +1,43 @@
+name: autoSyncSingleCommit # 工作流名称：自动同步单个提交
+
+on:
+    push: # 触发事件：当有 push 操作时
+        branches:
+            - main # 仅当 push 到 main 分支时触发
+
+jobs:
+    # 作业1：处理多个提交的推送（通常是合并提交），并忽略它们
+    doNotAutoSyncSingleCommit:
+        if: github.event.commits[1] != null # 条件：当推送中包含超过一个 commit 时执行。这通常意味着这是一个合并提交(merge commit)。
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - name: IGNORE autoSyncSingleCommit # 步骤名称：忽略自动同步
+              run: |
+                  echo This single commit has came from a merged commit. We will ignore it. This case is handled in autoSyncMergedPullRequest workflow for merge commits comming from merged pull requests only! Beware, the regular merge commits are not handled by any workflow for the moment.
+
+    # 作业2：处理单个提交的推送
+    autoSyncSingleCommit:
+        if: github.event.commits[1] == null # 条件：当推送中只包含一个 commit 时执行。这对应于 `git push` 一个单独的提交。
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - name: autoSyncSingleCommit
+              env:
+                  GITHUB_CONTEXT: ${{ toJSON(github) }}
+              run: |
+                  echo Autosync a single commit with id: ${{ github.sha }} from openSource main branch towards cloud hosted version.
+            # 核心步骤：发送仓库分发事件，通知下游仓库进行同步
+            - name: Repository Dispatch
+              uses: peter-evans/repository-dispatch@v3
+              with:
+                  token: ${{ secrets.AUTOSYNC_TOKEN }} # 使用 PAT 进行授权
+                  repository: ${{ secrets.AUTOSYNC_CH_URL }} # 目标仓库地址
+                  event-type: ${{ secrets.AUTOSYNC_SC_EVENT_TYPE }} # 单个提交同步的事件类型
+                  # 附带的 payload，包含提交信息
+                  client-payload: >-
+                      {
+                        "ref": "${{ github.ref }}",
+                        "sha": "${{ github.sha }}",
+                        "commitMessage": "${{ github.event.commits[0].id }}"
+                      }

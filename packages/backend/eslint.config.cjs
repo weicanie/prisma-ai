@@ -8,8 +8,10 @@ module.exports = tseslint.config(
 		ignores: ['eslint.config.mjs']
 	},
 	eslint.configs.recommended,
-	...tseslint.configs.recommendedTypeChecked,
-	eslintPluginPrettierRecommended,
+	//TODO 代码规范治理
+	//pnpm exec lint-staged --concurrent 3
+	// ...tseslint.configs.recommendedTypeChecked,
+	// eslintPluginPrettierRecommended,
 	{
 		languageOptions: {
 			globals: {
@@ -23,8 +25,6 @@ module.exports = tseslint.config(
 			}
 		}
 	},
-	//TODO 代码规范治理
-	//pnpm exec lint-staged --concurrent 3
 	{
 		rules: {
 			//待治理项

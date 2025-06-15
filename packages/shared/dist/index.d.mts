@@ -44,38 +44,6 @@ declare const errorMessage: {
 
 declare const DEFAULT_MESSAGE = "ok";
 
-/**
- * 人岗匹配前端上传的 DTO
- */
-interface HjmMatchDto {
-    resumeId: string;
-    topK?: number;
-    rerankTopN?: number;
-}
-
-declare const hjmRerankSchema: z.ZodObject<{
-    ranked_jobs: z.ZodArray<z.ZodObject<{
-        job_id: z.ZodString;
-        reason: z.ZodString;
-    }, "strip", z.ZodTypeAny, {
-        job_id: string;
-        reason: string;
-    }, {
-        job_id: string;
-        reason: string;
-    }>, "many">;
-}, "strip", z.ZodTypeAny, {
-    ranked_jobs: {
-        job_id: string;
-        reason: string;
-    }[];
-}, {
-    ranked_jobs: {
-        job_id: string;
-        reason: string;
-    }[];
-}>;
-
 declare enum JobOpenStatus {
     OPEN = "open",//招聘中
     CLOSED = "closed"
@@ -128,6 +96,71 @@ interface PaginatedJobsResult {
     page: number;
     limit: number;
 }
+
+/**
+ * 人岗匹配前端上传的 DTO
+ */
+interface HjmMatchDto {
+    resumeId: string;
+    topK?: number;
+    rerankTopN?: number;
+}
+/**
+ * 人岗匹配后端返回的VO,即简历匹配到的岗位Vo
+ */
+interface MatchedJobVo extends JobVo {
+    reason?: string;
+}
+/**
+ * 爬虫启动参数的数据传输对象
+ */
+interface StartCrawlDto {
+    /**
+     * 要爬取的岗位总数
+     */
+    totalCount: number;
+    /**
+     * 城市代码, 例如: 'c101020100' 代表上海
+     */
+    city: string;
+    /**
+     * 搜索关键词, 例如: '全栈工程师'
+     * 传入单个关键词则使用llm扩展关键词
+     * 数组则直接爬取
+     */
+    query: string | string[];
+    /**
+     * 行业 (可选)
+     */
+    industry?: string;
+    /**
+     * 职位 (可选)
+     */
+    position?: string;
+}
+
+declare const hjmRerankSchema: z.ZodObject<{
+    ranked_jobs: z.ZodArray<z.ZodObject<{
+        job_id: z.ZodString;
+        reason: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        job_id: string;
+        reason: string;
+    }, {
+        job_id: string;
+        reason: string;
+    }>, "many">;
+}, "strip", z.ZodTypeAny, {
+    ranked_jobs: {
+        job_id: string;
+        reason: string;
+    }[];
+}, {
+    ranked_jobs: {
+        job_id: string;
+        reason: string;
+    }[];
+}>;
 
 declare const llmJobSchema: z.ZodObject<{
     jobName: z.ZodString;
@@ -1437,4 +1470,4 @@ declare function projectSchemaToMarkdown(project: z.infer<typeof projectSchemaFo
 declare const skillsToMarkdown: (data: CreateSkillDto) => string;
 declare const markdownToSkills: (markdown: string) => CreateSkillDto;
 
-export { type CreateJobDto, type CreateKnowledgeDto, type CreateResumeDto, type CreateSkillDto, DEFAULT_MESSAGE, type DataChunkErrVO, type DataChunkVO, ErrorCode, FileTypeEnum, type HjmMatchDto, JobOpenStatus, JobStatus, type JobVo, KnowledgeTypeEnum, type KnowledgeVo, type LLMJobDto, type LLMSessionRequest, type LLMSessionResponse, type LLMSessionStatusResponse, type LoginFormType, type LoginResponse, type MatchJobDto, type PaginatedJobsResult, type PaginatedKnsResult, type PaginatedResumeMatchedResult, type PaginatedResumesResult, type ProjectDto, type ProjectMinedDto, type ProjectMineddVo, type ProjectPolishedDto, type ProjectPolishedVo, ProjectStatus, type ProjectVo, type RegistFormType, type RegistResponse, RequestTargetMap, type ResumeMatchedDto, type ResumeMatchedVo, ResumeStatus, type ResumeVo, type RoadFromDiff, type RoadFromDiffDto, type ServerDataFormat, type SkillItem, type SkillVo, type StreamingChunk, type TRequestParams, type UpdateJobDto, type UpdateKnowledgeDto, type UpdateResumeDto, type UpdateSkillDto, type UserInfoFromToken, type VerifyMetaData, errorMessage, getLightspotSchema, hjmRerankSchema, jsonMd_obj, llmJobSchema, loginformSchema, type lookupResultDto, lookupResultSchema, markdownToProjectSchema, markdownToSkills, type projectLookupedDto, projectLookupedSchema, projectMinedSchema, projectPolishedSchema, projectSchema, projectSchemaForm, projectSchemaToMarkdown, registformSchema, resumeMatchedSchema, roadFromDiffSchema, skillItemSchema, skillSchema, skillsToMarkdown, type_content_Map };
+export { type CreateJobDto, type CreateKnowledgeDto, type CreateResumeDto, type CreateSkillDto, DEFAULT_MESSAGE, type DataChunkErrVO, type DataChunkVO, ErrorCode, FileTypeEnum, type HjmMatchDto, JobOpenStatus, JobStatus, type JobVo, KnowledgeTypeEnum, type KnowledgeVo, type LLMJobDto, type LLMSessionRequest, type LLMSessionResponse, type LLMSessionStatusResponse, type LoginFormType, type LoginResponse, type MatchJobDto, type MatchedJobVo, type PaginatedJobsResult, type PaginatedKnsResult, type PaginatedResumeMatchedResult, type PaginatedResumesResult, type ProjectDto, type ProjectMinedDto, type ProjectMineddVo, type ProjectPolishedDto, type ProjectPolishedVo, ProjectStatus, type ProjectVo, type RegistFormType, type RegistResponse, RequestTargetMap, type ResumeMatchedDto, type ResumeMatchedVo, ResumeStatus, type ResumeVo, type RoadFromDiff, type RoadFromDiffDto, type ServerDataFormat, type SkillItem, type SkillVo, type StartCrawlDto, type StreamingChunk, type TRequestParams, type UpdateJobDto, type UpdateKnowledgeDto, type UpdateResumeDto, type UpdateSkillDto, type UserInfoFromToken, type VerifyMetaData, errorMessage, getLightspotSchema, hjmRerankSchema, jsonMd_obj, llmJobSchema, loginformSchema, type lookupResultDto, lookupResultSchema, markdownToProjectSchema, markdownToSkills, type projectLookupedDto, projectLookupedSchema, projectMinedSchema, projectPolishedSchema, projectSchema, projectSchemaForm, projectSchemaToMarkdown, registformSchema, resumeMatchedSchema, roadFromDiffSchema, skillItemSchema, skillSchema, skillsToMarkdown, type_content_Map };

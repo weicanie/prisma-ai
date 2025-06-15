@@ -1,0 +1,47 @@
+name: autoSyncMergedPullRequest # 工作流名称：自动同步已合并的PR
+
+on:
+    pull_request_target: # 使用 pull_request_target 事件，确保即使 PR 来自 fork 也能安全地访问 secrets
+        types:
+            - closed # 触发事件的类型：当一个 PR 被关闭时
+        branches: ['main'] # 仅当目标分支是 main 分支时触发
+
+jobs:
+    autoSyncMergedPullRequest:
+        if: github.event.pull_request.merged == true # 条件判断：仅当 PR 是被"合并"而不是仅"关闭"时，才继续执行
+        runs-on: ubuntu-latest # 运行环境：使用最新的 Ubuntu 系统
+        permissions:
+            contents: write # 授予工作流对仓库内容的写权限
+        steps:
+            # 步骤1：检出代码
+            # 这个步骤会将仓库的代码下载到运行环境中，以便后续步骤可以访问。
+            - uses: actions/checkout@v4
+
+            # 步骤2：显示 PR 信息
+            # 这是一个调试步骤，用于在日志中打印出被合并的 PR 的信息。
+            - name: Show PR info
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # 使用 GitHub 自动提供的 GITHUB_TOKEN
+              run: |
+                  echo The PR #${{ github.event.pull_request.number }} was merged on main branch!
+
+            # 步骤3：发送仓库分发事件 (Repository Dispatch)
+            # 这是核心步骤。它会向另一个仓库发送一个事件，通知它来同步代码。
+            - name: Repository Dispatch
+              uses: peter-evans/repository-dispatch@v3
+              with:
+                  # 使用预先配置的 Personal Access Token (PAT) 来授权
+                  token: ${{ secrets.AUTOSYNC_TOKEN }}
+                  # 目标仓库的地址，格式为 'owner/repo'
+                  repository: ${{ secrets.AUTOSYNC_CH_URL }}
+                  # 自定义的事件类型，目标仓库的工作流将监听这个事件类型
+                  event-type: ${{ secrets.AUTOSYNC_PR_EVENT_TYPE }}
+                  # 发送给目标仓库的附带数据（payload），包含了此次提交的相关信息
+                  client-payload: >-
+                      {
+                        "ref": "${{ github.ref }}",
+                        "prNumber": "${{ github.event.pull_request.number }}",
+                        "prTitle": "${{ github.event.pull_request.title }}",
+                        "prDescription": "",
+                        "sha": "${{ github.sha }}"
+                      }

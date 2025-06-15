@@ -1,5 +1,6 @@
 import { Document } from '@langchain/core/documents';
 import { Injectable, Logger } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import {
   JobStatus,
   JobVo,
@@ -8,6 +9,7 @@ import {
   UserInfoFromToken,
 } from '@prism-ai/shared';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+import { Model } from 'mongoose';
 import { ChainService } from '../../chain/chain.service';
 import { RedisService } from '../../redis/redis.service';
 import {
@@ -18,11 +20,12 @@ import {
   PineconeIndex,
   VectorStoreService,
 } from '../../vector-store/vector-store.service';
+import { Job, JobDocument } from '../job/entities/job.entity';
 import { JobService } from '../job/job.service';
 import { ResumeService } from '../resume/resume.service';
 
 export interface RankedJob extends JobVo {
-  reason: string;
+  reason?: string;
 }
 
 /**
@@ -68,6 +71,9 @@ export class HjmService {
     userId: 'system',
     username: '系统爬虫',
   };
+
+  @InjectModel(Job.name)
+  private jobModel: Model<JobDocument>;
 
   constructor(
     private readonly vectorStoreService: VectorStoreService,
@@ -339,7 +345,19 @@ export class HjmService {
       };
     }) as RankedJob[];
 
-    // 10. 将结果存入Redis
+    //FIXME recall数组没有内容,不影响业务但还是看看
+    // 10. 将结果存入数据库
+    finalJobs.forEach((job) => {
+      console.log("🚀 ~ HjmService ~ finalJobs.forEach ~ job:", job)
+      const recallItem = {
+        resumeId,
+        reason:job.reason,
+      }
+      console.log("🚀 ~ HjmService ~ finalJobs.forEach ~ recallItem:", recallItem)
+      this.jobModel.updateOne({ _id: job.id }, { $push: { recall:recallItem } });
+    });
+
+    // 11. 将结果存入Redis
     const resultKey = `${this.taskQueueService.PREFIX.RESULT}${task.id}`;
     await this.redisService.set(
       resultKey,
@@ -347,7 +365,7 @@ export class HjmService {
       this.taskQueueService.TASK_TTL,
     );
 
-    // 11. 更新任务，记录结果存储的key
+    // 12. 更新任务，记录结果存储的key
     const currentTask = await this.taskQueueService.getTask<JobMatchTask>(
       task.id,
     );

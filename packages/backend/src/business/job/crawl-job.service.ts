@@ -17,6 +17,24 @@ interface CrawlTask extends PersistentTask {
     completedCount: number; //当前任务已爬取数量(去重后)
   };
 }
+//延迟伪装配置
+const delayConfig = {
+  //列表页延迟
+  list: {
+    minDelay: 0,
+    maxDelay: 500,
+  },
+  //详情页延迟
+  detail: {
+    minDelay: 0,
+    maxDelay: 1000,
+  },
+  //滚动延迟
+  scroll: {
+    minDelay: 0,
+    maxDelay: 500,
+  },
+}
 /**
  * 爬取职位信息的爬虫
  * 爬虫功能：
@@ -225,8 +243,9 @@ export class CrawlJobService {
       });
     });
 
+    //会导致认证页面加载不出来,无法手动验证,所以暂时注释掉
     // 过滤掉图片、样式、字体、媒体等资源的请求
-    await page.setRequestInterception(true);
+/*     await page.setRequestInterception(true);
     page.on('request', (request) => {
       // 阻止加载不必要的资源以提高速度
       const resourceType = request.resourceType();
@@ -235,7 +254,7 @@ export class CrawlJobService {
       } else {
         request.continue();
       }
-    });
+    }); */
 
     // 监控响应状态
     page.on('response', (response) => {
@@ -479,16 +498,16 @@ export class CrawlJobService {
 
     switch (pageType) {
       case 'list':
-        minDelay = 1500; // 列表页延迟 1.5-3 秒
-        maxDelay = 3000;
+        minDelay = delayConfig.list.minDelay; // 列表页延迟 0-0.5 秒
+        maxDelay = delayConfig.list.maxDelay;
         break;
       case 'detail':
-        minDelay = 2000; // 详情页延迟 2-5 秒
-        maxDelay = 5000;
+        minDelay = delayConfig.detail.minDelay; // 详情页延迟 0-1 秒
+        maxDelay = delayConfig.detail.maxDelay;
         break;
       case 'scroll':
-        minDelay = 500; // 滚动延迟 0.5-1.5 秒
-        maxDelay = 1500;
+        minDelay = delayConfig.scroll.minDelay; // 滚动延迟 0-0.5 秒
+        maxDelay = delayConfig.scroll.maxDelay;
         break;
     }
 

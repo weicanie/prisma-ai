@@ -53,12 +53,36 @@ export class JobController {
   }
 
   @RequireLogin()
+  @Get('become/:jobId')
+  becomeUserJob(
+    @Param('jobId') jobId: string,
+    @UserInfo() userInfo: UserInfoFromToken,
+  ) {
+    return this.jobService.becomeUserJob(jobId, userInfo);
+  }
+
+  @RequireLogin()
   @Get('one/:id')
   findOneUserJob(
     @Param('id') id: string,
     @UserInfo() userInfo: UserInfoFromToken,
   ) {
     return this.jobService.findOne(id, userInfo);
+  }
+
+  /**
+   * 根据简历ID查询所有匹配的岗位
+   * @param resumeId 简历ID
+   * @param userInfo 用户信息
+   * @returns 匹配的岗位列表
+   */
+  @RequireLogin()
+  @Get('matched/:resumeId')
+  findAllMatched(
+    @Param('resumeId') resumeId: string,
+    @UserInfo() userInfo: UserInfoFromToken,
+  ) {
+    return this.jobService.findAllMatched(resumeId, userInfo);
   }
 
   @RequireLogin()

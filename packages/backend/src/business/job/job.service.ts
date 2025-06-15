@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { JobStatus, JobVo, UserInfoFromToken } from '@prism-ai/shared';
+import { JobStatus, JobVo, MatchedJobVo, UserInfoFromToken } from '@prism-ai/shared';
 import { Model } from 'mongoose';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
@@ -12,6 +12,8 @@ export interface PaginatedJobsResult {
   page: number;
   limit: number;
 }
+
+
 
 @Injectable()
 export class JobService {
@@ -59,6 +61,23 @@ export class JobService {
     };
   }
 
+  /**
+   * 将爬虫抓取的岗位成为用户追踪的岗位
+   * @param jobId 岗位id
+   * @param userInfo 用户信息
+   * @returns 岗位
+   */
+  async becomeUserJob(jobId: string, userInfo: UserInfoFromToken): Promise<Job> {
+    const job = await this.jobModel.findOne({ _id: jobId}).exec();
+    if (!job) {
+      throw new NotFoundException(
+        `Job with ID "${jobId}" not found or access denied`,
+      );
+    }
+    this.jobModel.updateOne({ _id: jobId }, { $set: { userInfo } },{new:true}).exec();
+    return job;
+  }
+
   async findOne(id: string, userInfoToken: UserInfoFromToken): Promise<JobVo> {
     const job = await this.jobModel.findOne({ _id: id }).exec();
     if (!job) {
@@ -67,6 +86,42 @@ export class JobService {
       );
     }
     return job.toObject() as JobVo;
+  }
+
+  /**
+   * 查询简历匹配的所有岗位
+   * @param resumeId 简历id
+   * @param userInfo
+   */
+  async findAllMatched(
+    resumeId: string,
+    userInfo: UserInfoFromToken,
+  ): Promise<MatchedJobVo[]> {
+    const query = {
+      'userInfo.userId': userInfo.userId,
+      recall: { $elemMatch: { resumeId: resumeId } },
+    };
+
+    const matchedJobVos = await this.jobModel
+      .find(query)
+      .sort({ createdAt: -1 })
+      .exec();
+
+    const jobsWithReason = matchedJobVos.map((job) => {
+      const jobObject = job.toObject() as JobVo;
+
+      // Find the specific recall entry for this resumeId
+      const recallEntry = job.recall?.find(
+        (r) => r.resumeId.toString() === resumeId,
+      );
+
+      return {
+        ...jobObject,
+        reason: recallEntry?.reason,
+      };
+    });
+
+    return jobsWithReason;
   }
 
   async update(

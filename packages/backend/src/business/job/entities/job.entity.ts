@@ -4,6 +4,15 @@ import { HydratedDocument, Types } from 'mongoose';
 import { UserInfo } from '../../project/entities/project.entity';
 
 @Schema({ timestamps: true })
+export class Recall {
+  @Prop({ type: Types.ObjectId, ref: 'Job' })
+  resumeId: Types.ObjectId;
+
+  @Prop({ type: String, trim: true })
+  reason?: string; //匹配原因
+}
+
+@Schema({ timestamps: true })
 export class Job {
   @Prop({
     type: String,
@@ -63,8 +72,15 @@ export class Job {
   })
   status?: string; //职位内部状态，"committed", "embedded", "matched" 未处理、已embedding、已被用户简历追踪
 
+  /* 专用简历追踪的岗位 */
   @Prop({ type: Types.ObjectId, ref: 'ResumeMatched' })
   resumeMatchedId?: Types.ObjectId;
+
+  /* 简历匹配的岗位:一份简历匹配多个岗位 */
+  @Prop({
+    type: [Recall],
+  })
+  recall?: Recall[]; //记录被哪些简历匹配及匹配原因的数组（匹配=召回+重排）
 }
 
 export type JobDocument = HydratedDocument<Job> & {

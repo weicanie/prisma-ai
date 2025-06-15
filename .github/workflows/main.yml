@@ -1,0 +1,62 @@
+name: Node CI # 工作流名称：Node.js CI
+
+on:
+    push:
+        branches:
+            - main # 当有代码推送到 main 分支时触发
+    pull_request:
+        branches:
+            - '*' # 当有新的拉取请求（Pull Request）到任何分支时触发
+permissions:
+    contents: read # 授予工作流对仓库内容的只读权限
+
+jobs:
+    build:
+        strategy:
+            matrix:
+                # 定义构建矩阵，尽管这里只有一个组合，但这种写法方便未来扩展
+                platform: [ubuntu-latest] # 运行平台
+                node-version: [18.15.0] # Node.js 版本
+        runs-on: ${{ matrix.platform }} # 从矩阵中获取运行平台
+        env:
+            PUPPETEER_SKIP_DOWNLOAD: true # 设置环境变量，跳过 Puppeteer 的下载（如果 Cypress 依赖了它）
+        steps:
+            # 步骤1：检出代码
+            - uses: actions/checkout@v4
+            # 步骤2：设置 pnpm 包管理器
+            - uses: pnpm/action-setup@v3
+              with:
+                  version: 9.0.4 # 指定 pnpm 版本
+            # 步骤3：设置 Node.js 环境
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ matrix.node-version }} # 从矩阵中获取 Node.js 版本
+                  cache: 'pnpm' # 启用 pnpm 的缓存，加快依赖安装速度
+                  cache-dependency-path: 'pnpm-lock.yaml' # 指定缓存依赖路径
+            # 步骤4：安装项目依赖
+            - run: pnpm install
+            # 步骤5：运行代码风格检查
+            - run: pnpm lint
+            # 步骤6：构建项目
+            - run: pnpm build
+            # 步骤7：安装 Cypress
+            - name: Cypress install
+              run: pnpm cypress install
+            # 步骤8：使用官方 action 安装 Cypress 浏览器等依赖
+            # 这一步确保了运行 Cypress 所需的操作系统级依赖都已就绪
+            - name: Install dependencies (Cypress Action)
+              uses: cypress-io/github-action@v6
+              with:
+                  working-directory: ./
+                  runTests: false # 设置为 false，因为我们只安装依赖，不在这里运行测试
+            # 步骤9：运行 Cypress 端到端测试
+            - name: Cypress test
+              uses: cypress-io/github-action@v6
+              with:
+                  install: false # 由于上一步已安装，这里不再重复安装
+                  working-directory: packages/server # 指定工作目录
+                  start: pnpm start # 运行测试前需要执行的命令，即启动后端服务
+                  wait-on: 'http://localhost:3000' # 等待此 URL 可访问后再开始测试
+                  wait-on-timeout: 120 # 等待的超时时间（秒）
+                  browser: chrome # 指定测试使用的浏览器
