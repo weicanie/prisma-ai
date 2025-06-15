@@ -21,5 +21,6 @@
 			"require": "./dist/index.js",
 			"types": "./dist/index.d.ts"
 		}
-	}
+	},
+	"gitHead": "fb77cd2257d3e01512dfaab4a6b7d306784a3922"
 }
