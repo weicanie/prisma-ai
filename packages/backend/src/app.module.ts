@@ -19,6 +19,7 @@ import { GraphModule } from './graph/graph.module';
 import { IsLoginGuard } from './isLogin.guard';
 import { SessionPoolModule } from './session/session-pool.module';
 import { UserModule } from './user/user.module';
+import { AutoflowModule } from './business/autoflow/autoflow.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { UserModule } from './user/user.module';
     CopilotModule,
     KnowledgebaseModule,
     HjmModule,
+    AutoflowModule,
   ],
   providers: [
     {
