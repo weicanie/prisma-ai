@@ -1,5 +1,6 @@
 export * from './constant/error';
 export * from './constant/response';
+export * from './types/autoflow.schema';
 export * from './types/hjm';
 export * from './types/hjm.schema';
 export * from './types/job';
@@ -21,3 +22,4 @@ export * from './types/skill.schema';
 export * from './types/sse';
 export * from './utils/jsonMd_obj';
 export * from './utils/md_json';
+

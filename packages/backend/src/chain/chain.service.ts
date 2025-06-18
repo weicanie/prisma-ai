@@ -6,6 +6,7 @@ import type { ChatOpenAI } from '@langchain/openai';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  autoflowSchema,
   hjmRerankSchema,
   JobVo,
   LLMJobDto,
@@ -135,6 +136,46 @@ export class ChainService {
       // 不添加会阻截流式输出的Runnable
     ]);
 
+    return chain;
+  }
+
+  /**
+   * 将文本转换为包含技能和项目经验的JSON
+   */
+  async textToJsonChain() {
+    const outputParser = StructuredOutputParser.fromZodSchema(
+      autoflowSchema,
+    );
+    const prompt = await this.promptService.textToJsonPrompt();
+    const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+
+    const chain = RunnableSequence.from([
+      {
+        input: (input: { input: string }) => input.input,
+        instructions: () => outputParser.getFormatInstructions(),
+      },
+      prompt,
+      llm,
+      outputParser,
+    ]);
+    return chain;
+  }
+
+  /**
+   * 将所有分析结果整合为一份报告
+   */
+  async resultsToTextChain() {
+    const prompt = await this.promptService.resultsToTextPrompt();
+    const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+
+    const chain = RunnableSequence.from([
+      {
+        input: (input: { input: string }) => input.input,
+      },
+      prompt,
+      llm,
+      // 直接返回llm的string输出
+    ]);
     return chain;
   }
 

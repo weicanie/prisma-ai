@@ -274,7 +274,7 @@ export class ResumeService {
   async create(
     createResumeDto: CreateResumeDto,
     userInfo: UserInfoFromToken,
-  ): Promise<Resume> {
+  ): Promise<ResumeDocument> {
     const createdResume = new this.resumeModel({
       ...createResumeDto,
       skill: new Types.ObjectId(createResumeDto.skill),

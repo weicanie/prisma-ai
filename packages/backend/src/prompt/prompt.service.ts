@@ -1,6 +1,6 @@
 //从文件中读取prompt
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -12,16 +12,18 @@ export enum role {
 }
 
 @Injectable()
-export class PromptService {
+export class PromptService implements OnModuleInit {
   /**
    * prompt插槽: instructions
    */
-  private readonly polishT: string;
-  private readonly lookupT: string;
-  private readonly matchT: string;
-  private readonly hjmRerankT: string;
-  private readonly hjmTransformT: string;
-  private readonly diffLearnT: string;
+  private polishT: string;
+  private lookupT: string;
+  private matchT: string;
+  private hjmRerankT: string;
+  private hjmTransformT: string;
+  private diffLearnT: string;
+  private textToJsonT: string;
+  private resultsToTextT: string;
 
   /**
    * prompt插槽: fewShot、instructions
@@ -33,65 +35,48 @@ export class PromptService {
    */
   private readonly fewShotMap: Record<string, string> = {};
 
-  constructor() {
-    const polishStr = fs.readFileSync(
-      path.join(process.cwd(), 'ai_data/prompt/polish-T.md'),
-      {
-        encoding: 'utf-8',
-      },
-    );
-    const mineTStr = fs.readFileSync(
-      path.join(process.cwd(), 'ai_data/prompt/mine-T.md'),
-      {
-        encoding: 'utf-8',
-      },
-    );
-    const lookupTStr = fs.readFileSync(
-      path.join(process.cwd(), 'ai_data/prompt/lookup-T.md'),
-      {
-        encoding: 'utf-8',
-      },
-    );
-    const matchTStr = fs.readFileSync(
-      path.join(process.cwd(), 'ai_data/prompt/match-T.md'),
-      {
-        encoding: 'utf-8',
-      },
-    );
-    const hjmRerankTStr = fs.readFileSync(
-      path.join(process.cwd(), 'ai_data/prompt/hjm_rerank-T.md'),
-      {
-        encoding: 'utf-8',
-      },
-    );
-    const hjmTransformTStr = fs.readFileSync(
-      path.join(process.cwd(), 'ai_data/prompt/hjm_transform-T.md'),
-      {
-        encoding: 'utf-8',
-      },
-    );
-    const diffLearnTStr = fs.readFileSync(
-      path.join(process.cwd(), 'ai_data/prompt/diff_learn-T.md'),
-      {
-        encoding: 'utf-8',
-      },
-    );
+  constructor() {}
 
-    this.polishT = polishStr;
-    this.lookupT = lookupTStr;
-    this.mineT = mineTStr;
-    this.matchT = matchTStr;
-    this.hjmRerankT = hjmRerankTStr;
-    this.hjmTransformT = hjmTransformTStr;
-    this.diffLearnT = diffLearnTStr;
-    const mineFewShot = fs.readFileSync(
-      path.join(process.cwd(), 'ai_data/prompt/mine-fewshot.md'),
-      {
-        encoding: 'utf-8',
-      },
-    );
-    this.fewShotMap['mine'] = mineFewShot;
+  async onModuleInit() {
+    try {
+         const promises = [
+      this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/polish-T.md')),
+      this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/mine-T.md')),
+      this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/lookup-T.md')),
+      this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/match-T.md')),
+      this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/hjm_rerank-T.md')),
+      this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/hjm_transform-T.md')),
+      this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/diff_learn-T.md')),
+      this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/text_to_json.md')),
+      this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/results_to_text.md')),
+      this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/mine-fewshot.md')),
+    ];
+    const [polishT, mineT, lookupT, matchT, hjmRerankT, hjmTransformT, diffLearnT, textToJsonT, resultsToTextT, mineFewShot] = await Promise.all(promises);
+    this.polishT = polishT as string;
+    this.mineT = mineT as string;
+    this.lookupT = lookupT as string;
+    this.matchT = matchT as string;
+    this.hjmRerankT = hjmRerankT as string;
+    this.hjmTransformT = hjmTransformT as string;
+    this.diffLearnT = diffLearnT as string;
+    this.textToJsonT = textToJsonT as string;
+    this.resultsToTextT = resultsToTextT as string;
+
+    this.fewShotMap['mine'] = mineFewShot as string;
+    } catch (error) {
+      console.error('Failed to read prompt files', error);
+    }
   }
+
+  private async _readPromptFile(filePath: string) {
+    return new Promise((resolve, reject) => {
+      fs.readFile(filePath, { encoding: 'utf-8' }, (err, data) => {
+        if (err) reject(err);
+        else resolve(data);
+      });
+    });
+  }
+
   /**
    * 部分填充promptT字符串的插槽
    * @description 由于langchain的partial方法不支持PromptTemplate部分填充后作为ChatPromptTemplate的组成部分,因此使用带插槽的string传入ChatPromptTemplate
@@ -206,6 +191,30 @@ export class PromptService {
     const prompt = ChatPromptTemplate.fromMessages([
       [`${role.SYSTEM}`, this.diffLearnT],
       // [`${role.SYSTEM}`, `这是目前为止的聊天记录：{chat_history}`],
+      [`${role.HUMAN}`, '{input}'],
+    ]);
+    return prompt;
+  }
+
+  /**
+   * 将文本转换为JSON的prompt
+   * @returns prompt：{instructions}、{input}
+   */
+  async textToJsonPrompt() {
+    const prompt = ChatPromptTemplate.fromMessages([
+      [`${role.SYSTEM}`, this.textToJsonT],
+      [`${role.HUMAN}`, '{input}'],
+    ]);
+    return prompt;
+  }
+
+  /**
+   * 将所有分析结果整合为一份报告的prompt
+   * @returns prompt：{input}
+   */
+  async resultsToTextPrompt() {
+    const prompt = ChatPromptTemplate.fromMessages([
+      [`${role.SYSTEM}`, this.resultsToTextT],
       [`${role.HUMAN}`, '{input}'],
     ]);
     return prompt;

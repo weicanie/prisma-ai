@@ -794,4 +794,31 @@ export class ProjectService {
       };
     }
   }
+
+  /**
+   * 更新项目的分析结果
+   * @param id 项目ID
+   * @param lookupResult 分析结果
+   * @param userInfo 用户信息
+   */
+  async updateLookupResult(
+    id: string,
+    lookupResult: any,
+    userInfo: UserInfoFromToken,
+  ) {
+    const updatedProject = await this.projectModel
+      .findOneAndUpdate(
+        { _id: id, 'userInfo.userId': userInfo.userId },
+        { $set: { lookupResult, status: ProjectStatus.lookuped } },
+        { new: true },
+      )
+      .exec();
+
+    if (!updatedProject) {
+      throw new Error(
+        `Project with ID "${id}" not found or user unauthorized.`,
+      );
+    }
+    return updatedProject;
+  }
 }

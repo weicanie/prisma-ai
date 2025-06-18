@@ -12,7 +12,7 @@ import { EmbeddingModelService } from './embedding-model.service';
  *  取用：index -> retriever -> record
  * */
 
-export enum PineconeIndex {
+export enum IndexMap {
   JOBS = 'jobs-index', // 岗位索引
 }
 
@@ -49,16 +49,16 @@ export class VectorStoreService implements OnModuleInit {
   async onModuleInit() {
     try {
       this.logger.log('正在检查 Pinecone 连接...');
-      const jobsIndexExists = await this.indexExists(PineconeIndex.JOBS);
+      const jobsIndexExists = await this.indexExists(IndexMap.JOBS);
       if (!jobsIndexExists) {
-        console.log(`索引 '${PineconeIndex.JOBS}' 不存在，将自动创建...`);
+        console.log(`索引 '${IndexMap.JOBS}' 不存在，将自动创建...`);
         const dimension = this.embeddingModelService.dimensions;
         if (!dimension) {
           throw new Error(
             '无法从 embeddingModelService 获取向量维度，初始化失败。',
           );
         }
-        await this.createEmptyIndex(PineconeIndex.JOBS, dimension);
+        await this.createEmptyIndex(IndexMap.JOBS, dimension);
       }
       this.logger.log('Pinecone 连接验证成功');
     } catch (error) {
@@ -80,14 +80,14 @@ Pinecone 连接失败。可能的原因:
    * 文档向量化并储存：新建索引
    * @param splitDocs 要添加的文档数组
    * @param embeddings 用于向量化的嵌入模型
-   * @param indexAlias 索引别名或索引名
+   * @param indexKey 索引别名或索引名
    */
   async embedAndStoreToIndex(
     splitDocs: Document[],
     embeddings: Embeddings,
-    indexAlias: string,
+    indexKey: string,
   ) {
-    const indexName = this.getIndexName(indexAlias);
+    const indexName = this.getIndexName(indexKey);
     await PineconeStore.fromDocuments(splitDocs, embeddings, {
       pineconeIndex: this.pinecone.Index(indexName),
     });
@@ -96,16 +96,16 @@ Pinecone 连接失败。可能的原因:
   /**
    * 文档向量化并储存到已有索引
    * @param documents 要添加的文档数组
-   * @param indexAlias 索引别名或索引名
+   * @param indexKey 索引别名或索引名
    * @param embeddings 用于向量化的嵌入模型
    */
   async addDocumentsToIndex(
     documents: Document[],
-    indexAlias: string,
+    indexKey: string,
     embeddings: Embeddings,
   ): Promise<void> {
     try {
-      const indexName = this.getIndexName(indexAlias);
+      const indexName = this.getIndexName(indexKey);
       if (!(await this.indexExists(indexName))) {
         throw new Error(`索引 ${indexName} 不存在，请先创建索引`);
       }
@@ -118,7 +118,7 @@ Pinecone 连接失败。可能的原因:
       console.log(`成功添加 ${documents.length} 个文档到索引 ${indexName}`);
     } catch (error) {
       const errorMessage = (error as Error).message;
-      console.error(`向索引 ${indexAlias} 添加文档失败:`, error);
+      console.error(`向索引 ${indexKey} 添加文档失败:`, error);
 
       if (
         errorMessage.includes('ENOTFOUND') ||
@@ -146,17 +146,17 @@ Pinecone 连接失败。可能的原因:
 
   /**
    * 获取向量数据库检索器
-   * @param indexAlias 索引别名或索引名
+   * @param indexKey 索引别名或索引名
    * @param embeddings 用于向量化的嵌入模型
    * @param config 检索器配置
    * @returns 检索器
    */
   async getRetrieverOfIndex(
-    indexAlias: string,
+    indexKey: string,
     embeddings: Embeddings,
     config: RetriverConfig = { k: 3, verbose: false },
   ) {
-    const indexName = this.getIndexName(indexAlias);
+    const indexName = this.getIndexName(indexKey);
     const index = this.pinecone.Index(indexName);
     const vectorStore = new PineconeStore(embeddings, { pineconeIndex: index });
 
@@ -175,7 +175,7 @@ Pinecone 连接失败。可能的原因:
     k: number,
   ): Promise<Document[]> {
     try {
-      const indexName = this.getIndexName(PineconeIndex.JOBS);
+      const indexName = this.getIndexName(IndexMap.JOBS);
       const index = this.pinecone.Index(indexName);
 
       const queryResult = await index.query({
@@ -216,16 +216,16 @@ Pinecone 连接失败。可能的原因:
 
   /**
    * 检查指定名称的向量索引是否存在
-   * @param indexAlias 索引别名标识符（如QIU或自定义索引名）
+   * @param indexKey 索引别名标识符（如QIU或自定义索引名）
    * @returns {Promise<boolean>} 是否存在的布尔值
    */
-  async indexExists(indexAlias: string): Promise<boolean> {
+  async indexExists(indexKey: string): Promise<boolean> {
     let retryCount = 0;
     const maxRetries = 3;
 
     while (retryCount < maxRetries) {
       try {
-        const indexName = this.getIndexName(indexAlias);
+        const indexName = this.getIndexName(indexKey);
         const indexes = (await this.pinecone.listIndexes()).indexes;
         if (!indexes || indexes.length === 0) {
           return false;
@@ -237,7 +237,7 @@ Pinecone 连接失败。可能的原因:
 
         if (retryCount >= maxRetries) {
           console.error(
-            `检查索引 ${indexAlias} 是否存在时出错 (最终失败):`,
+            `检查索引 ${indexKey} 是否存在时出错 (最终失败):`,
             error,
           );
 
@@ -279,18 +279,18 @@ Pinecone 连接失败。可能的原因:
 
   /**
    * 创建空的向量索引
-   * @param indexAlias 索引别名或直接索引名
+   * @param indexKey 索引别名或直接索引名
    * @param eModel 用于向量化的嵌入模型
    * @returns {Promise<void>}
    * @description 创建一个新的Pinecone索引，配置维度与模型匹配
    */
   async createEmptyIndexWithModel(
-    indexAlias: string,
+    indexKey: string,
     eModel: OpenAIEmbeddings,
   ): Promise<void> {
     try {
       // 确定索引名称
-      const indexName = PineconeIndex[indexAlias] || indexAlias;
+      const indexName = IndexMap[indexKey] || indexKey;
 
       // 确定向量维度
       const dimension = eModel.dimensions ?? 1536;
@@ -310,20 +310,20 @@ Pinecone 连接失败。可能的原因:
 
       console.log(`成功创建索引: ${indexName}, 维度: ${dimension}`);
     } catch (error) {
-      console.error(`创建索引 ${indexAlias} 失败:`, error);
+      console.error(`创建索引 ${indexKey} 失败:`, error);
       throw new Error(`创建索引失败: ${error.message}`);
     }
   }
 
   /**
    * 创建空的向量索引
-   * @param indexAlias 索引别名或直接索引名
+   * @param indexKey 索引别名或直接索引名
    * @param dimension 向量维度
    * @returns {Promise<void>}
    */
-  async createEmptyIndex(indexAlias: string, dimension: number): Promise<void> {
+  async createEmptyIndex(indexKey: string, dimension: number): Promise<void> {
     try {
-      const indexName = this.getIndexName(indexAlias);
+      const indexName = this.getIndexName(indexKey);
       await this.pinecone.createIndex({
         name: indexName,
         dimension: dimension,
@@ -337,7 +337,7 @@ Pinecone 连接失败。可能的原因:
       });
       console.log(`成功创建索引: ${indexName}, 维度: ${dimension}`);
     } catch (error) {
-      console.error(`创建索引 ${indexAlias} 失败:`, error);
+      console.error(`创建索引 ${indexKey} 失败:`, error);
       throw new Error(`创建索引失败: ${(error as Error).message}`);
     }
   }
@@ -355,9 +355,10 @@ Pinecone 连接失败。可能的原因:
    * @param alias - 索引的别名
    * @returns {string} 真实的索引名称
    */
-  private getIndexName(alias: string): string {
+  private getIndexName(keyOrIndexName: string): string {
     return (
-      PineconeIndex[alias.toUpperCase() as keyof typeof PineconeIndex] || alias
+      IndexMap[keyOrIndexName.toUpperCase() as keyof typeof IndexMap] ||
+      keyOrIndexName
     );
   }
 }
