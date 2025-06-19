@@ -1,6 +1,5 @@
 import { Document } from '@langchain/core/documents';
 import { Embeddings } from '@langchain/core/embeddings';
-import { OpenAIEmbeddings } from '@langchain/openai';
 import { PineconeStore } from '@langchain/pinecone';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -28,7 +27,7 @@ interface RetriverConfig {
 
 @Injectable()
 export class VectorStoreService implements OnModuleInit {
-  private pinecone: Pinecone;
+  public pinecone: Pinecone;
 
   private logger = new Logger(VectorStoreService.name);
 
@@ -154,64 +153,15 @@ Pinecone 连接失败。可能的原因:
   async getRetrieverOfIndex(
     indexKey: string,
     embeddings: Embeddings,
-    config: RetriverConfig = { k: 3, verbose: false },
+    topK: number = 3,
   ) {
     const indexName = this.getIndexName(indexKey);
     const index = this.pinecone.Index(indexName);
     const vectorStore = new PineconeStore(embeddings, { pineconeIndex: index });
 
-    const retriever = vectorStore.asRetriever(config.k);
+    //FIXME 能返回元数据?
+    const retriever = vectorStore.asRetriever(topK);
     return retriever;
-  }
-
-  /**
-   * 根据简历向量在岗位索引中查找相似的岗位
-   * @param resumeVector - 简历文本生成的向量
-   * @param k - 需要返回的最相似的岗位数量
-   * @returns {Promise<Document[]>} 包含岗位信息的文档列表
-   */
-  async findSimilarJobs(
-    resumeVector: number[],
-    k: number,
-  ): Promise<Document[]> {
-    try {
-      const indexName = this.getIndexName(IndexMap.JOBS);
-      const index = this.pinecone.Index(indexName);
-
-      const queryResult = await index.query({
-        vector: resumeVector,
-        topK: k,
-        includeMetadata: true, // 确保返回元数据，其中包含岗位信息
-      });
-
-      // 将查询结果转换为 LangChain 的 Document 格式
-      const documents =
-        queryResult.matches?.map(
-          (match) =>
-            new Document({
-              pageContent: match.metadata?.pageContent as string,
-              metadata: match.metadata || {},
-            }),
-        ) || [];
-
-      return documents;
-    } catch (error) {
-      const errorMessage = (error as Error).message;
-      console.error('查找相似岗位失败:', error);
-
-      if (
-        errorMessage.includes('ENOTFOUND') ||
-        errorMessage.includes('ECONNREFUSED')
-      ) {
-        throw new Error(
-          `网络连接失败: 无法连接到 Pinecone 服务器进行查询。请检查网络连接或VPN设置。`,
-        );
-      } else if (errorMessage.includes('timeout')) {
-        throw new Error(`查询超时: 网络连接不稳定，请重试或检查VPN连接。`);
-      }
-
-      throw new Error(`查询向量数据库失败: ${errorMessage}`);
-    }
   }
 
   /**
@@ -280,44 +230,6 @@ Pinecone 连接失败。可能的原因:
   /**
    * 创建空的向量索引
    * @param indexKey 索引别名或直接索引名
-   * @param eModel 用于向量化的嵌入模型
-   * @returns {Promise<void>}
-   * @description 创建一个新的Pinecone索引，配置维度与模型匹配
-   */
-  async createEmptyIndexWithModel(
-    indexKey: string,
-    eModel: OpenAIEmbeddings,
-  ): Promise<void> {
-    try {
-      // 确定索引名称
-      const indexName = IndexMap[indexKey] || indexKey;
-
-      // 确定向量维度
-      const dimension = eModel.dimensions ?? 1536;
-
-      // 创建索引
-      await this.pinecone.createIndex({
-        name: indexName,
-        dimension: dimension,
-        metric: 'cosine', // 使用余弦相似度计算
-        spec: {
-          serverless: {
-            cloud: serverlessConfig.cloud,
-            region: serverlessConfig.region,
-          },
-        },
-      });
-
-      console.log(`成功创建索引: ${indexName}, 维度: ${dimension}`);
-    } catch (error) {
-      console.error(`创建索引 ${indexKey} 失败:`, error);
-      throw new Error(`创建索引失败: ${error.message}`);
-    }
-  }
-
-  /**
-   * 创建空的向量索引
-   * @param indexKey 索引别名或直接索引名
    * @param dimension 向量维度
    * @returns {Promise<void>}
    */
@@ -355,7 +267,7 @@ Pinecone 连接失败。可能的原因:
    * @param alias - 索引的别名
    * @returns {string} 真实的索引名称
    */
-  private getIndexName(keyOrIndexName: string): string {
+  public getIndexName(keyOrIndexName: string): string {
     return (
       IndexMap[keyOrIndexName.toUpperCase() as keyof typeof IndexMap] ||
       keyOrIndexName

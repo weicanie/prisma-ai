@@ -46,7 +46,7 @@ export class RagService {
     const retriever = await this.vectorStoreService.getRetrieverOfIndex(
       'QIU',
       this.modelService.embedModel_openai,
-      { k: 3, verbose: true },
+      3,
     );
     const infoRetrieved = await retriever.invoke(userInput);
     //5.prompt增强

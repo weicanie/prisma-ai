@@ -30,6 +30,38 @@ export class OssService {
       throw new Error(`Failed to upload to OSS: ${error.message}`);
     }
   }
+  //检查文件是否已存在
+  async checkFileExists(objectName: string, bucketName = 'prisma-ai') {
+    try {
+      await this.ossClient.statObject(bucketName, objectName);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * 从OSS获取文件对象
+   * @param objectName 对象名(文件名)
+   * @param bucketName 桶名
+   * @returns 文件内容的Buffer
+   */
+  async getObject(
+    objectName: string,
+    bucketName = 'prisma-ai',
+  ): Promise<Buffer> {
+    try {
+      const dataStream = await this.ossClient.getObject(bucketName, objectName);
+      const chunks: Buffer[] = [];
+      for await (const chunk of dataStream) {
+        chunks.push(chunk);
+      }
+      return Buffer.concat(chunks);
+    } catch (error) {
+      this.logger.error(error, 'OssService ~ getObject');
+      throw new Error(`Failed to get object from OSS: ${error.message}`);
+    }
+  }
 
   /**
    * 获取预签名URL以前端直传文件到oss

@@ -242,7 +242,7 @@ export class ModelService {
   /**
    * @description 获取单例的嵌入模型实例
    */
-  async getEmbedModelOpenAI() {
+   getEmbedModelOpenAI() {
     return this.embedModel_openai;
   }
 

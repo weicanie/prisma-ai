@@ -20,21 +20,21 @@ export enum KnowledgeTypeEnum {
 export enum FileTypeEnum {
 	txt = 'txt', //txt
 	url = 'url', //url
-	doc = 'doc' //文档
+	doc = 'doc' //文档 (目前只支持pdf)
 }
-
+//TODO 前端直传用户上传的pdf文档
 /* 用户知识库 */
 export interface CreateKnowledgeDto {
 	name: string; //知识名称
 	fileType: `${FileTypeEnum}`; //文件类型 'txt' 'url' 'doc'
-	/* 知识标签-声明知识用途-目前由用户自定义
+	/* 知识标签-前由用户自定义
     项目经验优化
     简历匹配岗位
     简历延申论文
   */
 	tag: string[]; //知识标签
 
-	/* 知识类型
+	/* 知识类型-声明知识用途
 
   1.项目相关
     用户项目
@@ -51,6 +51,11 @@ export interface CreateKnowledgeDto {
 
   */
 	type: `${KnowledgeTypeEnum}`; //知识类型
+	/* 
+	1.txt: 文本内容
+  2.doc: 文档oss url（前端直传用户上传的pdf文档）
+  3.url: 项目github仓库url、文档url
+	*/
 	content: string; //知识内容
 }
 
@@ -62,9 +67,9 @@ export interface KnowledgeVo {
 	type: `${KnowledgeTypeEnum}`;
 	createdAt: Date;
 	updatedAt: Date;
-	fileType: string; // Added missing field
-	tag: string[]; // Added missing field
-	content: string; // Added missing field
+	fileType: string; 
+	tag: string[]; 
+	content: string; 
 }
 
 /**

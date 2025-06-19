@@ -273,4 +273,4 @@ workflow.addEdge("generate", END);
 workflow.addEdge("rewrite", "agent");
 
 // Compile
-export const app = workflow.compile();
+export const RAGGraph = workflow.compile();

@@ -46,6 +46,7 @@
     "@prisma/client": "^6.7.0",
     "@xenova/transformers": "^2.17.2",
     "body-parser": "^2.2.0",
+    "cheerio": "^1.1.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "dotenv": "^16.5.0",
@@ -57,13 +58,22 @@
     "nodemailer": "^7.0.3",
     "openai": "^4.98.0",
     "opossum": "^8.4.0",
+    "pdf-parse": "^1.1.1",
     "prisma": "^6.7.0",
     "puppeteer": "^24.9.0",
     "redis": "^5.0.1",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
     "sharp": "^0.34.2",
-    "tesseract.js": "^6.0.1"
+    "tesseract.js": "^6.0.1",
+    "tree-sitter": "^0.25.0",
+    "tree-sitter-cpp": "^0.23.4",
+    "tree-sitter-go": "^0.23.4",
+    "tree-sitter-java": "^0.23.5",
+    "tree-sitter-javascript": "^0.23.1",
+    "tree-sitter-python": "^0.23.6",
+    "tree-sitter-typescript": "^0.23.2",
+    "zod-to-json-schema": "^3.24.5"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
@@ -82,7 +92,8 @@
     "supertest": "^7.0.0",
     "ts-jest": "^29.1.0",
     "ts-loader": "^9.4.3",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "tsx": "^4.20.3"
   },
   "jest": {
     "moduleFileExtensions": [

@@ -17,7 +17,7 @@ import {
   TaskQueueService,
 } from '../../task-queue/task-queue.service';
 import {
-  PineconeIndex,
+  IndexMap,
   VectorStoreService,
 } from '../../vector-store/vector-store.service';
 import { Job, JobDocument } from '../job/entities/job.entity';
@@ -211,7 +211,7 @@ export class HjmService {
         try {
           await this.vectorStoreService.addDocumentsToIndex(
             allChunks,
-            PineconeIndex.JOBS,
+            IndexMap.JOBS,
             embeddings,
           );
         } catch (error) {
@@ -299,7 +299,7 @@ export class HjmService {
     }
 
     // 5. 使用平均后的单一向量，在向量数据库中查找最相似的 topK 个岗位块
-    const candidateJobChunks = await this.vectorStoreService.findSimilarJobs(
+    const candidateJobChunks = await this.findSimilarJobs(
       resumeVector,
       topK,
     );
@@ -391,4 +391,54 @@ export class HjmService {
     const text = `职位: ${result.jobName}, 公司: ${result.companyName}. 职位要求: ${result.description}`;
     return text;
   }
+
+    /**
+   * 根据简历向量在岗位索引中查找相似的岗位
+   * @param resumeVector - 简历文本生成的向量
+   * @param k - 需要返回的最相似的岗位数量
+   * @returns {Promise<Document[]>} 包含岗位信息的文档列表
+   */
+    async findSimilarJobs(
+      resumeVector: number[],
+      k: number,
+      ): Promise<Document[]> {
+        try {
+        const indexName = this.vectorStoreService.getIndexName(IndexMap.JOBS);
+        const index = this.vectorStoreService.pinecone.Index(indexName);
+  
+        const queryResult = await index.query({
+          vector: resumeVector,
+          topK: k,
+          includeMetadata: true, // 确保返回元数据，其中包含岗位信息
+        });
+  
+        // 将查询结果转换为 LangChain 的 Document 格式
+        const documents =
+          queryResult.matches?.map(
+            (match) =>
+              new Document({
+                pageContent: match.metadata?.pageContent as string,
+                metadata: match.metadata || {},
+              }),
+          ) || [];
+  
+        return documents;
+      } catch (error) {
+        const errorMessage = (error as Error).message;
+        console.error('查找相似岗位失败:', error);
+  
+        if (
+          errorMessage.includes('ENOTFOUND') ||
+          errorMessage.includes('ECONNREFUSED')
+        ) {
+          throw new Error(
+            `网络连接失败: 无法连接到 Pinecone 服务器进行查询。请检查网络连接或VPN设置。`,
+          );
+        } else if (errorMessage.includes('timeout')) {
+          throw new Error(`查询超时: 网络连接不稳定，请重试或检查VPN连接。`);
+        }
+  
+        throw new Error(`查询向量数据库失败: ${errorMessage}`);
+      }
+    }
 }

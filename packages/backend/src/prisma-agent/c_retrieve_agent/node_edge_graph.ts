@@ -3,42 +3,34 @@ import { SerpAPI } from "@langchain/community/tools/serpapi";
 import { Document, DocumentInterface } from "@langchain/core/documents";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { RunnableSequence } from "@langchain/core/runnables";
 import { END, START, StateGraph } from "@langchain/langgraph";
-import { ChatOpenAI } from "@langchain/openai";
-import { pull } from "langchain/hub";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { formatDocumentsAsString } from "langchain/util/document";
 import { z } from "zod";
-import { retriever } from "../RAG_Agent/retriever";
 import { GraphState } from "./state";
 
-// --- 配置常量 ---
-const UPPER_THRESHOLD = 7; // 相关性评分高于此值，视为 "Correct"
-const LOWER_THRESHOLD = 3; // 相关性评分低于此值，视为 "Incorrect"
+export const retrievalGraderSchema =  z
+.object({
+  score: z
+    .number()
+    .min(1)
+    .max(10)
+    .describe("文档与问题的相关性评分，1表示不相关，10表示非常相关。"),
+  justification: z.string().describe("评分的简要理由。"),
+})
+.describe("对检索到的文档与问题的相关性进行评分的工具。")
 
-// --- 模型定义 ---
-// 定义一个LLM。我们将在整个图中使用它。
-const model = new ChatOpenAI({
-  model: "gpt-4o",
-  temperature: 0,
-});
-
-// --- 检索评估器 (Retrieval Evaluator) ---
+// --- 节点 (Nodes) ---
 /**
- * 检索评估器，用于评估检索到的文档与问题的相关性。
- * @description 使用LLM来为每个文档打分(1-10)，并提供理由。
+ * 配置 检索评估器 chain
  */
+export const init = (state: typeof GraphState.State) => {
+
+const model = state.runningConfig.model;
+
+
 const retrievalGrader = model.withStructuredOutput(
-  z
-    .object({
-      score: z
-        .number()
-        .min(1)
-        .max(10)
-        .describe("文档与问题的相关性评分，1表示不相关，10表示非常相关。"),
-      justification: z.string().describe("评分的简要理由。"),
-    })
-    .describe("对检索到的文档与问题的相关性进行评分的工具。"),
+  retrievalGraderSchema,
   {
     name: "retrieval_grader",
   },
@@ -59,10 +51,13 @@ const gradePrompt = ChatPromptTemplate.fromTemplate(
 **用户的问题:** {question}
 `,
 );
-
-const retrievalGraderChain = gradePrompt.pipe(retrievalGrader);
-
-// --- 节点 (Nodes) ---
+/**
+ * 检索评估器，用于评估检索到的文档与问题的相关性。
+ * @description 使用LLM来为每个文档打分(1-10)，并提供理由。
+ */
+state.runningConfig.retrievalGraderChain = gradePrompt.pipe(retrievalGrader) as RunnableSequence<{context:string,question:string},z.infer<typeof retrievalGraderSchema>>;
+return {};
+}
 
 /**
  * **节点1: 检索 (Retrieve)**
@@ -70,11 +65,11 @@ const retrievalGraderChain = gradePrompt.pipe(retrievalGrader);
  * @param {typeof GraphState.State} state - 图的当前状态。
  * @returns {Promise<Partial<typeof GraphState.State>>} - 包含检索到的文档的新状态。
  */
-async function retrieve(
+export async function retrieve(
   state: typeof GraphState.State
 ): Promise<Partial<typeof GraphState.State>> {
   console.log("---NODE: RETRIEVE---");
-  const documents = await retriever.invoke(state.question);
+  const documents = await state.runningConfig.retriever!.invoke(state.question);
   return { documents };
 }
 
@@ -84,7 +79,7 @@ async function retrieve(
  * @param {typeof GraphState.State} state - 图的当前状态。
  * @returns {Promise<Partial<typeof GraphState.State>>} - 包含评分和检索状态的新状态。
  */
-async function gradeRetrieval(
+export async function gradeRetrieval(
   state: typeof GraphState.State
 ): Promise<Partial<typeof GraphState.State>> {
   console.log("---NODE: GRADE RETRIEVAL---");
@@ -92,7 +87,7 @@ async function gradeRetrieval(
   let totalScore = 0;
 
   for (const doc of documents) {
-    const grade = await retrievalGraderChain.invoke({
+    const grade = await state.runningConfig.retrievalGraderChain!.invoke({
       question,
       context: doc.pageContent,
     });
@@ -104,10 +99,10 @@ async function gradeRetrieval(
   const averageScore = totalScore / (documents.length || 1);
   let retrieval_status: "Correct" | "Incorrect" | "Ambiguous";
 
-  if (averageScore >= UPPER_THRESHOLD) {
+  if (averageScore >= state.runningConfig.UPPER_THRESHOLD) {
     retrieval_status = "Correct";
     console.log("---GRADE: CORRECT---");
-  } else if (averageScore < LOWER_THRESHOLD) {
+  } else if (averageScore < state.runningConfig.LOWER_THRESHOLD) {
     retrieval_status = "Incorrect";
     console.log("---GRADE: INCORRECT---");
   } else {
@@ -124,7 +119,7 @@ async function gradeRetrieval(
  * @param {typeof GraphState.State} state - 图的当前状态。
  * @returns {Promise<Partial<typeof GraphState.State>>} - 包含精炼后文档的新状态。
  */
-async function refineKnowledge(
+export async function refineKnowledge(
   state: typeof GraphState.State
 ): Promise<Partial<typeof GraphState.State>> {
   console.log("---NODE: REFINE KNOWLEDGE---");
@@ -140,18 +135,18 @@ async function refineKnowledge(
   const refinedDocs: DocumentInterface[] = [];
   // 只处理评分较高的文档
   const relevantDocs = documents.filter(
-    (doc) => doc.metadata.relevance_score >= LOWER_THRESHOLD
+    (doc) => doc.metadata.relevance_score >= state.runningConfig.LOWER_THRESHOLD
   );
 
   for (const doc of relevantDocs) {
     const splits = await splitter.splitDocuments([doc]);
     for (const split of splits) {
-      const grade = await retrievalGraderChain.invoke({
+      const grade = await state.runningConfig.retrievalGraderChain!.invoke({
         question,
         context: split.pageContent,
       });
       // 只保留高度相关的知识片段
-      if (grade.score >= UPPER_THRESHOLD) {
+      if (grade.score >= state.runningConfig.UPPER_THRESHOLD) {
         console.log("  - Keeping refined chunk.");
         refinedDocs.push(split);
       } else {
@@ -169,7 +164,7 @@ async function refineKnowledge(
  * @param {typeof GraphState.State} state - 图的当前状态。
  * @returns {Promise<Partial<typeof GraphState.State>>} - 包含Web搜索结果的新状态。
  */
-async function webSearch(
+export async function webSearch(
   state: typeof GraphState.State
 ): Promise<Partial<typeof GraphState.State>> {
   console.log("---NODE: WEB SEARCH---");
@@ -181,7 +176,7 @@ async function webSearch(
     `请将以下问题转化为一个简洁、适合搜索引擎的关键词查询。
     **问题:** {question}`,
   );
-  const queryRewriter = rewritePrompt.pipe(model).pipe(new StringOutputParser());
+  const queryRewriter = rewritePrompt.pipe(state.runningConfig.model).pipe(new StringOutputParser());
   const webQuery = await queryRewriter.invoke({ question });
   console.log(`  - Web query: ${webQuery}`);
 
@@ -208,7 +203,7 @@ async function webSearch(
  * @param {typeof GraphState.State} state - 图的当前状态。
  * @returns {Promise<Partial<typeof GraphState.State>>} - 包含最终文档集的新状态。
  */
-async function gradeAndRefineWeb(
+export async function gradeAndRefineWeb(
   state: typeof GraphState.State
 ): Promise<Partial<typeof GraphState.State>> {
   console.log("---NODE: GRADE AND REFINE WEB---");
@@ -231,11 +226,11 @@ async function gradeAndRefineWeb(
   for (const doc of docsToProcess) {
     const splits = await splitter.splitDocuments([doc]);
     for (const split of splits) {
-      const grade = await retrievalGraderChain.invoke({
+      const grade = await state.runningConfig.retrievalGraderChain!.invoke({
         question,
         context: split.pageContent,
       });
-      if (grade.score >= UPPER_THRESHOLD) {
+      if (grade.score >= state.runningConfig.UPPER_THRESHOLD) {
         console.log("  - Keeping web chunk.");
         refinedWebDocs.push(split);
       } else {
@@ -248,28 +243,6 @@ async function gradeAndRefineWeb(
   return { documents: finalDocs };
 }
 
-/**
- * **节点6: 生成 (Generate)**
- * @description 使用最终的、经过校正的文档作为上下文来生成答案。
- * @param {typeof GraphState.State} state - 图的当前状态。
- * @returns {Promise<Partial<typeof GraphState.State>>} - 包含生成答案的新状态。
- */
-async function generate(
-  state: typeof GraphState.State
-): Promise<Partial<typeof GraphState.State>> {
-  console.log("---NODE: GENERATE---");
-  const { question, documents } = state;
-  const prompt = await pull<ChatPromptTemplate>("rlm/rag-prompt");
-
-  const ragChain = prompt.pipe(model).pipe(new StringOutputParser());
-
-  const generation = await ragChain.invoke({
-    context: formatDocumentsAsString(documents),
-    question: question,
-  });
-
-  return { generation };
-}
 
 // --- 边 (Edges) ---
 
@@ -279,7 +252,7 @@ async function generate(
  * @param {typeof GraphState.State} state - 图的当前状态。
  * @returns {"refineKnowledge" | "webSearch"} - 下一个节点的名称。
  */
-function decideAction(state: typeof GraphState.State) {
+export function decideAction(state: typeof GraphState.State) {
   console.log("---EDGE: DECIDE ACTION---");
   const status = state.retrieval_status;
   if (status === "Incorrect") {
@@ -294,7 +267,7 @@ function decideAction(state: typeof GraphState.State) {
  * @param {typeof GraphState.State} state - 图的当前状态。
  * @returns {"webSearch" | "generate"} - 下一个节点的名称。
  */
-function decideAfterRefinement(state: typeof GraphState.State) {
+export function decideAfterRefinement(state: typeof GraphState.State) {
   console.log("---EDGE: DECIDE AFTER REFINEMENT---");
   const status = state.retrieval_status;
   if (status === "Ambiguous") {
@@ -304,25 +277,21 @@ function decideAfterRefinement(state: typeof GraphState.State) {
   return "generate";
 }
 
-// --- 构建图 (Build Graph) ---
+//--- 图 (Graph) ---
+const CRAGGraph = new StateGraph(GraphState)
+.addNode('init',init)
+.addNode("retrieve", retrieve)
+.addNode("gradeRetrieval", gradeRetrieval)
+.addNode("refineKnowledge", refineKnowledge)
+.addNode("webSearch", webSearch)
+.addNode("gradeAndRefineWeb", gradeAndRefineWeb)
 
-const workflow = new StateGraph(GraphState)
-  // 定义节点
-  .addNode("retrieve", retrieve)
-  .addNode("gradeRetrieval", gradeRetrieval)
-  .addNode("refineKnowledge", refineKnowledge)
-  .addNode("webSearch", webSearch)
-  .addNode("gradeAndRefineWeb", gradeAndRefineWeb)
-  .addNode("generate", generate);
+CRAGGraph.addEdge(START, "retrieve");
+CRAGGraph.addEdge("retrieve", "gradeRetrieval");
+CRAGGraph.addConditionalEdges("gradeRetrieval", decideAction);
+CRAGGraph.addConditionalEdges("refineKnowledge", decideAfterRefinement);
+CRAGGraph.addEdge("webSearch", "gradeAndRefineWeb");
+CRAGGraph.addEdge("gradeAndRefineWeb", END);
 
-// 定义图的流程
-workflow.addEdge(START, "retrieve");
-workflow.addEdge("retrieve", "gradeRetrieval");
-workflow.addConditionalEdges("gradeRetrieval", decideAction);
-workflow.addConditionalEdges("refineKnowledge", decideAfterRefinement);
-workflow.addEdge("webSearch", "gradeAndRefineWeb");
-workflow.addEdge("gradeAndRefineWeb", "generate");
-workflow.addEdge("generate", END);
+export { CRAGGraph };
 
-// 编译图
-export const CRAGGraph = workflow.compile();

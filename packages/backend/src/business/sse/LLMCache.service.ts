@@ -30,9 +30,9 @@ export class LLMCacheService {
       );
       if (!exists) {
         // 创建一个空索引
-        await this.vectorStoreService.createEmptyIndexWithModel(
+        await this.vectorStoreService.createEmptyIndex(
           this.CACHE_INDEX,
-          this.modelService.embedModel_openai,
+          this.modelService.embedModel_openai.dimensions ?? 1536,
         );
       }
       const logger = new Logger();
@@ -130,7 +130,7 @@ export class LLMCacheService {
       const retriever = await this.vectorStoreService.getRetrieverOfIndex(
         this.CACHE_INDEX,
         this.modelService.embedModel_openai,
-        { k: 3, verbose: true },
+        3,
       );
 
       // 检索相似文档

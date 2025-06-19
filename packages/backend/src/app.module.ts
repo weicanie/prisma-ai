@@ -20,6 +20,7 @@ import { IsLoginGuard } from './isLogin.guard';
 import { SessionPoolModule } from './session/session-pool.module';
 import { UserModule } from './user/user.module';
 import { AutoflowModule } from './business/autoflow/autoflow.module';
+import { PrismaAgentModule } from './prisma-agent/prisma-agent.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { AutoflowModule } from './business/autoflow/autoflow.module';
     KnowledgebaseModule,
     HjmModule,
     AutoflowModule,
+    PrismaAgentModule,
   ],
   providers: [
     {

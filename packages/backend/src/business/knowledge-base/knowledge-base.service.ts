@@ -2,12 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   CreateKnowledgeDto,
+  FileTypeEnum,
   KnowledgeVo,
   PaginatedKnsResult,
   UpdateKnowledgeDto,
   UserInfoFromToken,
 } from '@prism-ai/shared';
 import { Model, Types } from 'mongoose';
+import { OssService } from '../../oss/oss.service';
 import {
   Knowledgebase,
   KnowledgebaseDocument,
@@ -18,12 +20,24 @@ export class KnowledgebaseService {
   constructor(
     @InjectModel(Knowledgebase.name)
     private knowledgebaseModel: Model<KnowledgebaseDocument>,
+    private ossService: OssService,
   ) {}
 
+  /**
+   * 存储知识到数据库,文档则上传到oss
+   * oss中文档的命名规则: 知识名称-用户id
+   */
   async create(
     createKnowledgeDto: CreateKnowledgeDto,
     userInfo: UserInfoFromToken,
   ): Promise<KnowledgeVo> {
+    if(createKnowledgeDto.fileType === FileTypeEnum.doc){
+      const fileExists = await this.ossService.checkFileExists(`${createKnowledgeDto.name}-${userInfo.userId}`);
+      if (!fileExists) {
+        throw new Error('文件不存在,请检查文件名或文件是否已上传');
+      }
+    }
+
     const createdKnowledgebase = new this.knowledgebaseModel({
       ...createKnowledgeDto,
       userInfo,

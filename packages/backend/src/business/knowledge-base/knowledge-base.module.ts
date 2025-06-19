@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { OssModule } from '../../oss/oss.module';
 import {
   Knowledgebase,
   KnowledgebaseSchema,
@@ -12,6 +13,7 @@ import { KnowledgebaseService } from './knowledge-base.service';
     MongooseModule.forFeature([
       { name: Knowledgebase.name, schema: KnowledgebaseSchema },
     ]),
+    OssModule
   ],
   controllers: [KnowledgebaseController],
   providers: [KnowledgebaseService],
