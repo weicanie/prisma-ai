@@ -9,12 +9,12 @@ const plan = zodToJsonSchema(
   z.object({
     steps: z
       .array(z.string())
-      .describe("different steps to follow, should be in sorted order"),
+      .describe("不同的步骤，应该按顺序排列"),
   }),
 );
 const planFunction = {
   name: "plan",
-  description: "This tool is used to plan the steps to follow",
+  description: "这个工具用于规划要遵循的步骤",
   parameters: plan,
 };
 
@@ -23,15 +23,15 @@ const planTool = {
   function: planFunction,
 };
 const plannerPrompt = ChatPromptTemplate.fromTemplate(
-  `For the given objective, come up with a simple step by step plan. \
-This plan should involve individual tasks, that if executed correctly will yield the correct answer. Do not add any superfluous steps. \
-The result of the final step should be the final answer. Make sure that each step has all the information needed - do not skip steps.
+  `对于给定的目标，想出一个简单的一步一步的计划。
+这个计划应该包括单独的任务，如果执行正确就会得到正确的答案。不要添加任何多余的步骤。
+最后一步的结果应该是最终的答案。确保每一步都有所有需要的信息——不要跳过任何步骤。
 
-{objective}`,
+目标：{objective}`,
 );
 
 const model = new ChatOpenAI({
-  modelName: "gpt-4-0125-preview",
+  modelName: "gpt-4o",
 }).withStructuredOutput(planFunction);
 
 const planner = plannerPrompt.pipe(model);
@@ -54,22 +54,22 @@ const responseTool = {
 };
 
 const replannerPrompt = ChatPromptTemplate.fromTemplate(
-  `For the given objective, come up with a simple step by step plan. 
-This plan should involve individual tasks, that if executed correctly will yield the correct answer. Do not add any superfluous steps.
-The result of the final step should be the final answer. Make sure that each step has all the information needed - do not skip steps.
+`对于给定的目标，想出一个简单的一步一步的计划。
+这个计划应该包括单独的任务，如果执行正确就会得到正确的答案。不要添加任何多余的步骤。
+最后一步的结果应该是最终的答案。确保每一步都有所有需要的信息——不要跳过任何步骤。
 
-Your objective was this:
+你的目标是：
 {input}
 
-Your original plan was this:
+你的原始计划：
 {plan}
 
-You have currently done the follow steps:
+你目前已经完成了以下步骤：
 {pastSteps}
 
-Update your plan accordingly. If no more steps are needed and you can return to the user, then respond with that and use the 'response' function.
-Otherwise, fill out the plan.  
-Only add steps to the plan that still NEED to be done. Do not return previously done steps as part of the plan.`,
+更新你的计划。如果没有更多的步骤需要完成，并且你可以返回给用户，那么就使用'response'函数返回。
+否则，完成计划。
+只向计划中添加仍然需要完成的步骤。不要返回已经完成的步骤作为计划的一部分。`,
 );
 
 const parser = new JsonOutputToolsParser();

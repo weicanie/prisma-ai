@@ -66,35 +66,9 @@ export class McpServerService implements OnModuleInit, OnModuleDestroy {
 				try {
 					// 获取当前时间
 					const now = new Date();
-
-					// 格式化时间
-					let formattedTime: string;
-
-					if (timezone) {
-						// 使用用户提供的时区格式化时间
-						formattedTime = now.toLocaleString('zh-CN', {
-							timeZone: timezone,
-							year: 'numeric',
-							month: '2-digit',
-							day: '2-digit',
-							hour: '2-digit',
-							minute: '2-digit',
-							second: '2-digit',
-							hour12: false
-						});
-					} else {
-						// 使用系统默认时区
-						formattedTime = now.toLocaleString('zh-CN', {
-							year: 'numeric',
-							month: '2-digit',
-							day: '2-digit',
-							hour: '2-digit',
-							minute: '2-digit',
-							second: '2-digit',
-							hour12: false
-						});
-					}
-
+					const formattedTime = now.toLocaleString('zh-CN', {
+						timeZone: timezone || Intl.DateTimeFormat().resolvedOptions().timeZone
+					});
 					const systemTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 					// 返回 MCP 格式的结果

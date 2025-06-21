@@ -10,7 +10,7 @@ export const type_content_Map: Record<string, string> = {
 //上面的作为注释
 export enum KnowledgeTypeEnum {
 	userProjectDoc = 'userProjectDoc', //我的项目文档
-	userProjectRepo = 'userProjectRepo', //我的项目github仓库地址
+	//userProjectRepo = 'userProjectRepo', //我的项目github仓库地址
 	openSourceProjectDoc = 'openSourceProjectDoc', //开源项目文档
 	openSourceProjectRepo = 'openSourceProjectRepo', //开源项目github仓库地址
 	techDoc = 'techDoc', //技术文档
@@ -39,7 +39,7 @@ export interface CreateKnowledgeDto {
   1.项目相关
     用户项目
       项目文档 'userProjectDoc'
-      项目代码（github地址） 'userProjectRepo'
+      项目代码（github地址） 'userProjectRepo' （暂时不支持,一是要处理更新逻辑,二是存在亮点实现时的重复问题,三是用户代码泛用价值不大）
     同类型开源项目
       开源项目文档 'openSourceProjectDoc'
       开源项目代码（github地址） 'openSourceProjectRepo'
@@ -67,9 +67,9 @@ export interface KnowledgeVo {
 	type: `${KnowledgeTypeEnum}`;
 	createdAt: Date;
 	updatedAt: Date;
-	fileType: string; 
-	tag: string[]; 
-	content: string; 
+	fileType: string;
+	tag: string[];
+	content: string;
 }
 
 /**

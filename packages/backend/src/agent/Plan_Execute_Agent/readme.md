@@ -5,6 +5,7 @@
 `Planner`模块采用
 - plan出所有步骤
 - 每完成一个步骤,replan
+- prompt旨在完成简单的线性任务
 
 `Executor`
 - ReAct Agent进行执行
