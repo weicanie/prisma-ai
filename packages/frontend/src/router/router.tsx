@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
 import UpdateBreadRouter from './UpdateBreadRouter';
 const LoginRegist = lazy(() => import('../views/LoginRegist/LoginRegist'));
@@ -23,11 +23,7 @@ const JobMatch = lazy(() => import('../views/Main/Hjm/JobMatch'));
 export const routes = [
 	{
 		path: '',
-		element: (
-			<PrivateRoute>
-				<Main />
-			</PrivateRoute>
-		)
+		element: <Navigate to="/main/home" />
 	},
 
 	{
@@ -42,6 +38,10 @@ export const routes = [
 			</PrivateRoute>
 		),
 		children: [
+			{
+				path: '',
+				element: <Navigate to="/main/home" />
+			},
 			// 首页
 			{
 				path: '/main/home',

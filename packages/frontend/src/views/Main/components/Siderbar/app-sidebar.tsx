@@ -29,7 +29,7 @@ import { TeamSwitcher } from './team-switcher';
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const navigate = useNavigate();
 	const userInfoData = localStorage.getItem('userInfo');
-	const userInfo = JSON.parse(userInfoData || '{}')?.data;
+	const userInfo = userInfoData && JSON.parse(userInfoData);
 	//流程、分组
 	const data = {
 		user: {
@@ -73,7 +73,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				url: '/main/hjm',
 				items: [
 					{ title: '岗位数据获取', url: '/main/hjm/get-jobs' },
-					{ title: '简历匹配岗位', url: '/main/hjm/match-jobs' },
+					{ title: '简历匹配岗位', url: '/main/hjm/match-jobs' }
 				]
 			},
 			{
@@ -97,7 +97,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				items: [
 					{ title: '技术学习路线', url: '/main/offer/road' },
 					{ title: '项目亮点实现', url: '/main/offer/doit' },
-					{ title: '简历延申八股', url: '/main/offer/questions' },
+					{ title: '简历延申八股', url: '/main/offer/questions' }
 				]
 			}
 		]

@@ -1,5 +1,5 @@
 import { Document } from '@langchain/core/documents';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { JobStatus, JobVo, LLMJobDto, ResumeVo, UserInfoFromToken } from '@prism-ai/shared';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
@@ -7,7 +7,7 @@ import { Model } from 'mongoose';
 import { ChainService } from '../../chain/chain.service';
 import { RedisService } from '../../redis/redis.service';
 import { PersistentTask, TaskQueueService } from '../../task-queue/task-queue.service';
-import { IndexMap, VectorStoreService } from '../../vector-store/vector-store.service';
+import { VectorStoreService } from '../../vector-store/vector-store.service';
 import { Job, JobDocument } from '../job/entities/job.entity';
 import { JobService } from '../job/job.service';
 import { ResumeService } from '../resume/resume.service';
@@ -48,8 +48,12 @@ interface JobMatchTask extends PersistentTask {
 	metadata: JobMatchTaskMetadata;
 }
 
+enum IndexMap {
+	JOBS = 'jobs-index' // 岗位索引
+}
+
 @Injectable()
-export class HjmService {
+export class HjmService implements OnModuleInit {
 	private readonly logger = new Logger(HjmService.name);
 	// 定义任务类型常量
 	readonly taskTypeJobEmbedding = 'job_embedding';
@@ -87,6 +91,37 @@ export class HjmService {
 		this.logger.log(
 			`人岗匹配任务处理器已注册: ${this.taskTypeJobEmbedding}, ${this.taskTypeJobMatch}`
 		);
+	}
+
+	/**
+	 * 确保要用到的向量数据库索引存在, 不存在则创建
+	 * 顺便检查向量数据库连接
+	 */
+	async onModuleInit() {
+		try {
+			this.logger.log('正在检查 Pinecone 连接...');
+			const jobsIndexExists = await this.vectorStoreService.indexExists(IndexMap.JOBS);
+			if (!jobsIndexExists) {
+				console.log(`索引 '${IndexMap.JOBS}' 不存在，将自动创建...`);
+				const dimension = this.vectorStoreService.embeddingModelService.dimensions;
+				if (!dimension) {
+					throw new Error('无法从 embeddingModelService 获取向量维度，初始化失败。');
+				}
+				await this.vectorStoreService.createEmptyIndex(IndexMap.JOBS, dimension);
+			}
+			this.logger.log('Pinecone 连接验证成功');
+		} catch (error) {
+			const errorMsg = `
+	Pinecone 连接失败。可能的原因:
+	1. 网络连接问题 - 请检查网络连接
+	2. API密钥错误 - 请检查 PINECONE_API_KEY 环境变量
+	3. 需要VPN - Pinecone 在某些地区可能需要VPN访问
+	
+	错误详情: ${(error as Error).message}
+				`.trim();
+			this.logger.error(errorMsg);
+			throw new Error(errorMsg);
+		}
 	}
 
 	/**
@@ -353,7 +388,7 @@ export class HjmService {
 	 */
 	async findSimilarJobs(resumeVector: number[], k: number): Promise<Document[]> {
 		try {
-			const indexName = this.vectorStoreService.getIndexName(IndexMap.JOBS);
+			const indexName = IndexMap.JOBS;
 			const index = this.vectorStoreService.pinecone.Index(indexName);
 
 			const queryResult = await index.query({

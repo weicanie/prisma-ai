@@ -53,21 +53,21 @@ declare const autoflowSchema: z.ZodObject<{
             type: z.ZodDefault<z.ZodString>;
             content: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
         }, "strip", z.ZodTypeAny, {
-            content: string[];
             type: string;
+            content: string[];
         }, {
-            content?: string[] | undefined;
             type?: string | undefined;
+            content?: string[] | undefined;
         }>, "many">;
     }, "strip", z.ZodTypeAny, {
         content: {
-            content: string[];
             type: string;
+            content: string[];
         }[];
     }, {
         content: {
-            content?: string[] | undefined;
             type?: string | undefined;
+            content?: string[] | undefined;
         }[];
     }>;
     projects: z.ZodArray<z.ZodObject<{
@@ -109,12 +109,12 @@ declare const autoflowSchema: z.ZodObject<{
             skill: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
             user: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
         }, "strip", z.ZodTypeAny, {
-            skill: string[];
             team: string[];
+            skill: string[];
             user: string[];
         }, {
-            skill?: string[] | undefined;
             team?: string[] | undefined;
+            skill?: string[] | undefined;
             user?: string[] | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
@@ -128,8 +128,8 @@ declare const autoflowSchema: z.ZodObject<{
             techStack: string[];
         };
         lightspot: {
-            skill: string[];
             team: string[];
+            skill: string[];
             user: string[];
         };
     }, {
@@ -143,16 +143,16 @@ declare const autoflowSchema: z.ZodObject<{
             techStack?: string[] | undefined;
         };
         lightspot: {
-            skill?: string[] | undefined;
             team?: string[] | undefined;
+            skill?: string[] | undefined;
             user?: string[] | undefined;
         };
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
     skill: {
         content: {
-            content: string[];
             type: string;
+            content: string[];
         }[];
     };
     projects: {
@@ -166,16 +166,16 @@ declare const autoflowSchema: z.ZodObject<{
             techStack: string[];
         };
         lightspot: {
-            skill: string[];
             team: string[];
+            skill: string[];
             user: string[];
         };
     }[];
 }, {
     skill: {
         content: {
-            content?: string[] | undefined;
             type?: string | undefined;
+            content?: string[] | undefined;
         }[];
     };
     projects: {
@@ -189,8 +189,8 @@ declare const autoflowSchema: z.ZodObject<{
             techStack?: string[] | undefined;
         };
         lightspot: {
-            skill?: string[] | undefined;
             team?: string[] | undefined;
+            skill?: string[] | undefined;
             user?: string[] | undefined;
         };
     }[];
@@ -331,7 +331,6 @@ declare const llmJobSchema: z.ZodObject<{
 declare const type_content_Map: Record<string, string>;
 declare enum KnowledgeTypeEnum {
     userProjectDoc = "userProjectDoc",//我的项目文档
-    userProjectRepo = "userProjectRepo",//我的项目github仓库地址
     openSourceProjectDoc = "openSourceProjectDoc",//开源项目文档
     openSourceProjectRepo = "openSourceProjectRepo",//开源项目github仓库地址
     techDoc = "techDoc",//技术文档

@@ -323,7 +323,8 @@ ReplanGraph
 	.addEdge('re_analyze', 're_plan')
 	//当整个任务为完成时，进行`人类审核`：根据`亮点的需求分析、亮点的实现计划`，审核是否需要重新反思或结束
 	.addConditionalEdges('re_plan', shouldEnd, {
-		[END]: END
+		[END]: END,
+		human_review: 'human_review'
 	})
 	.addConditionalEdges('human_review', shouldReflect, {
 		prepare_reflection: 'prepare_reflection', // 如果提供了反馈，则再次反思。

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { EventBusModule } from '../EventBus/event-bus.module';
 import { ClientModule } from '../mcp-client/mcp-client.module';
 import { ModelModule } from '../model/model.module';
@@ -13,10 +13,9 @@ import { PlanExecuteAgentService } from './plan_execute_agent/plan_execute_agent
 import { PlanStepAgentService } from './plan_step_agent/plan_step_agent.service';
 import { PrismaAgentService } from './prisma-agent.service';
 import { ReflectAgentService } from './reflact_agent/reflact_agent.service';
-import { TestController } from './test.controller';
 
 @Module({
-	controllers: [TestController],
+	controllers: [],
 	providers: [
 		PrismaAgentService,
 		ProjectCodeVDBService,
@@ -31,9 +30,9 @@ import { TestController } from './test.controller';
 		PromptModule,
 		ClientModule,
 		VectorStoreModule,
-		TaskQueueModule,
+		forwardRef(() => TaskQueueModule),
 		OssModule,
-		EventBusModule
+		forwardRef(() => EventBusModule)
 	],
 	exports: [PrismaAgentService, KnowledgeVDBService]
 })

@@ -4249,7 +4249,6 @@ var type_content_Map = {
 };
 var KnowledgeTypeEnum = /* @__PURE__ */ ((KnowledgeTypeEnum2) => {
   KnowledgeTypeEnum2["userProjectDoc"] = "userProjectDoc";
-  KnowledgeTypeEnum2["userProjectRepo"] = "userProjectRepo";
   KnowledgeTypeEnum2["openSourceProjectDoc"] = "openSourceProjectDoc";
   KnowledgeTypeEnum2["openSourceProjectRepo"] = "openSourceProjectRepo";
   KnowledgeTypeEnum2["techDoc"] = "techDoc";

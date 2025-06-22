@@ -203,10 +203,7 @@ export class KnowledgeVDBService {
 				return [new Document({ pageContent: content, metadata: { source: name } })];
 
 			case FileTypeEnum.url:
-				if (
-					type === KnowledgeTypeEnum.userProjectRepo ||
-					type === KnowledgeTypeEnum.openSourceProjectRepo
-				) {
+				if (type === KnowledgeTypeEnum.openSourceProjectRepo) {
 					this.logger.log(`  - 使用 GithubRepoLoader 加载: ${content}`);
 					const loader = new GithubRepoLoader(content, {
 						branch: 'main',
@@ -245,10 +242,7 @@ export class KnowledgeVDBService {
 		documents: Document[],
 		type: `${KnowledgeTypeEnum}`
 	): Promise<Document[]> {
-		if (
-			type === KnowledgeTypeEnum.userProjectRepo ||
-			type === KnowledgeTypeEnum.openSourceProjectRepo
-		) {
+		if (type === KnowledgeTypeEnum.openSourceProjectRepo) {
 			// 复用ProjectCodeVDBService中的代码分割逻辑
 			this.logger.log('  - 使用代码分割策略...');
 			const allChunks: Document[] = [];
@@ -316,7 +310,6 @@ export class KnowledgeVDBService {
 	private _getIndexName(type: `${KnowledgeTypeEnum}`, userId: string): string {
 		let prefix: KnowledgeIndex;
 		switch (type) {
-			case KnowledgeTypeEnum.userProjectRepo:
 			case KnowledgeTypeEnum.openSourceProjectRepo:
 				prefix = KnowledgeIndex.PROJECT_CODE;
 				break;

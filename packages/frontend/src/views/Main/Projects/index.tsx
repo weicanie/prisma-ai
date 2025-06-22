@@ -31,14 +31,14 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 	mainTable = true
 }) => {
 	const { data, status } = useCustomQuery([ProjectQueryKey.Projects], findAllProjects);
-	const removeMutation = useCustomMutation(removeProject,{
+	const removeMutation = useCustomMutation(removeProject, {
 		onSuccess: () => {
 			toast.success('删除成功');
 		},
 		onError: () => {
 			toast.error('删除失败');
 		}
-	})
+	});
 	const navigate = useNavigate();
 	if (status === 'pending') {
 		return <div>Loading...</div>;
@@ -136,9 +136,14 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 			rowActionsCol: [
 				{
 					id: 'actions',
-					cell: ({ row }) => <DataTableRowActions row={row} onDelete={() => {
-						removeMutation.mutate(row.original.id);
-					}} />
+					cell: ({ row }) => (
+						<DataTableRowActions
+							row={row}
+							onDelete={() => {
+								removeMutation.mutate(row.original.id);
+							}}
+						/>
+					)
 				}
 			]
 		},
@@ -152,7 +157,7 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 		},
 		onRowClick: (index: number) => {
 			return () => {
-				navigate(`/main/projects/detail/${projectDatas[index]?.id}`, {
+				navigate(`/main/projects/action/${projectDatas[index]?.id}`, {
 					state: { param: projectDatas[index]?.id }
 				});
 			};
