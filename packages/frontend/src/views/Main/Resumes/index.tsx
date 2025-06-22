@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { ResumeVo } from '@prism-ai/shared';
+import { useQueryClient } from '@tanstack/react-query';
 import type { Row, Table } from '@tanstack/react-table';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
@@ -36,18 +37,20 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
-	const { data, status } = useCustomQuery([ResumeQueryKey.Resumes, 1, 10], ({ queryKey }) => {
+	const { data, status } = useCustomQuery([ResumeQueryKey.Resumes, 1, 1000], ({ queryKey }) => {
 		const [, page, limit] = queryKey; // 从 queryKey 中解构分页参数
 		return findAllUserResumes(page as number, limit as number);
 	});
-	const removeMutation = useCustomMutation(removeResume,{
+	const queryClient = useQueryClient();
+	const removeMutation = useCustomMutation(removeResume, {
 		onSuccess: () => {
 			toast.success('删除成功');
+			queryClient.invalidateQueries({ queryKey: [ResumeQueryKey.Resumes, 1, 1000] });
 		},
 		onError: () => {
 			toast.error('删除失败');
 		}
-	})
+	});
 
 	/* 挂载和卸载时重置选中的职业技能和项目经验 */
 	useEffect(() => {
@@ -176,9 +179,14 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 			rowActionsCol: [
 				{
 					id: 'actions',
-					cell: ({ row }) => <DataTableRowActions row={row} onDelete={() => {
-						removeMutation.mutate(row.original.id);
-					}} />
+					cell: ({ row }) => (
+						<DataTableRowActions
+							row={row}
+							onDelete={() => {
+								removeMutation.mutate(row.original.id);
+							}}
+						/>
+					)
 				}
 			]
 		},

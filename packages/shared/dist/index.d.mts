@@ -44,6 +44,29 @@ declare const errorMessage: {
 
 declare const DEFAULT_MESSAGE = "ok";
 
+interface ChatMessage {
+    id: string;
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+}
+interface ConversationDto {
+    label: string;
+    id: number;
+    keyname: string;
+    content: ChatMessage[];
+    user_id: number;
+    create_at: Date | null;
+    update_at: Date | null;
+}
+interface MessageSendDto {
+    message: ChatMessage;
+}
+interface ConversationSendDto {
+    key: string;
+    label: string;
+    content: ChatMessage[];
+}
+
 /**
  * autoflow chain 从简历文本中提取出的原始JSON
  */
@@ -340,7 +363,8 @@ declare enum KnowledgeTypeEnum {
 declare enum FileTypeEnum {
     txt = "txt",//txt
     url = "url",//url
-    doc = "doc"
+    doc = "doc",//文档 (目前只支持pdf)
+    md = "md"
 }
 interface CreateKnowledgeDto {
     name: string;
@@ -1621,4 +1645,4 @@ declare function projectSchemaToMarkdown(project: z.infer<typeof projectSchemaFo
 declare const skillsToMarkdown: (data: CreateSkillDto) => string;
 declare const markdownToSkills: (markdown: string) => CreateSkillDto;
 
-export { type CreateJobDto, type CreateKnowledgeDto, type CreateResumeDto, type CreateSkillDto, DEFAULT_MESSAGE, type DataChunkErrVO, type DataChunkVO, ErrorCode, FileTypeEnum, type HjmMatchDto, JobOpenStatus, JobStatus, type JobVo, KnowledgeTypeEnum, type KnowledgeVo, type LLMJobDto, type LLMSessionRequest, type LLMSessionResponse, type LLMSessionStatusResponse, type LoginFormType, type LoginResponse, type MatchJobDto, type MatchedJobVo, type PaginatedJobsResult, type PaginatedKnsResult, type PaginatedResumeMatchedResult, type PaginatedResumesResult, type ProjectDto, type ProjectMinedDto, type ProjectMineddVo, type ProjectPolishedDto, type ProjectPolishedVo, ProjectStatus, type ProjectVo, type RegistFormType, type RegistResponse, RequestTargetMap, type ResumeMatchedDto, type ResumeMatchedVo, ResumeStatus, type ResumeVo, type RoadFromDiff, type RoadFromDiffDto, type ServerDataFormat, type SkillItem, type SkillVo, type StartCrawlDto, type StreamingChunk, type TRequestParams, type UpdateJobDto, type UpdateKnowledgeDto, type UpdateResumeDto, type UpdateSkillDto, type UserInfoFromToken, type VerifyMetaData, autoflowSchema, errorMessage, getLightspotSchema, hjmRerankSchema, jsonMd_obj, llmJobSchema, loginformSchema, type lookupResultDto, lookupResultSchema, markdownToProjectSchema, markdownToSkills, type projectLookupedDto, projectLookupedSchema, projectMinedSchema, projectPolishedSchema, projectSchema, projectSchemaForm, projectSchemaToMarkdown, registformSchema, resumeMatchedSchema, roadFromDiffSchema, skillItemSchema, skillSchema, skillsToMarkdown, type_content_Map };
+export { type ChatMessage, type ConversationDto, type ConversationSendDto, type CreateJobDto, type CreateKnowledgeDto, type CreateResumeDto, type CreateSkillDto, DEFAULT_MESSAGE, type DataChunkErrVO, type DataChunkVO, ErrorCode, FileTypeEnum, type HjmMatchDto, JobOpenStatus, JobStatus, type JobVo, KnowledgeTypeEnum, type KnowledgeVo, type LLMJobDto, type LLMSessionRequest, type LLMSessionResponse, type LLMSessionStatusResponse, type LoginFormType, type LoginResponse, type MatchJobDto, type MatchedJobVo, type MessageSendDto, type PaginatedJobsResult, type PaginatedKnsResult, type PaginatedResumeMatchedResult, type PaginatedResumesResult, type ProjectDto, type ProjectMinedDto, type ProjectMineddVo, type ProjectPolishedDto, type ProjectPolishedVo, ProjectStatus, type ProjectVo, type RegistFormType, type RegistResponse, RequestTargetMap, type ResumeMatchedDto, type ResumeMatchedVo, ResumeStatus, type ResumeVo, type RoadFromDiff, type RoadFromDiffDto, type ServerDataFormat, type SkillItem, type SkillVo, type StartCrawlDto, type StreamingChunk, type TRequestParams, type UpdateJobDto, type UpdateKnowledgeDto, type UpdateResumeDto, type UpdateSkillDto, type UserInfoFromToken, type VerifyMetaData, autoflowSchema, errorMessage, getLightspotSchema, hjmRerankSchema, jsonMd_obj, llmJobSchema, loginformSchema, type lookupResultDto, lookupResultSchema, markdownToProjectSchema, markdownToSkills, type projectLookupedDto, projectLookupedSchema, projectMinedSchema, projectPolishedSchema, projectSchema, projectSchemaForm, projectSchemaToMarkdown, registformSchema, resumeMatchedSchema, roadFromDiffSchema, skillItemSchema, skillSchema, skillsToMarkdown, type_content_Map };

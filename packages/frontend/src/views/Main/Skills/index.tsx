@@ -1,10 +1,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { SkillVo } from '@prism-ai/shared';
+import { useQueryClient } from '@tanstack/react-query';
 import type { Row, Table } from '@tanstack/react-table';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { toast } from 'sonner';
+import { toast } from 'sonner';
 import { useCustomMutation, useCustomQuery } from '../../../query/config';
 import { SkillQueryKey } from '../../../query/keys';
 import { findAllUserSkills, removeSkill } from '../../../services/skill';
@@ -32,14 +33,16 @@ const Skills: React.FC<SkillsProps<SkillVo>> = ({
 }) => {
 	const navigate = useNavigate();
 	const { data, status } = useCustomQuery([SkillQueryKey.Skills], findAllUserSkills);
-	const removeMutation = useCustomMutation(removeSkill,{
+	const queryClient = useQueryClient();
+	const removeMutation = useCustomMutation(removeSkill, {
 		onSuccess: () => {
 			toast.success('删除成功');
+			queryClient.invalidateQueries({ queryKey: [SkillQueryKey.Skills] });
 		},
 		onError: () => {
 			toast.error('删除失败');
 		}
-	})
+	});
 
 	if (status === 'pending') {
 		return <div>Loading...</div>;

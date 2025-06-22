@@ -37,7 +37,14 @@ export function DataTableRowActions<TData>({ row, onDelete }: DataTableRowAction
 						</DropdownMenuRadioGroup>
 					</DropdownMenuSubContent>
 				</DropdownMenuSub> */}
-				<DropdownMenuItem onClick={() => onDelete?.(row.original)}>删除</DropdownMenuItem>
+				<DropdownMenuItem
+					onClick={e => {
+						e.stopPropagation();
+						onDelete?.(row.original);
+					}}
+				>
+					删除
+				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

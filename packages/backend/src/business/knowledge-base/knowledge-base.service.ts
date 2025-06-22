@@ -11,6 +11,7 @@ import {
 import { Model, Types } from 'mongoose';
 import { OssService } from '../../oss/oss.service';
 import { KnowledgeVDBService } from '../../prisma-agent/data_base/konwledge_vdb.service';
+import { getOssObjectNameFromURL } from '../../utils/getOssObjectNameFromURL';
 import { Knowledgebase, KnowledgebaseDocument } from './entities/knowledge-base.entity';
 
 @Injectable()
@@ -32,11 +33,10 @@ export class KnowledgebaseService {
 		userInfo: UserInfoFromToken
 	): Promise<KnowledgeVo> {
 		if (createKnowledgeDto.fileType === FileTypeEnum.doc) {
-			const fileExists = await this.ossService.checkFileExists(
-				`${createKnowledgeDto.name}-${userInfo.userId}`
-			);
+			const fileObjName = getOssObjectNameFromURL(createKnowledgeDto.content);
+			const fileExists = await this.ossService.checkFileExists(fileObjName!);
 			if (!fileExists) {
-				throw new Error('文件不存在,请检查文件名或文件是否已上传');
+				throw new Error('文件不存在,请不要修改知识内容中的URL');
 			}
 		}
 

@@ -7,6 +7,7 @@ import { FileTypeEnum, KnowledgeTypeEnum, KnowledgeVo, UserInfoFromToken } from 
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { ModelService } from '../../model/model.service';
 import { OssService } from '../../oss/oss.service';
+import { getOssObjectNameFromURL } from '../../utils/getOssObjectNameFromURL';
 import { VectorStoreService } from '../../vector-store/vector-store.service';
 import { CRetrieveAgentService } from '../c_retrieve_agent/c_retrieve_agent.service';
 import { ProjectCodeVDBService } from './project_code_vdb.service';
@@ -15,11 +16,11 @@ import { ProjectCodeVDBService } from './project_code_vdb.service';
  * 知识库向量索引的前缀枚举
  */
 export enum KnowledgeIndex {
-	PROJECT_CODE = 'knowbase_projectCode', //开源、其它项目代码
-	PROJECT_DOC = 'knowbase_projectDoc', //用户、开源、其它项目文档
-	TECH_DOC = 'knowbase_techDoc', //技术文档
-	INTERVIEW_QUESTION = 'knowbase_interviewQuestion', //面试题
-	OTHER = 'knowbase_other' //其它
+	PROJECT_CODE = 'knowbase-projectCode', //开源、其它项目代码
+	PROJECT_DOC = 'knowbase-projectDoc', //用户、开源、其它项目文档
+	TECH_DOC = 'knowbase-techDoc', //技术文档
+	INTERVIEW_QUESTION = 'knowbase-interviewQuestion', //面试题
+	OTHER = 'knowbase-other' //其它
 }
 
 /**
@@ -218,8 +219,8 @@ export class KnowledgeVDBService {
 				}
 
 			case FileTypeEnum.doc:
-				this.logger.log(`  - 从OSS加载PDF文档: ${content}`);
-				const buffer = await this.ossService.getObject(content);
+				this.logger.log(`  - 从OSS加载PDF文档: ${content} -> ${getOssObjectNameFromURL(content)}`);
+				const buffer = await this.ossService.getObject(getOssObjectNameFromURL(content));
 				const blob = new Blob([buffer], { type: 'application/pdf' });
 				const loader = new PDFLoader(blob);
 				const docs = await loader.load();
@@ -227,6 +228,20 @@ export class KnowledgeVDBService {
 					doc.metadata.source = name;
 				});
 				return docs;
+
+			case FileTypeEnum.md:
+				this.logger.log(`  - 从OSS加载Markdown文档: ${content}`);
+				// 1. 从OSS获取文件内容缓冲区
+				const mdBuffer = await this.ossService.getObject(getOssObjectNameFromURL(content));
+				// 2. 将缓冲区转换为UTF-8字符串
+				const mdContent = mdBuffer.toString('utf-8');
+				// 3. 直接创建一个新的Document对象。
+				return [
+					new Document({
+						pageContent: mdContent,
+						metadata: { source: name }
+					})
+				];
 
 			default:
 				this.logger.warn(`不支持的文件类型: ${fileType}，知识: ${name}`);
@@ -247,8 +262,10 @@ export class KnowledgeVDBService {
 			this.logger.log('  - 使用代码分割策略...');
 			const allChunks: Document[] = [];
 			for (const doc of documents) {
+				console.log('🚀 ~ KnowledgeVDBService ~ doc:', doc);
 				// 尝试从路径推断语言，默认为ts
 				const lang = this._getLangFromPath(doc.metadata.source) || 'typescript';
+				this.logger.log(`  - 语言推断为 ${lang} 进行${doc.metadata.source}的代码分割...`);
 				const codeChunks = this.projectCodeVDBService.splitCodeIntoChunks(doc.pageContent, lang);
 				const chunkDocs = codeChunks.map(
 					(chunk: string) => new Document({ pageContent: chunk, metadata: doc.metadata })
@@ -332,6 +349,6 @@ export class KnowledgeVDBService {
 				prefix = KnowledgeIndex.OTHER;
 				break;
 		}
-		return `${prefix}_${userId}`;
+		return `${prefix}-${userId}`;
 	}
 }

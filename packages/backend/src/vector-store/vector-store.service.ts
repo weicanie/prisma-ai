@@ -64,10 +64,10 @@ export class VectorStoreService {
 			});
 			//会去调用embeddings的embedDocuments方法
 			await pineconeStore.addDocuments(documents);
-			console.log(`成功添加 ${documents.length} 个文档到索引 ${indexName}`);
+			this.logger.log(`成功添加 ${documents.length} 个文档到索引 ${indexName}`);
 		} catch (error) {
 			const errorMessage = (error as Error).message;
-			console.error(`向索引 ${indexName} 添加文档失败:`, error);
+			this.logger.error(`向索引 ${indexName} 添加文档失败:`, error);
 
 			if (errorMessage.includes('ENOTFOUND') || errorMessage.includes('ECONNREFUSED')) {
 				throw new Error(
@@ -120,7 +120,7 @@ export class VectorStoreService {
 				const errorMessage = (error as Error).message;
 
 				if (retryCount >= maxRetries) {
-					console.error(`检查索引 ${indexName} 是否存在时出错 (最终失败):`, error);
+					this.logger.error(`检查索引 ${indexName} 是否存在时出错 (最终失败):`, error);
 
 					// 提供详细的网络错误诊断
 					if (errorMessage.includes('ENOTFOUND') || errorMessage.includes('ECONNREFUSED')) {
@@ -134,7 +134,7 @@ export class VectorStoreService {
 					throw error;
 				}
 
-				console.warn(`检查索引失败，正在重试 (${retryCount}/${maxRetries}):`, errorMessage);
+				this.logger.warn(`检查索引失败，正在重试 (${retryCount}/${maxRetries}):`, errorMessage);
 				// 指数退避重试
 				await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000));
 			}
@@ -162,9 +162,9 @@ export class VectorStoreService {
 					}
 				}
 			});
-			console.log(`成功创建索引: ${indexName}, 维度: ${dimension}`);
+			this.logger.log(`成功创建索引: ${indexName}, 维度: ${dimension}`);
 		} catch (error) {
-			console.error(`创建索引 ${indexName} 失败:`, error);
+			this.logger.error(`创建索引 ${indexName} 失败:`, error);
 			throw new Error(`创建索引失败: ${(error as Error).message}`);
 		}
 	}

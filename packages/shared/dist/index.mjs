@@ -4240,7 +4240,6 @@ var llmJobSchema = z.object({
 // src/types/knowBase.ts
 var type_content_Map = {
   userProjectDoc: "\u6211\u7684\u9879\u76EE\u6587\u6863",
-  userProjectRepo: "\u6211\u7684\u9879\u76EEgithub\u4ED3\u5E93\u5730\u5740",
   openSourceProjectDoc: "\u5F00\u6E90\u9879\u76EE\u6587\u6863",
   openSourceProjectRepo: "\u5F00\u6E90\u9879\u76EEgithub\u4ED3\u5E93\u5730\u5740",
   techDoc: "\u6280\u672F\u6587\u6863",
@@ -4260,6 +4259,7 @@ var FileTypeEnum = /* @__PURE__ */ ((FileTypeEnum2) => {
   FileTypeEnum2["txt"] = "txt";
   FileTypeEnum2["url"] = "url";
   FileTypeEnum2["doc"] = "doc";
+  FileTypeEnum2["md"] = "md";
   return FileTypeEnum2;
 })(FileTypeEnum || {});
 

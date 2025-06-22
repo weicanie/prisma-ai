@@ -16,7 +16,7 @@ const KnowledgeCreate: React.FC<KnowledgeCreateProps> = () => {
 	);
 
 	return (
-		<CreateBtn title={'创建知识库'} description="添加您的专业知识">
+		<CreateBtn title={'添加知识'} description="添加您的专业知识">
 			{dialogContent}
 		</CreateBtn>
 	);

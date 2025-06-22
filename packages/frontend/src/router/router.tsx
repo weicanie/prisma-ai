@@ -2,6 +2,7 @@ import { lazy } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
 import UpdateBreadRouter from './UpdateBreadRouter';
+const AIChat = lazy(() => import('../components/aichat/AIChat'));
 const LoginRegist = lazy(() => import('../views/LoginRegist/LoginRegist'));
 const Main = lazy(() => import('../views/Main'));
 const Home = lazy(() => import('../views/Main/Home'));
@@ -25,10 +26,13 @@ export const routes = [
 		path: '',
 		element: <Navigate to="/main/home" />
 	},
-
 	{
 		path: '/login',
 		element: <LoginRegist />
+	},
+	{
+		path: '/aichat',
+		element: <AIChat />
 	},
 	{
 		path: '/main',

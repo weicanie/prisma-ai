@@ -29,7 +29,7 @@ interface ProjectEmbeddingTask extends PersistentTask {
  * 项目代码向量索引的前缀枚举
  */
 export enum ProjectCodeIndexPrefix {
-	PROJECT_CODE = 'agent_projectCode'
+	PROJECT_CODE = 'agent-projectCode'
 }
 
 @Injectable()
@@ -55,7 +55,7 @@ export class ProjectCodeVDBService {
 	}
 
 	private async getIndexName(userId: string, projectName: string) {
-		return `${ProjectCodeIndexPrefix.PROJECT_CODE}_${projectName}_${userId}`;
+		return `${ProjectCodeIndexPrefix.PROJECT_CODE}-${projectName}-${userId}`;
 	}
 
 	/**
@@ -261,39 +261,63 @@ export class ProjectCodeVDBService {
 		const tree = this.parser.parse(sourceCode);
 		const chunks: string[] = [];
 
+		const tsQuery = `
+      [
+        (function_declaration) @chunk
+        (class_declaration) @chunk
+        (method_definition) @chunk
+        (lexical_declaration (variable_declarator value: [(arrow_function) (function)])) @chunk
+        (interface_declaration) @chunk
+        (type_alias_declaration) @chunk
+      ]
+    `;
+
+		const jsQuery = `
+      [
+        (function_declaration) @chunk
+        (class_declaration) @chunk
+        (lexical_declaration (variable_declarator value: [(arrow_function) (function)])) @chunk
+      ]
+    `;
+
 		const queryPatterns: Record<string, string> = {
-			javascript: `
-          [(function_declaration) @chunk]
-          [(class_declaration) @chunk]
-          [(method_definition) @chunk]
-          [(lexical_declaration (variable_declarator value: [(arrow_function) (function)])) @chunk]
-        `,
-			typescript: `
-          [(function_declaration) @chunk]
-          [(class_declaration) @chunk]
-          [(method_definition) @chunk]
-          [(lexical_declaration (variable_declarator type: _ value: (arrow_function))) @chunk]
-        `,
+			javascript: jsQuery,
+			typescript: tsQuery,
+			tsx: tsQuery,
 			python: `
           [(function_definition) @chunk]
           [(class_definition) @chunk]
         `,
 			java: `
-          [(method_declaration) @chunk]
-          [(class_declaration) @chunk]
+          [
+            (class_declaration) @chunk
+            (interface_declaration) @chunk
+            (enum_declaration) @chunk
+            (method_declaration) @chunk
+            (constructor_declaration) @chunk
+          ]
         `,
 			go: `
-          [(function_declaration) @chunk]
-          [(method_declaration) @chunk]
-          [(type_spec (struct_type)) @chunk]
+          [
+            (function_declaration) @chunk
+            (method_declaration) @chunk
+            (type_declaration) @chunk
+            (const_declaration) @chunk
+            (var_declaration) @chunk
+          ]
         `,
 			cpp: `
-          [(function_definition) @chunk]
-          [(class_specifier) @chunk]
+          [
+            (function_definition) @chunk
+            (class_specifier) @chunk
+            (struct_specifier) @chunk
+            (enum_specifier) @chunk
+            (template_declaration) @chunk
+          ]
         `
 		};
 
-		const query = new Parser.Query(grammar, queryPatterns[lang] || queryPatterns['typescript']);
+		const query = new Parser.Query(grammar, queryPatterns[lang] || jsQuery);
 		const matches = query.matches(tree.rootNode);
 
 		if (matches.length > 0) {

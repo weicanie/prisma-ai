@@ -17,3 +17,14 @@ export async function uploadFilesToOSS(files: File[]) {
 		}
 	}
 }
+/**
+ * 获取OSS直传URL
+ * @param fileName 文件名
+ * @param bucketName 桶名
+ * @returns
+ */
+export async function presignedUrl(fileName: string, bucketName = 'prisma-ai') {
+	return instance.get<ServerDataFormat<string>>(
+		`/oss/presignedUrl?name=${fileName}&bucketName=${bucketName}`
+	);
+}

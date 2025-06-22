@@ -26,8 +26,9 @@ import { KnowledgeTypeEnum, type_content_Map, type CreateKnowledgeDto } from '@p
 import { useQueryClient } from '@tanstack/react-query';
 import { throttle } from 'lodash';
 import { X } from 'lucide-react';
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { UploadModal } from '../../../components/FileUploadModel';
 import { useCustomMutation } from '../../../query/config';
 import { KnowledgeQueryKey } from '../../../query/keys';
 import { createKnowledge } from '../../../services/knowbase';
@@ -36,17 +37,16 @@ import {
 	selectKnowledgeData,
 	setKnowledgeDataFromDto
 } from '../../../store/knowbase';
-
+//TODO 知识库功能测试：github仓库和静态页面
 const knowledgeFormSchema = z.object({
 	name: z.string().min(1, '知识名称不能为空').max(100, '知识名称不能超过100个字符'),
-	fileType: z.enum(['txt', 'url', 'doc'], {
+	fileType: z.enum(['txt', 'url', 'doc', 'md'], {
 		required_error: '请选择文件类型'
 	}),
 	tag: z.array(z.string()).min(1, '至少需要添加一个标签'),
 	type: z.enum(
 		[
 			'userProjectDoc',
-			// 'userProjectRepo',
 			'openSourceProjectDoc',
 			'openSourceProjectRepo',
 			'techDoc',
@@ -77,6 +77,8 @@ export const KnowledgeForm = memo(() => {
 	});
 
 	const [tagInput, setTagInput] = useState('');
+	const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+	const fileType = form.watch('fileType');
 
 	const dispatch = useDispatch();
 	const onChange = throttle((formData: KnowledgeFormData) => {
@@ -97,7 +99,7 @@ export const KnowledgeForm = memo(() => {
 	});
 
 	const onSubmit = (data: KnowledgeFormData) => {
-		console.log('通过表单提交的知识库数据:', data);
+		console.log('通过表单提交的知识数据:', data);
 		uploadKnowledgeMutation.mutate(data);
 	};
 
@@ -112,6 +114,7 @@ export const KnowledgeForm = memo(() => {
 
 	// 删除标签
 	const removeTag = (tagToRemove: string) => {
+		console.log('🚀 ~ removeTag ~ tagToRemove:', tagToRemove);
 		const currentTags = form.getValues('tag');
 		form.setValue(
 			'tag',
@@ -130,9 +133,16 @@ export const KnowledgeForm = memo(() => {
 	// 文件类型选项
 	const fileTypeOptions = [
 		{ value: 'txt', label: '文本' },
-		{ value: 'url', label: 'URL链接' }
-		// { value: 'doc', label: '文档文件' }
+		{ value: 'url', label: 'URL链接' },
+		{ value: 'doc', label: 'PDF文档' },
+		{ value: 'md', label: 'Markdown文档' }
 	];
+
+	useEffect(() => {
+		if (fileType === 'doc' || fileType === 'md') {
+			setIsUploadModalOpen(true);
+		}
+	}, [fileType]);
 
 	return (
 		<div className="w-full h-full sm:min-w-xl">
@@ -150,7 +160,7 @@ export const KnowledgeForm = memo(() => {
 							<FormItem>
 								<FormLabel>知识名称</FormLabel>
 								<FormControl>
-									<Input placeholder="请输入知识库名称" {...field} />
+									<Input placeholder="请输入知识名称" {...field} />
 								</FormControl>
 								<FormDescription>为您的知识条目起一个描述性的名称</FormDescription>
 								<FormMessage />
@@ -165,7 +175,8 @@ export const KnowledgeForm = memo(() => {
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>文件类型</FormLabel>
-								<Select onValueChange={field.onChange} defaultValue={field.value}>
+								{/* 受控以响应fileType的变化 */}
+								<Select onValueChange={field.onChange} value={field.value}>
 									<FormControl>
 										<SelectTrigger>
 											<SelectValue placeholder="请选择文件类型" />
@@ -264,7 +275,7 @@ export const KnowledgeForm = memo(() => {
 								<FormControl>
 									<Textarea
 										placeholder="请输入知识内容..."
-										className="min-h-[200px] resize-y"
+										className="min-h-[200px] resize-y scb-thin"
 										{...field}
 									/>
 								</FormControl>
@@ -272,6 +283,19 @@ export const KnowledgeForm = memo(() => {
 								<FormMessage />
 							</FormItem>
 						)}
+					/>
+					<UploadModal
+						isOpen={isUploadModalOpen}
+						type={'file'}
+						handleClose={fileUrl => {
+							setIsUploadModalOpen(false);
+
+							if (fileUrl) {
+								form.setValue('content', fileUrl);
+							} else {
+								form.setValue('fileType', 'txt');
+							}
+						}}
 					/>
 
 					<div className="flex justify-end gap-2">

@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { JobVo, ResumeVo } from '@prism-ai/shared';
+import { useQueryClient } from '@tanstack/react-query';
 import type { Row, Table } from '@tanstack/react-table';
 import React, { memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -35,17 +36,20 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 		const { data, status } = useCustomQuery([JobQueryKey.Jobs], () => findAllUserJobs(1, 100));
 
 		const { data: resumeMatchedData, status: resumeMatchedStatus } = useCustomQuery(
-			[ResumeQueryKey.ResumeMatched, 1, 10],
-			() => findAllResumeMatched(1, 10)
+			[ResumeQueryKey.ResumeMatched, 1, 1000],
+			() => findAllResumeMatched(1, 1000)
 		);
-		const removeMutation = useCustomMutation(removeJob,{
+		const queryClient = useQueryClient();
+
+		const removeMutation = useCustomMutation(removeJob, {
 			onSuccess: () => {
 				toast.success('删除成功');
+				queryClient.invalidateQueries({ queryKey: [JobQueryKey.Jobs] });
 			},
 			onError: () => {
 				toast.error('删除失败');
 			}
-		})
+		});
 
 		// 从store获取选中的简历和岗位
 		const selectedIds = useSelector(selectResumeData);
@@ -158,9 +162,14 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 				rowActionsCol: [
 					{
 						id: 'actions',
-						cell: ({ row }) => <DataTableRowActions row={row} onDelete={() => {
-							removeMutation.mutate(row.original.id);
-						}} />
+						cell: ({ row }) => (
+							<DataTableRowActions
+								row={row}
+								onDelete={() => {
+									removeMutation.mutate(row.original.id);
+								}}
+							/>
+						)
 					}
 				]
 			},

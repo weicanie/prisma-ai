@@ -1,6 +1,5 @@
 export const type_content_Map: Record<string, string> = {
 	userProjectDoc: '我的项目文档',
-	userProjectRepo: '我的项目github仓库地址',
 	openSourceProjectDoc: '开源项目文档',
 	openSourceProjectRepo: '开源项目github仓库地址',
 	techDoc: '技术文档',
@@ -10,7 +9,6 @@ export const type_content_Map: Record<string, string> = {
 //上面的作为注释
 export enum KnowledgeTypeEnum {
 	userProjectDoc = 'userProjectDoc', //我的项目文档
-	//userProjectRepo = 'userProjectRepo', //我的项目github仓库地址
 	openSourceProjectDoc = 'openSourceProjectDoc', //开源项目文档
 	openSourceProjectRepo = 'openSourceProjectRepo', //开源项目github仓库地址
 	techDoc = 'techDoc', //技术文档
@@ -20,7 +18,8 @@ export enum KnowledgeTypeEnum {
 export enum FileTypeEnum {
 	txt = 'txt', //txt
 	url = 'url', //url
-	doc = 'doc' //文档 (目前只支持pdf)
+	doc = 'doc', //文档 (目前只支持pdf)
+	md = 'md' // markdown文档
 }
 //TODO 前端直传用户上传的pdf文档
 /* 用户知识库 */

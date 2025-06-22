@@ -1,4 +1,5 @@
 //TODO copilot包体积太大,需要优化
+import '@ant-design/v5-patch-for-react-19';
 import { CopilotKit } from '@copilotkit/react-core';
 import { CopilotSidebar } from '@copilotkit/react-ui';
 import '@copilotkit/react-ui/styles.css';
@@ -8,6 +9,7 @@ import { useRoutes } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import './index.css';
 import { routes } from './router/router';
+
 const queryClient = new QueryClient({
 	defaultOptions: {
 		queries: {

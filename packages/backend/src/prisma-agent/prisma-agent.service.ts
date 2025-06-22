@@ -11,7 +11,6 @@ import { PlanStepAgentService } from './plan_step_agent/plan_step_agent.service'
 import { ReflectAgentService } from './reflact_agent/reflact_agent.service';
 import { GraphState } from './state';
 import { Result_step, RunningConfig } from './types';
-import { visualizeGraph } from './utils/global';
 //TODO 测试整个链路
 
 @Injectable()
@@ -29,10 +28,10 @@ export class PrismaAgentService {
 		private readonly modelService: ModelService
 	) {
 		this.workflow = this.buildGraph();
-		visualizeGraph(this.workflow, 'prisma-agent');
-		visualizeGraph(this.planStepAgentService.getWorkflow(), 'plan_step_agent');
-		visualizeGraph(this.planExecuteAgentService.getPlanWorkflow(), 'plan_agent');
-		visualizeGraph(this.planExecuteAgentService.getReplanWorkflow(), 'replan_agent');
+		// visualizeGraph(this.workflow, 'prisma-agent');
+		// visualizeGraph(this.planStepAgentService.getWorkflow(), 'plan_step_agent');
+		// visualizeGraph(this.planExecuteAgentService.getPlanWorkflow(), 'plan_agent');
+		// visualizeGraph(this.planExecuteAgentService.getReplanWorkflow(), 'replan_agent');
 	}
 
 	/**

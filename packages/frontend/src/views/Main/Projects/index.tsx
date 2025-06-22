@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { ProjectVo } from '@prism-ai/shared';
+import { useQueryClient } from '@tanstack/react-query';
 import type { Row, Table } from '@tanstack/react-table';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -31,9 +32,11 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 	mainTable = true
 }) => {
 	const { data, status } = useCustomQuery([ProjectQueryKey.Projects], findAllProjects);
+	const queryClient = useQueryClient();
 	const removeMutation = useCustomMutation(removeProject, {
 		onSuccess: () => {
 			toast.success('删除成功');
+			queryClient.invalidateQueries({ queryKey: [ProjectQueryKey.Projects] });
 		},
 		onError: () => {
 			toast.error('删除失败');

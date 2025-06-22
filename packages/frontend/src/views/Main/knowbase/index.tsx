@@ -1,5 +1,6 @@
 import { Checkbox } from '@/components/ui/checkbox';
 import { type_content_Map, type KnowledgeVo } from '@prism-ai/shared';
+import { useQueryClient } from '@tanstack/react-query';
 import type { Row, Table } from '@tanstack/react-table';
 import { AlignLeft, Link } from 'lucide-react';
 import React from 'react';
@@ -26,16 +27,18 @@ const Knowledges: React.FC<KnowledgesProps<KnowledgeVo>> = ({
 }) => {
 	const navigate = useNavigate();
 	const { data, status } = useCustomQuery([KnowledgeQueryKey.Knowledges], () =>
-		findAllUserKnowledge({ page: 1, limit: 10 })
+		findAllUserKnowledge({ page: 1, limit: 1000 })
 	);
-	const removeMutation = useCustomMutation(removeKnowledge,{
+	const queryClient = useQueryClient();
+	const removeMutation = useCustomMutation(removeKnowledge, {
 		onSuccess: () => {
 			toast.success('删除成功');
+			queryClient.invalidateQueries({ queryKey: [KnowledgeQueryKey.Knowledges] });
 		},
 		onError: () => {
 			toast.error('删除失败');
 		}
-	})
+	});
 
 	if (status === 'pending') {
 		return <div>Loading...</div>;
@@ -143,9 +146,14 @@ const Knowledges: React.FC<KnowledgesProps<KnowledgeVo>> = ({
 			rowActionsCol: [
 				{
 					id: 'actions',
-					cell: ({ row }) => <DataTableRowActions row={row} onDelete={() => {
-						removeMutation.mutate(row.original.id);
-					}} />
+					cell: ({ row }) => (
+						<DataTableRowActions
+							row={row}
+							onDelete={() => {
+								removeMutation.mutate(row.original.id);
+							}}
+						/>
+					)
 				}
 			]
 		},
