@@ -2,7 +2,7 @@ import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf';
 import { CheerioWebBaseLoader } from '@langchain/community/document_loaders/web/cheerio';
 import { GithubRepoLoader } from '@langchain/community/document_loaders/web/github';
 import { Document } from '@langchain/core/documents';
-import { Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { FileTypeEnum, KnowledgeTypeEnum, KnowledgeVo, UserInfoFromToken } from '@prism-ai/shared';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { ModelService } from '../../model/model.service';
@@ -49,8 +49,10 @@ export class KnowledgeVDBService {
 		private readonly modelService: ModelService,
 		private readonly ossService: OssService,
 		// 注入ProjectCodeVDBService以复用其代码分割逻辑
+		@Inject(forwardRef(() => ProjectCodeVDBService))
 		private readonly projectCodeVDBService: ProjectCodeVDBService,
 		// 注入CRetrieveAgentService以将检索升级为CRAG检索
+		@Inject(forwardRef(() => CRetrieveAgentService))
 		private readonly cRetrieveAgentService: CRetrieveAgentService
 	) {}
 

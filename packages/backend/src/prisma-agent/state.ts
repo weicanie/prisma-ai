@@ -105,7 +105,14 @@ const PlanState = Annotation.Root({
 		reducer: (_x, y) => y ?? null,
 		default: () => null
 	}),
-
+	/**
+	 * @description 所有步骤的执行结果，由开发者提供。
+	 * @lifecycle - 在 `execute_step` 节点中通过 `interrupt` 等待外部传入。
+	 */
+	stepResultList: Annotation<Result_step[]>({
+		reducer: (x, y) => (y ? x.concat(y) : x),
+		default: () => []
+	}),
 	/**
 	 * @description Replan子图中使用的数据通道。
 	 * @lifecycle - 在replan流程中被填充和使用。

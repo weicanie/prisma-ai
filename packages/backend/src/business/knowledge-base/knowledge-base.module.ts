@@ -1,22 +1,19 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { OssModule } from '../../oss/oss.module';
-import {
-  Knowledgebase,
-  KnowledgebaseSchema,
-} from './entities/knowledge-base.entity';
+import { PrismaAgentModule } from '../../prisma-agent/prisma-agent.module';
+import { Knowledgebase, KnowledgebaseSchema } from './entities/knowledge-base.entity';
 import { KnowledgebaseController } from './knowledge-base.controller';
 import { KnowledgebaseService } from './knowledge-base.service';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([
-      { name: Knowledgebase.name, schema: KnowledgebaseSchema },
-    ]),
-    OssModule
-  ],
-  controllers: [KnowledgebaseController],
-  providers: [KnowledgebaseService],
-  exports: [KnowledgebaseService],
+	imports: [
+		MongooseModule.forFeature([{ name: Knowledgebase.name, schema: KnowledgebaseSchema }]),
+		OssModule,
+		forwardRef(() => PrismaAgentModule)
+	],
+	controllers: [KnowledgebaseController],
+	providers: [KnowledgebaseService],
+	exports: [KnowledgebaseService]
 })
 export class KnowledgebaseModule {}

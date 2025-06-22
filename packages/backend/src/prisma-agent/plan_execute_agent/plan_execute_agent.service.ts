@@ -4,7 +4,6 @@ import { Injectable } from '@nestjs/common';
 import { ProjectDto } from '@prism-ai/shared';
 import { z } from 'zod';
 import { ModelService } from '../../model/model.service';
-import { ReflectAgentService } from '../reflact_agent/reflact_agent.service';
 import { Reflection } from '../types';
 import { PlanGraph } from './planner';
 import { ReplanGraph } from './replanner';
@@ -28,43 +27,21 @@ const planSchema = z.object({
 
 @Injectable()
 export class PlanExecuteAgentService {
-	private readonly workflow: Runnable<any, any>;
+	private readonly planWorkflow: Runnable<any, any>;
+
 	private readonly replanWorkflow: Runnable<any, any>;
 
-	constructor(
-		private readonly modelService: ModelService,
-		private readonly reflectAgentService: ReflectAgentService
-	) {
-		this.workflow = PlanGraph.compile();
+	constructor(private readonly modelService: ModelService) {
+		this.planWorkflow = PlanGraph.compile();
 		this.replanWorkflow = ReplanGraph.compile();
 	}
 
-	public getWorkflow() {
-		return this.workflow;
+	public getPlanWorkflow() {
+		return this.planWorkflow;
 	}
 
 	public getReplanWorkflow() {
 		return this.replanWorkflow;
-	}
-
-	/**
-	 * @description 调用并执行 Plan-Execute Agent
-	 */
-	async _invoke(
-		initialState: { projectInfo: ProjectDto; lightSpot: string; projectPath: string },
-		recursionLimit = 100
-	) {
-		const config = {
-			recursionLimit,
-			configurable: {
-				runningConfig: {
-					analysisChain: this.createAnalysisChain(),
-					planChain: this.createPlanChain(),
-					reflectChain: this.reflectAgentService.createReflectChain()
-				}
-			}
-		};
-		return await this.workflow.invoke(initialState, config);
 	}
 
 	/**
@@ -199,17 +176,23 @@ export class PlanExecuteAgentService {
 	/**
 	 * 创建一个用于"重新进行需求分析"的Chain (Re-analysis)。
 	 * 在重新规划(replan)流程中使用。它接收比初始分析更多的上下文，包括用户反馈、执行结果和反思。
-	 * @input {{ projectInfo: ProjectDto; lightSpot: string; originalPlan: any; stepResult: any; knowledge?: any; reflection?: Reflection }} - 完整的重新规划上下文。
-	 * @output {z.infer<typeof analysisSchema>} - 输出更新后的`highlightAnalysis`。
+	 * @input 完整的重新规划上下文。
+	 * @output 更新后的`highlightAnalysis`。
 	 */
 	createReAnalysisChain(): Runnable<
 		{
-			projectInfo: ProjectDto;
+			projectName: string;
+			projectDescription: string;
+			projectTechStack: string;
 			lightSpot: string;
-			originalPlan: any;
-			stepResult: any;
-			knowledge?: { retrievedProjectCodes: string; retrievedDomainDocs: string };
-			reflection?: Reflection;
+			originalPlan: string;
+			userFeedback: string;
+			summary: string;
+			writtenCodeFiles: string;
+			stepResultList: string;
+			retrievedProjectCodes: string;
+			retrievedDomainDocs: string;
+			reflection: string;
 		},
 		z.infer<typeof analysisSchema>
 	> {
@@ -258,11 +241,14 @@ export class PlanExecuteAgentService {
 - **修改/新增的代码文件:**
 {writtenCodeFiles}
 
-### 相关知识 
+### 所有步骤的执行结果
+\`\`\`json
+{stepResultList}
+\`\`\`
 
-**项目相关代码:** 
+### 相关知识
+**项目相关代码:**
 {retrievedProjectCodes}
-
 **相关领域知识:**
 {retrievedDomainDocs}
 
@@ -275,18 +261,24 @@ export class PlanExecuteAgentService {
 	/**
 	 * 创建一个用于"重新生成计划"的Chain (Re-plan)。
 	 * 在重新规划(replan)流程中使用。它基于更新后的需求分析，以及所有历史和反馈信息，生成一个全新的、用于完成剩余任务的计划。
-	 * @input {{ projectInfo: ProjectDto; lightSpot: string; highlightAnalysis: string; originalPlan: any; stepResult: any; knowledge?: any; reflection?: Reflection }} - 完整的重新规划上下文。
-	 * @output {z.infer<typeof planSchema>} - 输出一个全新的`implementationPlan`。
+	 * @input 完整的重新规划上下文。
+	 * @output 更新后的`implementationPlan`。
 	 */
 	createRePlanChain(): Runnable<
 		{
-			projectInfo: ProjectDto;
+			projectName: string;
+			projectDescription: string;
+			projectTechStack: string;
 			lightSpot: string;
 			highlightAnalysis: string;
-			originalPlan: any;
-			stepResult: any;
-			knowledge?: { retrievedProjectCodes: string; retrievedDomainDocs: string };
-			reflection?: Reflection;
+			originalPlan: string;
+			userFeedback: string;
+			summary: string;
+			writtenCodeFiles: string;
+			stepResultList: string;
+			retrievedProjectCodes: string;
+			retrievedDomainDocs: string;
+			reflection: string;
 		},
 		z.infer<typeof planSchema>
 	> {
@@ -316,7 +308,7 @@ export class PlanExecuteAgentService {
 			],
 			[
 				'human',
-				`我们刚刚执行了第一个步骤，并根据执行结果更新了需求分析，现在需要根据执行结果为剩余的工作而调整计划。
+				`我们刚刚执行了一个步骤，并根据执行结果更新了需求分析，现在需要根据执行结果为剩余的工作而调整计划。
 
 ### 目标项目信息
 - **项目名称:** {projectName}
@@ -335,20 +327,25 @@ export class PlanExecuteAgentService {
 - **用户反馈:** {userFeedback}
 - **执行总结:** {summary}
 - **修改/新增的代码文件:**
-\`\`\`json
 {writtenCodeFiles}
+
+### 所有步骤的执行结果
+\`\`\`json
+{stepResultList}
 \`\`\`
 
 ### 更新后的需求分析
 {highlightAnalysis}
 
-### 相关知识 
-
+### 相关知识
+**项目相关代码:**
+{retrievedProjectCodes}
 **相关领域知识:**
 {retrievedDomainDocs}
 
 
-请为**剩余的工作**生成一个全新的、详细的、分步骤的实现计划。`
+请为**剩余的工作**生成一个全新的、详细的、分步骤的实现计划。
+如果要实现的功能亮点已完成，返回空数组`
 			]
 		]);
 		return prompt.pipe(structuredLLM);

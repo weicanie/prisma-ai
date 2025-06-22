@@ -11,8 +11,9 @@ import { PlanStepAgentService } from './plan_step_agent/plan_step_agent.service'
 import { ReflectAgentService } from './reflact_agent/reflact_agent.service';
 import { GraphState } from './state';
 import { Result_step, RunningConfig } from './types';
+import { visualizeGraph } from './utils/global';
 //TODO 测试整个链路
-//TODO 添加知识查漏补缺功能
+
 @Injectable()
 export class PrismaAgentService {
 	private workflow: ReturnType<typeof this.buildGraph>;
@@ -28,6 +29,10 @@ export class PrismaAgentService {
 		private readonly modelService: ModelService
 	) {
 		this.workflow = this.buildGraph();
+		visualizeGraph(this.workflow, 'prisma-agent');
+		visualizeGraph(this.planStepAgentService.getWorkflow(), 'plan_step_agent');
+		visualizeGraph(this.planExecuteAgentService.getPlanWorkflow(), 'plan_agent');
+		visualizeGraph(this.planExecuteAgentService.getReplanWorkflow(), 'replan_agent');
 	}
 
 	/**
@@ -40,59 +45,35 @@ export class PrismaAgentService {
 	 * 4. execute_step -> plan_step / END: 一个步骤执行后，如果有下一个步骤，则回到 plan_step；否则，结束。
 	 */
 	private buildGraph() {
-		const planGraph = this.planExecuteAgentService.getWorkflow();
+		const planGraph = this.planExecuteAgentService.getPlanWorkflow();
 		const planStepGraph = this.planStepAgentService.getWorkflow();
 		const replanGraph = this.planExecuteAgentService.getReplanWorkflow();
 
 		const workflow = new StateGraph(GraphState)
-			.addNode('plan', planGraph)
+			.addNode('plan_top', planGraph)
 			.addNode('plan_step', planStepGraph)
 			.addNode('replan', replanGraph)
 			.addNode('execute_step', this.executeStep.bind(this));
 
 		workflow
-			.addEdge(START, 'plan')
-			// 条件边: 从 'plan' 节点出来后
-			// 如果高阶计划已生成 (state.plan存在)，则流向 'plan_step' 节点，开始逐步执行
-			// 否则，流程结束
-			.addConditionalEdges(
-				'plan',
-				(state: typeof GraphState.State) => {
-					return state.plan ? 'plan_step' : END;
-				},
-				{
-					plan_step: 'plan_step',
-					[END]: END
-				}
-			)
-			// 条件边: 从 'plan_step' 节点出来后
-			// 如果步骤计划已生成 (state.stepPlan存在)，则流向 'execute_step' 节点，等待开发者执行
-			// 否则，流程结束
-			.addConditionalEdges(
-				'plan_step',
-				(state: typeof GraphState.State) => {
-					return state.stepPlan ? 'execute_step' : END;
-				},
-				{
-					execute_step: 'execute_step',
-					[END]: END
-				}
-			)
-			// 条件边: 从 'execute_step' 节点出来后
+			.addEdge(START, 'plan_top')
+			.addEdge('plan_top', 'plan_step')
+			.addEdge('plan_step', 'execute_step')
+			.addEdge('execute_step', 'replan')
+			// 条件边: 从 'replan' 节点出来后
 			// 如果所有步骤都已完成，则结束流程 (END)
-			// 否则，重新规划 (replan)
+			// 否则，对步骤进行计划 (plan_step)
 			.addConditionalEdges(
-				'execute_step',
+				'replan',
 				(state: typeof GraphState.State) => {
 					if (state.done) {
 						return END;
 					} else {
-						return 'replan';
+						return 'plan_step';
 					}
 				},
 				{
-					replan: 'replan',
-					plan_step: 'plan_step',
+					['plan_step']: 'plan_step',
 					[END]: END
 				}
 			);
@@ -105,7 +86,7 @@ export class PrismaAgentService {
 	 * @description 这是一个中断节点，用于暂停工作流，等待开发者完成当前步骤的编码任务。
 	 * 它通过 `interrupt` 将步骤计划返回给调用方，并等待调用方通过API传入该步骤的执行结果。
 	 * @input {GraphState} state - 从 `state.stepPlan` 获取当前步骤的详细计划。
-	 * @output {Partial<GraphState>} - 更新 `stepResult` 和 `currentStepIndex`。
+	 * @output {Partial<GraphState>} - 更新 `stepResultList` 和 `currentStepIndex`。
 	 */
 	private async executeStep(
 		state: typeof GraphState.State
@@ -123,10 +104,8 @@ export class PrismaAgentService {
 		});
 
 		console.log('---STEP RESULT RECEIVED---');
-		//现在，我们假设不需要重新规划，只需要继续。
-		//更复杂的实现会有一个replan循环。
 		return {
-			stepResult,
+			stepResultList: [stepResult],
 			currentStepIndex: state.currentStepIndex + 1
 		};
 	}

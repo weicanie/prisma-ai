@@ -205,7 +205,7 @@ export class ProjectCodeVDBService {
 
 	/**
 	 * 递归遍历项目目录，获取指定语言的文件列表
-	 * @param dir - 目录路径
+	 * @param dir - 目标项目文件夹路径
 	 * @param lang - 语言
 	 * @returns {Promise<string[]>} - 文件路径数组
 	 * @private

@@ -11,15 +11,16 @@ import { HjmController } from './hjm.controller';
 import { HjmService } from './hjm.service';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([{ name: Job.name, schema: JobSchema }]),
-    VectorStoreModule,
-    JobModule,
-    ResumeModule,
-    ChainModule,
-    TaskQueueModule,
-  ],
-  controllers: [HjmController],
-  providers: [HjmService],
+	imports: [
+		MongooseModule.forFeature([{ name: Job.name, schema: JobSchema }]),
+		VectorStoreModule,
+		JobModule,
+		ResumeModule,
+		ChainModule,
+		TaskQueueModule
+	],
+	controllers: [HjmController],
+	providers: [HjmService],
+	exports: [HjmService]
 })
 export class HjmModule {}

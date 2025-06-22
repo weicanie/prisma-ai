@@ -222,6 +222,7 @@ export interface Prompt_step {
  * @lifecycle - 在 `execute_step` 节点中，当图被 `interrupt` 后，由外部调用注入。
  */
 export interface Result_step {
+	stepDescription: string; // 步骤的详细描述
 	replanNeeded: boolean; // 是否需要根据反馈进行重新规划
 	output: {
 		userFeedback: string; // 用户的反馈

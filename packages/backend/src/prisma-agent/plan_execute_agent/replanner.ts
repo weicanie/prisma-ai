@@ -5,6 +5,7 @@ import { waitForHumanReview } from '../human_involve_agent/node';
 import { reflect } from '../reflact_agent/node';
 import { GraphState } from '../state';
 import { Plan, ReviewType } from '../types';
+import { formatProjectCodes, formatStepResults, formatWrittenCodeFiles } from '../utils/replanner';
 import { shouldReflect, uploadCode } from './planner';
 
 /**
@@ -146,7 +147,7 @@ export async function reAnalyze(
 		projectInfo,
 		lightSpot,
 		plan: originalPlan,
-		stepResult,
+		stepResultList,
 		replanState,
 		reflection,
 		runningConfig
@@ -162,17 +163,28 @@ export async function reAnalyze(
 		throw new Error('Project info is not set in state for re-analysis');
 	}
 
-	const { highlightAnalysis } = await runningConfig.reAnalysisChain.invoke({
-		projectInfo,
+	const lastStepResult =
+		stepResultList.length > 0 ? stepResultList[stepResultList.length - 1] : null;
+
+	const { info } = projectInfo;
+	const projectDescription = `背景和目标: ${info.desc.bgAndTarget} | 角色: ${info.desc.role} | 贡献: ${info.desc.contribute}`;
+
+	const chainInput = {
+		projectName: info.name,
+		projectDescription,
+		projectTechStack: info.techStack.join(', '),
 		lightSpot,
-		originalPlan,
-		stepResult,
-		knowledge: {
-			retrievedProjectCodes: '', // 在replan中我们更依赖领域知识和代码
-			retrievedDomainDocs: replanState.knowledge.retrievedDomainDocs
-		},
-		reflection: reflection ?? undefined
-	});
+		originalPlan: JSON.stringify(originalPlan, null, 2),
+		userFeedback: lastStepResult?.output.userFeedback ?? '无',
+		summary: lastStepResult?.output.summary ?? '无',
+		writtenCodeFiles: formatWrittenCodeFiles(lastStepResult?.output.writtenCodeFiles ?? []),
+		stepResultList: formatStepResults(stepResultList),
+		retrievedProjectCodes: formatProjectCodes(replanState.projectCodes),
+		retrievedDomainDocs: replanState.knowledge.retrievedDomainDocs,
+		reflection: reflection ? JSON.stringify(reflection, null, 2) : '无'
+	};
+
+	const { highlightAnalysis } = await runningConfig.reAnalysisChain.invoke(chainInput);
 
 	console.log('---RE-ANALYSIS OUTPUT---', highlightAnalysis);
 
@@ -201,7 +213,7 @@ export async function rePlan(
 		projectInfo,
 		lightSpot,
 		plan: currentPlan,
-		stepResult,
+		stepResultList,
 		replanState,
 		reflection,
 		runningConfig
@@ -217,20 +229,37 @@ export async function rePlan(
 		throw new Error('Project info is not set in state for re-planning');
 	}
 
-	const { implementationPlan } = await runningConfig.rePlanChain.invoke({
-		projectInfo,
+	const lastStepResult =
+		stepResultList.length > 0 ? stepResultList[stepResultList.length - 1] : null;
+
+	const { info } = projectInfo;
+	const projectDescription = `背景和目标: ${info.desc.bgAndTarget} | 角色: ${info.desc.role} | 贡献: ${info.desc.contribute}`;
+
+	const chainInput = {
+		projectName: info.name,
+		projectDescription,
+		projectTechStack: info.techStack.join(', '),
 		lightSpot,
 		highlightAnalysis: currentPlan.output.highlightAnalysis,
-		originalPlan: currentPlan,
-		stepResult,
-		knowledge: {
-			retrievedProjectCodes: '',
-			retrievedDomainDocs: replanState.knowledge.retrievedDomainDocs
-		},
-		reflection: reflection ?? undefined
-	});
+		originalPlan: JSON.stringify(currentPlan, null, 2),
+		userFeedback: lastStepResult?.output.userFeedback ?? '无',
+		summary: lastStepResult?.output.summary ?? '无',
+		writtenCodeFiles: formatWrittenCodeFiles(lastStepResult?.output.writtenCodeFiles ?? []),
+		stepResultList: formatStepResults(stepResultList),
+		retrievedProjectCodes: formatProjectCodes(replanState.projectCodes),
+		retrievedDomainDocs: replanState.knowledge.retrievedDomainDocs,
+		reflection: reflection ? JSON.stringify(reflection, null, 2) : '无'
+	};
+
+	const { implementationPlan } = await runningConfig.rePlanChain.invoke(chainInput);
 
 	console.log('---RE-PLAN OUTPUT---', implementationPlan);
+	//没有步骤需要执行则整个流程结束
+	if (implementationPlan.length === 0) {
+		return {
+			done: true
+		};
+	}
 
 	const newPlan: Plan = {
 		output: {
@@ -249,6 +278,16 @@ export async function rePlan(
 			}
 		}
 	};
+}
+
+/**
+ * 条件边，根据replan结果决定是否结束整个流程
+ */
+function shouldEnd(state: typeof GraphState.State) {
+	if (state.done) {
+		return END;
+	}
+	return 'human_review';
 }
 
 // ----- 图 -----
@@ -282,8 +321,10 @@ ReplanGraph
 	.addEdge('reflect', 're_analyze')
 	//根据`input、knowledge、projectCodes、Reflection、亮点的需求分析`，更新亮点的实现计划
 	.addEdge('re_analyze', 're_plan')
-	//`人类审核`：根据`亮点的需求分析、亮点的实现计划`，审核是否需要重新反思或结束
-	.addEdge('re_plan', 'human_review')
+	//当整个任务为完成时，进行`人类审核`：根据`亮点的需求分析、亮点的实现计划`，审核是否需要重新反思或结束
+	.addConditionalEdges('re_plan', shouldEnd, {
+		[END]: END
+	})
 	.addConditionalEdges('human_review', shouldReflect, {
 		prepare_reflection: 'prepare_reflection', // 如果提供了反馈，则再次反思。
 		reset_step_index: 'reset_step_index'

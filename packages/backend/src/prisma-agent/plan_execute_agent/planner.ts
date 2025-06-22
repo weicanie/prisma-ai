@@ -288,7 +288,7 @@ export const PlanGraph = new StateGraph(GraphState)
 	.addNode('uploadCode', uploadCode)
 	.addNode('retrieve', retrieveNode)
 	.addNode('analyze', analyze)
-	.addNode('plan', plan)
+	.addNode('plan_top', plan)
 	.addNode('prepare_reflection', prepareReflection)
 	.addNode('reflect', reflect)
 	.addNode('human_review', waitForHumanReview);
@@ -305,7 +305,7 @@ PlanGraph
 	// "人类审核" -> ("准备反思" | "计划")：根据 shouldReflect 的判断结果决定走向
 	.addConditionalEdges('human_review', shouldReflect, {
 		prepare_reflection: 'prepare_reflection',
-		continue: 'plan', // 用户接受，则继续"计划"
+		continue: 'plan_top', // 用户接受，则继续"计划"
 		end: END // 异常情况，结束流程
 	})
 	// "准备反思" -> "反思"：准备好输入后，执行反思
@@ -313,8 +313,8 @@ PlanGraph
 	// "反思" -> ("需求分析" | "计划")：反思结束后，根据 afterReflect 的判断结果决定是重新需求分析还是重新计划
 	.addConditionalEdges('reflect', afterReflect, {
 		analyze: 'analyze',
-		plan: 'plan',
+		plan: 'plan_top',
 		end: END
 	})
 	// "计划" -> "人类审核"：计划完成后，再次交由人类审核
-	.addEdge('plan', 'human_review');
+	.addEdge('plan_top', 'human_review');

@@ -1,7 +1,7 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { RunnableSequence } from '@langchain/core/runnables';
 import { ChatOpenAI } from '@langchain/openai';
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { formatDocumentsAsString } from 'langchain/util/document';
 import z from 'zod';
 import { ModelService } from '../../model/model.service';
@@ -31,6 +31,7 @@ export class CRetrieveAgentService {
 
 	constructor(
 		private readonly modelService: ModelService,
+		@Inject(forwardRef(() => KnowledgeVDBService))
 		private readonly knowledgeVDBService: KnowledgeVDBService
 	) {
 		this.workflow = CRAGGraph.compile();
