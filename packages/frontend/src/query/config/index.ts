@@ -11,6 +11,36 @@ import {
 } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+
+/**
+ * 用于管理toast的队列, 避免重试导致重复显示相同的toast
+ */
+enum ToastType {
+	Success = 'success',
+	Error = 'error',
+	Warning = 'warning',
+	Info = 'info'
+}
+const toastQueue = new Set<string>();
+let curTimer: NodeJS.Timeout | null = null;
+function addToastToQueue(message: string, type: ToastType = ToastType.Success) {
+	if (toastQueue.has(JSON.stringify({ message, type }))) {
+		return;
+	}
+	toastQueue.add(JSON.stringify({ message, type }));
+	if (curTimer) {
+		clearTimeout(curTimer);
+	}
+	curTimer = setTimeout(() => {
+		for (const msg of toastQueue) {
+			const { message, type } = JSON.parse(msg);
+			toast[type as ToastType](message);
+		}
+		toastQueue.clear();
+		curTimer = null;
+	}, 500);
+}
+
 /** 固定一些配置 并提供统一的错误处理
  *
  * @param queryKey
@@ -46,16 +76,19 @@ export function useCustomQuery<SD>( //SD: Response Data
 				if (data.code === '2006' || data.code === '2007') {
 					localStorage.removeItem('token');
 					localStorage.removeItem('userInfo');
-					toast.warning(data.code === '2006' ? '登录已过期，请重新登录' : '请先登录');
+					addToastToQueue(
+						data.code === '2006' ? '登录已过期，请重新登录' : '请先登录',
+						ToastType.Warning
+					);
 					navigate('/login');
 				} else {
-					toast.error(data.message || '系统繁忙，请稍后再试');
+					addToastToQueue(data.message || '系统繁忙，请稍后再试', ToastType.Error);
 					throw new Error(data.message);
 				}
 			}
 			/* 返回默认的'ok'时，不显示toast，交给外部组件来决定toast */
 			if (data.message && data.message !== DEFAULT_MESSAGE) {
-				toast.success(data.message);
+				addToastToQueue(data.message, ToastType.Success);
 			}
 			if (outerSelect) {
 				return outerSelect(data);
@@ -104,17 +137,20 @@ export function useCustomMutation<TData, TVariables, TContext = unknown>(
 				if (data.code === '2006' || data.code === '2007') {
 					localStorage.removeItem('token');
 					localStorage.removeItem('userInfo');
-					toast.warning(data.code === '2006' ? '登录已过期，请重新登录' : '请先登录');
+					addToastToQueue(
+						data.code === '2006' ? '登录已过期，请重新登录' : '请先登录',
+						ToastType.Warning
+					);
 					navigate('/login');
 					return;
 				} else {
-					toast.error(data.message || '系统繁忙，请稍后再试');
+					addToastToQueue(data.message || '系统繁忙，请稍后再试', ToastType.Error);
 					throw new Error(data.message);
 				}
 			} else {
 				/* 返回默认的'ok'时，不显示toast，交给外部组件来决定toast */
 				if (data.message && data.message !== DEFAULT_MESSAGE) {
-					toast.success(data.message);
+					addToastToQueue(data.message, ToastType.Success);
 				}
 				if (outerOnSuccess) {
 					outerOnSuccess(data, variables, context);
@@ -124,7 +160,7 @@ export function useCustomMutation<TData, TVariables, TContext = unknown>(
 
 		// 处理其它错误（如网络错误）
 		onError: (error, variables, context) => {
-			toast.error(`系统繁忙，请稍后再试${error}`);
+			addToastToQueue(`系统繁忙，请稍后再试${error}`, ToastType.Error);
 
 			if (outerOnError) {
 				outerOnError(error, variables, context);

@@ -114,7 +114,6 @@ export const KnowledgeForm = memo(() => {
 
 	// 删除标签
 	const removeTag = (tagToRemove: string) => {
-		console.log('🚀 ~ removeTag ~ tagToRemove:', tagToRemove);
 		const currentTags = form.getValues('tag');
 		form.setValue(
 			'tag',
@@ -252,7 +251,9 @@ export const KnowledgeForm = memo(() => {
 														className="flex items-center gap-1"
 													>
 														{tag}
-														<X className="h-3 w-3 cursor-pointer" onClick={() => removeTag(tag)} />
+														<span onClick={() => removeTag(tag)}>
+															<X className="h-3 w-3 cursor-pointer" />
+														</span>
 													</Badge>
 												))}
 											</div>

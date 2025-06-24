@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
 	Form,
@@ -14,10 +15,10 @@ import {
 import { Input } from '@/components/ui/input';
 import type { CreateSkillDto, SkillItem } from '@prism-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
-import { throttle } from 'lodash';
-import { Plus, Trash2 } from 'lucide-react';
-import { memo } from 'react';
+import { Plus, Trash2, X } from 'lucide-react';
+import { memo, useReducer } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'sonner';
 import { useCustomMutation } from '../../../query/config';
 import { SkillQueryKey } from '../../../query/keys';
 import { createSkill } from '../../../services/skill';
@@ -29,16 +30,46 @@ import { resetSkillData, selectSkillData, setSkillDataFromDto } from '../../../s
 */
 const skillFormSchema = z.object({
 	name: z.string().min(1, '技能清单名称不能为空'),
-	types: z.array(z.string().min(1, '技能类型不能为空')).min(1, '至少需要一个技能类型'),
+	types: z
+		.array(z.string().min(1, '技能类型不能为空'))
+		.min(1, '至少需要一个技能类型')
+		.refine(items => new Set(items).size === items.length, {
+			message: '技能类型不能重复'
+		}),
 	skills: z.array(
 		z.object({
-			typeIndex: z.number(),
+			skillTypeIndex: z.number(), //所属技能类型在技能类型数组中的索引
 			name: z.string().min(1, '技能名称不能为空')
 		})
 	)
 });
 
 type SkillFormData = z.infer<typeof skillFormSchema>;
+
+type SkillInputState = Record<string, string>;
+
+type SkillInputAction =
+	| { type: 'SET_INPUT'; payload: { fieldId: string; value: string } }
+	| { type: 'CLEAR_INPUT'; payload: { fieldId: string } };
+/**
+ * 技能输入框的reducer, 用于管理各个技能类型下技能输入框的值
+ * @param state 当前状态表, 技能类型的typeField.id -> 输入框的值
+ * @param action 动作
+ * @returns 新的状态
+ */
+const skillInputReducer = (state: SkillInputState, action: SkillInputAction): SkillInputState => {
+	switch (action.type) {
+		case 'SET_INPUT':
+			return { ...state, [action.payload.fieldId]: action.payload.value };
+		case 'CLEAR_INPUT': {
+			const newState = { ...state };
+			delete newState[action.payload.fieldId];
+			return newState;
+		}
+		default:
+			return state;
+	}
+};
 
 // dto 转 表单数据
 const convertToFormData = (data: CreateSkillDto): SkillFormData => {
@@ -47,15 +78,15 @@ const convertToFormData = (data: CreateSkillDto): SkillFormData => {
 	}
 
 	const types: string[] = [];
-	const skills: { typeIndex: number; name: string }[] = [];
+	const skills: { skillTypeIndex: number; name: string }[] = [];
 
-	data.content.forEach((item: SkillItem, typeIndex: number) => {
+	data.content.forEach((item: SkillItem, skillTypeIndex: number) => {
 		if (item.type) {
 			types.push(item.type);
 			if (item.content && Array.isArray(item.content)) {
 				item.content.forEach((skillName: string) => {
 					if (skillName) {
-						skills.push({ typeIndex, name: skillName });
+						skills.push({ skillTypeIndex, name: skillName });
 					}
 				});
 			}
@@ -67,9 +98,11 @@ const convertToFormData = (data: CreateSkillDto): SkillFormData => {
 
 // 表单数据 转 dto
 const convertToOriginalFormat = (formData: SkillFormData) => {
-	const content = formData.types.map((type, typeIndex) => ({
+	const content = formData.types.map((type, skillTypeIndex) => ({
 		type,
-		content: formData.skills.filter(skill => skill.typeIndex === typeIndex).map(skill => skill.name)
+		content: formData.skills
+			.filter(skill => skill.skillTypeIndex === skillTypeIndex)
+			.map(skill => skill.name)
 	}));
 
 	return { name: formData.name, content };
@@ -84,11 +117,6 @@ export const SkillForm = memo(() => {
 	});
 
 	const dispatch = useDispatch();
-	const onChange = throttle((formData: SkillFormData) => {
-		// 将表单数据转换回原格式
-		const convertedData = convertToOriginalFormat(formData);
-		dispatch(setSkillDataFromDto(convertedData));
-	}, 1000);
 
 	const queryClient = useQueryClient();
 	const uploadSkillMutation = useCustomMutation(createSkill, {
@@ -106,7 +134,7 @@ export const SkillForm = memo(() => {
 
 	// 管理技能类型数组
 	//@ts-expect-error 内部体操的锅
-	const typesArray = useFieldArray<SkillFormData, 'types'>({
+	const skillTypeArray = useFieldArray<SkillFormData, 'types'>({
 		control: form.control,
 		name: 'types'
 	});
@@ -117,21 +145,59 @@ export const SkillForm = memo(() => {
 		name: 'skills'
 	});
 
-	// 添加技能类型
-	const addType = () => {
-		typesArray.append('技能类型1');
-		typesArray.append('技能类型2');
-		typesArray.append('技能类型3');
+	const [skillInputs, dispatchSkillInput] = useReducer(skillInputReducer, {});
+	const { fields: skillFields, append: appendSkill } = skillsArray;
+	const watchedSkills = form.watch('skills');
+
+	const removeSkill = (skillIndex: number) => {
+		skillsArray.remove(skillIndex);
+		updateToStore();
+	};
+	// 添加技能
+	const addSkill = (skillTypeIndex: number, fieldId: string) => {
+		const skillName = skillInputs[fieldId]?.trim();
+		if (skillName) {
+			// 检查当前类型下技能是否重复
+			const skillsForType = watchedSkills
+				.filter(s => s.skillTypeIndex === skillTypeIndex)
+				.map(s => s.name);
+			if (!skillsForType.includes(skillName)) {
+				appendSkill({ skillTypeIndex, name: skillName });
+				dispatchSkillInput({ type: 'CLEAR_INPUT', payload: { fieldId } });
+				updateToStore();
+			} else {
+				toast.error('技能已存在');
+			}
+		}
+	};
+
+	// 处理Enter键添加技能
+	const handleSkillInputKeyDown = (
+		e: React.KeyboardEvent,
+		skillTypeIndex: number,
+		fieldId: string
+	) => {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			addSkill(skillTypeIndex, fieldId);
+		}
+	};
+
+	// 获取特定类型下的技能
+	const getSkillsForType = (skillTypeIndex: number) => {
+		return skillFields
+			.map((skill, index) => ({ ...skill, originalIndex: index }))
+			.filter((_, index) => watchedSkills[index]?.skillTypeIndex === skillTypeIndex);
 	};
 
 	// 删除技能类型（级联删除相关技能）
-	const removeType = (typeIndex: number) => {
-		typesArray.remove(typeIndex);
+	const removeType = (skillTypeIndex: number) => {
+		skillTypeArray.remove(skillTypeIndex);
 
 		// 删除该类型下的所有技能
 		const skillsToRemove: number[] = [];
-		skillsArray.fields.forEach((skill, index) => {
-			if (skill.typeIndex === typeIndex) {
+		skillFields.forEach((_skill, index) => {
+			if (watchedSkills[index]?.skillTypeIndex === skillTypeIndex) {
 				skillsToRemove.push(index);
 			}
 		});
@@ -141,36 +207,25 @@ export const SkillForm = memo(() => {
 			skillsArray.remove(index);
 		});
 
-		// 更新剩余技能的typeIndex
+		// 更新剩余技能的skillTypeIndex
 		const currentSkills = form.getValues('skills');
 		const updatedSkills = currentSkills.map(skill =>
-			skill.typeIndex > typeIndex ? { ...skill, typeIndex: skill.typeIndex - 1 } : skill
+			skill.skillTypeIndex > skillTypeIndex
+				? { ...skill, skillTypeIndex: skill.skillTypeIndex - 1 }
+				: skill
 		);
 
 		form.setValue('skills', updatedSkills);
-		/* 不触发onChange,需要手动同步到store */
+		updateToStore();
+	};
+
+	/**
+	 * 将表单数据更新到store,以更新md显示
+	 */
+	const updateToStore = () => {
 		const formData = form.getValues();
 		const convertedData = convertToOriginalFormat(formData);
 		dispatch(setSkillDataFromDto(convertedData));
-	};
-
-	// 添加技能
-	const addSkill = (typeIndex: number) => {
-		skillsArray.append({ typeIndex, name: `技能${typeIndex + 1}-1` });
-		skillsArray.append({ typeIndex, name: `技能${typeIndex + 1}-2` });
-		skillsArray.append({ typeIndex, name: `技能${typeIndex + 1}-3` });
-	};
-
-	// 删除技能
-	const removeSkill = (skillIndex: number) => {
-		skillsArray.remove(skillIndex);
-	};
-
-	// 获取特定类型下的技能
-	const getSkillsForType = (typeIndex: number) => {
-		return skillsArray.fields
-			.map((skill, index) => ({ ...skill, originalIndex: index }))
-			.filter(skill => skill.typeIndex === typeIndex);
 	};
 
 	return (
@@ -179,7 +234,7 @@ export const SkillForm = memo(() => {
 				<Form {...form}>
 					<form
 						onSubmit={form.handleSubmit(onSubmit)}
-						onChange={() => onChange(form.getValues())}
+						onChange={() => updateToStore()}
 						style={{ overflow: 'auto', padding: '2px' }}
 						className="space-y-8"
 					>
@@ -206,7 +261,12 @@ export const SkillForm = memo(() => {
 							{/* 添加技能类型按钮 */}
 							<div className="flex justify-between items-center">
 								<h4 className="text-lg font-semibold">技能分类</h4>
-								<Button type="button" variant="outline" size="sm" onClick={addType}>
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									onClick={() => skillTypeArray.append('技能类型1')}
+								>
 									<Plus className="h-4 w-4 mr-2" />
 									添加技能类型
 								</Button>
@@ -214,8 +274,8 @@ export const SkillForm = memo(() => {
 
 							{/* 技能类型和对应技能列表 */}
 							<div className="space-y-6">
-								{typesArray.fields.map((typeField, typeIndex) => {
-									const typeSkills = getSkillsForType(typeIndex);
+								{skillTypeArray.fields.map((typeField, skillTypeIndex) => {
+									const typeSkills = getSkillsForType(skillTypeIndex);
 
 									return (
 										<div key={typeField.id} className="border rounded-lg p-4 space-y-4">
@@ -223,7 +283,7 @@ export const SkillForm = memo(() => {
 											<div className="flex items-center gap-3">
 												<FormField
 													control={form.control}
-													name={`types.${typeIndex}`}
+													name={`types.${skillTypeIndex}`}
 													render={({ field }) => (
 														<FormItem className="flex-1">
 															<FormLabel>技能类型</FormLabel>
@@ -238,7 +298,7 @@ export const SkillForm = memo(() => {
 													type="button"
 													variant="ghost"
 													size="sm"
-													onClick={() => removeType(typeIndex)}
+													onClick={() => removeType(skillTypeIndex)}
 													className="mt-8"
 												>
 													<Trash2 className="h-4 w-4" />
@@ -247,47 +307,54 @@ export const SkillForm = memo(() => {
 
 											{/* 该类型下的技能列表 */}
 											<div className="space-y-3">
-												<div className="flex justify-between items-center">
-													<FormLabel>具体技能</FormLabel>
-													<Button
-														type="button"
-														variant="outline"
-														size="sm"
-														onClick={() => addSkill(typeIndex)}
-													>
-														<Plus className="h-4 w-4 mr-2" />
-														添加技能
-													</Button>
-												</div>
-
-												{typeSkills.map(skill => (
-													<div key={skill.id} className="flex items-center gap-3">
-														<FormField
-															control={form.control}
-															name={`skills.${skill.originalIndex}.name`}
-															render={({ field }) => (
-																<FormItem className="flex-1">
-																	<FormControl>
-																		<Input placeholder="技能名称" {...field} />
-																	</FormControl>
-																	<FormMessage />
-																</FormItem>
-															)}
+												<FormLabel>具体技能</FormLabel>
+												<div className="space-y-2">
+													<div className="flex gap-2">
+														<Input
+															placeholder="输入技能后按回车添加"
+															value={skillInputs[typeField.id] || ''}
+															onChange={e =>
+																dispatchSkillInput({
+																	type: 'SET_INPUT',
+																	payload: { fieldId: typeField.id, value: e.target.value }
+																})
+															}
+															onKeyDown={e =>
+																handleSkillInputKeyDown(e, skillTypeIndex, typeField.id)
+															}
 														/>
 														<Button
 															type="button"
-															variant="ghost"
-															size="sm"
-															onClick={() => removeSkill(skill.originalIndex)}
+															onClick={() => addSkill(skillTypeIndex, typeField.id)}
+															variant="outline"
 														>
-															<Trash2 className="h-4 w-4" />
+															添加
 														</Button>
 													</div>
-												))}
+													{typeSkills.length > 0 && (
+														<div className="flex flex-wrap gap-2 pt-2">
+															{typeSkills.map(skill => (
+																<Badge
+																	key={skill.id}
+																	variant="secondary"
+																	className="flex items-center gap-1"
+																>
+																	{watchedSkills[skill.originalIndex]?.name}
+																	<span
+																		onClick={() => removeSkill(skill.originalIndex)}
+																		className="cursor-pointer"
+																	>
+																		<X className="h-3 w-3" />
+																	</span>
+																</Badge>
+															))}
+														</div>
+													)}
+												</div>
 
 												{typeSkills.length === 0 && (
 													<div className="text-gray-500 text-center py-4">
-														暂无技能，点击上方按钮添加
+														暂无技能，请在上方输入框添加
 													</div>
 												)}
 											</div>

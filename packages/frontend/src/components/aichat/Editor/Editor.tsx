@@ -1,3 +1,6 @@
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { selectProjectMd } from '@/store/projects';
 import { useTheme } from '@/utils/theme.tsx';
 import { Crepe } from '@milkdown/crepe';
 import '@milkdown/crepe/theme/common/style.css'; //编辑器基础样式
@@ -9,9 +12,6 @@ import { debounce, throttle } from 'lodash';
 import { ArrowLeft, CheckIcon } from 'lucide-react';
 import { useEffect, useRef, type FC } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button } from '../../../../components/ui/button';
-import { cn } from '../../../../lib/utils';
-import { selectProjectMd } from '../../../../store/projects';
 import './theme.css'; //编辑器主题样式
 
 export interface EditorProps {

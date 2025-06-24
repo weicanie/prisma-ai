@@ -8,7 +8,7 @@ import {
 	Pyramid,
 	Sun
 } from 'lucide-react';
-//TODO 完成iconMap,替换所有icon
+//* 完成iconMap,替换所有icon
 export const iconMap = {
 	decorator: {
 		RightV: ChevronRight,

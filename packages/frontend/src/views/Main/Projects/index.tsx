@@ -88,7 +88,7 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 				{
 					accessorKey: 'name',
 					header: ({ column }) => <DataTableColumnHeader column={column} title="名称" />,
-					cell: ({ row }) => <div className="w-[80px]">{row.original.info.name}</div>,
+					cell: ({ row }) => <div className="max-w-[160px] truncate">{row.original.info.name}</div>,
 					enableHiding: false,
 					enableSorting: false
 				},

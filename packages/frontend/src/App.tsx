@@ -1,7 +1,5 @@
 //TODO copilot包体积太大,需要优化
 import '@ant-design/v5-patch-for-react-19';
-import { CopilotKit } from '@copilotkit/react-core';
-import { CopilotSidebar } from '@copilotkit/react-ui';
 import '@copilotkit/react-ui/styles.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -30,8 +28,9 @@ const queryClient = new QueryClient({
 function APP() {
 	return (
 		<QueryClientProvider client={queryClient}>
-			<CopilotKit runtimeUrl={import.meta.env.VITE_API_BASE_URL + '/copilotkit' || '/api'}>
-				<Toaster />
+			<Toaster />
+			<ReactQueryDevtools initialIsOpen={false} />
+			{/* <CopilotKit runtimeUrl={import.meta.env.VITE_API_BASE_URL + '/copilotkit' || '/api'}>
 				<CopilotSidebar
 					defaultOpen={false}
 					instructions={
@@ -41,12 +40,10 @@ function APP() {
 						title: 'Prisma',
 						initial: 'Prisma 为你效劳!'
 					}}
-				>
-					<div className="flex max-[900px]:flex-col">{useRoutes(routes)}</div>
-				</CopilotSidebar>
-
-				<ReactQueryDevtools initialIsOpen={false} />
-			</CopilotKit>
+				> */}
+			<div className="flex max-[900px]:flex-col">{useRoutes(routes)}</div>
+			{/* </CopilotSidebar>
+			</CopilotKit> */}
 		</QueryClientProvider>
 	);
 }

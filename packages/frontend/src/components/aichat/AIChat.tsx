@@ -17,7 +17,9 @@ import { Avatar, Button, Flex, Space, Spin, message } from 'antd';
 import dayjs from 'dayjs';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { getConversationList, sendMessageToAI, storeConversation } from '../../services/aichat';
+import type { EditorProps } from '../../views/Main/components/Editor/Editor';
 import { DESIGN_GUIDE, HOT_TOPICS, SENDER_PROMPTS } from './config';
+import MilkdownEditor from './Editor';
 import { useStyle } from './style';
 
 const AIChat: React.FC = () => {
@@ -36,11 +38,9 @@ const AIChat: React.FC = () => {
 	const [inputValue, setInputValue] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [messages, setMessages] = useState<ChatMessage[]>([]);
-	console.log('🚀 ~ messages:', messages);
 
 	// ==================== Event ====================
 	const onSubmit = async (val: string) => {
-		console.log('🚀 ~ onSubmit ~ val:', val);
 		if (!val) return;
 		if (loading) {
 			message.error('Request is in progress, please wait for the request to complete.');
@@ -55,7 +55,6 @@ const AIChat: React.FC = () => {
 		};
 
 		const currentHistory = [...messages, userMessage];
-		console.log('🚀 ~ onSubmit ~ currentHistory:', currentHistory);
 
 		setMessages(currentHistory);
 
@@ -257,7 +256,15 @@ const AIChat: React.FC = () => {
 			{messages?.length ? (
 				/* 🌟 消息列表 */
 				<Bubble.List
-					items={messages}
+					/* content可以是任意ReactNode */
+					items={messages.map(item => {
+						const props: EditorProps = {
+							type: 'show',
+							mdSelector: () => item.content
+						};
+						const itemRender = { ...item, content: <MilkdownEditor {...props} /> };
+						return itemRender;
+					})}
 					style={{ height: '100%', paddingInline: 'calc(calc(100% - 700px) /2)' }}
 					roles={{
 						assistant: {
