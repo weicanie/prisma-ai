@@ -88,7 +88,7 @@ class JSONChatHistory extends BaseListChatMessageHistory {
 		}
 	}
 }
-//TODO 文件存储 -> 数据库存储
+//* 文件存储 -> 数据库存储
 @Injectable()
 export class ChatHistoryService {
 	getChatHistory(

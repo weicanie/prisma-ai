@@ -16,7 +16,13 @@ required是必须填写的（即不允许提交''）
 */
 const infoSchemaForm = z
 	.object({
-		name: z.string().min(2).max(100).describe('项目名称'),
+		//只允许小写英文字母和-
+		name: z
+			.string()
+			.min(2)
+			.max(40)
+			.regex(/^[a-z0-9-]+$/)
+			.describe('项目名称'),
 		desc: z.object({
 			role: z.string().describe('用户在项目中的角色和职责'),
 			contribute: z.string().describe('用户的核心贡献和参与程度'),

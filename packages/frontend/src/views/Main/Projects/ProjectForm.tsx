@@ -188,7 +188,7 @@ const ProjectForm: React.FC<PropsType> = ({ setIsUseMdEditor }) => {
 							<h4 className="text-lg font-semibold mb-2">项目名称</h4>
 						</FormLabel>
 						<FormControl>
-							<Input placeholder="请输入项目名称" {...field} />
+							<Input placeholder="请输入小写英文字母和-组成的项目名称" {...field} />
 						</FormControl>
 						<FormMessage />
 					</FormItem>

@@ -7,7 +7,7 @@ import { KnowledgeVDBService } from './data_base/konwledge_vdb.service';
 import { ProjectCodeVDBService } from './data_base/project_code_vdb.service';
 import { PlanExecuteAgentService } from './plan_execute_agent/plan_execute_agent.service';
 import { PlanStepAgentService } from './plan_step_agent/plan_step_agent.service';
-import { ReflectAgentService, reflectionSchema } from './reflact_agent/reflact_agent.service';
+import { ReflectAgentService, reflectionSchema } from './reflect_agent/reflect_agent.service';
 
 type ChainReturned<T extends (...args: any) => Runnable> = T extends (...args: any) => infer R
 	? R
@@ -80,28 +80,36 @@ export interface HumanIOState<I = string, O = string> {
  * @description 用户在审核时可能采取的操作。
  */
 export enum UserAction {
-	/**
-	 * @description 拒绝Agent的输出。
-	 */
-	REJECT = 'reject',
-	/**
-	 * @description 接受Agent的输出。
-	 */
+	/* 
+	- accept：完全接受并继续
+	- fix：手动修改并继续
+	- redo：反馈并重做
+	*/
 	ACCEPT = 'accept',
-	/**
-	 * @description 对Agent的输出提供具体反馈。
-	 */
-	FEEDBACK = 'feedback'
+	FIX = 'fix',
+	REDO = 'redo'
 }
+
+/**
+ * @description 用户在审核时可能采取的操作的Zod Schema。
+ */
+export const userActionSchema = z.nativeEnum(UserAction);
+
+/**
+ * @description 用户输入的Zod Schema。
+ */
+export const humanInputSchema = z.object({
+	action: userActionSchema,
+	content: z.string().describe('当 action 为 FEEDBACK 时，这里是具体的反馈内容。')
+});
+
 /**
  * @description 用户输入的结构。
  * @lifecycle - 在 `human_review` 节点中，当图被 `interrupt` 后，由外部调用注入。
  *            - 在 `shouldReflect` 条件边中被读取，以决定工作流的走向。
  */
-export interface HumanInput {
-	action: UserAction;
-	content: string; // 当 action 为 FEEDBACK 时，这里是具体的反馈内容。
-}
+export type HumanInput = z.infer<typeof humanInputSchema>;
+
 /**
  * @description 需要人类审核的内容类型。
  * 这也用于在多轮审核中区分当前所处的阶段。
@@ -110,7 +118,9 @@ export enum ReviewType {
 	PLAN = 'plan', // 整个高阶计划
 	ANALYSIS = 'analysis', // 高阶需求分析
 	PLAN_STEP = 'plan_step', // 单个步骤的详细计划
-	ANALYSIS_STEP = 'analysis_step' // 单个步骤的详细分析
+	ANALYSIS_STEP = 'analysis_step', // 单个步骤的详细分析
+	RE_ANALYSIS = 're_analysis', // 重新分析
+	RE_PLAN = 're_plan' // 重新计划
 }
 /**
  * @description Agent准备好让用户审核的输出。
@@ -202,38 +212,33 @@ export interface Plan_step {
 		retrievedDomainDocs: string;
 	};
 }
+
 /**
- * @description 最终生成给开发人员的完整Prompt结构。
+ * @description 开发者执行完一个步骤后的结果的Zod Schema。
  */
-export interface Prompt_step {
-	context: {
-		codeFiles: string[];
-		projectKnowledge: string;
-		domainKnowledge: string;
-	};
-	userPrompt: {
-		stepAnalysis: string;
-		implementationDetailPlan: Step_prompt[];
-	};
-	systemPrompt: string;
-}
+export const resultStepSchema = z.object({
+	stepDescription: z.string().describe('步骤的详细描述').optional(),
+	output: z
+		.object({
+			userFeedback: z.string().describe('用户的反馈'),
+			writtenCodeFiles: z
+				.array(
+					z.object({
+						relativePath: z.string().describe('新建或修改的文件的相对路径'),
+						summary: z.string().describe('对该文件修改的简要总结')
+					})
+				)
+				.describe('开发者编写或修改的文件列表'),
+			summary: z.string().describe('对本次执行的总体总结')
+		})
+		.describe('执行的产出')
+});
+
 /**
  * @description 开发者执行完一个步骤后的结果。
  * @lifecycle - 在 `execute_step` 节点中，当图被 `interrupt` 后，由外部调用注入。
  */
-export interface Result_step {
-	stepDescription: string; // 步骤的详细描述
-	replanNeeded: boolean; // 是否需要根据反馈进行重新规划
-	output: {
-		userFeedback: string; // 用户的反馈
-		writtenCodeFiles: {
-			// 开发者编写或修改的文件列表
-			relativePath: string;
-			summary: string;
-		}[];
-		summary: string; // 对本次执行的总体总结
-	};
-}
+export type Result_step = z.infer<typeof resultStepSchema>;
 
 /**
  * @description Replan子图中使用的数据通道。

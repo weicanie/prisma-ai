@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
-//TODO md文档协作tools, 其实就是写内容、删内容、替换内容
 //chain出结果, agent 协作
 /**
  * 启动 NestJS 应用

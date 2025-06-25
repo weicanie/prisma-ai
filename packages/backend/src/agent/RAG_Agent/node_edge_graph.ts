@@ -1,18 +1,18 @@
-import { AIMessage } from "@langchain/core/messages";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { END, START, StateGraph } from "@langchain/langgraph";
-import { ChatOpenAI } from "@langchain/openai";
-import { pull } from "langchain/hub";
-import { z } from "zod";
-import { GraphState } from "./state";
-import { toolNode, tools } from "./tools";
+import { AIMessage } from '@langchain/core/messages';
+import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { END, START, StateGraph } from '@langchain/langgraph';
+import { ChatOpenAI } from '@langchain/openai';
+import { pull } from 'langchain/hub';
+import { z } from 'zod';
+import { GraphState } from './state';
+import { toolNode, tools } from './tools';
 
 enum Node {
-  RETRIEVE = "retrieve",
-  CHECK_RELEVANCE = "check_relevance",
-  AGENT = "agent",
-  REWRITE = "rewrite",
-  GENERATE = "generate",
+	RETRIEVE = 'retrieve',
+	CHECK_RELEVANCE = 'check_relevance',
+	AGENT = 'agent',
+	REWRITE = 'rewrite',
+	GENERATE = 'generate'
 }
 // --------------------------------Edges--------------------------------
 /**
@@ -24,16 +24,20 @@ enum Node {
  * @returns {string} - "continue"继续检索过程或"end"结束的决定。
  */
 function shouldRetrieve(state: typeof GraphState.State): string {
-  const { messages } = state;
-  console.log("---DECIDE TO RETRIEVE---");
-  const lastMessage = messages[messages.length - 1];
+	const { messages } = state;
+	console.log('---DECIDE TO RETRIEVE---');
+	const lastMessage = messages[messages.length - 1];
 
-  if ("tool_calls" in lastMessage && Array.isArray(lastMessage.tool_calls) && lastMessage.tool_calls.length) {
-    console.log("---DECISION: RETRIEVE---");
-    return Node.RETRIEVE;
-  }
-  // 如果没有工具调用，那么我们完成。
-  return END;
+	if (
+		'tool_calls' in lastMessage &&
+		Array.isArray(lastMessage.tool_calls) &&
+		lastMessage.tool_calls.length
+	) {
+		console.log('---DECISION: RETRIEVE---');
+		return Node.RETRIEVE;
+	}
+	// 如果没有工具调用，那么我们完成。
+	return END;
 }
 
 /**
@@ -45,20 +49,22 @@ function shouldRetrieve(state: typeof GraphState.State): string {
  * @param {typeof GraphState.State} state - Agent的当前状态，包括所有消息。
  * @returns {Promise<Partial<typeof GraphState.State>>} - 更新后的状态，并将新消息添加到消息列表中。
  */
-async function gradeDocuments(state: typeof GraphState.State): Promise<Partial<typeof GraphState.State>> {
-  console.log("---GET RELEVANCE---");
+async function gradeDocuments(
+	state: typeof GraphState.State
+): Promise<Partial<typeof GraphState.State>> {
+	console.log('---GET RELEVANCE---');
 
-  const { messages } = state;
-  const tool = {
-    name: "give_relevance_score",
-    description: "Give a relevance score to the retrieved documents.",
-    schema: z.object({
-      binaryScore: z.string().describe("Relevance score 'yes' or 'no'"),
-    })
-  }
+	const { messages } = state;
+	const tool = {
+		name: 'give_relevance_score',
+		description: 'Give a relevance score to the retrieved documents.',
+		schema: z.object({
+			binaryScore: z.string().describe("Relevance score 'yes' or 'no'")
+		})
+	};
 
-  const prompt = ChatPromptTemplate.fromTemplate(
-    `你是一个评分员，负责评估检索到的文档与用户问题的相关性。
+	const prompt = ChatPromptTemplate.fromTemplate(
+		`你是一个评分员，负责评估检索到的文档与用户问题的相关性。
   这是检索到的文档:
   \n ------- \n
   {context}
@@ -67,28 +73,28 @@ async function gradeDocuments(state: typeof GraphState.State): Promise<Partial<t
   如果文档内容与用户问题相关，则将其评为相关。
   给出"yes"或"no"的二进制分数，以指示文档是否与问题相关。
   Yes: 文档与问题相关。
-  No: 文档与问题不相关。`,
-  );
+  No: 文档与问题不相关。`
+	);
 
-  const model = new ChatOpenAI({
-    model: "gpt-4o",
-    temperature: 0,
-  }).bindTools([tool], {
-    tool_choice: tool.name,//指定必须调用该工具
-  });
+	const model = new ChatOpenAI({
+		model: 'gpt-4o',
+		temperature: 0
+	}).bindTools([tool], {
+		tool_choice: tool.name //指定必须调用该工具
+	});
 
-  const chain = prompt.pipe(model);
+	const chain = prompt.pipe(model);
 
-  const lastMessage = messages[messages.length - 1];
+	const lastMessage = messages[messages.length - 1];
 
-  const score = await chain.invoke({
-    question: messages[0].content as string,
-    context: lastMessage.content as string,
-  });
+	const score = await chain.invoke({
+		question: messages[0].content as string,
+		context: lastMessage.content as string
+	});
 
-  return {
-    messages: [score]
-  };
+	return {
+		messages: [score]
+	};
 }
 
 /**
@@ -101,24 +107,26 @@ async function gradeDocuments(state: typeof GraphState.State): Promise<Partial<t
  * @returns {string} - 根据文档的相关性返回"yes"或"no"的指令。
  */
 function checkRelevance(state: typeof GraphState.State): string {
-  console.log("---CHECK RELEVANCE---");
+	console.log('---CHECK RELEVANCE---');
 
-  const { messages } = state;
-  const lastMessage = messages[messages.length - 1];
-  if (!("tool_calls" in lastMessage)) {
-    throw new Error("The 'checkRelevance' node requires the most recent message to contain tool calls.")
-  }
-  const toolCalls = (lastMessage as AIMessage).tool_calls;
-  if (!toolCalls || !toolCalls.length) {
-    throw new Error("Last message was not a function message");
-  }
+	const { messages } = state;
+	const lastMessage = messages[messages.length - 1];
+	if (!('tool_calls' in lastMessage)) {
+		throw new Error(
+			"The 'checkRelevance' node requires the most recent message to contain tool calls."
+		);
+	}
+	const toolCalls = (lastMessage as AIMessage).tool_calls;
+	if (!toolCalls || !toolCalls.length) {
+		throw new Error('Last message was not a function message');
+	}
 
-  if (toolCalls[0].args.binaryScore === "yes") {
-    console.log("---DECISION: DOCS RELEVANT---");
-    return "yes";
-  }
-  console.log("---DECISION: DOCS NOT RELEVANT---");
-  return "no";
+	if (toolCalls[0].args.binaryScore === 'yes') {
+		console.log('---DECISION: DOCS RELEVANT---');
+		return 'yes';
+	}
+	console.log('---DECISION: DOCS NOT RELEVANT---');
+	return 'no';
 }
 
 // --------------------------------Nodes--------------------------------
@@ -132,31 +140,34 @@ function checkRelevance(state: typeof GraphState.State): string {
  * @returns {Promise<Partial<typeof GraphState.State>>} - 更新后的状态，并将新消息添加到消息列表中。
  */
 async function agent(state: typeof GraphState.State): Promise<Partial<typeof GraphState.State>> {
-  console.log("---CALL AGENT---");
+	console.log('---CALL AGENT---');
 
-  const { messages } = state;
-  // 找到包含 `give_relevance_score` 工具调用的AIMessage，
-  // 如果存在则将其删除。这是因为Agent不需要知道
-  // 相关性分数。
-  const filteredMessages = messages.filter((message) => {
-    if ("tool_calls" in message && Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {
-      return message.tool_calls[0].name !== "give_relevance_score";
-    }
-    return true;
-  });
+	const { messages } = state;
+	// 找到包含 `give_relevance_score` 工具调用的AIMessage，
+	// 如果存在则将其删除。这是因为Agent不需要知道
+	// 相关性分数。
+	const filteredMessages = messages.filter(message => {
+		if (
+			'tool_calls' in message &&
+			Array.isArray(message.tool_calls) &&
+			message.tool_calls.length > 0
+		) {
+			return message.tool_calls[0].name !== 'give_relevance_score';
+		}
+		return true;
+	});
 
-  const model = new ChatOpenAI({
-    model: "gpt-4o",
-    temperature: 0,
-    streaming: true,
-  }).bindTools(tools);
+	const model = new ChatOpenAI({
+		model: 'gpt-4o',
+		temperature: 0,
+		streaming: true
+	}).bindTools(tools);
 
-  const response = await model.invoke(filteredMessages);
-  return {
-    messages: [response],
-  };
+	const response = await model.invoke(filteredMessages);
+	return {
+		messages: [response]
+	};
 }
-//TODO 这里有好几个优化手段：通过引入更多llm
 
 /**
  * 当检索到的文档和用户提问不相关时,重写检索向量
@@ -165,29 +176,29 @@ async function agent(state: typeof GraphState.State): Promise<Partial<typeof Gra
  * @returns {Promise<Partial<typeof GraphState.State>>} - 更新后的状态，并将新消息添加到消息列表中。
  */
 async function rewrite(state: typeof GraphState.State): Promise<Partial<typeof GraphState.State>> {
-  console.log("---TRANSFORM QUERY---");
+	console.log('---TRANSFORM QUERY---');
 
-  const { messages } = state;
-  const question = messages[0].content as string;
-  const prompt = ChatPromptTemplate.fromTemplate(
-    `查看输入并尝试推断其潜在的语义意图/含义。\n
+	const { messages } = state;
+	const question = messages[0].content as string;
+	const prompt = ChatPromptTemplate.fromTemplate(
+		`查看输入并尝试推断其潜在的语义意图/含义。\n
     这是最初的问题:
     \n ------- \n
     {question}
     \n ------- \n
-    提出一个改进的问题:`,
-  );
+    提出一个改进的问题:`
+	);
 
-  // 评分器
-  const model = new ChatOpenAI({
-    model: "gpt-4o",
-    temperature: 0,
-    streaming: true,
-  });
-  const response = await prompt.pipe(model).invoke({ question });
-  return {
-    messages: [response],
-  };
+	// 评分器
+	const model = new ChatOpenAI({
+		model: 'gpt-4o',
+		temperature: 0,
+		streaming: true
+	});
+	const response = await prompt.pipe(model).invoke({ question });
+	return {
+		messages: [response]
+	};
 }
 
 /**
@@ -196,19 +207,22 @@ async function rewrite(state: typeof GraphState.State): Promise<Partial<typeof G
  * @returns {Promise<Partial<typeof GraphState.State>>} - 更新后的状态，并将新消息添加到消息列表中。
  */
 async function generate(state: typeof GraphState.State): Promise<Partial<typeof GraphState.State>> {
-  console.log("---GENERATE---");
+	console.log('---GENERATE---');
 
-  const { messages } = state;
-  const question = messages[0].content as string;
-  // 提取最新的ToolMessage
-  const lastToolMessage = messages.slice().reverse().find((msg) => msg._getType() === "tool");
-  if (!lastToolMessage) {
-    throw new Error("No tool message found in the conversation history");
-  }
+	const { messages } = state;
+	const question = messages[0].content as string;
+	// 提取最新的ToolMessage
+	const lastToolMessage = messages
+		.slice()
+		.reverse()
+		.find(msg => msg._getType() === 'tool');
+	if (!lastToolMessage) {
+		throw new Error('No tool message found in the conversation history');
+	}
 
-  const docs = lastToolMessage.content as string;
+	const docs = lastToolMessage.content as string;
 
-  /*
+	/*
    人类
 
    你是一个用于问答任务的助手。使用以下检索到的上下文片段来回答问题。如果你不知道答案，就说你不知道。最多使用三个句子，并保持答案简洁。
@@ -219,58 +233,51 @@ async function generate(state: typeof GraphState.State): Promise<Partial<typeof 
 
    答案:
   */
-  const prompt = await pull<ChatPromptTemplate>("rlm/rag-prompt");
+	const prompt = await pull<ChatPromptTemplate>('rlm/rag-prompt');
 
-  const llm = new ChatOpenAI({
-    model: "gpt-4o",
-    temperature: 0,
-    streaming: true,
-  });
+	const llm = new ChatOpenAI({
+		model: 'gpt-4o',
+		temperature: 0,
+		streaming: true
+	});
 
-  const ragChain = prompt.pipe(llm);
+	const ragChain = prompt.pipe(llm);
 
-  const response = await ragChain.invoke({
-    context: docs,
-    question,
-  });
+	const response = await ragChain.invoke({
+		context: docs,
+		question
+	});
 
-  return {
-    messages: [response],
-  };
+	return {
+		messages: [response]
+	};
 }
 
 // --------------------------------Graph--------------------------------
 // 定义图
 const workflow = new StateGraph(GraphState)
-  // 定义我们将在其间循环的节点。
-  .addNode("agent", agent)
-  .addNode("retrieve", toolNode)
-  .addNode("gradeDocuments", gradeDocuments)
-  .addNode("rewrite", rewrite)
-  .addNode("generate", generate);
+	// 定义我们将在其间循环的节点。
+	.addNode('agent', agent)
+	.addNode('retrieve', toolNode)
+	.addNode('gradeDocuments', gradeDocuments)
+	.addNode('rewrite', rewrite)
+	.addNode('generate', generate);
 // 调用Agent节点来决定是否检索
-workflow.addEdge(START, "agent");
+workflow.addEdge(START, 'agent');
 
 // 决定是否检索
-workflow.addConditionalEdges(
-  "agent",
-  shouldRetrieve,
-);
+workflow.addConditionalEdges('agent', shouldRetrieve);
 
-workflow.addEdge("retrieve", "gradeDocuments");
+workflow.addEdge('retrieve', 'gradeDocuments');
 
 // Edges taken after the `action` node is called.
-workflow.addConditionalEdges(
-  "gradeDocuments",
-  checkRelevance,
-  {
-    yes: "generate",
-    no: "rewrite",
-  },
-);
+workflow.addConditionalEdges('gradeDocuments', checkRelevance, {
+	yes: 'generate',
+	no: 'rewrite'
+});
 
-workflow.addEdge("generate", END);
-workflow.addEdge("rewrite", "agent");
+workflow.addEdge('generate', END);
+workflow.addEdge('rewrite', 'agent');
 
 // Compile
 export const RAGGraph = workflow.compile();

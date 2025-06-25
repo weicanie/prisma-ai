@@ -14,6 +14,13 @@ interface ImplementDto {
 export class ProjectController {
 	constructor(private readonly projectService: ProjectService) {}
 
+	/**
+	 * 分析项目经验 - 使用AI对项目经验进行分析和总结
+	 * @param sessionId 会话id
+	 * @param recover 是否恢复
+	 * @param userInfo 用户信息
+	 * @returns 返回分析结果
+	 */
 	@RequireLogin()
 	@Sse('lookup')
 	async lookupProject(

@@ -1,0 +1,173 @@
+[
+  {
+    "stepDescription": "设计并实现数据收集模块，用于从聊天记录、好友备注和互动历史中提取数据",
+    "techStackList": [
+      "NestJS",
+      "Prisma",
+      "MySQL",
+      "Redis"
+    ],
+    "challengesList": [
+      "数据量大时的性能优化",
+      "确保数据隐私和安全",
+      "实时数据同步"
+    ],
+    "questionsList": [
+      "如何高效地从数据库中提取历史聊天记录？",
+      "如何处理数据中的敏感信息？"
+    ]
+  },
+  {
+    "stepDescription": "构建数据预处理模块，对收集到的数据进行清洗和格式化",
+    "techStackList": [
+      "Node.js",
+      "TypeScript",
+      "Prisma"
+    ],
+    "challengesList": [
+      "处理非结构化数据",
+      "确保数据一致性",
+      "处理多语言文本"
+    ],
+    "questionsList": [
+      "如何标准化不同来源的数据格式？",
+      "如何处理数据中的噪声和无关信息？"
+    ]
+  },
+  {
+    "stepDescription": "实现文本嵌入模块，使用OpenAI的text-embedding-ada-002模型将文本转换为向量",
+    "techStackList": [
+      "langchain",
+      "OpenAI API",
+      "TypeScript"
+    ],
+    "challengesList": [
+      "API调用限制",
+      "处理大文本块的嵌入",
+      "成本控制"
+    ],
+    "questionsList": [
+      "如何优化嵌入过程的性能？",
+      "如何处理嵌入失败的情况？"
+    ]
+  },
+  {
+    "stepDescription": "设置Pinecone向量数据库，存储和管理文本嵌入向量",
+    "techStackList": [
+      "Pinecone",
+      "Node.js",
+      "TypeScript"
+    ],
+    "challengesList": [
+      "向量索引的优化",
+      "处理高维数据",
+      "确保查询性能"
+    ],
+    "questionsList": [
+      "如何设计高效的索引策略？",
+      "如何处理向量数据库的扩容问题？"
+    ]
+  },
+  {
+    "stepDescription": "开发检索增强生成(RAG)模块，整合langchain实现自然语言查询",
+    "techStackList": [
+      "langchain",
+      "Node.js",
+      "TypeScript"
+    ],
+    "challengesList": [
+      "减少LLM的幻想问题",
+      "提高检索的准确性",
+      "优化响应时间"
+    ],
+    "questionsList": [
+      "如何设置默认回答以避免误导用户？",
+      "如何优化查询的相关性评分？"
+    ]
+  },
+  {
+    "stepDescription": "设计并实现前端界面，支持用户通过自然语言查询好友信息",
+    "techStackList": [
+      "React",
+      "TypeScript",
+      "styled-components"
+    ],
+    "challengesList": [
+      "设计直观的用户界面",
+      "处理复杂的用户查询",
+      "确保响应速度"
+    ],
+    "questionsList": [
+      "如何设计用户友好的查询界面？",
+      "如何处理查询结果的展示逻辑？"
+    ]
+  },
+  {
+    "stepDescription": "实现API接口，连接前端和RAG系统",
+    "techStackList": [
+      "NestJS",
+      "RESTful API",
+      "GraphQL"
+    ],
+    "challengesList": [
+      "确保API的安全性",
+      "处理高并发请求",
+      "优化数据传输"
+    ],
+    "questionsList": [
+      "如何设计高效的API端点？",
+      "如何处理API的版本控制？"
+    ]
+  },
+  {
+    "stepDescription": "进行系统集成测试，确保各模块协同工作",
+    "techStackList": [
+      "Jest",
+      "Cypress",
+      "Postman"
+    ],
+    "challengesList": [
+      "模拟真实用户场景",
+      "处理边缘情况",
+      "确保系统稳定性"
+    ],
+    "questionsList": [
+      "如何设计全面的测试用例？",
+      "如何处理测试中发现的数据不一致问题？"
+    ]
+  },
+  {
+    "stepDescription": "部署系统到生产环境，并进行性能监控",
+    "techStackList": [
+      "Docker",
+      "Kubernetes",
+      "Prometheus"
+    ],
+    "challengesList": [
+      "确保部署的稳定性",
+      "监控系统性能",
+      "处理生产环境的问题"
+    ],
+    "questionsList": [
+      "如何优化生产环境的配置？",
+      "如何设置有效的监控警报？"
+    ]
+  },
+  {
+    "stepDescription": "收集用户反馈并进行系统优化",
+    "techStackList": [
+      "React",
+      "NestJS",
+      "TypeScript"
+    ],
+    "challengesList": [
+      "分析用户行为数据",
+      "处理用户反馈",
+      "持续优化系统"
+    ],
+    "questionsList": [
+      "如何有效地收集和分析用户反馈？",
+      "如何优先处理优化需求？"
+    ]
+  }
+]

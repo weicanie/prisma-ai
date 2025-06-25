@@ -48,6 +48,8 @@ export const GraphState = Annotation.Root({
 			{ context: string; question: string },
 			z.infer<typeof retrievalGraderSchema>
 		> | null;
+		//查询重写chain
+		rewriteChain: RunnableSequence<{ question: string }, { rewrittenQuery: string }> | null;
 		//检索器
 		retriever: VectorStoreRetriever | null;
 		//检索评估器chain的阈值

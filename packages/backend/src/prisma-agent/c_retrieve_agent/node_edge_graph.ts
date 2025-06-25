@@ -1,8 +1,6 @@
 import { SerpAPI } from '@langchain/community/tools/serpapi';
 
 import { Document, DocumentInterface } from '@langchain/core/documents';
-import { StringOutputParser } from '@langchain/core/output_parsers';
-import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { GraphState } from './state';
@@ -19,11 +17,18 @@ import { GraphState } from './state';
  * @returns {Promise<Partial<typeof GraphState.State>>} - 包含检索到的文档的新状态。
  */
 export async function retrieve(
-	state: typeof GraphState.State
+	state: typeof GraphState.State,
+	config: any
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---NODE: RETRIEVE---');
-	const documents = await state.runningConfig.retriever!.invoke(state.question);
-	return { documents };
+	console.log('---CRAG NODE: RETRIEVE---');
+	try {
+		const retriever = config.configurable.retriever;
+		const documents = await retriever.invoke(state.question);
+		return { documents };
+	} catch (error) {
+		console.error('检索失败,将返回空文档:', error);
+		return { documents: [] };
+	}
 }
 
 /**
@@ -33,14 +38,16 @@ export async function retrieve(
  * @returns {Promise<Partial<typeof GraphState.State>>} - 包含评分和检索状态的新状态。
  */
 export async function gradeRetrieval(
-	state: typeof GraphState.State
+	state: typeof GraphState.State,
+	config: any
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---NODE: GRADE RETRIEVAL---');
+	console.log('---CRAG NODE: GRADE RETRIEVAL---');
 	const { question, documents } = state;
+	const retrievalGraderChain = config.configurable.retrievalGraderChain;
 	let totalScore = 0;
 
 	for (const doc of documents) {
-		const grade = await state.runningConfig.retrievalGraderChain!.invoke({
+		const grade = await retrievalGraderChain.invoke({
 			question,
 			context: doc.pageContent
 		});
@@ -52,10 +59,10 @@ export async function gradeRetrieval(
 	const averageScore = totalScore / (documents.length || 1);
 	let retrieval_status: 'Correct' | 'Incorrect' | 'Ambiguous';
 
-	if (averageScore >= state.runningConfig.UPPER_THRESHOLD) {
+	if (averageScore >= config.configurable.UPPER_THRESHOLD) {
 		retrieval_status = 'Correct';
 		console.log('---GRADE: CORRECT---');
-	} else if (averageScore < state.runningConfig.LOWER_THRESHOLD) {
+	} else if (averageScore < config.configurable.LOWER_THRESHOLD) {
 		retrieval_status = 'Incorrect';
 		console.log('---GRADE: INCORRECT---');
 	} else {
@@ -73,10 +80,12 @@ export async function gradeRetrieval(
  * @returns {Promise<Partial<typeof GraphState.State>>} - 包含精炼后文档的新状态。
  */
 export async function refineKnowledge(
-	state: typeof GraphState.State
+	state: typeof GraphState.State,
+	config: any
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---NODE: REFINE KNOWLEDGE---');
+	console.log('---CRAG NODE: REFINE KNOWLEDGE---');
 	const { question, documents } = state;
+	const retrievalGraderChain = config.configurable.retrievalGraderChain;
 
 	const splitter = new RecursiveCharacterTextSplitter({
 		chunkSize: 200,
@@ -88,18 +97,18 @@ export async function refineKnowledge(
 	const refinedDocs: DocumentInterface[] = [];
 	// 只处理评分较高的文档
 	const relevantDocs = documents.filter(
-		doc => doc.metadata.relevance_score >= state.runningConfig.LOWER_THRESHOLD
+		doc => doc.metadata.relevance_score >= config.configurable.LOWER_THRESHOLD
 	);
 
 	for (const doc of relevantDocs) {
 		const splits = await splitter.splitDocuments([doc]);
 		for (const split of splits) {
-			const grade = await state.runningConfig.retrievalGraderChain!.invoke({
+			const grade = await retrievalGraderChain.invoke({
 				question,
 				context: split.pageContent
 			});
 			// 只保留高度相关的知识片段
-			if (grade.score >= state.runningConfig.UPPER_THRESHOLD) {
+			if (grade.score >= config.configurable.UPPER_THRESHOLD) {
 				console.log('  - Keeping refined chunk.');
 				refinedDocs.push(split);
 			} else {
@@ -118,21 +127,17 @@ export async function refineKnowledge(
  * @returns {Promise<Partial<typeof GraphState.State>>} - 包含Web搜索结果的新状态。
  */
 export async function webSearch(
-	state: typeof GraphState.State
+	state: typeof GraphState.State,
+	config: any
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---NODE: WEB SEARCH---');
+	console.log('---CRAG NODE: WEB SEARCH---');
 	const { question, documents, retrieval_status } = state;
+	const rewriteChain = config.configurable.rewriteChain;
 
 	// 1. 重写查询以适应搜索引擎
 	console.log('  - Rewriting query for web search...');
-	const rewritePrompt = ChatPromptTemplate.fromTemplate(
-		`请将以下问题转化为一个简洁、适合搜索引擎的关键词查询。
-    **问题:** {question}`
-	);
-	const queryRewriter = rewritePrompt
-		.pipe(state.runningConfig.model)
-		.pipe(new StringOutputParser());
-	const webQuery = await queryRewriter.invoke({ question });
+	const rewriteResult = await rewriteChain!.invoke({ question });
+	const webQuery = rewriteResult.rewrittenQuery;
 	console.log(`  - Web query: ${webQuery}`);
 
 	// 2. 执行Web搜索
@@ -159,10 +164,12 @@ export async function webSearch(
  * @returns {Promise<Partial<typeof GraphState.State>>} - 包含最终文档集的新状态。
  */
 export async function gradeAndRefineWeb(
-	state: typeof GraphState.State
+	state: typeof GraphState.State,
+	config: any
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---NODE: GRADE AND REFINE WEB---');
+	console.log('---CRAG NODE: GRADE AND REFINE WEB---');
 	const { question, documents } = state;
+	const retrievalGraderChain = config.configurable.retrievalGraderChain;
 
 	const docsToProcess = documents.filter(d => d.metadata.relevance_score === undefined);
 	const existingDocs = documents.filter(d => d.metadata.relevance_score !== undefined);
@@ -177,11 +184,11 @@ export async function gradeAndRefineWeb(
 	for (const doc of docsToProcess) {
 		const splits = await splitter.splitDocuments([doc]);
 		for (const split of splits) {
-			const grade = await state.runningConfig.retrievalGraderChain!.invoke({
+			const grade = await retrievalGraderChain.invoke({
 				question,
 				context: split.pageContent
 			});
-			if (grade.score >= state.runningConfig.UPPER_THRESHOLD) {
+			if (grade.score >= config.configurable.UPPER_THRESHOLD) {
 				console.log('  - Keeping web chunk.');
 				refinedWebDocs.push(split);
 			} else {
@@ -203,7 +210,7 @@ export async function gradeAndRefineWeb(
  * @returns {"refineKnowledge" | "webSearch"} - 下一个节点的名称。
  */
 export function decideAction(state: typeof GraphState.State) {
-	console.log('---EDGE: DECIDE ACTION---');
+	console.log('---CRAG EDGE: DECIDE ACTION---');
 	const status = state.retrieval_status;
 	if (status === 'Incorrect') {
 		return 'webSearch';
@@ -218,7 +225,7 @@ export function decideAction(state: typeof GraphState.State) {
  * @returns {"webSearch" | "generate"} - 下一个节点的名称。
  */
 export function decideAfterRefinement(state: typeof GraphState.State) {
-	console.log('---EDGE: DECIDE AFTER REFINEMENT---');
+	console.log('---CRAG EDGE: DECIDE AFTER REFINEMENT---');
 	const status = state.retrieval_status;
 	if (status === 'Ambiguous') {
 		return 'webSearch';
@@ -237,6 +244,12 @@ const CRAGGraph = new StateGraph(GraphState)
 
 CRAGGraph.addEdge(START, 'retrieve');
 CRAGGraph.addEdge('retrieve', 'gradeRetrieval');
+CRAGGraph.addConditionalEdges('retrieve', (state: typeof GraphState.State) => {
+	if (state.documents.length === 0) {
+		return END;
+	}
+	return 'gradeRetrieval';
+});
 CRAGGraph.addConditionalEdges('gradeRetrieval', decideAction);
 CRAGGraph.addConditionalEdges('refineKnowledge', decideAfterRefinement);
 CRAGGraph.addEdge('webSearch', 'gradeAndRefineWeb');

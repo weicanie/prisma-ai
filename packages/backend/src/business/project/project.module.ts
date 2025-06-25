@@ -22,7 +22,6 @@ import { ProjectService } from './project.service';
 		RedisModule,
 		forwardRef(() => SseModule),
 		forwardRef(() => PrismaAgentModule),
-
 		MongooseModule.forFeature([
 			{ name: Project.name, schema: ProjectSchema },
 			{ name: ProjectPolished.name, schema: ProjectPolishedSchema },

@@ -27,6 +27,7 @@ export class AichatService {
 			return answer;
 		} catch (error) {
 			this.logger.error(error, 'AichatService', 'sendMessageToAI');
+			throw error;
 		}
 	}
 

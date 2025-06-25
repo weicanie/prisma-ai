@@ -1,6 +1,7 @@
 import { Document } from '@langchain/core/documents';
 import { Injectable, Logger } from '@nestjs/common';
-import * as fs from 'fs/promises';
+import * as fs from 'fs';
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import * as path from 'path';
 import Parser from 'tree-sitter';
 import { ModelService } from '../../model/model.service';
@@ -14,7 +15,6 @@ interface ProjectEmbeddingTaskMetadata {
 	userId: string;
 	projectName: string;
 	projectPath: string;
-	lang: string;
 	indexName: string;
 }
 
@@ -32,6 +32,8 @@ export enum ProjectCodeIndexPrefix {
 	PROJECT_CODE = 'agent-projectCode'
 }
 
+export const projectsDirPath = path.join(process.cwd(), '..', '..', 'projects');
+
 @Injectable()
 export class ProjectCodeVDBService {
 	private readonly logger = new Logger(ProjectCodeVDBService.name);
@@ -39,6 +41,26 @@ export class ProjectCodeVDBService {
 
 	private parser: Parser;
 	private languageGrammars: { [key: string]: any } = {};
+
+	/**
+	 * 支持的语言及其文件扩展名
+	 */
+	private readonly languageExtensions: Record<string, string[]> = {
+		javascript: ['.js', '.jsx', '.cjs', '.mjs'],
+		typescript: ['.ts'],
+		tsx: ['.tsx'],
+		java: ['.java'],
+		go: ['.go'],
+		python: ['.py'],
+		cpp: ['.cpp', '.hpp', '.c', '.h', '.cc', '.cxx'],
+		json: ['.json'],
+		xml: ['.xml']
+	};
+
+	/**
+	 * 文件扩展名到语言的映射
+	 */
+	private extensionToLangMap: { [ext: string]: string };
 
 	constructor(
 		private readonly vectorStoreService: VectorStoreService,
@@ -52,10 +74,26 @@ export class ProjectCodeVDBService {
 		);
 		this.logger.log(`项目代码向量化任务处理器已注册: ${this.taskTypeCodeEmbedding}`);
 		this.loadGrammars();
+
+		this.extensionToLangMap = {};
+		for (const lang in this.languageExtensions) {
+			for (const ext of this.languageExtensions[lang]) {
+				this.extensionToLangMap[ext] = lang;
+			}
+		}
+
+		//确保项目代码目录存在
+		if (!fs.existsSync(projectsDirPath)) {
+			fs.mkdirSync(projectsDirPath, { recursive: true });
+		}
 	}
 
-	private async getIndexName(userId: string, projectName: string) {
-		return `${ProjectCodeIndexPrefix.PROJECT_CODE}-${projectName}-${userId}`;
+	private getIndexName(userId: string, projectName: string) {
+		/* pinecone索引名称长度限制为45字符 */
+		if (projectName.length > 40) {
+			throw new Error('项目名称长度不能超过40个字符');
+		}
+		return `${projectName.toLowerCase().trim()}-${userId}`;
 	}
 
 	/**
@@ -64,7 +102,7 @@ export class ProjectCodeVDBService {
 	 * @param projectName - 项目名称
 	 */
 	public async deleteIndex(userId: string, projectName: string) {
-		const indexName = await this.getIndexName(userId, projectName);
+		const indexName = this.getIndexName(userId, projectName);
 		await this.vectorStoreService.pinecone.deleteIndex(indexName);
 	}
 
@@ -84,6 +122,7 @@ export class ProjectCodeVDBService {
 			this.logger.log('所有tree-sitter语法解析器加载成功。');
 		} catch (error) {
 			this.logger.error('加载tree-sitter语法解析器失败,请确保相关依赖已安装。', error);
+			throw error;
 		}
 	}
 
@@ -100,8 +139,7 @@ export class ProjectCodeVDBService {
 		userId: string,
 		projectName: string,
 		projectPath: string,
-		sessionId: string,
-		lang: string = 'typescript'
+		sessionId: string
 	): Promise<PersistentTask> {
 		const indexName = await this.getIndexName(userId, projectName);
 		const task = await this.taskQueueService.createAndEnqueueTask(
@@ -112,7 +150,6 @@ export class ProjectCodeVDBService {
 				userId,
 				projectName,
 				projectPath,
-				lang,
 				indexName
 			} as ProjectEmbeddingTaskMetadata
 		);
@@ -154,7 +191,7 @@ export class ProjectCodeVDBService {
 	 */
 	private async _projectCodeEmbeddingTaskHandler(task: ProjectEmbeddingTask): Promise<void> {
 		this.logger.log(`开始执行项目代码向量化任务: ${task.id}`);
-		const { projectPath, lang, indexName } = task.metadata;
+		const { projectPath, indexName } = task.metadata;
 
 		// 1. 向量索引存在、不存在都新建（存在则清空）
 		const indexExists = await this.vectorStoreService.indexExists(indexName);
@@ -162,21 +199,31 @@ export class ProjectCodeVDBService {
 			const embedding = this.modelService.getEmbedModelOpenAI();
 			await this.vectorStoreService.createEmptyIndex(indexName, embedding.dimensions ?? 1536);
 		} else {
-			await this.vectorStoreService.pinecone.deleteIndex(indexName);
-			const embedding = this.modelService.getEmbedModelOpenAI();
-			await this.vectorStoreService.createEmptyIndex(indexName, embedding.dimensions ?? 1536);
+			this.logger.warn(`索引 ${indexName} 已存在,跳过创建`);
+			//删除旧的索引(目前存在问题,删除后无法重新创建)
+			// await this.vectorStoreService.pinecone.deleteIndex(indexName);
+			// const embedding = this.modelService.getEmbedModelOpenAI();
+			// await this.vectorStoreService.createEmptyIndex(indexName, embedding.dimensions ?? 1536);
 		}
 
 		// 2. 遍历项目文件
-		const files = await this._getProjectFiles(projectPath, lang);
-		this.logger.log(`在项目 ${projectPath} 中找到 ${files.length} 个'${lang}'文件`);
+		const files = await this._getProjectFiles(projectPath);
+		this.logger.log(`在项目 ${projectPath} 中找到 ${files.length} 个待处理文件`);
 
 		// 3. 对每个文件进行处理
 		for (const file of files) {
 			try {
-				const sourceCode = await fs.readFile(file, 'utf8');
+				const fileExtension = path.extname(file).toLowerCase();
+				const lang = this._getLangFromExtension(fileExtension);
+
+				if (!lang) {
+					this.logger.warn(`文件 ${file} 的扩展名 ${fileExtension} 不受支持，已跳过`);
+					continue;
+				}
+
+				const sourceCode = fs.readFileSync(file, 'utf8');
 				// 4. 切分代码
-				const chunks = this.splitCodeIntoChunks(sourceCode, lang);
+				const chunks = await this.splitCodeIntoChunks(sourceCode, lang);
 				if (chunks.length === 0) {
 					this.logger.warn(`文件 ${file} 未提取到代码块，已跳过`);
 					continue;
@@ -192,11 +239,12 @@ export class ProjectCodeVDBService {
 						})
 				);
 
-				const embeddings = this.vectorStoreService.getLocalEmbeddings();
+				const embeddings = this.modelService.getEmbedModelOpenAI();
 				await this.vectorStoreService.addDocumentsToIndex(documents, indexName, embeddings);
 				this.logger.log(`已处理文件 ${relativePath}，存入 ${documents.length} 个代码块。`);
 			} catch (error) {
 				this.logger.error(`处理文件 ${file} 失败:`, error);
+				throw error;
 			}
 		}
 
@@ -204,57 +252,77 @@ export class ProjectCodeVDBService {
 	}
 
 	/**
-	 * 递归遍历项目目录，获取指定语言的文件列表
+	 * 从文件扩展名获取语言类型
+	 * @param extension - 文件扩展名 (e.g., '.ts', '.json')
+	 * @returns {string | null} - 语言标识符或null
+	 * @private
+	 */
+	private _getLangFromExtension(extension: string): string | null {
+		return this.extensionToLangMap[extension.toLowerCase()] || null;
+	}
+
+	/**
+	 * 递归遍历项目目录，获取所有受支持的文件列表
 	 * @param dir - 目标项目文件夹路径
-	 * @param lang - 语言
 	 * @returns {Promise<string[]>} - 文件路径数组
 	 * @private
 	 */
-	private async _getProjectFiles(dir: string, lang: string): Promise<string[]> {
-		const languageExtensions: Record<string, string[]> = {
-			javascript: ['.js', '.jsx', '.cjs', '.mjs'],
-			typescript: ['.ts', '.tsx'],
-			java: ['.java'],
-			go: ['.go'],
-			python: ['.py'],
-			cpp: ['.cpp', '.hpp', '.c', '.h', '.cc', '.cxx']
-		};
-		const extensions = languageExtensions[lang] || languageExtensions['typescript'];
+	private async _getProjectFiles(dir: string): Promise<string[]> {
+		const extensions = Object.keys(this.extensionToLangMap);
 		const ignoreDirs = ['node_modules', '.git', 'dist', 'build', 'vendor', '__pycache__'];
 
 		let files: string[] = [];
 		try {
-			const entries = await fs.readdir(dir, { withFileTypes: true });
+			const entries = fs.readdirSync(dir, { withFileTypes: true });
 			for (const entry of entries) {
 				const fullPath = path.join(dir, entry.name);
 				if (entry.isDirectory()) {
 					if (!ignoreDirs.includes(entry.name)) {
-						files = files.concat(await this._getProjectFiles(fullPath, lang));
+						files = files.concat(await this._getProjectFiles(fullPath));
 					}
-				} else if (
-					extensions.some(ext => entry.name.endsWith(ext) || entry.name.endsWith('.json'))
-				) {
+				} else if (extensions.some(ext => entry.name.toLowerCase().endsWith(ext))) {
 					files.push(fullPath);
 				}
 			}
 		} catch (error) {
 			this.logger.error(`读取目录 ${dir} 失败:`, error);
+			throw error;
 		}
 		return files;
 	}
 
 	/**
-	 * 使用tree-sitter将代码文件切分为函数/类块
+	 * 将内部语言标识符映射到Langchain支持的语言标识符
+	 * @param lang - 内部语言标识符, e.g., 'typescript'
+	 * @returns { 'cpp' | 'go' | 'java' | 'js' | 'python' | null }
+	 * @private
+	 */
+	private _mapToLangchainLang(lang: string): 'cpp' | 'go' | 'java' | 'js' | 'python' | null {
+		const mapping = {
+			javascript: 'js',
+			typescript: 'js',
+			tsx: 'js',
+			java: 'java',
+			go: 'go',
+			python: 'python',
+			cpp: 'cpp'
+		};
+		return mapping[lang] || null;
+	}
+
+	/**
+	 * 使用tree-sitter将代码文件切分为函数/类块。
+	 * 当tree-sitter解析失败时,使用Langchain的RecursiveCharacterTextSplitter进行切分
 	 * @param sourceCode - 源代码字符串
 	 * @param lang - 语言
 	 * @returns {string[]} - 代码块数组
 	 * @private
 	 */
-	public splitCodeIntoChunks(sourceCode: string, lang: string): string[] {
+	public async splitCodeIntoChunks(sourceCode: string, lang: string): Promise<string[]> {
 		const grammar = this.languageGrammars[lang];
 		if (!grammar) {
-			this.logger.error(`不支持的语言或语法解析器未加载: ${lang}`);
-			return [sourceCode]; // Fallback to whole file
+			this.logger.warn(`不支持的语言或语法解析器未加载,将整个文件作为代码块: ${lang}`);
+			return [sourceCode];
 		}
 		this.parser.setLanguage(grammar);
 
@@ -263,20 +331,25 @@ export class ProjectCodeVDBService {
 
 		const tsQuery = `
       [
+        (import_statement) @chunk
+        (export_statement) @chunk
         (function_declaration) @chunk
         (class_declaration) @chunk
-        (method_definition) @chunk
         (lexical_declaration (variable_declarator value: [(arrow_function) (function)])) @chunk
         (interface_declaration) @chunk
         (type_alias_declaration) @chunk
+        (expression_statement (assignment_expression)) @chunk
       ]
     `;
 
 		const jsQuery = `
       [
+        (import_statement) @chunk
+        (export_statement) @chunk
         (function_declaration) @chunk
         (class_declaration) @chunk
         (lexical_declaration (variable_declarator value: [(arrow_function) (function)])) @chunk
+        (expression_statement (assignment_expression)) @chunk
       ]
     `;
 
@@ -285,22 +358,25 @@ export class ProjectCodeVDBService {
 			typescript: tsQuery,
 			tsx: tsQuery,
 			python: `
-          [(function_definition) @chunk]
-          [(class_definition) @chunk]
+          [
+            (import_statement) @chunk
+            (import_from_statement) @chunk
+            (function_definition) @chunk
+            (class_definition) @chunk
+          ]
         `,
 			java: `
           [
+            (import_declaration) @chunk
             (class_declaration) @chunk
             (interface_declaration) @chunk
             (enum_declaration) @chunk
-            (method_declaration) @chunk
-            (constructor_declaration) @chunk
           ]
         `,
 			go: `
           [
+            (import_declaration) @chunk
             (function_declaration) @chunk
-            (method_declaration) @chunk
             (type_declaration) @chunk
             (const_declaration) @chunk
             (var_declaration) @chunk
@@ -308,6 +384,8 @@ export class ProjectCodeVDBService {
         `,
 			cpp: `
           [
+            (preproc_include) @chunk
+            (using_declaration) @chunk
             (function_definition) @chunk
             (class_specifier) @chunk
             (struct_specifier) @chunk
@@ -317,19 +395,64 @@ export class ProjectCodeVDBService {
         `
 		};
 
-		const query = new Parser.Query(grammar, queryPatterns[lang] || jsQuery);
-		const matches = query.matches(tree.rootNode);
+		try {
+			//FIXME 这里报错 Error: Query error of type TSQueryErrorNodeType
+			const query = new Parser.Query(grammar, queryPatterns[lang] || jsQuery);
+			const matches = query.matches(tree.rootNode);
 
-		if (matches.length > 0) {
-			matches.forEach(match => {
-				const node = match.captures[0].node;
-				chunks.push(node.text);
-			});
-		} else {
-			// 如果没有匹配到任何块，将整个文件作为一个块
-			chunks.push(tree.rootNode.text);
+			if (matches.length > 0) {
+				const allNodes = matches.map(m => m.captures[0].node);
+				const nodeSet = new Set(allNodes);
+
+				// 过滤掉作为其他捕获节点子节点的节点
+				const topLevelNodes = allNodes.filter(node => {
+					let parent = node.parent;
+					while (parent) {
+						if (nodeSet.has(parent)) {
+							return false; // 该节点是另一个捕获节点的子节点，所以过滤掉
+						}
+						parent = parent.parent;
+					}
+					return true;
+				});
+
+				topLevelNodes.forEach(node => {
+					chunks.push(node.text);
+				});
+
+				if (chunks.length === 0) {
+					// 如果过滤后没有块，则将整个文件作为一个块
+					chunks.push(tree.rootNode.text);
+				}
+			} else {
+				// 如果没有匹配到任何块，将整个文件作为一个块
+				chunks.push(tree.rootNode.text);
+			}
+
+			return chunks;
+		} catch (error) {
+			this.logger.error(
+				`Tree-sitter query for lang ${lang} failed, falling back to Langchain's RecursiveCharacterTextSplitter.`,
+				error.message
+			);
+
+			const lcLang = this._mapToLangchainLang(lang);
+			let splitter: RecursiveCharacterTextSplitter;
+
+			if (lcLang) {
+				this.logger.log(`Using language-specific splitter for: ${lcLang}`);
+				splitter = RecursiveCharacterTextSplitter.fromLanguage(lcLang, {
+					chunkSize: 1500,
+					chunkOverlap: 200
+				});
+			} else {
+				this.logger.log(`Using generic character splitter for: ${lang}`);
+				splitter = new RecursiveCharacterTextSplitter({
+					chunkSize: 1500,
+					chunkOverlap: 200
+				});
+			}
+			return await splitter.splitText(sourceCode);
 		}
-
-		return chunks;
 	}
 }

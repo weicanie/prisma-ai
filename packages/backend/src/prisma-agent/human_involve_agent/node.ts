@@ -1,15 +1,28 @@
+import { RunnableConfig } from '@langchain/core/runnables';
 import { interrupt } from '@langchain/langgraph';
 import { Logger } from '@nestjs/common';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import * as path from 'path';
+// import { InterruptType } from '../prisma-agent.service';
 import { GraphState } from '../state';
-import { HumanInput, HumanOutput, ReviewType } from '../types';
-
+import { HumanInput, HumanOutput, ReviewType, RunningConfig } from '../types';
+export enum InterruptType {
+	HumanReview = 'human_review',
+	ExecuteStep = 'execute_step'
+}
+interface NodeConfig extends RunnableConfig {
+	configurable: RunningConfig;
+}
 export class HumanInvolve {
 	private readonly logger = new Logger(HumanInvolve.name);
 	private readonly outputDir = path.resolve(process.cwd(), 'agent_output');
 
-	constructor() {}
+	constructor() {
+		// Ensure the output directory exists
+		fs.mkdir(this.outputDir, { recursive: true }).catch(error => {
+			this.logger.error('Failed to create agent_output directory', error);
+		});
+	}
 
 	/**
 	 * 等待人类审核的图节点。
@@ -18,19 +31,24 @@ export class HumanInvolve {
 	 * @output {Partial<GraphState>} - 将用户的输入（通过 interrupt 注入）更新到 state.humanIO.input 中。
 	 */
 	async waitForHumanReview(
-		state: typeof GraphState.State
+		state: typeof GraphState.State,
+		config: NodeConfig
 	): Promise<Partial<typeof GraphState.State>> {
 		console.log('---NODE: HUMAN REVIEW---');
-		const { type, content } = state.humanIO.output as HumanOutput;
+		const { type: reviewType, content } = state.humanIO.output as HumanOutput;
 
 		// 1. 将 review 内容写入文件
-		await this.writeReviewFile(type, content);
-		console.log(`Content for review [${type}] written. Waiting for human input...`);
+		const outputPath = await this.writeReviewFile(reviewType, content);
+		console.log(
+			`Content for review [${reviewType}] written to ${outputPath}. Waiting for human input...`
+		);
 
 		// 2. 中断流程，等待用户输入
 		const userInput: HumanInput = interrupt({
-			type,
-			content
+			content,
+			outputPath,
+			type: InterruptType.HumanReview,
+			reviewType: reviewType
 		});
 
 		console.log('---HUMAN INPUT RECEIVED---', userInput);
@@ -45,21 +63,13 @@ export class HumanInvolve {
 	}
 
 	private getFilePath(reviewType: ReviewType): string {
-		// 确保目录存在
-		try {
-			if (!fs.existsSync(this.outputDir)) {
-				fs.mkdirSync(this.outputDir, { recursive: true });
-			}
-		} catch (error) {
-			this.logger.error('Failed to create agent_output directory', error);
-		}
 		switch (reviewType) {
 			case ReviewType.PLAN:
-				return path.join(this.outputDir, 'plan.md');
+				return path.join(this.outputDir, 'plan.json');
 			case ReviewType.ANALYSIS:
 				return path.join(this.outputDir, 'analysis.md');
 			case ReviewType.PLAN_STEP:
-				return path.join(this.outputDir, 'plan_step.md');
+				return path.join(this.outputDir, 'plan_step.json');
 			case ReviewType.ANALYSIS_STEP:
 				return path.join(this.outputDir, 'analysis_step.md');
 			default:
@@ -69,19 +79,17 @@ export class HumanInvolve {
 
 	/**
 	 * 将需要用户 review 的内容写入指定文件
-	 * @param reviewType 要 review 的内容类型，决定了写入哪个文件（如 plan.md, analysis.md 等）。
+	 * @param reviewType 要 review 的内容类型，决定了写入哪个文件（如 plan.json, analysis.md 等）。
 	 * @param content 要写入文件的字符串内容。
-	 * @input reviewType - 'plan', 'analysis', 'plan_step', or 'analysis_step'.
-	 * @input content - The string content to be written to the file.
-	 * @output {Promise<void>} - A promise that resolves when the file has been written.
+	 * @returns {Promise<string>} - 返回写入文件的绝对路径。
 	 */
-	private async writeReviewFile(reviewType: ReviewType, content: string): Promise<void> {
+	private async writeReviewFile(reviewType: ReviewType, content: string): Promise<string> {
 		const filePath = this.getFilePath(reviewType);
 		try {
-			// 覆盖原内容
-			fs.unlinkSync(filePath);
-			fs.writeFileSync(filePath, content, { encoding: 'utf-8' });
+			// 使用 fs/promises 异步写入
+			await fs.writeFile(filePath, content, { encoding: 'utf-8' });
 			this.logger.log(`Successfully wrote to ${filePath}`);
+			return filePath;
 		} catch (error) {
 			this.logger.error(`Failed to write to ${filePath}`, error);
 			throw error;

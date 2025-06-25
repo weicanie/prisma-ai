@@ -1,5 +1,5 @@
 const eslint = require('@eslint/js');
-const eslintPluginPrettierRecommended = require('eslint-plugin-prettier/recommended');
+// const eslintPluginPrettierRecommended = require('eslint-plugin-prettier/recommended');
 const globals = require('globals');
 const tseslint = require('typescript-eslint');
 
@@ -27,18 +27,6 @@ module.exports = tseslint.config(
 	},
 	{
 		rules: {
-			//待治理项
-			'@typescript-eslint/no-unsafe-assignment': 'off',
-			'@typescript-eslint/no-unsafe-member-access': 'off',
-			'@typescript-eslint/no-unsafe-call': 'off',
-			'@typescript-eslint/no-unsafe-return': 'off',
-			'@typescript-eslint/require-await': 'off',
-			'@typescript-eslint/no-unsafe-argument': 'off',
-			'@typescript-eslint/no-unused-vars': 'off',
-			'@typescript-eslint/no-floating-promises': 'off',
-			'@typescript-eslint/no-redundant-type-constituents': 'off',
-			'@typescript-eslint/no-empty-object-type': 'off',
-			//等
 			//合理项
 			'@typescript-eslint/no-explicit-any': 'off',
 			'@typescript-eslint/interface-name-prefix': 'off',

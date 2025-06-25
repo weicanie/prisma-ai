@@ -150,8 +150,8 @@ export class ProjectService {
 		schema: ZodSchema,
 		model: typeof Model,
 		userInfo: UserInfoFromToken,
-		status: `${ProjectStatus}`,
-		statusMerged: `${ProjectStatus}`,
+		status: ProjectStatus,
+		statusMerged: ProjectStatus,
 		inputSchema = projectSchema,
 		existingProjectId: ProjectDocument
 	) {
@@ -282,7 +282,8 @@ export class ProjectService {
 			//取出redis中的结果进行处理
 
 			if (!task.resultKey) {
-				this.logger.error(`${task.id}任务结果键不存在,数据库储存失败`);
+				this.logger.error(`${task.id}任务结果redis键不存在,数据获取失败`);
+				return;
 			}
 
 			this.redisService
@@ -295,7 +296,8 @@ export class ProjectService {
 				})
 				.then(result => this._handleLookupResult(result, userInfo, project))
 				.catch(error => {
-					this.logger.error(`任务${task.resultKey}处理结果失败: ${error}`);
+					this.logger.error(`任务${task.resultKey}结果获取失败: ${error}`);
+					throw error;
 				});
 		});
 
@@ -418,7 +420,8 @@ export class ProjectService {
 			//取出redis中的结果进行处理
 
 			if (!task.resultKey) {
-				this.logger.error(`${task.id}任务结果键不存在,数据库储存失败`);
+				this.logger.error(`${task.id}任务结果redis键不存在,数据获取失败`);
+				return;
 			}
 
 			this.redisService
@@ -431,7 +434,8 @@ export class ProjectService {
 				})
 				.then(result => resultHandler(result))
 				.catch(error => {
-					this.logger.error(`任务${task.resultKey}处理结果失败: ${error}`);
+					this.logger.error(`任务${task.resultKey}结果获取失败: ${error}`);
+					throw error;
 				});
 		});
 
@@ -504,7 +508,8 @@ export class ProjectService {
 			//取出redis中的结果进行处理
 
 			if (!task.resultKey) {
-				this.logger.error(`${task.id}任务结果键不存在,数据库储存失败`);
+				this.logger.error(`${task.id}任务结果redis键不存在,数据获取失败`);
+				return;
 			}
 
 			this.redisService
@@ -517,7 +522,8 @@ export class ProjectService {
 				})
 				.then(result => resultHandler(result))
 				.catch(error => {
-					this.logger.error(`任务${task.resultKey}处理结果失败: ${error}`);
+					this.logger.error(`任务${task.resultKey}结果获取失败: ${error}`);
+					throw error;
 				});
 		});
 
@@ -605,7 +611,6 @@ export class ProjectService {
 	private async lookupProjectUnStream(project: ProjectDocument, userInfo: UserInfoFromToken) {
 		const chain = await this.chainService.lookupChain();
 		const projectStr = JSON.stringify(project);
-		//TODO 这里只消费lookupResult,但使用了更多的prompt
 		let [result] = await chain.invoke(projectStr);
 		let lookupResult = { ...result, userInfo, projectName: project.info.name };
 		// 格式验证
@@ -694,13 +699,28 @@ export class ProjectService {
 		id: string,
 		userInfo: UserInfoFromToken
 	): Promise<{ deleted: boolean; id?: string }> {
+		const project = await this.projectModel
+			.findOne({ _id: id, 'userInfo.userId': userInfo.userId })
+			.exec();
+		if (!project) {
+			throw new Error(`Project with ID "${id}" not found or user unauthorized.`);
+		}
 		const result = await this.projectModel
 			.deleteOne({ _id: id, 'userInfo.userId': userInfo.userId })
 			.exec();
 		if (result.deletedCount === 0) {
 			throw new Error(`Project with ID "${id}" not found or user unauthorized.`);
 		}
-		//TODO 删除相关的拷打、挖掘和打磨数据
+		// 删除相关的挖掘和打磨数据
+		await this.projectPolishedModel.deleteMany({
+			'info.name': project.info.name,
+			'userInfo.userId': userInfo.userId
+		});
+		await this.projectMinedModel.deleteMany({
+			'info.name': project.info.name,
+			'userInfo.userId': userInfo.userId
+		});
+
 		return { deleted: true, id };
 	}
 

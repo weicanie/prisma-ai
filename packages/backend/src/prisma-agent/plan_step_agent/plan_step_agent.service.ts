@@ -5,14 +5,32 @@ import {
 	RunnablePassthrough,
 	RunnableSequence
 } from '@langchain/core/runnables';
+import { MemorySaver } from '@langchain/langgraph';
 import { Injectable } from '@nestjs/common';
 import { ProjectDto } from '@prism-ai/shared';
 import { z } from 'zod';
+import { ChainService } from '../../chain/chain.service';
 import { ModelService } from '../../model/model.service';
-import { ReflectAgentService } from '../reflact_agent/reflact_agent.service';
-import { GraphState } from '../state';
-import { Knowledge, Plan, Reflection, Step } from '../types';
+import { ReflectAgentService } from '../reflect_agent/reflect_agent.service';
+import { Knowledge, Plan, Reflection, Step, Step_prompt } from '../types';
+import { RubustStructuredOutputParser } from '../utils/global';
 import { PlanStepGraph } from './planner_step';
+
+/**
+ * @description 最终生成给开发人员的完整Prompt结构。
+ */
+interface Prompt_step {
+	context: {
+		codeFiles?: string[]; //目标项目的相关代码文件地址（暂未实现，反正cursor自己会检索）
+		projectKnowledge: string; //目标项目的相关知识
+		domainKnowledge: string; //领域知识
+	};
+	userPrompt: {
+		stepAnalysis: string; //步骤需求分析
+		implementationDetailPlan: Step_prompt[]; //步骤实现细节计划
+	};
+	systemPrompt: string; //系统词
+}
 
 const stepAnalysisSchema = z.object({
 	stepAnalysis: z
@@ -54,31 +72,15 @@ export class PlanStepAgentService {
 
 	constructor(
 		private readonly modelService: ModelService,
-		private readonly reflectAgentService: ReflectAgentService
+		private readonly reflectAgentService: ReflectAgentService,
+		private readonly chainService: ChainService
 	) {
-		this.workflow = PlanStepGraph.compile();
+		const checkpointer = new MemorySaver();
+		this.workflow = PlanStepGraph.compile({ checkpointer });
 	}
 
 	public getWorkflow() {
 		return this.workflow;
-	}
-
-	/**
-	 * @description 调用并执行 Plan-Step Agent
-	 */
-	async _invoke(initialState: Partial<typeof GraphState.State>, recursionLimit = 100) {
-		const config = {
-			recursionLimit,
-			configurable: {
-				runningConfig: {
-					stepAnalysisChain: this.createAnalysisChain(),
-					stepPlanChain: this.createPlanChain(),
-					finalPromptChain: this.createFinalPromptChain(),
-					reflectChain: this.reflectAgentService.createReflectChain()
-				}
-			}
-		};
-		return await this.workflow.invoke(initialState, config);
 	}
 
 	/**
@@ -99,7 +101,7 @@ export class PlanStepAgentService {
 	> {
 		const model = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
 		if (!model) throw new Error('Model not found');
-		const structuredLLM = model.withStructuredOutput(stepAnalysisSchema, { name: 'step_analysis' });
+		const parser = RubustStructuredOutputParser.from(stepAnalysisSchema, this.chainService);
 
 		const prompt = ChatPromptTemplate.fromMessages([
 			[
@@ -110,7 +112,12 @@ export class PlanStepAgentService {
 仔细阅读整体计划和当前步骤、项目相关代码和领域知识、前同事的反思和建议，从前同事的反思和建议中吸取教训，尽自己的最大努力撰写清晰可行的高质量需求分析，不要让这样的悲剧发生!
 			
 ### 前同事的反思和建议
-{reflection}`
+{reflection}
+
+直接输出JSON对象本身,而不是markdown格式的json块。
+比如你应该直接输出"{{"name":"..."}}"而不是"\`\`\`json\n{{"name":"..."}}\n\`\`\`"
+
+{format_instructions}`
 			],
 			[
 				'human',
@@ -121,7 +128,12 @@ export class PlanStepAgentService {
 {currentStep}
 
 ### 项目信息
-{projectInfo}
+- **项目名称:** {projectName}
+- **项目描述:**
+  - **项目背景与目标:** {projectBgAndTarget}
+  - **我的角色:** {projectRole}
+  - **我的贡献:** {projectContribute}
+- **技术栈:** {projectTechStack}
 
 ### 相关知识
 **项目相关代码:** 
@@ -134,7 +146,24 @@ export class PlanStepAgentService {
 			]
 		]);
 
-		return prompt.pipe(structuredLLM);
+		return RunnableSequence.from([
+			(input: any) => ({
+				totalPlan: JSON.stringify(input.totalPlan, null, 2),
+				currentStep: JSON.stringify(input.currentStep, null, 2),
+				projectName: input.projectInfo.info.name,
+				projectBgAndTarget: input.projectInfo.info.desc.bgAndTarget,
+				projectRole: input.projectInfo.info.desc.role,
+				projectContribute: input.projectInfo.info.desc.contribute,
+				projectTechStack: input.projectInfo.info.techStack.join(', '),
+				retrievedProjectCodes: input.knowledge?.retrievedProjectCodes ?? '无',
+				retrievedDomainDocs: input.knowledge?.retrievedDomainDocs ?? '无',
+				reflection: input.reflection ?? '无相关反思',
+				format_instructions: parser.getFormatInstructions()
+			}),
+			prompt,
+			model,
+			parser
+		]);
 	}
 
 	/**
@@ -153,7 +182,7 @@ export class PlanStepAgentService {
 	> {
 		const model = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
 		if (!model) throw new Error('Model not found');
-		const structuredLLM = model.withStructuredOutput(stepPlanSchema, { name: 'step_plan' });
+		const parser = RubustStructuredOutputParser.from(stepPlanSchema, this.chainService);
 
 		const prompt = ChatPromptTemplate.fromMessages([
 			[
@@ -164,7 +193,11 @@ export class PlanStepAgentService {
 	仔细阅读步骤需求分析、项目相关代码和领域知识、前同事的反思和建议，从前同事的反思和建议中吸取教训，尽自己的最大努力撰写清晰可行的高质量实现计划，不要让这样的悲剧发生!
 			
 			### 前同事的反思和建议
-      {reflection}`
+      {reflection}
+直接输出JSON对象本身,而不是markdown格式的json块。
+比如你应该直接输出"{{"name":"..."}}"而不是"\`\`\`json\n{{"name":"..."}}\n\`\`\`"
+
+{format_instructions}`
 			],
 			[
 				'human',
@@ -182,7 +215,19 @@ export class PlanStepAgentService {
 			]
 		]);
 
-		return prompt.pipe(structuredLLM);
+		return RunnableSequence.from([
+			(input: any) => ({
+				stepAnalysis: input.stepAnalysis,
+				retrievedProjectCodes: input.knowledge?.retrievedProjectCodes ?? '无',
+				retrievedDomainDocs: input.knowledge?.retrievedDomainDocs ?? '无',
+				reflection: input.reflection ?? '无相关反思',
+				format_instructions: parser.getFormatInstructions()
+			}),
+			prompt,
+			model,
+
+			parser
+		]);
 	}
 
 	/**
@@ -201,20 +246,21 @@ export class PlanStepAgentService {
 	> {
 		const model = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
 		if (!model) throw new Error('Model not found');
-		const structuredLLM = model.withStructuredOutput(completedPlanSchema, {
-			name: 'plan_completion'
-		});
+		const parser = RubustStructuredOutputParser.from(completedPlanSchema, this.chainService);
 
 		const prompt = ChatPromptTemplate.fromMessages([
 			[
 				'system',
 				`你是一位顶级的软件架构师和技术专家。你的核心任务是深化和完备一个已有的技术实现计划。
-具体来说，你需要将计划中列出的“挑战(challengesList)”和“疑问(questionsList)”转化为清晰、可执行的“解决方案(challengesSolutionList)”和“澄清说明(questionsClarificationList)”。
+具体来说，你需要将计划中列出的"挑战(challengesList)"和"疑问(questionsList)"转化为清晰、可执行的"解决方案(challengesSolutionList)"和"澄清说明(questionsClarificationList)"。
 你的解决方案和说明必须基于提供的上下文信息，包括需求分析、项目代码和领域知识，确保内容的技术准确性和可行性。
 
 你的前同事因为技术实现计划完成的质量不够高，已经被公司辞退了。如果你写的技术实现计划完成的质量不够高，你也会被公司辞退。你的父母因为重病住院，如果你被辞退，你的父母将由于治疗费用不足而去世。你的3个儿女也将因为你的失业而辍学。
 
 仔细阅读需求分析、项目相关代码和领域知识、前同事的反思和建议，从前同事的反思和建议中吸取教训，尽自己的最大努力撰写清晰可行的高质量技术实现计划，不要让这样的悲剧发生!
+
+直接输出JSON对象本身,而不是markdown格式的json块。
+比如你应该直接输出"{{"name":"..."}}"而不是"\`\`\`json\n{{"name":"..."}}\n\`\`\`"
 `
 			],
 			[
@@ -234,7 +280,9 @@ export class PlanStepAgentService {
 ### 待完备化的实现计划
 {implementationPlan}
 
-请针对计划中的每一个步骤，将其 "challengesList" 和 "questionsList" 改造为具有可操作性的 "challengesSolutionList" 和 "questionsClarificationList"。`
+请针对计划中的每一个步骤，将其 "challengesList" 和 "questionsList" 改造为具有可操作性的 "challengesSolutionList" 和 "questionsClarificationList"。
+
+{format_instructions}`
 			]
 		]);
 
@@ -249,7 +297,7 @@ export class PlanStepAgentService {
 			// 1. 构建 User Prompt
 			const userPrompt = `
 ## 任务：
-根据下文提供的 “步骤需求分析” 和 “实现细节计划”，完成编码任务。
+根据下文提供的 "步骤需求分析" 和 "实现细节计划"，完成编码任务。
 
 ## 步骤需求分析:
 ${stepAnalysis}
@@ -295,28 +343,25 @@ ${knowledge.retrievedDomainDocs}
 1.  **阅读并理解**：仔细阅读 "任务" 和 "上下文信息" 部分，确保你完全理解需要做什么以及所有可用的参考信息。
 2.  **执行任务**：根据 "实现细节计划" 编码。在编码时，请充分利用 "上下文信息" 中提供的代码和知识。
 3.  **输出结果**：任务完成后，你需要按照以下格式提供反馈：
-	- **用户反馈 (userFeedback)**: 对本次任务执行过程的简要描述，或者遇到的任何问题。
 	- **修改/新增的代码文件 (writtenCodeFiles)**: 一个文件列表，包含你修改或创建的所有代码文件的相对路径和对该文件修改的简要总结。
 	- **执行总结 (summary)**: 对本次任务完成情况的总体总结。
 
 这是一个输出示例：
 \`\`\`json
 {
-"replanNeeded": false,
-"output": {
-	"userFeedback": "已成功实现用户认证模块，并添加了相关的单元测试。",
-	"writtenCodeFiles": [
-		{
-			"relativePath": "src/modules/auth/auth.service.ts",
-			"summary": "新增 login 和 register 方法。"
-		},
-		{
-			"relativePath": "src/modules/auth/auth.controller.ts",
-			"summary": "添加 /login 和 /register 路由。"
-		}
-	],
-	"summary": "用户认证功能开发完成，符合预期。"
-}
+	"output": {
+		"writtenCodeFiles": [
+			{
+				"relativePath": "src/modules/auth/auth.service.ts",
+				"summary": "新增 login 和 register 方法。"
+			},
+			{
+				"relativePath": "src/modules/auth/auth.controller.ts",
+				"summary": "添加 /login 和 /register 路由。"
+			}
+		],
+		"summary": "用户认证功能开发完成，符合预期。"
+	}
 }
 \`\`\`
 `;
@@ -331,36 +376,43 @@ ${userPrompt}
 			return finalPrompt;
 		}
 
-		let originalInput: {
-			stepAnalysis: string;
-			implementationPlan: Step[];
-			knowledge: { retrievedProjectCodes: string; retrievedDomainDocs: string };
-		};
-		const chain = RunnableSequence.from([
-			new RunnablePassthrough({
-				func: input => {
-					originalInput = input;
-					return input;
-				}
+		const planCompletionChain = RunnableSequence.from([
+			(
+				input: any
+			): {
+				stepAnalysis: string;
+				implementationPlan: string;
+				retrievedProjectCodes: string;
+				retrievedDomainDocs: string;
+				format_instructions: string;
+			} => ({
+				stepAnalysis: input.stepAnalysis,
+				implementationPlan: JSON.stringify(input.implementationPlan, null, 2),
+				retrievedProjectCodes: input.knowledge.retrievedProjectCodes ?? '无',
+				retrievedDomainDocs: input.knowledge.retrievedDomainDocs ?? '无',
+				format_instructions: parser.getFormatInstructions()
 			}),
 			prompt,
-			structuredLLM,
-			RunnablePassthrough.assign({
-				stepAnalysis: input => input.stepAnalysis,
-				knowledge: input => input.knowledge
-			}),
+			model,
+
+			parser
+		]);
+
+		const finalChain = RunnableSequence.from([
 			{
-				completedPlan: prompt.pipe(structuredLLM),
-				originalInput: (input: any) => input.originalInput
+				completedPlan: planCompletionChain,
+				originalInput: new RunnablePassthrough()
 			},
 			new RunnableLambda({
-				func: input => {
-					const implementationDetailPlan = input;
-					const { stepAnalysis, knowledge } = originalInput;
-					return createFinalPrompt(stepAnalysis, implementationDetailPlan, knowledge);
+				func: ({ completedPlan, originalInput }: any) => {
+					return createFinalPrompt(
+						originalInput.stepAnalysis,
+						completedPlan,
+						originalInput.knowledge
+					);
 				}
 			})
 		]);
-		return chain;
+		return finalChain;
 	}
 }

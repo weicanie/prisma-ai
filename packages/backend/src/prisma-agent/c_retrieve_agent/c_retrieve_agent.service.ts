@@ -4,8 +4,10 @@ import { ChatOpenAI } from '@langchain/openai';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { formatDocumentsAsString } from 'langchain/util/document';
 import z from 'zod';
+import { ChainService } from '../../chain/chain.service';
 import { ModelService } from '../../model/model.service';
 import { KnowledgeIndex, KnowledgeVDBService } from '../data_base/konwledge_vdb.service';
+import { RubustStructuredOutputParser } from '../utils/global';
 import { CRAGGraph } from './node_edge_graph';
 
 export const retrievalGraderSchema = z
@@ -18,6 +20,12 @@ export const retrievalGraderSchema = z
 		justification: z.string().describe('评分的简要理由。')
 	})
 	.describe('对检索到的文档与问题的相关性进行评分的工具。');
+
+export const rewriteQuerySchema = z.object({
+	rewrittenQuery: z
+		.string()
+		.describe('为搜索引擎重写的简洁、关键词驱动的查询语句。输出最佳语句(1条)')
+});
 
 /**
  * 按CRAG Agent的思路，检索知识库，并返回评估、精炼、网络搜索补充后的文档
@@ -32,7 +40,8 @@ export class CRetrieveAgentService {
 	constructor(
 		private readonly modelService: ModelService,
 		@Inject(forwardRef(() => KnowledgeVDBService))
-		private readonly knowledgeVDBService: KnowledgeVDBService
+		private readonly knowledgeVDBService: KnowledgeVDBService,
+		private readonly chainService: ChainService
 	) {
 		this.workflow = CRAGGraph.compile();
 	}
@@ -48,16 +57,21 @@ export class CRetrieveAgentService {
 	async invoke(question: string, prefix: KnowledgeIndex, userId: string, topK: number) {
 		const retriever = await this.knowledgeVDBService.getRetriever(prefix, userId, topK);
 		const model = this.modelService.getLLMDeepSeekRaw('deepseek-chat') as ChatOpenAI;
-		const result = await this.workflow.invoke({
-			question,
-			runningConfig: {
-				retrievalGraderChain: this.retrievalGraderChain(),
-				retriever,
-				model,
-				UPPER_THRESHOLD: 7,
-				LOWER_THRESHOLD: 3
+		const result = await this.workflow.invoke(
+			{
+				question
+			},
+			{
+				configurable: {
+					retrievalGraderChain: this.retrievalGraderChain(),
+					rewriteChain: this.rewriteChain(),
+					retriever,
+					model,
+					UPPER_THRESHOLD: 7,
+					LOWER_THRESHOLD: 3
+				}
 			}
-		});
+		);
 		return formatDocumentsAsString(result.documents);
 	}
 
@@ -66,10 +80,7 @@ export class CRetrieveAgentService {
 	 */
 	retrievalGraderChain() {
 		const model = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
-
-		const retrievalGrader = model.withStructuredOutput(retrievalGraderSchema, {
-			name: 'retrieval_grader'
-		});
+		const parser = RubustStructuredOutputParser.from(retrievalGraderSchema, this.chainService);
 
 		const gradePrompt = ChatPromptTemplate.fromTemplate(
 			`您是一位专业的评估员，负责评估检索到的文档与用户问题的相关性。
@@ -84,16 +95,60 @@ export class CRetrieveAgentService {
 {context}
 \n ------- \n
 **用户的问题:** {question}
+
+直接输出JSON对象本身,而不是markdown格式的json块。
+比如你应该直接输出"{{"name":"..."}}"而不是"\`\`\`json\n{{"name":"..."}}\n\`\`\`"
+
+{format_instructions}
 `
 		);
 		/**
 		 * 检索评估器，用于评估检索到的文档与问题的相关性。
 		 * @description 使用LLM来为每个文档打分(1-10)，并提供理由。
 		 */
-		const retrievalGraderChain = gradePrompt.pipe(retrievalGrader) as RunnableSequence<
-			{ context: string; question: string },
-			z.infer<typeof retrievalGraderSchema>
-		>;
+		const retrievalGraderChain = RunnableSequence.from([
+			{
+				question: (input: { question: string; context: string }) => input.question,
+				context: (input: { question: string; context: string }) => input.context,
+				format_instructions: () => parser.getFormatInstructions()
+			},
+			gradePrompt,
+			model,
+
+			parser
+		]);
 		return retrievalGraderChain;
+	}
+
+	/**
+	 * 查询重写 chain
+	 */
+	rewriteChain() {
+		const model = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+		const parser = RubustStructuredOutputParser.from(rewriteQuerySchema, this.chainService);
+
+		const rewritePrompt = ChatPromptTemplate.fromTemplate(
+			`您是一位强大的查询优化助手。您的任务是将给定的用户问题转化为一个简洁、高效、适合搜索引擎的关键词查询。
+请分析以下问题，并提供一个最佳的关键词查询。
+
+**用户问题:**
+{question}
+
+直接输出JSON对象本身,而不是markdown格式的json块。
+比如你应该直接输出"{{"name":"..."}}"而不是"\`\`\`json\n{{"name":"..."}}\n\`\`\`"
+
+{format_instructions}`
+		);
+
+		const rewriteChain = RunnableSequence.from([
+			{
+				question: (input: { question: string }) => input.question,
+				format_instructions: () => parser.getFormatInstructions()
+			},
+			rewritePrompt,
+			model,
+			parser
+		]);
+		return rewriteChain;
 	}
 }

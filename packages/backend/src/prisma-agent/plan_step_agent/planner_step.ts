@@ -1,10 +1,19 @@
-import { END, START, StateGraph } from '@langchain/langgraph';
+import { RunnableConfig } from '@langchain/core/runnables';
+import { Command, END, START, StateGraph } from '@langchain/langgraph';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { waitForHumanReview } from '../human_involve_agent/node';
-import { reflect } from '../reflact_agent/node';
+import { reflect } from '../reflect_agent/node';
 import { GraphState } from '../state';
-import { Plan_step, ReviewType, UserAction } from '../types';
+import { Plan_step, ReviewType, RunningConfig, UserAction } from '../types';
+
+type ChainReturned<T extends (...args: any) => any> = T extends (...args: any) => infer R
+	? R
+	: never;
+
+interface NodeConfig extends RunnableConfig {
+	configurable: RunningConfig;
+}
 
 // --- Node Implementations ---
 
@@ -15,16 +24,20 @@ import { Plan_step, ReviewType, UserAction } from '../types';
  * @output {Partial<GraphState>} - 更新 `state.stepPlan.knowledge`。
  */
 async function retrieveNode(
-	state: typeof GraphState.State
+	state: typeof GraphState.State,
+	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---NODE: RETRIEVE KNOWLEDGE FOR STEP---');
-	const { projectInfo, plan, currentStepIndex, userId, runningConfig } = state;
-
-	if (!projectInfo || !plan || !userId || !runningConfig) {
+	console.log('---PlanStep NODE: RETRIEVE KNOWLEDGE FOR STEP---');
+	const { projectInfo, plan, currentStepIndex, userId } = state;
+	const knowledgeVDBService = config.configurable?.knowledgeVDBService;
+	const projectCodeVDBService = config.configurable?.projectCodeVDBService;
+	if (!knowledgeVDBService || !projectCodeVDBService) {
+		throw new Error('Missing required services for step retrieval.');
+	}
+	if (!projectInfo || !plan || !userId) {
 		throw new Error('Missing required state for step retrieval.');
 	}
 
-	const { knowledgeVDBService, projectCodeVDBService } = runningConfig;
 	const projectName = projectInfo.info.name;
 	const currentStep = plan.output.implementationPlan[currentStepIndex];
 	const query = currentStep.stepDescription;
@@ -33,7 +46,7 @@ async function retrieveNode(
 
 	const [projectDocs, domainDocs] = await Promise.all([
 		projectCodeVDBService.retrieveCodeChunks(query, 5, userId, projectName),
-		knowledgeVDBService.retrieveCodeAndDoc_CRAG(query, 5, userId)
+		knowledgeVDBService.retrieveCodeAndDoc(query, 5, userId)
 	]);
 
 	const newStepPlan: Plan_step = {
@@ -59,16 +72,17 @@ async function retrieveNode(
  * @output {Partial<GraphState>} - 更新 `stepPlan`（填充步骤分析结果）, `humanIO`（准备让人类审核），并清空 `reflection`。
  */
 async function analyzeStep(
-	state: typeof GraphState.State
+	state: typeof GraphState.State,
+	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---NODE: ANALYZE STEP---');
+	console.log('---PlanStep NODE: ANALYZE STEP---');
 	const { projectInfo, plan, currentStepIndex, reflection, stepPlan } = state;
 	if (!projectInfo || !plan) throw new Error('Project info or plan not set.');
-	if (!state.runningConfig?.stepAnalysisChain)
-		throw new Error('Step analysis chain not found in runningConfig');
+	const stepAnalysisChain = config.configurable?.stepAnalysisChain;
+	if (!stepAnalysisChain) throw new Error('Step analysis chain not found in configurable');
 
 	const currentStep = plan.output.implementationPlan[currentStepIndex];
-	const { stepAnalysisChain } = state.runningConfig;
+
 	const result: any = await stepAnalysisChain.invoke({
 		projectInfo,
 		totalPlan: plan,
@@ -105,14 +119,17 @@ async function analyzeStep(
  * @input {GraphState} state - 必需 `stepPlan`（其中包含分析结果）；可选 `reflection`。
  * @output {Partial<GraphState>} - 更新 `stepPlan`（填充子步骤计划）, `humanIO`（准备让人类审核），并清空 `reflection`。
  */
-async function planStep(state: typeof GraphState.State): Promise<Partial<typeof GraphState.State>> {
-	console.log('---NODE: PLAN STEP---');
+async function planStep(
+	state: typeof GraphState.State,
+	config: NodeConfig
+): Promise<Partial<typeof GraphState.State>> {
+	console.log('---PlanStep NODE: PLAN STEP---');
 	const { stepPlan, reflection } = state;
 	if (!stepPlan) throw new Error('Step plan not set.');
-	if (!state.runningConfig?.stepPlanChain)
-		throw new Error('Step plan chain not found in runningConfig');
 
-	const { stepPlanChain } = state.runningConfig;
+	const stepPlanChain = config.configurable?.stepPlanChain;
+	if (!stepPlanChain) throw new Error('Step plan chain not found in configurable');
+
 	const result: any = await stepPlanChain.invoke({
 		stepAnalysis: stepPlan.output.stepAnalysis,
 		knowledge: stepPlan.knowledge,
@@ -147,15 +164,17 @@ async function planStep(state: typeof GraphState.State): Promise<Partial<typeof 
  * @output {Partial<GraphState>} - 更新 `state.finalPrompt`。
  */
 async function generateFinalPromptNode(
-	state: typeof GraphState.State
+	state: typeof GraphState.State,
+	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---NODE: GENERATE FINAL PROMPT---');
-	const { stepPlan, runningConfig } = state;
-	if (!stepPlan || !runningConfig?.finalPromptChain) {
+	console.log('---PlanStep NODE: GENERATE FINAL PROMPT---');
+	const { stepPlan } = state;
+	const finalPromptChain = config.configurable?.finalPromptChain;
+	if (!stepPlan || !finalPromptChain) {
 		throw new Error('Missing stepPlan or finalPromptChain for final prompt generation.');
 	}
 
-	const finalPrompt = await runningConfig.finalPromptChain.invoke({
+	const finalPrompt = await finalPromptChain.invoke({
 		stepAnalysis: stepPlan.output.stepAnalysis,
 		implementationPlan: stepPlan.output.implementationPlan,
 		knowledge: stepPlan.knowledge
@@ -175,52 +194,105 @@ async function generateFinalPromptNode(
 async function writePromptToFileNode(
 	state: typeof GraphState.State
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---NODE: WRITE PROMPT TO FILE---');
+	console.log('---PlanStep NODE: WRITE PROMPT TO FILE---');
 	const { finalPrompt, projectPath } = state;
 	if (!finalPrompt || !projectPath) {
 		throw new Error('Missing finalPrompt or projectPath.');
 	}
 
+	//写入目标项目的agent_output目录
 	const outputDir = path.join(projectPath, 'agent_output');
-	await fs.mkdir(outputDir, { recursive: true });
-
+	//不存在则新建目录
+	if (!(await fs.stat(outputDir)).isDirectory()) {
+		await fs.mkdir(outputDir, { recursive: true });
+	}
 	const outputPath = path.join(outputDir, 'cursor_input.md');
 	await fs.writeFile(outputPath, finalPrompt);
 
+	//写入agent_output/cursor_input.md
+	const cursorInputPath = path.join(process.cwd(), 'agent_output', 'cursor_input.md');
+	await fs.writeFile(cursorInputPath, finalPrompt);
+
 	console.log(`Final prompt written to ${outputPath}`);
+	console.log(`Final prompt written to ${cursorInputPath}`);
 
 	return {};
 }
 
-// --- Edge Implementations ---
-
 /**
- * 条件边：在人类审核之后 (afterReview)
+ * 在人类审核之后 (afterReview)
  * @description 根据审核的阶段和用户的操作决定下一步。
  * @param state
- * @returns 'plan_step' | 'prepare_reflection' | 'generate_final_prompt' | 'end'
  */
-function routeAfterReview(
-	state: typeof GraphState.State
-): 'plan_step' | 'prepare_reflection' | 'generate_final_prompt' | 'end' {
-	console.log('---EDGE: ROUTE AFTER REVIEW---');
+async function shouldReflect(state: typeof GraphState.State) {
+	console.log('---PlanStep EDGE: ROUTE AFTER REVIEW---');
+	const { type } = state.humanIO.output!;
 	const userInput = state.humanIO.input;
-	const reviewType = state.humanIO.output?.type;
 
-	if (userInput?.action !== UserAction.ACCEPT) {
-		return 'prepare_reflection';
+	if (!type) {
+		throw new Error('Review type is missing in humanIO.output.');
+	}
+	if (!userInput) {
+		throw new Error('User input is missing in shouldReflect edge.'); //should not happen
 	}
 
-	if (reviewType === ReviewType.ANALYSIS_STEP) {
-		return 'plan_step';
+	switch (userInput.action) {
+		case UserAction.ACCEPT:
+			console.log('User accepted. Continuing...');
+			switch (type) {
+				case ReviewType.ANALYSIS_STEP:
+					return new Command({ goto: 'plan_step' });
+				case ReviewType.PLAN_STEP:
+					return new Command({ goto: 'generate_final_prompt' });
+				default:
+					throw new Error('Invalid review type');
+			}
+		case UserAction.REDO:
+			console.log('User rejected or provided feedback. Reflecting...');
+			return new Command({ goto: 'prepare_reflection' });
+		case UserAction.FIX:
+			console.log('User fixed. Continuing...');
+			let fixedContent = await fs.readFile(state.humanIO.reviewPath!, 'utf-8');
+			const fileExtension = path.extname(state.humanIO.reviewPath!);
+			const isJson = fileExtension === '.json';
+			fixedContent = isJson ? JSON.parse(fixedContent) : fixedContent;
+			switch (type) {
+				case ReviewType.ANALYSIS_STEP:
+					return new Command({
+						goto: 'plan_step',
+						update: {
+							stepPlan: {
+								output: {
+									implementationPlan: state.stepPlan?.output.implementationPlan,
+									stepAnalysis: fixedContent
+								},
+								knowledge: state.stepPlan?.knowledge
+							}
+						}
+					});
+				case ReviewType.PLAN_STEP:
+				case ReviewType.ANALYSIS_STEP:
+					return new Command({
+						goto: 'plan_step',
+						update: {
+							stepPlan: {
+								output: {
+									implementationPlan: fixedContent,
+									stepAnalysis: state.stepPlan?.output.stepAnalysis
+								},
+								knowledge: state.stepPlan?.knowledge
+							}
+						}
+					});
+				default:
+					throw new Error('Invalid review type');
+			}
+		default:
+			throw new Error('Invalid user action');
 	}
-
-	if (reviewType === ReviewType.PLAN_STEP) {
-		return 'generate_final_prompt';
-	}
-
-	return 'end';
 }
+
+// --- Edge Implementations ---
 
 /**
  * 条件边：反思之后 (afterReflect)
@@ -229,10 +301,22 @@ function routeAfterReview(
  * @output {'analyze_step' | 'plan_step' | 'end'} - 返回下一个节点的名称：'analyze_step', 'plan_step', 或 'end'（异常情况）。
  */
 function afterReflect(state: typeof GraphState.State): 'analyze_step' | 'plan_step' | 'end' {
-	const reviewType = state.humanIO.output?.type;
-	if (reviewType === ReviewType.ANALYSIS_STEP) return 'analyze_step';
-	if (reviewType === ReviewType.PLAN_STEP) return 'plan_step';
-	return 'end';
+	console.log('---PlanStep EDGE: AFTER REFLECT---');
+	const reviewType = state.humanIO.output?.type; // Check which stage we were reviewing
+	if (!reviewType) {
+		throw new Error('Review type is missing in humanIO.output.');
+	}
+	switch (reviewType) {
+		case ReviewType.ANALYSIS_STEP:
+			console.log('Re-analyzing after reflection...');
+			return 'analyze_step';
+		case ReviewType.PLAN_STEP:
+			console.log('Re-planning after reflection...');
+			return 'plan_step';
+		default:
+			console.error('Could not determine next step after reflection.');
+			return 'end'; // Should not happen
+	}
 }
 
 /**
@@ -284,7 +368,7 @@ ${JSON.stringify(stepPlan?.output.implementationPlan, null, 2)}
 	};
 }
 
-export const PlanStepGraph = new StateGraph(GraphState)
+const PlanStepGraph = new StateGraph(GraphState)
 	.addNode('retrieve', retrieveNode)
 	.addNode('analyze_step', analyzeStep)
 	.addNode('plan_step', planStep)
@@ -292,23 +376,21 @@ export const PlanStepGraph = new StateGraph(GraphState)
 	.addNode('reflect', reflect)
 	.addNode('human_review', waitForHumanReview)
 	.addNode('generate_final_prompt', generateFinalPromptNode)
-	.addNode('write_prompt_to_file', writePromptToFileNode);
+	.addNode('write_prompt_to_file', writePromptToFileNode)
+	.addNode('shouldReflect', shouldReflect, {
+		ends: [END, 'plan_step', 'prepare_reflection', 'generate_final_prompt']
+	});
 
 PlanStepGraph.addEdge(START, 'retrieve')
 	.addEdge('retrieve', 'analyze_step')
 	.addEdge('analyze_step', 'human_review')
-	.addConditionalEdges('human_review', routeAfterReview, {
-		prepare_reflection: 'prepare_reflection',
-		plan_step: 'plan_step',
-		generate_final_prompt: 'generate_final_prompt',
-		end: END
-	})
+	.addEdge('human_review', 'shouldReflect')
 	.addEdge('prepare_reflection', 'reflect')
 	.addConditionalEdges('reflect', afterReflect, {
 		analyze_step: 'analyze_step',
-		plan_step: 'plan_step',
-		end: END
+		plan_step: 'plan_step'
 	})
 	.addEdge('plan_step', 'human_review')
 	.addEdge('generate_final_prompt', 'write_prompt_to_file')
 	.addEdge('write_prompt_to_file', END);
+export { PlanStepGraph };

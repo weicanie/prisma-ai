@@ -4384,7 +4384,8 @@ var ProjectStatus = /* @__PURE__ */ ((ProjectStatus2) => {
 
 // src/types/project.schema-form.ts
 var infoSchemaForm = z.object({
-  name: z.string().min(2).max(100).describe("\u9879\u76EE\u540D\u79F0"),
+  //只允许小写英文字母和-
+  name: z.string().min(2).max(40).regex(/^[a-z0-9-]+$/).describe("\u9879\u76EE\u540D\u79F0"),
   desc: z.object({
     role: z.string().describe("\u7528\u6237\u5728\u9879\u76EE\u4E2D\u7684\u89D2\u8272\u548C\u804C\u8D23"),
     contribute: z.string().describe("\u7528\u6237\u7684\u6838\u5FC3\u8D21\u732E\u548C\u53C2\u4E0E\u7A0B\u5EA6"),
@@ -4428,19 +4429,24 @@ var RequestTargetMap = {
 
 // src/utils/jsonMd_obj.ts
 function jsonMd_obj(content) {
-  let jsonMd = content.match(/(?<=```json)(.*)(?=```)/gs)?.[0];
-  if (!jsonMd) {
-    console.error(`jsonMd_obj\u6CA1\u627E\u5230json\u5185\u5BB9\u5757,\u8F93\u5165: ${content}`);
-    return;
-  }
-  let obj;
   try {
-    obj = JSON.parse(jsonMd);
-  } catch (error) {
-    console.error("jsonMd_obj JSON parsing error:", error);
-    console.error("jsonMd_obj when parsing:", jsonMd);
+    JSON.parse(content);
+    return content;
+  } catch (err) {
+    const jsonMd = content.match(/(?<=```json)(.*)(?=```)/gs)?.[0];
+    if (!jsonMd) {
+      console.error(`jsonMd_obj\u6CA1\u627E\u5230json\u5185\u5BB9\u5757,\u8F93\u5165: ${content}`);
+      return;
+    }
+    let obj;
+    try {
+      obj = JSON.parse(jsonMd);
+    } catch (error) {
+      console.error("jsonMd_obj JSON parsing error:", error);
+      console.error("jsonMd_obj when parsing:", jsonMd);
+    }
+    return obj;
   }
-  return obj;
 }
 
 // src/utils/md_json.ts

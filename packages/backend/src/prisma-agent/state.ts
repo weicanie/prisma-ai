@@ -9,10 +9,8 @@ import {
 	Reflection,
 	ReflectIOState,
 	Replan,
-	Result_step,
-	RunningConfig
+	Result_step
 } from './types';
-
 /* 
   用于记录对话历史
   新消息自动push, 自动管理消息id
@@ -40,7 +38,7 @@ const InputState = Annotation.Root({
 
 	/**
 	 * @description 目标项目路径。
-	 * @lifecycle - 在工作流启动时由外部传入，并且在整个流程中保持不变。
+	 * @lifecycle - 在工作流启动时由外部传入，并且在整个流程中保持不变。在ProjectCodeVDBService中用于读取并上传项目代码。
 	 */
 	projectPath: Annotation<string>({
 		reducer: (_x, y) => y ?? '',
@@ -88,10 +86,9 @@ const PlanState = Annotation.Root({
 		reducer: (_x, y) => y ?? null,
 		default: () => null
 	}),
-	/**
+	/** 现在的replan不保留之前的步骤,因此总为0,和直接shift一样
 	 * @description 标记当前执行到高阶计划中的第几个步骤。
 	 * @lifecycle - 初始为 0。
-	 *            - 在 `execute_step` 节点成功执行并接收到结果后自增 1。
 	 */
 	currentStepIndex: Annotation<number>({
 		reducer: (_x, y) => y ?? 0,
@@ -151,10 +148,18 @@ const SubAgentState = Annotation.Root({
 	 * @description 用户交互Agent的IO通道。
 	 * @lifecycle - `output` 在各个 `analyze` 和 `plan` 节点中被写入。
 	 *            - `input` 在 `human_review` 节点被中断后，由外部调用时写入。
+	 *            - `reviewPath` 在 `human_review` 节点被中断后，由外部调用时写入。用于获取用户fix修改后的内容。
 	 */
-	humanIO: Annotation<{ input: HumanInput | null; output: HumanOutput | null }>({
-		reducer: (x, y) => (y ? { ...x, ...y } : x),
-		default: () => ({ input: null, output: null })
+	humanIO: Annotation<{
+		input: HumanInput | null;
+		output: HumanOutput | null;
+		reviewPath: string | null;
+	}>({
+		reducer: (x, y) => {
+			console.log('humanIO reducer', x, y);
+			return y ? { ...x, ...y } : x;
+		},
+		default: () => ({ input: null, output: null, reviewPath: null })
 	}),
 	/**
 	 * @description 反思Agent的IO通道。
@@ -184,14 +189,6 @@ const ControlState = Annotation.Root({
 	done: Annotation<boolean>({
 		reducer: (_x, y) => y ?? false,
 		default: () => false
-	}),
-
-	/**
-	 * @description 运行时配置，用于向图中注入Chain和Service等依赖。
-	 * @lifecycle - 在每个子图的 `invoke` 方法中被填充，并且是只读的。
-	 */
-	runningConfig: Annotation<RunningConfig>({
-		reducer: (x, y) => (y ? { ...x, ...y } : x)
 	})
 });
 

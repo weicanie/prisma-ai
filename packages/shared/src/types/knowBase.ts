@@ -21,7 +21,6 @@ export enum FileTypeEnum {
 	doc = 'doc', //文档 (目前只支持pdf)
 	md = 'md' // markdown文档
 }
-//TODO 前端直传用户上传的pdf文档
 /* 用户知识库 */
 export interface CreateKnowledgeDto {
 	name: string; //知识名称
@@ -63,7 +62,7 @@ export type UpdateKnowledgeDto = Partial<CreateKnowledgeDto>;
 export interface KnowledgeVo {
 	id: string;
 	name: string;
-	type: `${KnowledgeTypeEnum}`;
+	type: KnowledgeTypeEnum;
 	createdAt: Date;
 	updatedAt: Date;
 	fileType: string;

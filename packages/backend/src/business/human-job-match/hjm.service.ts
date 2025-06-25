@@ -87,6 +87,7 @@ export class HjmService implements OnModuleInit {
 			);
 		} catch (error) {
 			this.logger.error(`人岗匹配任务处理器注册失败: ${error}`);
+			throw error;
 		}
 		this.logger.log(
 			`人岗匹配任务处理器已注册: ${this.taskTypeJobEmbedding}, ${this.taskTypeJobMatch}`

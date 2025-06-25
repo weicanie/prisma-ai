@@ -1,0 +1,172 @@
+[
+  {
+    "stepDescription": "设计数据收集模块的数据库查询接口",
+    "techStackList": [
+      "NestJS",
+      "Prisma ORM",
+      "MySQL"
+    ],
+    "challengesList": [
+      "处理大数据量时的查询性能优化",
+      "确保查询接口的安全性",
+      "实现高效的分页机制"
+    ],
+    "questionsList": [
+      "如何平衡查询性能和内存使用？",
+      "是否需要为不同数据源设计不同的查询策略？"
+    ]
+  },
+  {
+    "stepDescription": "实现敏感数据脱敏处理机制",
+    "techStackList": [
+      "Node.js",
+      "Lodash",
+      "Crypto"
+    ],
+    "challengesList": [
+      "识别所有敏感字段",
+      "保持数据可用性的同时进行脱敏",
+      "处理嵌套数据结构中的敏感信息"
+    ],
+    "questionsList": [
+      "脱敏后如何保持数据关联性？",
+      "是否需要可逆的脱敏方案？"
+    ]
+  },
+  {
+    "stepDescription": "构建Redis缓存层",
+    "techStackList": [
+      "Redis",
+      "Node.js",
+      "ioredis"
+    ],
+    "challengesList": [
+      "设计合理的缓存键策略",
+      "处理缓存一致性问题",
+      "确定合适的缓存过期时间"
+    ],
+    "questionsList": [
+      "如何监控缓存命中率？",
+      "缓存失效策略如何设计？"
+    ]
+  },
+  {
+    "stepDescription": "实现数据变更监听机制",
+    "techStackList": [
+      "MySQL Binlog",
+      "Debezium",
+      "Kafka"
+    ],
+    "challengesList": [
+      "实时监听数据库变更",
+      "处理高频率变更事件",
+      "确保事件顺序一致性"
+    ],
+    "questionsList": [
+      "如何降低监听对数据库性能的影响？",
+      "如何处理监听中断后的数据同步？"
+    ]
+  },
+  {
+    "stepDescription": "开发数据质量检查功能",
+    "techStackList": [
+      "Node.js",
+      "Joi",
+      "Lodash"
+    ],
+    "challengesList": [
+      "定义全面的数据质量指标",
+      "处理数据不一致情况",
+      "生成易读的质量报告"
+    ],
+    "questionsList": [
+      "如何量化数据质量？",
+      "质量检查的频率如何确定？"
+    ]
+  },
+  {
+    "stepDescription": "集成JWT鉴权机制",
+    "techStackList": [
+      "NestJS",
+      "Passport.js",
+      "JWT"
+    ],
+    "challengesList": [
+      "确保所有数据访问都经过授权",
+      "处理token过期和刷新",
+      "实现细粒度的权限控制"
+    ],
+    "questionsList": [
+      "如何平衡安全性和性能？",
+      "是否需要支持多因素认证？"
+    ]
+  },
+  {
+    "stepDescription": "设计模块API接口",
+    "techStackList": [
+      "NestJS",
+      "Swagger",
+      "RESTful"
+    ],
+    "challengesList": [
+      "设计清晰的API版本控制策略",
+      "处理高并发API请求",
+      "确保API文档的准确性"
+    ],
+    "questionsList": [
+      "API响应格式如何标准化？",
+      "如何设计合理的限流策略？"
+    ]
+  },
+  {
+    "stepDescription": "实现性能监控和日志记录",
+    "techStackList": [
+      "Winston",
+      "Prometheus",
+      "Grafana"
+    ],
+    "challengesList": [
+      "收集全面的性能指标",
+      "处理大量日志数据",
+      "设置合理的告警阈值"
+    ],
+    "questionsList": [
+      "如何平衡监控粒度和系统开销？",
+      "日志保留策略如何设计？"
+    ]
+  },
+  {
+    "stepDescription": "编写单元测试和集成测试",
+    "techStackList": [
+      "Jest",
+      "Supertest",
+      "Mock Service Worker"
+    ],
+    "challengesList": [
+      "模拟各种边界条件",
+      "测试大数据量场景",
+      "确保测试覆盖率"
+    ],
+    "questionsList": [
+      "如何设计有效的性能测试？",
+      "测试数据如何管理？"
+    ]
+  },
+  {
+    "stepDescription": "文档编写和API发布",
+    "techStackList": [
+      "Swagger UI",
+      "Markdown",
+      "Postman"
+    ],
+    "challengesList": [
+      "保持文档与代码同步",
+      "提供清晰的示例",
+      "说明使用限制和最佳实践"
+    ],
+    "questionsList": [
+      "如何组织文档结构？",
+      "是否需要提供多语言文档？"
+    ]
+  }
+]

@@ -16,10 +16,10 @@ import { ProjectCodeVDBService } from './project_code_vdb.service';
  * 知识库向量索引的前缀枚举
  */
 export enum KnowledgeIndex {
-	PROJECT_CODE = 'knowbase-projectCode', //开源、其它项目代码
-	PROJECT_DOC = 'knowbase-projectDoc', //用户、开源、其它项目文档
-	TECH_DOC = 'knowbase-techDoc', //技术文档
-	INTERVIEW_QUESTION = 'knowbase-interviewQuestion', //面试题
+	PROJECT_CODE = 'knowbase-project-code', //开源、其它项目代码
+	PROJECT_DOC = 'knowbase-project-doc', //用户、开源、其它项目文档
+	TECH_DOC = 'knowbase-tech-doc', //技术文档
+	INTERVIEW_QUESTION = 'knowbase-question', //面试题
 	OTHER = 'knowbase-other' //其它
 }
 
@@ -113,7 +113,7 @@ export class KnowledgeVDBService {
 		topK: number,
 		userId: string
 	): Promise<KnowledgeChunkDoc[]> {
-		const indexName = `${prefix}_${userId}`;
+		const indexName = `${prefix}-${userId}`;
 		const embeddings = this.embedModel;
 		const retriever = await this.vectorStoreService.getRetrieverOfIndex(
 			indexName,
@@ -131,14 +131,21 @@ export class KnowledgeVDBService {
 	 * @returns {Promise<KnowledgeChunkDoc[]>} - 匹配的文档片段数组
 	 */
 	async retrieveCodeAndDoc(query: string, topK: number, userId: string): Promise<string> {
-		const prefixs = [
+		let prefixs = [
 			KnowledgeIndex.PROJECT_CODE,
 			KnowledgeIndex.PROJECT_DOC,
 			KnowledgeIndex.TECH_DOC
 		];
+		//过滤掉不存在的索引
+		const indexNames = prefixs.map(prefix => `${prefix}-${userId}`);
+		const exists = await Promise.all(
+			indexNames.map(indexName => this.vectorStoreService.indexExists(indexName))
+		);
+		prefixs = prefixs.filter((_, index) => exists[index]);
 		const retrievers = await Promise.all(
 			prefixs.map(prefix => this.getRetriever(prefix, userId, topK))
 		);
+
 		const docs = await Promise.all(retrievers.map(retriever => retriever.invoke(query)));
 		const texts = docs.map(doc => doc.map(doc => doc.pageContent).join('\n'));
 		const text = `
@@ -155,11 +162,17 @@ export class KnowledgeVDBService {
 	 * retrieveCodeAndDoc的CRAG检索版本
 	 */
 	async retrieveCodeAndDoc_CRAG(query: string, topK: number, userId: string): Promise<string> {
-		const prefixs = [
+		let prefixs = [
 			KnowledgeIndex.PROJECT_CODE,
 			KnowledgeIndex.PROJECT_DOC,
 			KnowledgeIndex.TECH_DOC
 		];
+		//过滤掉不存在的索引
+		const indexNames = prefixs.map(prefix => `${prefix}-${userId}`);
+		const exists = await Promise.all(
+			indexNames.map(indexName => this.vectorStoreService.indexExists(indexName))
+		);
+		prefixs = prefixs.filter((_, index) => exists[index]);
 		const docs = await Promise.all(
 			prefixs.map(prefix => this.cRetrieveAgentService.invoke(query, prefix, userId, topK))
 		);
@@ -182,7 +195,7 @@ export class KnowledgeVDBService {
 	 * @param topK 每次检索的召回数量
 	 */
 	async getRetriever(prefix: KnowledgeIndex, userId: string, topK: number) {
-		const indexName = `${prefix}_${userId}`;
+		const indexName = `${prefix}-${userId}`;
 		const embeddings = this.embedModel;
 		const retriever = await this.vectorStoreService.getRetrieverOfIndex(
 			indexName,
@@ -255,18 +268,20 @@ export class KnowledgeVDBService {
 	 */
 	private async _splitDocuments(
 		documents: Document[],
-		type: `${KnowledgeTypeEnum}`
+		type: KnowledgeTypeEnum
 	): Promise<Document[]> {
 		if (type === KnowledgeTypeEnum.openSourceProjectRepo) {
 			// 复用ProjectCodeVDBService中的代码分割逻辑
 			this.logger.log('  - 使用代码分割策略...');
 			const allChunks: Document[] = [];
 			for (const doc of documents) {
-				console.log('🚀 ~ KnowledgeVDBService ~ doc:', doc);
 				// 尝试从路径推断语言，默认为ts
 				const lang = this._getLangFromPath(doc.metadata.source) || 'typescript';
 				this.logger.log(`  - 语言推断为 ${lang} 进行${doc.metadata.source}的代码分割...`);
-				const codeChunks = this.projectCodeVDBService.splitCodeIntoChunks(doc.pageContent, lang);
+				const codeChunks = await this.projectCodeVDBService.splitCodeIntoChunks(
+					doc.pageContent,
+					lang
+				);
 				const chunkDocs = codeChunks.map(
 					(chunk: string) => new Document({ pageContent: chunk, metadata: doc.metadata })
 				);
@@ -324,7 +339,7 @@ export class KnowledgeVDBService {
 	 * 根据知识类型和用户ID生成完整的索引名称。
 	 * @private
 	 */
-	private _getIndexName(type: `${KnowledgeTypeEnum}`, userId: string): string {
+	private _getIndexName(type: KnowledgeTypeEnum, userId: string): string {
 		let prefix: KnowledgeIndex;
 		switch (type) {
 			case KnowledgeTypeEnum.openSourceProjectRepo:
