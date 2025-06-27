@@ -2,11 +2,14 @@ import { RunnableConfig } from '@langchain/core/runnables';
 import { Command, END, START, StateGraph } from '@langchain/langgraph';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { EventList } from '../../EventBus/event-bus.service';
 import { waitForHumanReview } from '../human_involve_agent/node';
 import { reflect } from '../reflect_agent/node';
 import { GraphState } from '../state';
 import { Plan, ReviewType, RunningConfig, UserAction } from '../types';
-
+import { getAgentConfig, updateAgentConfig } from '../utils/config';
+//TODO 现在先不更新项目代码知识库,后续使用cursor来感知项目代码库? 增量更新?(通过metadata)
+const agentConfigPath = path.join(process.cwd(), 'prisma_agent_config.json');
 interface NodeConfig extends RunnableConfig {
 	configurable: RunningConfig;
 }
@@ -17,18 +20,49 @@ interface NodeConfig extends RunnableConfig {
  * "上传代码"节点
  * @description 这是一个后台任务启动节点。它会触发一个将项目代码进行嵌入并存入向量数据库的后台任务。
  *              图的执行会在此暂停，直到它监听到任务完成的事件。
- * @input {GraphState} state - 从state中获取项目路径、用户ID、项目信息等。
- * @output {Partial<GraphState>} - 返回一个空对象，仅用于推进图。
  */
 export async function uploadCode(
 	state: typeof GraphState.State,
 	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
-	// console.log('---Plan NODE: UPLOAD CODE---');
-	// const { projectPath, userId, projectInfo, sessionId = randomUUID() } = state;
-	// const projectCodeVDBService = config.configurable.projectCodeVDBService;
-	// const eventBusService = config.configurable.eventBusService;
-	//...
+	const agentConfig = await getAgentConfig();
+	if (agentConfig._uploadedProjects.includes(state.projectPath)) {
+		return {};
+	} else {
+		agentConfig._uploadedProjects.push(state.projectPath);
+		await updateAgentConfig(agentConfig);
+	}
+
+	console.log('---NODE: UPLOAD CODE---');
+	const { projectPath, userId, projectInfo, sessionId = crypto.randomUUID() } = state;
+	const { projectCodeVDBService, eventBusService } = config.configurable;
+
+	if (!projectPath) throw new Error('Project path is not set');
+	if (!userId) throw new Error('User ID is not set');
+	if (!projectInfo?.info.name) throw new Error('Project name is not set');
+	if (!projectCodeVDBService) throw new Error('projectCodeVDBService not found in runningConfig');
+
+	const task = await projectCodeVDBService.storeToVDB(
+		userId,
+		projectInfo.info.name,
+		projectPath,
+		sessionId
+	);
+	console.log('---CODE UPLOAD AND EMBEDDING STARTED---');
+
+	await new Promise((resolve, reject) => {
+		try {
+			eventBusService.once(EventList.taskCompleted, ({ task: taskPayload }) => {
+				if (task.id === taskPayload.id) {
+					resolve(true);
+				}
+			});
+		} catch (error) {
+			reject(error);
+		}
+	});
+
+	console.log('---CODE UPLOAD AND EMBEDDING COMPLETE---');
 	return {};
 }
 
@@ -53,9 +87,21 @@ export async function retrieveNode(
 
 	console.log(`Retrieving knowledge for: "${lightSpot}"`);
 
+	const agentConfig = await getAgentConfig();
 	const [projectDocs, domainDocs] = await Promise.all([
-		projectCodeVDBService.retrieveCodeChunks(lightSpot, 5, userId, projectName),
-		knowledgeVDBService.retrieveCodeAndDoc(lightSpot, 5, userId)
+		projectCodeVDBService.retrieveCodeChunks(
+			lightSpot,
+			agentConfig.topK.plan.projectCode,
+			userId,
+			projectName
+		),
+		agentConfig.CRAG
+			? knowledgeVDBService.retrieveCodeAndDoc_CRAG(
+					lightSpot,
+					agentConfig.topK.plan.knowledge,
+					userId
+				)
+			: knowledgeVDBService.retrieveCodeAndDoc(lightSpot, agentConfig.topK.plan.knowledge, userId)
 	]);
 
 	console.log(

@@ -1,17 +1,11 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Sse } from '@nestjs/common';
-import { ProjectStatus, UserInfoFromToken } from '@prism-ai/shared';
+import { ImplementDto, ProjectStatus, UserInfoFromToken } from '@prism-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { ProjectDto } from './dto/project.dto';
 import { ProjectImplementService } from './project-implement.service';
 import { ProjectProcessService } from './project-process.service';
 import { ProjectService } from './project.service';
-interface ImplementDto {
-	projectId: string;
-	lightspot: string;
-	projectPath: string;
-	userId: string;
-	sessionId: string;
-}
+
 @Controller('project')
 export class ProjectController {
 	constructor(
@@ -77,14 +71,21 @@ export class ProjectController {
 	@RequireLogin()
 	@Post('agent-implement')
 	async implement(@Body() implementDto: ImplementDto, @UserInfo() userInfo: UserInfoFromToken) {
-		const project = await this.projectService.findProjectById(implementDto.projectId, userInfo);
-		return this.projectImplementService.startLightspotImplementTask(
-			project,
-			implementDto.lightspot,
-			implementDto.projectPath,
-			implementDto.userId,
-			implementDto.sessionId
-		);
+		try {
+			const project = await this.projectService.findProjectById(implementDto.projectId, userInfo);
+			return {
+				data: await this.projectImplementService.startLightspotImplementTask(
+					project,
+					implementDto.lightspot,
+					implementDto.projectPath,
+					userInfo.userId,
+					crypto.randomUUID()
+				),
+				message: '请到 CLI 与Agent协作'
+			};
+		} catch (error) {
+			throw error;
+		}
 	}
 
 	/* mcp tools 测试 */

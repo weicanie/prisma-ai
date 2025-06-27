@@ -2,14 +2,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTheme } from '@/utils/theme';
 import { MessageSquare, Sparkles, Target, Wand2, Zap } from 'lucide-react';
-import React from 'react';
+import React, { useState } from 'react';
+import ImplementRequest from './ImplementRequest';
 
 interface PreflightBtnsProps {
 	availableActions: string[];
 	handleLookup: () => void;
 	handlePolish: () => void;
 	handleMine: () => void;
-	handleCollaborate: () => void;
+	handleCollaborate: (content: string, projectPath: string) => void;
 }
 
 const PreflightBtns: React.FC<PreflightBtnsProps> = ({
@@ -21,6 +22,7 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({
 }) => {
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
+	const [isImplementRequestOpen, setIsImplementRequestOpen] = useState(false);
 
 	return (
 		<>
@@ -125,7 +127,7 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({
 
 					{availableActions.includes('collaborate') && (
 						<Button
-							onClick={handleCollaborate}
+							onClick={() => setIsImplementRequestOpen(true)}
 							variant="default"
 							className="w-full bg-purple-600 hover:bg-purple-700 text-white"
 							size="lg"
@@ -136,6 +138,11 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({
 					)}
 				</div>
 			</CardContent>
+			<ImplementRequest
+				open={isImplementRequestOpen}
+				onOpenChange={setIsImplementRequestOpen}
+				onSubmit={handleCollaborate}
+			/>
 		</>
 	);
 };

@@ -24,7 +24,6 @@ import { ReflectAgentService } from '../prisma-agent/reflect_agent/reflect_agent
 import { PromptService } from '../prompt/prompt.service';
 import { RubustStructuredOutputParser } from '../utils/RubustStructuredOutputParser';
 import { ChainService } from './chain.service';
-//TODO 前端选项按钮、前端调用
 
 /**
  * @description 项目处理链的统一输入接口
@@ -85,6 +84,7 @@ export class ProjectChainService {
 				},
 
 				//TODO 多轮检索(不使用CRAG), 比如每个亮点分别检索并标注其属于哪个亮点
+				//TODO 使用SRAG将幻觉拉到最低,将相关性拉到最高
 				// 知识库集成：检索相关代码和文档
 				retrievedProjectCodes: async (i: ProjectProcessingInput) => {
 					try {

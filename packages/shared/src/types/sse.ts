@@ -48,9 +48,18 @@ export const RequestTargetMap = {
 	lookup: '/sse/project-generate'
 };
 
+/**
+ * @description 用户反馈，用于决定是否需要进行反思
+ */
+export interface UserFeedback {
+	reflect: boolean;
+	content: string; // 当 reflect 为 true 时，这里是用户的反馈内容
+}
+
 //用于创建llm-sse会话的context
 export interface LLMSessionRequest {
 	input: any; //传入目标方法的输入
+	userFeedback?: UserFeedback; //用户反馈,决定是否反思,默认不反思,此时字段应该为空
 	userInfo?: UserInfoFromToken; //由登录验证 Guard 注入的用户信息
 }
 //llm-sse会话创建成功后的响应

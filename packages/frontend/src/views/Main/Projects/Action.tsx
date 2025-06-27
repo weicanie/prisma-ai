@@ -1,5 +1,6 @@
 import { useTheme } from '@/utils/theme';
 import {
+	type ImplementDto,
 	jsonMd_obj,
 	type lookupResultDto,
 	type ProjectDto,
@@ -10,9 +11,9 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useCustomQuery } from '../../../query/config';
+import { useCustomMutation, useCustomQuery } from '../../../query/config';
 import { ProjectQueryKey } from '../../../query/keys';
-import { findAllProjects } from '../../../services/project';
+import { findAllProjects, implementProject } from '../../../services/project';
 import type { contextInput } from '../../../services/sse/sse';
 import { useSseAnswer } from '../../../services/sse/useSseAnswer';
 import { OriginalProject } from './Action-Result/OriginalProject';
@@ -77,6 +78,8 @@ const Action: React.FC<ActionProps> = () => {
 			}, 0);
 		}
 	}, [done]);
+
+	const ImplementRequest = useCustomMutation(implementProject);
 
 	if (status === 'pending') {
 		return <div className="flex justify-center items-center h-64">Loading...</div>;
@@ -154,10 +157,18 @@ const Action: React.FC<ActionProps> = () => {
 		navigate('#reasoning');
 	};
 
-	// 处理协作
-	const handleCollaborate = () => {
-		console.log('启动与AI agent的协作');
-		navigate('#collaborate');
+	// 处理和 Agent 协作实现亮点
+	/**
+	 * @param content 用户想要实现的项目亮点
+	 * @param projectPath 项目路径（项目名称）
+	 */
+	const handleCollaborate = (content: string, projectPath: string) => {
+		const implementDto: ImplementDto = {
+			projectId: projectData.id,
+			lightspot: content,
+			projectPath
+		};
+		ImplementRequest.mutate(implementDto);
 	};
 
 	/* 用户点击完成优化后更新左侧的项目经验,并更新所有状态 */
@@ -168,8 +179,11 @@ const Action: React.FC<ActionProps> = () => {
 		navigate('#next-action');
 	};
 
+	/**
+	 * 用户提交反馈后重新调用llm
+	 * @param content 反馈内容
+	 */
 	const handleFeedback = (content: string) => {
-		console.log('🚀 ~ handleFeedback ~ actionType:', actionType);
 		switch (actionType) {
 			case 'lookup':
 				setInput({

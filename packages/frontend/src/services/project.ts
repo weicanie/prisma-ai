@@ -1,11 +1,13 @@
 import {
 	projectSchema,
+	type ImplementDto,
 	type ProjectDto,
 	type ProjectVo,
 	type ServerDataFormat as SDF
 } from '@prism-ai/shared';
 import { ZodError } from 'zod';
 import { instance } from './config';
+import type { PersistentTaskVo } from './hjm';
 /**
  * 上传JSON新建项目经验
  * @param project JSON格式的项目经验对象
@@ -85,5 +87,18 @@ export async function updateProject(id: string, projectUpdateDto: Partial<Projec
  */
 export async function removeProject(id: string) {
 	const res = await instance.delete<SDF<null>>(`/project/${id}`);
+	return res.data;
+}
+
+/**
+ * 亮点实现
+ * @param implementDto 实现亮点所需的数据
+ * @returns 返回实现亮点的任务
+ */
+export async function implementProject(implementDto: ImplementDto) {
+	const res = await instance.post<ImplementDto, SDF<PersistentTaskVo>>(
+		'/project/agent-implement',
+		implementDto
+	);
 	return res.data;
 }

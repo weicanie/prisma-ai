@@ -396,7 +396,6 @@ export class ProjectCodeVDBService {
 		};
 
 		try {
-			//FIXME 这里报错 Error: Query error of type TSQueryErrorNodeType
 			const query = new Parser.Query(grammar, queryPatterns[lang] || jsQuery);
 			const matches = query.matches(tree.rootNode);
 
@@ -431,10 +430,11 @@ export class ProjectCodeVDBService {
 
 			return chunks;
 		} catch (error) {
-			this.logger.error(
-				`Tree-sitter query for lang ${lang} failed, falling back to Langchain's RecursiveCharacterTextSplitter.`,
-				error.message
-			);
+			//FIXME 修正Query的错误, Error: Query error of type TSQueryErrorNodeType
+			// this.logger.error(
+			// 	`Tree-sitter query for lang ${lang} failed, falling back to Langchain's RecursiveCharacterTextSplitter.`,
+			// 	error.message
+			// );
 
 			const lcLang = this._mapToLangchainLang(lang);
 			let splitter: RecursiveCharacterTextSplitter;

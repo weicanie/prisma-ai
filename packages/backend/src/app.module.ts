@@ -18,7 +18,6 @@ import { GlobalFilter } from './errorHandle.filter';
 import { EventBusModule } from './EventBus/event-bus.module';
 import { IsLoginGuard } from './isLogin.guard';
 import { PrismaAgentModule } from './prisma-agent/prisma-agent.module';
-import { ProjectAgentModule } from './project-agent/project-agent.module';
 import { SessionPoolModule } from './session/session-pool.module';
 import { UserModule } from './user/user.module';
 
@@ -50,8 +49,7 @@ import { UserModule } from './user/user.module';
 		CopilotModule,
 		KnowledgebaseModule,
 		HjmModule,
-		PrismaAgentModule,
-		ProjectAgentModule
+		PrismaAgentModule
 	],
 	providers: [
 		{

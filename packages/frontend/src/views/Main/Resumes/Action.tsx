@@ -133,10 +133,6 @@ const ResumeActions: React.FC<ResumeActionsProps> = () => {
 		navigate('#reasoning');
 	};
 
-	// const handleCollaborate = () => {
-	// 	console.log('handleCollaborate');
-	// };
-
 	const ResumeResultProps = {
 		resultData,
 		resumeData,

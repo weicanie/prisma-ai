@@ -6,6 +6,7 @@ import { waitForHumanReview } from '../human_involve_agent/node';
 import { reflect } from '../reflect_agent/node';
 import { GraphState } from '../state';
 import { Plan, ReviewType, RunningConfig, UserAction } from '../types';
+import { getAgentConfig } from '../utils/config';
 import { formatProjectCodes, formatStepResults, formatWrittenCodeFiles } from '../utils/replanner';
 import { uploadCode } from './planner';
 
@@ -35,13 +36,20 @@ export async function retrieveNode(
 		throw new Error('KnowledgeVDBService not found in configurable');
 	}
 	if (!userId) throw new Error('User ID is not set');
+	const agentConfig = await getAgentConfig();
 
-	const retrievedDomainDocs = await knowledgeVDBService.retrieveCodeAndDoc(
-		stepResult.output.userFeedback,
-		10,
-		userId
-	);
-	console.log(`Retrieved domain documents with user feedback: ${retrievedDomainDocs}`);
+	const retrievedDomainDocs = agentConfig.CRAG
+		? await knowledgeVDBService.retrieveCodeAndDoc_CRAG(
+				stepResult.output.userFeedback,
+				agentConfig.topK.replan.knowledge,
+				userId
+			)
+		: await knowledgeVDBService.retrieveCodeAndDoc(
+				stepResult.output.userFeedback,
+				agentConfig.topK.replan.knowledge,
+				userId
+			);
+	console.log(`Retrieved ${retrievedDomainDocs.length} domain documents with user feedback`);
 
 	return {
 		replanState: {

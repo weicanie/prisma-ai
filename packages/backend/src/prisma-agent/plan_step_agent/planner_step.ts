@@ -6,6 +6,7 @@ import { waitForHumanReview } from '../human_involve_agent/node';
 import { reflect } from '../reflect_agent/node';
 import { GraphState } from '../state';
 import { Plan_step, ReviewType, RunningConfig, UserAction } from '../types';
+import { getAgentConfig } from '../utils/config';
 
 type ChainReturned<T extends (...args: any) => any> = T extends (...args: any) => infer R
 	? R
@@ -37,16 +38,27 @@ async function retrieveNode(
 	if (!projectInfo || !plan || !userId) {
 		throw new Error('Missing required state for step retrieval.');
 	}
-
 	const projectName = projectInfo.info.name;
 	const currentStep = plan.output.implementationPlan[currentStepIndex];
 	const query = currentStep.stepDescription;
 
 	console.log(`Retrieving knowledge for step: "${query}"`);
+	const agentConfig = await getAgentConfig();
 
 	const [projectDocs, domainDocs] = await Promise.all([
-		projectCodeVDBService.retrieveCodeChunks(query, 5, userId, projectName),
-		knowledgeVDBService.retrieveCodeAndDoc(query, 5, userId)
+		projectCodeVDBService.retrieveCodeChunks(
+			query,
+			agentConfig.topK.plan_step.projectCode,
+			userId,
+			projectName
+		),
+		agentConfig.CRAG
+			? knowledgeVDBService.retrieveCodeAndDoc_CRAG(
+					query,
+					agentConfig.topK.plan_step.knowledge,
+					userId
+				)
+			: knowledgeVDBService.retrieveCodeAndDoc(query, agentConfig.topK.plan_step.knowledge, userId)
 	]);
 
 	const newStepPlan: Plan_step = {

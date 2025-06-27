@@ -7,7 +7,7 @@ import type {
 } from '@prism-ai/shared';
 import { instance } from './config';
 
-interface PersistentTaskVo {
+export interface PersistentTaskVo {
 	id: string; // 任务唯一标识
 	status: 'pending' | 'processing' | 'completed' | 'failed'; // 任务状态
 	resultKey?: string;

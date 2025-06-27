@@ -51,3 +51,12 @@ export interface ProjectPolishedVo extends z.infer<typeof projectPolishedSchema>
 export interface ProjectMineddVo extends z.infer<typeof projectMinedSchema> {
 	reasonContent?: string; // 推理内容
 }
+
+/**
+ * 亮点实现前端上传的Dto
+ */
+export interface ImplementDto {
+	projectId: string;
+	lightspot: string;
+	projectPath: string;
+}

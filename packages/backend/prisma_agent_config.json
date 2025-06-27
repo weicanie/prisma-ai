@@ -1,0 +1,21 @@
+{
+  "_uploadedProjects": [
+    "prisma-chat",
+    "C:\\Users\\user\\Desktop\\项目：简历到offer\\prisma-ai\\projects\\prisma-chat"
+  ],
+  "CRAG": false,
+  "topK": {
+    "plan": {
+      "knowledge": 10,
+      "projectCode": 10
+    },
+    "plan_step": {
+      "knowledge": 10,
+      "projectCode": 10
+    },
+    "replan": {
+      "knowledge": 10,
+      "projectCode": 10
+    }
+  }
+}

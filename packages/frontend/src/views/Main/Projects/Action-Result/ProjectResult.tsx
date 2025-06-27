@@ -22,7 +22,7 @@ export interface ProjectResultProps {
 	handleLookup: () => void;
 	handlePolish: () => void;
 	handleMine: () => void;
-	handleCollaborate: () => void;
+	handleCollaborate: (content: string, projectPath: string) => void;
 
 	handleMerge?: () => void; //完成优化
 	handleFeedback: (content: string) => void; //用户反馈,反思并重新优化
