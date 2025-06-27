@@ -23,8 +23,8 @@ import {
 	ReviewType,
 	RunningConfig
 } from './types';
-//TODO 然后用来测试整个链路
 //TODO 将原来的llm调用升级成Agent调用,知识库集成、human review、反思
+//TODO 简历灵感菇 -> doro
 //TODO 通过mcp server 调用 cursor 的Agent
 
 const outputDir = path.resolve(process.cwd(), 'agent_output');
@@ -153,7 +153,7 @@ export class PrismaAgentService {
 		// 总是从主图中获取状态，因为它是整个流程的入口和状态管理者。
 		const graph = this.workflow;
 		const currentState = await graph.getState(threadConfig);
-		// this.logger.debug('🚀 ~ PrismaAgentService ~ currentState:', currentState);
+		// this.logger.debug(' PrismaAgentService ~ currentState:', currentState);
 		// 步骤1: 保存当前中断信息到文件，供用户审查和调试。
 
 		await fs.writeFile(
@@ -361,7 +361,7 @@ export class PrismaAgentService {
 			sessionId
 		};
 
-		let finalState: any;
+		let finalState: typeof GraphState.State | null = null;
 		let input: any = initialState;
 		let shouldContinue = true;
 

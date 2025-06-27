@@ -19,7 +19,8 @@ import { AutoflowService } from './autoflow.service';
 		forwardRef(() => ResumeModule),
 		forwardRef(() => HjmModule),
 		OssModule,
-		ChainModule,
+		forwardRef(() => ChainModule),
+
 		forwardRef(() => TaskQueueModule)
 	]
 })

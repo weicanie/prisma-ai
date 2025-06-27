@@ -4,6 +4,7 @@ import {
 	DataChunkVO,
 	LLMSessionRequest,
 	StreamingChunk,
+	UserFeedback,
 	UserInfoFromToken
 } from '@prism-ai/shared';
 import { catchError, mergeMap, Observable, timeout } from 'rxjs';
@@ -11,6 +12,7 @@ import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { RedisService } from '../../redis/redis.service';
 import { LLMSseSessionPoolService } from '../../session/llm-sse-session-pool.service';
 import { PersistentTask, TaskQueueService, TaskStatus } from '../../task-queue/task-queue.service';
+import { ProjectProcessService } from '../project/project-process.service';
 import { ProjectService } from '../project/project.service';
 import { ResumeService } from '../resume/resume.service';
 import { LLMCacheService } from './LLMCache.service';
@@ -38,7 +40,8 @@ export interface redisStoreResult {
 export type SseFunc = (
 	input: any,
 	userInfo: UserInfoFromToken,
-	taskId: string
+	taskId: string,
+	userFeedback: UserFeedback
 ) => Promise<Observable<LLMStreamingChunk>>;
 /* 
 
@@ -82,7 +85,9 @@ export class LLMSseService implements OnApplicationBootstrap {
 		@Inject(forwardRef(() => ProjectService))
 		public projectService: ProjectService,
 		@Inject(forwardRef(() => ResumeService))
-		public resumeService: ResumeService
+		public resumeService: ResumeService,
+		@Inject(forwardRef(() => ProjectProcessService))
+		public projectProcessService: ProjectProcessService
 	) {
 		/* 注册任务处理器 */
 		try {
@@ -97,12 +102,12 @@ export class LLMSseService implements OnApplicationBootstrap {
 	onApplicationBootstrap() {
 		/* 注册任务处理器内调用的业务函数 */
 		//project
-		this.funcPool[this.projectService.methodKeys.lookupProject] =
-			this.projectService.lookupProject.bind(this.projectService);
-		this.funcPool[this.projectService.methodKeys.polishProject] =
-			this.projectService.polishProject.bind(this.projectService);
-		this.funcPool[this.projectService.methodKeys.mineProject] =
-			this.projectService.mineProject.bind(this.projectService);
+		this.funcPool[this.projectProcessService.methodKeys.lookupProject] =
+			this.projectProcessService.lookupProject.bind(this.projectProcessService);
+		this.funcPool[this.projectProcessService.methodKeys.polishProject] =
+			this.projectProcessService.polishProject.bind(this.projectProcessService);
+		this.funcPool[this.projectProcessService.methodKeys.mineProject] =
+			this.projectProcessService.mineProject.bind(this.projectProcessService);
 		//resume
 		this.funcPool[this.resumeService.methodKeys.resumeMatchJob] =
 			this.resumeService.resumeMatchJob.bind(this.resumeService);
@@ -118,14 +123,19 @@ export class LLMSseService implements OnApplicationBootstrap {
 	private async taskHandler(task: LLMSseTask): Promise<void> {
 		const { sessionId, userId, id: taskId, metadata } = task;
 
-		/* 获取上下文 */
+		/* 获取上下文,其含有input和userInfo、userFeedback */
 		const context = await this.sessionPool.getContext(sessionId);
 		if (!context || !context.input) {
 			throw new Error('会话上下文不完整，请先创建会话');
 		}
 		/* 调用llm开启流式传输 */
 		const func: SseFunc = this.funcPool[metadata.funcKey];
-		const observable = await func(context.input, context.userInfo!, taskId);
+		const observable = await func(
+			context.input,
+			context.userInfo!,
+			taskId,
+			context.userFeedback ?? { reflect: false, content: '' }
+		);
 		/* 返回一个Promise，该Promise在该Observable完成时才会解析 */
 		return new Promise<void>((resolve, reject) => {
 			/* 创建订阅 */
@@ -261,7 +271,7 @@ export class LLMSseService implements OnApplicationBootstrap {
 			sessionId,
 			userInfo.userId,
 			this.taskType.project,
-			{ funcKey } //返回sse数据的函数作为任务的metadata
+			{ funcKey } //流式数据源,函数
 		);
 		return task;
 	}

@@ -6,8 +6,8 @@ import { ProjectDto } from '@prism-ai/shared';
 import { z } from 'zod';
 import { ChainService } from '../../chain/chain.service';
 import { ModelService } from '../../model/model.service';
+import { RubustStructuredOutputParser } from '../../utils/RubustStructuredOutputParser';
 import { Reflection } from '../types';
-import { RubustStructuredOutputParser } from '../utils/global';
 import { PlanGraph } from './planner';
 import { ReplanGraph } from './replanner';
 

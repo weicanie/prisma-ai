@@ -6,8 +6,8 @@ import { formatDocumentsAsString } from 'langchain/util/document';
 import z from 'zod';
 import { ChainService } from '../../chain/chain.service';
 import { ModelService } from '../../model/model.service';
+import { RubustStructuredOutputParser } from '../../utils/RubustStructuredOutputParser';
 import { KnowledgeIndex, KnowledgeVDBService } from '../data_base/konwledge_vdb.service';
-import { RubustStructuredOutputParser } from '../utils/global';
 import { CRAGGraph } from './node_edge_graph';
 
 export const retrievalGraderSchema = z

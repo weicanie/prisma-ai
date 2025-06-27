@@ -8,13 +8,13 @@ import { JobController } from './job.controller';
 import { JobService } from './job.service';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([{ name: Job.name, schema: JobSchema }]),
-    forwardRef(() => TaskQueueModule),
-    ChainModule,
-  ],
-  controllers: [JobController],
-  providers: [JobService, CrawlJobService],
-  exports: [JobService],
+	imports: [
+		MongooseModule.forFeature([{ name: Job.name, schema: JobSchema }]),
+		forwardRef(() => TaskQueueModule),
+		forwardRef(() => ChainModule)
+	],
+	controllers: [JobController],
+	providers: [JobService, CrawlJobService],
+	exports: [JobService]
 })
 export class JobModule {}

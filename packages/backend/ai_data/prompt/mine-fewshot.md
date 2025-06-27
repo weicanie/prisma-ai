@@ -1,14 +1,14 @@
-## 1. xx旅途 - H5民宿预订平台
+## 1. PrismaTrip - H5民宿预订平台
 
 ### 项目信息
 
 #### 基本信息
 
-- 名称：xx旅途 - H5民宿预订平台
+- 名称：PrismaTrip - H5民宿预订平台
 
 #### 项目介绍
 
-- 角色与职责: 作为核心前端开发者，负责设计与实现了“xx旅途”民宿预订平台的H5网站前端部分。
+- 角色与职责: 作为核心前端开发者，负责设计与实现了“PrismaTrip”民宿预订平台的H5网站前端部分。
 - 核心贡献: 独立负责关键模块开发，推动技术选型和代码规范制定。
 - 背景与目的: 项目旨在打造一个直观、响应式的用户界面，使用户能够轻松浏览和预订全国各地的民宿，提升用户预订体验和平台订单量。
 
@@ -38,13 +38,13 @@ Vue3, Vuex, Vue Router, Axios, SCSS, Webpack, Mock.js, ECharts, 百度地图API,
   - 使用 Vuex 管理全局状态。
   - 完成了城市列表、详情页等基础页面的开发。
 
-## 2.xx后台管理系统 - 多后台管理系统的统⼀解决⽅案
+## 2.Prisma后台管理系统 - 多后台管理系统的统⼀解决⽅案
 
 ### 项目信息
 
 #### 基本信息
 
-- 名称：xx后台管理系统 - 多后台管理系统的统⼀解决⽅案
+- 名称：Prisma后台管理系统 - 多后台管理系统的统⼀解决⽅案
 
 #### 项目介绍
 
@@ -71,13 +71,13 @@ Vue3, Pinia, Vue Router, Axios, Element Plus, Echart, Vite, TypeScript,JavaScrip
   - 动态系统构建:开发基于配置的动态构建系统，快速生成后台管理系统Ul界面，包括表格、查询、数据模态窗口等，缩短开发周期。
 - 用户体验/业务价值
 
-## 3.xx低代码商城系统平台（LowCode Mall System Platform）
+## 3.Prisma低代码商城系统平台（LowCode Mall System Platform）
 
 ### 项目信息
 
 #### 基本信息
 
-- 名称：xx低代码商城系统平台（LowCode Mall System Platform）
+- 名称：Prisma低代码商城系统平台（LowCode Mall System Platform）
 
 #### 项目介绍
 
@@ -102,13 +102,13 @@ Vue3、Vue Router、Pinia、 Element-plus、 axios、 vuedraggable、Swiper、sa
   - 提高开发效率:通过低代码平台，产品团队无需开发人员介入即可设计和部署商城系统，减少开发时间和成本80%。
   - 减少沟通成本:通过可视化配置简化客户、产品和开发之间的沟通，减少需求误差和频繁变更。
 
-## 1.xx⾳乐–原⽣⼩程序项⽬
+## 1.Prisma⾳乐–原⽣⼩程序项⽬
 
 ### 项目信息
 
 #### 基本信息
 
-- 名称：xx⾳乐–原⽣⼩程序项⽬
+- 名称：Prisma⾳乐–原⽣⼩程序项⽬
 
 #### 项目介绍
 
@@ -133,13 +133,13 @@ Vue3、Vue Router、Pinia、 Element-plus、 axios、 vuedraggable、Swiper、sa
   - 用户参与度提升:通过优化用户界面和个性化功能，显著提升用户参与度和用户粘性。
   - 优化效率提升:性能优化措施使应用性能提升超过30%，用户满意度增加55%。
 
-## 1.xx住宿 -⾼端住宿预订平台前端重构
+## 1.Prisma住宿 -⾼端住宿预订平台前端重构
 
 ### 项目信息
 
 #### 基本信息
 
-- 名称：xx住宿 -⾼端住宿预订平台前端重构
+- 名称：Prisma住宿 -⾼端住宿预订平台前端重构
 
 #### 项目介绍
 
@@ -167,13 +167,13 @@ React18, React Router, ReduxToolKit(RTK), axios, AntDesign, MaterialUI, styled-c
 - 用户体验/业务价值
   - 用户体验提升:优化首屏加载和响应速度，将页面响应时间从2.5秒降至1秒以下。
 
-## 2.xx⾳乐-PC Web⾳乐项⽬
+## 2.Prisma⾳乐-PC Web⾳乐项⽬
 
 ### 项目信息
 
 #### 基本信息
 
-- 名称：xx⾳乐-PC Web⾳乐项⽬
+- 名称：Prisma⾳乐-PC Web⾳乐项⽬
 
 #### 项目介绍
 
@@ -199,13 +199,13 @@ React18, React Router, TypeScript, Redux Toolkit, Ant Design, styled-components,
 - 用户体验/业务价值
   - 用户体验提升:通过用户反馈收集和行为分析,用户停留时间增加了20%,并且页面的跳出率降低了15%
 
-## 1.xx音乐数据服务- (Netease Cloud Music Data Service)
+## 1.Prisma音乐数据服务- (Netease Cloud Music Data Service)
 
 ### 项目信息
 
 #### 基本信息
 
-- 名称：xx音乐数据服务- (Netease Cloud Music Data Service)
+- 名称：Prisma音乐数据服务- (Netease Cloud Music Data Service)
 
 #### 项目介绍
 

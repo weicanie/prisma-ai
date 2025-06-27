@@ -36,6 +36,12 @@ import { ReflectAgentService } from './reflect_agent/reflect_agent.service';
 		forwardRef(() => EventBusModule),
 		forwardRef(() => ChainModule)
 	],
-	exports: [PrismaAgentService, KnowledgeVDBService]
+	exports: [
+		PrismaAgentService,
+		KnowledgeVDBService,
+		ProjectCodeVDBService,
+		CRetrieveAgentService,
+		ReflectAgentService
+	]
 })
 export class PrismaAgentModule {}

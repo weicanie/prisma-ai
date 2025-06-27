@@ -2,6 +2,8 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Query, Sse } from '@ne
 import { ProjectStatus, UserInfoFromToken } from '@prism-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { ProjectDto } from './dto/project.dto';
+import { ProjectImplementService } from './project-implement.service';
+import { ProjectProcessService } from './project-process.service';
 import { ProjectService } from './project.service';
 interface ImplementDto {
 	projectId: string;
@@ -12,7 +14,11 @@ interface ImplementDto {
 }
 @Controller('project')
 export class ProjectController {
-	constructor(private readonly projectService: ProjectService) {}
+	constructor(
+		private readonly projectService: ProjectService,
+		private readonly projectImplementService: ProjectImplementService,
+		private readonly projectProcessService: ProjectProcessService
+	) {}
 
 	/**
 	 * 分析项目经验 - 使用AI对项目经验进行分析和总结
@@ -28,7 +34,7 @@ export class ProjectController {
 		@Query('recover') recover: boolean,
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
-		return this.projectService.SseLookupResult(sessionId, userInfo, recover);
+		return this.projectProcessService.SseLookupResult(sessionId, userInfo, recover);
 	}
 
 	/**
@@ -44,7 +50,7 @@ export class ProjectController {
 		@Query('recover') recover: boolean,
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
-		return this.projectService.SsePolishResult(sessionId, userInfo, recover);
+		return this.projectProcessService.SsePolishResult(sessionId, userInfo, recover);
 	}
 
 	/**
@@ -60,27 +66,19 @@ export class ProjectController {
 		@Query('recover') recover: boolean,
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
-		return this.projectService.SseMineResult(sessionId, userInfo, recover);
+		return this.projectProcessService.SseMineResult(sessionId, userInfo, recover);
 	}
 
-	@RequireLogin()
-	@Post('test-implement')
-	async testImplement(@Body() implementDto: ImplementDto, @UserInfo() userInfo: UserInfoFromToken) {
-		const project = await this.projectService.findProjectById(implementDto.projectId, userInfo);
-		return this.projectService.prismaAgentService.invoke(
-			project,
-			implementDto.lightspot,
-			implementDto.projectPath,
-			implementDto.userId,
-			implementDto.sessionId
-		);
-	}
-
+	/**
+	 * 使用Agent实现亮点
+	 * @param implementDto 实现亮点所需的数据
+	 * @param userInfo 用户信息
+	 */
 	@RequireLogin()
 	@Post('agent-implement')
 	async implement(@Body() implementDto: ImplementDto, @UserInfo() userInfo: UserInfoFromToken) {
 		const project = await this.projectService.findProjectById(implementDto.projectId, userInfo);
-		return this.projectService.prismaAgentService.invoke(
+		return this.projectImplementService.startLightspotImplementTask(
 			project,
 			implementDto.lightspot,
 			implementDto.projectPath,
@@ -103,7 +101,7 @@ export class ProjectController {
 	@RequireLogin()
 	@Post('add')
 	async createProject(@Body() project: ProjectDto, @UserInfo() userInfo: UserInfoFromToken) {
-		return await this.projectService.checkoutProject(project, userInfo);
+		return await this.projectProcessService.checkoutProject(project, userInfo);
 	}
 
 	/**
@@ -114,7 +112,7 @@ export class ProjectController {
 	@RequireLogin()
 	@Post('add-text')
 	async createFrommRawText(@Body() projectText: string, @UserInfo() userInfo: UserInfoFromToken) {
-		return await this.projectService.transformAndCheckProject(projectText, userInfo);
+		return await this.projectProcessService.transformAndCheckProject(projectText, userInfo);
 	}
 
 	/**

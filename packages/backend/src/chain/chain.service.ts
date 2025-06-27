@@ -11,12 +11,6 @@ import {
 	JobVo,
 	LLMJobDto,
 	llmJobSchema,
-	lookupResultSchema,
-	projectLookupedSchema,
-	ProjectMinedDto,
-	projectMinedSchema,
-	ProjectPolishedDto,
-	projectPolishedSchema,
 	projectSchema,
 	ResumeMatchedDto,
 	resumeMatchedSchema,
@@ -31,7 +25,6 @@ import { AgentService } from '../agent/agent.service';
 import { MCPClientService } from '../mcp-client/mcp-client.service';
 import { ModelService } from '../model/model.service';
 import { PromptService, role } from '../prompt/prompt.service';
-//TODO chain分模块
 @Injectable()
 export class ChainService {
 	constructor(
@@ -50,7 +43,7 @@ export class ChainService {
 	 * @param schema 定义模型输出格式的zod schema
 	 * @param saveFn 结果保存函数,保存到mongodb数据库
 	 */
-	private async createChain<Input = string, Output = unknown>(
+	async createChain<Input = string, Output = unknown>(
 		llm: ChatOpenAI | ChatDeepSeek,
 		prompt: ChatPromptTemplate,
 		outputSchema: z.Schema,
@@ -277,64 +270,6 @@ export class ChainService {
 			llm,
 			outputParser
 		]);
-		return chain;
-	}
-
-	/**
-	 * 分析项目经验的问题和解决方案
-	 */
-	async lookupChain(stream = false) {
-		const schema = lookupResultSchema;
-		const schema0 = projectLookupedSchema;
-		const prompt = await this.promptService.lookupPrompt();
-
-		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
-
-		const shemaTotal = z.tuple([schema, schema0]);
-		const chain = await this.createChain<string, ProjectMinedDto>(llm, prompt, shemaTotal);
-		const streamChain = await this.createStreamChain<string>(llm, prompt, schema, schema0);
-		if (stream) {
-			return streamChain;
-		}
-		return chain;
-	}
-
-	/**
-	 * 现有亮点评估、改进。
-	 * @description -> 亮点突出
-	 */
-	async polishChain(stream = false) {
-		const schema = projectPolishedSchema;
-		const schema0 = projectSchema; // 输入的schema
-		const prompt = await this.promptService.polishPrompt();
-
-		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
-
-		const chain = await this.createChain<string, ProjectPolishedDto>(llm, prompt, schema, schema0);
-		const streamChain = await this.createStreamChain<string>(llm, prompt, schema, schema0);
-		if (stream) {
-			return streamChain;
-		}
-		return chain;
-	}
-
-	/**
-	 * 项目亮点挖掘。
-	 * @description -> 亮点充足
-	 */
-	async mineChain(stream = false) {
-		const schema = projectMinedSchema;
-		const schema0 = projectSchema; // 输入的schema
-
-		const prompt = await this.promptService.minePrompt();
-
-		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
-
-		const chain = await this.createChain<string, ProjectMinedDto>(llm, prompt, schema, schema0);
-		const streamChain = await this.createStreamChain<string>(llm, prompt, schema, schema0);
-		if (stream) {
-			return streamChain;
-		}
 		return chain;
 	}
 

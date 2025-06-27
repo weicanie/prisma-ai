@@ -11,9 +11,9 @@ import { ProjectDto } from '@prism-ai/shared';
 import { z } from 'zod';
 import { ChainService } from '../../chain/chain.service';
 import { ModelService } from '../../model/model.service';
+import { RubustStructuredOutputParser } from '../../utils/RubustStructuredOutputParser';
 import { ReflectAgentService } from '../reflect_agent/reflect_agent.service';
 import { Knowledge, Plan, Reflection, Step, Step_prompt } from '../types';
-import { RubustStructuredOutputParser } from '../utils/global';
 import { PlanStepGraph } from './planner_step';
 
 /**

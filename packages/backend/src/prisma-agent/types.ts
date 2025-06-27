@@ -100,7 +100,7 @@ export const userActionSchema = z.nativeEnum(UserAction);
  */
 export const humanInputSchema = z.object({
 	action: userActionSchema,
-	content: z.string().describe('当 action 为 FEEDBACK 时，这里是具体的反馈内容。')
+	content: z.string().describe('当 action 为 redo 时，这里是具体的反馈内容。')
 });
 
 /**

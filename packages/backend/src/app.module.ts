@@ -3,7 +3,6 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AichatModule } from './business/aichat/aichat.module';
-import { AutoflowModule } from './business/autoflow/autoflow.module';
 import { HjmModule } from './business/human-job-match/hjm.module';
 import { JobModule } from './business/job/job.module';
 import { KnowledgebaseModule } from './business/knowledge-base/knowledge-base.module';
@@ -17,9 +16,9 @@ import { GlobalInterceptor } from './dataFormat.interceptor';
 import { DbModule } from './DB/db.module';
 import { GlobalFilter } from './errorHandle.filter';
 import { EventBusModule } from './EventBus/event-bus.module';
-import { GraphModule } from './graph/graph.module';
 import { IsLoginGuard } from './isLogin.guard';
 import { PrismaAgentModule } from './prisma-agent/prisma-agent.module';
+import { ProjectAgentModule } from './project-agent/project-agent.module';
 import { SessionPoolModule } from './session/session-pool.module';
 import { UserModule } from './user/user.module';
 
@@ -29,7 +28,6 @@ import { UserModule } from './user/user.module';
 		DbModule,
 		ProjectModule,
 		ChainModule,
-		GraphModule,
 		AichatModule,
 		ConfigModule.forRoot({
 			isGlobal: true,
@@ -52,8 +50,8 @@ import { UserModule } from './user/user.module';
 		CopilotModule,
 		KnowledgebaseModule,
 		HjmModule,
-		AutoflowModule,
-		PrismaAgentModule
+		PrismaAgentModule,
+		ProjectAgentModule
 	],
 	providers: [
 		{

@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { ChainService } from '../../chain/chain.service';
 import { ModelService } from '../../model/model.service';
-import { RubustStructuredOutputParser } from '../utils/global';
+import { RubustStructuredOutputParser } from '../../utils/RubustStructuredOutputParser';
 
 /**
  * @description 反思的结构化输出Zod Schema
