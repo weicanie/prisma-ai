@@ -6,23 +6,30 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { ProjectMinedDto, ProjectPolishedDto } from '@prism-ai/shared';
 import { Code, Lightbulb, Pyramid, Sparkles, Zap } from 'lucide-react';
-import React from 'react';
+import React, { useState } from 'react';
+import FeedBack from './FeedBack';
 import { MinedPolishedLightspotSection } from './MinedLightspotSection';
 import { PolishedLightspotSection } from './PolishedLightspotSection';
 import { headerMap, type ProjectResultProps } from './ProjectResult';
 type ProejctPMResultCardProps = Pick<
 	ProjectResultProps,
 	'actionType' | 'resultData' | 'mergedData' | 'handleMerge'
->;
-
+> & {
+	handleFeedback: (content: string) => void;
+};
+/**
+ * 用于展示项目经验polish或者mine的结果
+ */
 export const ProejctPMResultCard: React.FC<ProejctPMResultCardProps> = ({
 	actionType,
 	resultData,
 	mergedData,
-	handleMerge
+	handleMerge,
+	handleFeedback
 }) => {
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
+	const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 	resultData = resultData as ProjectPolishedDto | ProjectMinedDto | null;
 	if (resultData === null) return;
 	let lightspotSection: React.ReactNode;
@@ -135,16 +142,23 @@ export const ProejctPMResultCard: React.FC<ProejctPMResultCardProps> = ({
 				{lightspotSection}
 			</CardContent>
 			{mergedData && (
-				<Button
-					onClick={handleMerge}
-					variant="default"
-					className="fixed  bottom-5 right-40   rounded-md  w-80 hover:bg-purple-700 text-white"
-					size="lg"
-				>
-					<Pyramid className="w-4 h-4 mr-2" />
-					完成优化
-				</Button>
+				<div className="flex justify-center items-center gap-4 fixed bottom-5 right-1/2 translate-x-1/2">
+					<Button onClick={handleMerge} variant="default" className="w-40" size="lg">
+						<Pyramid className="w-4 h-4 mr-2" />
+						满意,完成优化
+					</Button>
+					<Button
+						onClick={() => setIsFeedbackOpen(true)}
+						variant="outline"
+						className="w-40"
+						size="lg"
+					>
+						<Pyramid className="w-4 h-4 mr-2" />
+						不满意,重新优化
+					</Button>
+				</div>
 			)}
+			<FeedBack open={isFeedbackOpen} onOpenChange={setIsFeedbackOpen} onSubmit={handleFeedback} />
 		</>
 	);
 };

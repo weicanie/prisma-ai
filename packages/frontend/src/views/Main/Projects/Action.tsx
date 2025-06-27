@@ -13,6 +13,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useCustomQuery } from '../../../query/config';
 import { ProjectQueryKey } from '../../../query/keys';
 import { findAllProjects } from '../../../services/project';
+import type { contextInput } from '../../../services/sse/sse';
 import { useSseAnswer } from '../../../services/sse/useSseAnswer';
 import { OriginalProject } from './Action-Result/OriginalProject';
 import { ProjectResult } from './Action-Result/ProjectResult';
@@ -29,7 +30,7 @@ const Action: React.FC<ActionProps> = () => {
 
 	const navigate = useNavigate();
 
-	const [input, setInput] = useState<ProjectDto | Record<string, unknown>>({});
+	const [input, setInput] = useState<contextInput | object>({});
 	//目标接口的URL path
 	const [urlPath, setUrlPath] = useState('');
 	/**
@@ -125,7 +126,7 @@ const Action: React.FC<ActionProps> = () => {
 			info: projectData.info,
 			lightspot: projectData.lightspot
 		};
-		setInput(projectDto);
+		setInput({ input: projectDto });
 		setUrlPath('/project/lookup');
 		navigate('#reasoning');
 	};
@@ -137,7 +138,7 @@ const Action: React.FC<ActionProps> = () => {
 			lightspot: projectData.lightspot,
 			lookupResult: projectData.lookupResult!
 		};
-		setInput(projectLookupedDto);
+		setInput({ input: projectLookupedDto });
 		setUrlPath('/project/polish');
 		navigate('#reasoning');
 	};
@@ -148,7 +149,7 @@ const Action: React.FC<ActionProps> = () => {
 			info: projectData.info,
 			lightspot: projectData.lightspot
 		};
-		setInput(projectDto);
+		setInput({ input: projectDto });
 		setUrlPath('/project/mine');
 		navigate('#reasoning');
 	};
@@ -159,12 +160,55 @@ const Action: React.FC<ActionProps> = () => {
 		navigate('#collaborate');
 	};
 
-	/* 用户点击完成优化后更新左侧的项目经验,并清理所有状态 */
+	/* 用户点击完成优化后更新左侧的项目经验,并更新所有状态 */
 	const handleMerge = () => {
 		queryClient.invalidateQueries({ queryKey: [ProjectQueryKey.Projects] });
 		setInput({});
 		setUrlPath('polish');
 		navigate('#next-action');
+	};
+
+	const handleFeedback = (content: string) => {
+		console.log('🚀 ~ handleFeedback ~ actionType:', actionType);
+		switch (actionType) {
+			case 'lookup':
+				setInput({
+					input: projectData,
+					userFeedback: {
+						reflect: true,
+						content
+					}
+				});
+				break;
+			case 'polish': {
+				const projectLookupedDto: projectLookupedDto = {
+					info: projectData.info,
+					lightspot: projectData.lightspot,
+					lookupResult: projectData.lookupResult!
+				};
+				setInput({
+					input: projectLookupedDto,
+					userFeedback: {
+						reflect: true,
+						content
+					}
+				});
+				break;
+			}
+			case 'mine':
+				setInput({
+					input: projectData,
+					userFeedback: {
+						reflect: true,
+						content
+					}
+				});
+				break;
+			default:
+				break;
+		}
+		setUrlPath(urlPath);
+		navigate('#reasoning');
 	};
 
 	const ProjectResultProps = {
@@ -177,6 +221,7 @@ const Action: React.FC<ActionProps> = () => {
 		handleMine,
 		handleCollaborate,
 		handleMerge,
+		handleFeedback,
 		content,
 		reasonContent,
 		done,
@@ -193,7 +238,7 @@ const Action: React.FC<ActionProps> = () => {
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 ">
 					{/* 左栏：原始项目信息 */}
 					<div className="overflow-y-auto">
-						<OriginalProject projectData={projectData} projectId={projectId} isDark={isDark} />
+						<OriginalProject projectData={projectData} isDark={isDark} />
 					</div>
 
 					{/* 右栏：AI行动区域 */}

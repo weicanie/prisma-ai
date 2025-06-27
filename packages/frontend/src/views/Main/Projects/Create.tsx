@@ -10,9 +10,6 @@ import { CreateBtn } from '../components/CreateBtn';
 import MilkdownEditor from '../components/Editor';
 import ProjectForm from './ProjectForm';
 
-//TODO md编辑器如何实现格式保护?
-//TODO支持项目经验上传, 支持上传非格式文本（格式转换）和上传文件（提取文本,然后格式转换）
-
 interface CreateProjectProps {
 	_?: string;
 }

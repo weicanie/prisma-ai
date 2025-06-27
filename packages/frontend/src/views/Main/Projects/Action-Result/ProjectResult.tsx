@@ -24,7 +24,8 @@ export interface ProjectResultProps {
 	handleMine: () => void;
 	handleCollaborate: () => void;
 
-	handleMerge?: () => void; //正式合并、完成优化
+	handleMerge?: () => void; //完成优化
+	handleFeedback: (content: string) => void; //用户反馈,反思并重新优化
 
 	content: string; //生成内容-流式
 	reasonContent?: string; //推理内容-流式
@@ -61,6 +62,7 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 	handleMine,
 	handleCollaborate,
 	handleMerge,
+	handleFeedback,
 	content,
 	reasonContent,
 	isReasoning = false,
@@ -198,7 +200,8 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 		actionType,
 		resultData,
 		mergedData,
-		handleMerge
+		handleMerge,
+		handleFeedback
 	};
 	const proejctResultCard = <ProejctPMResultCard {...resultCardProps} />;
 	const contentMap = {

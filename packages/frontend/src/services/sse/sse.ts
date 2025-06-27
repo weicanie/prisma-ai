@@ -6,7 +6,8 @@ import type {
 	LLMSessionStatusResponse,
 	MatchJobDto,
 	ProjectDto,
-	ServerDataFormat as SDF
+	ServerDataFormat as SDF,
+	UserFeedback
 } from '@prism-ai/shared';
 import { toast } from 'sonner';
 import { instance } from '../config';
@@ -16,7 +17,10 @@ import { instance } from '../config';
  * @description ProjectDto 项目经验服务
  * @description MatchJobDto 简历匹配岗位服务
  */
-export type contextInput = ProjectDto | MatchJobDto;
+export type contextInput = {
+	input: ProjectDto | MatchJobDto;
+	userFeedback?: UserFeedback;
+};
 /**
  * 提取会话状态
  */
@@ -40,9 +44,7 @@ async function createLLMSessionContext(
 	//新建会话
 	const res = await instance.post<LLMSessionRequest, SDF<LLMSessionResponse>>(
 		'llm-session/context',
-		{
-			input
-		}
+		input
 	);
 	localStorage.setItem(llmSessionKey, res.data.data.sessionId);
 	localStorage.setItem(sessionStatusKey, 'tasknotfound');

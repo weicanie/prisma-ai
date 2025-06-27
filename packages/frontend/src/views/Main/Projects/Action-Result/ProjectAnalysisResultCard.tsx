@@ -4,6 +4,7 @@ import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { lookupResultDto, projectLookupedDto } from '@prism-ai/shared';
 import { AlertTriangle, CheckCircle, Lightbulb, Pyramid } from 'lucide-react'; // Assuming lucide-react for icons
 import React, { useEffect, useState } from 'react';
+import FeedBack from './FeedBack';
 import type { ProjectResultProps } from './ProjectResult';
 
 type ProjectAnalysisResultCardProps = Pick<
@@ -11,6 +12,7 @@ type ProjectAnalysisResultCardProps = Pick<
 	'resultData' | 'mergedData' | 'handleMerge'
 > & {
 	isDark: boolean;
+	handleFeedback: (content: string) => void;
 };
 /**
  * 项目分析结果展示组件
@@ -20,12 +22,14 @@ export const ProjectAnalysisResultCard: React.FC<ProjectAnalysisResultCardProps>
 	resultData: result,
 	isDark,
 	mergedData,
-	handleMerge
+	handleMerge,
+	handleFeedback
 }) => {
 	result = result as lookupResultDto | null;
 
 	const score = result?.score;
 	const [animatedScore, setAnimatedScore] = useState(0);
+	const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
 	useEffect(() => {
 		const animationTimeout = setTimeout(() => {
@@ -138,18 +142,23 @@ export const ProjectAnalysisResultCard: React.FC<ProjectAnalysisResultCardProps>
 				)}
 			</CardContent>
 			{mergedData && (
-				<div className="flex justify-center">
+				<div className="flex justify-center items-center gap-4 fixed bottom-5 right-1/2 translate-x-1/2">
+					<Button onClick={handleMerge} variant="default" className="w-40" size="lg">
+						<Pyramid className="w-4 h-4 mr-2" />
+						满意,采纳建议
+					</Button>
 					<Button
-						onClick={handleMerge}
-						variant="default"
-						className="fixed  bottom-5 right-40   rounded-md  w-80 hover:bg-purple-700 text-white"
+						onClick={() => setIsFeedbackOpen(true)}
+						variant="outline"
+						className="w-40"
 						size="lg"
 					>
 						<Pyramid className="w-4 h-4 mr-2" />
-						完成分析
+						不满意,重新分析
 					</Button>
 				</div>
 			)}
+			<FeedBack open={isFeedbackOpen} onOpenChange={setIsFeedbackOpen} onSubmit={handleFeedback} />
 		</>
 	);
 };

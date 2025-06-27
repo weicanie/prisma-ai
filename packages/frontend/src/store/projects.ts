@@ -115,6 +115,7 @@ const projectSlice = createSlice({
 			state.dataMd = dataMd;
 			state.data = markdownToProjectSchema(dataMd);
 		},
+
 		resetProjectData: () => {
 			/* state = initialState;不会产生副作用、无法重置state对象。
 			因为代理对象没有被操作,因此真正的state对象也不会通过immer修改。
@@ -133,6 +134,5 @@ export const { setDataFromDto, setDataFromMd, resetProjectData } = projectSlice.
 // Selectors
 export const selectProjectData = (state: { project: ProjectState }) => state.project.data;
 export const selectProjectMd = (state: { project: ProjectState }) => state.project.dataMd;
-
 // Reducer
 export const projectReducer = projectSlice.reducer;
