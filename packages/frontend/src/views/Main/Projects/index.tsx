@@ -177,7 +177,7 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 				title={title ?? '项目经验'}
 				description={
 					description ??
-					'项目经验决定面试机会、面试表现。点击项目让 Prisma 深入分析你的项目、彻底优化你的项目经验'
+					'项目经验决定面试机会、面试表现。点击项目让 doro 深入分析你的项目、彻底优化你的项目经验'
 				}
 			></PageHeader>
 			<div className="pl-10 pr-10 ">

@@ -60,7 +60,7 @@ export const ProjectAnalysisResultCard: React.FC<ProjectAnalysisResultCardProps>
 					className={`flex items-center justify-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
 				>
 					<Lightbulb className="w-5 h-5 text-yellow-500" />
-					Prisma 深度分析结果
+					doro 深度分析结果
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-6">

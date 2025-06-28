@@ -148,7 +148,7 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 			<CardHeader>
 				<CardTitle className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
 					<div className="animate-pulse w-4 h-4 bg-blue-500 rounded-full"></div>
-					{isReasoning ? `Prisma 正在分析和推理...` : `Prisma 的推理过程`}
+					{isReasoning ? `doro 正在分析和推理...` : `doro 的推理过程`}
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-0 h-full">
@@ -161,7 +161,7 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 						scrollBehavior: 'smooth'
 					}}
 				>
-					{reasonContent || 'Prisma 在等待你的指示送达...'}
+					{reasonContent || 'doro 在等待你的指示送达...'}
 					{/* 添加一个闪烁的光标效果 */}
 					<span className="animate-pulse text-blue-400">▋</span>
 				</div>
@@ -176,7 +176,7 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 					className={`flex items-center gap-2 font-mono ${isDark ? 'text-white' : 'text-gray-900'}`}
 				>
 					<div className="animate-pulse w-4 h-4 bg-blue-500 rounded-full"></div>
-					Prisma 的生成结果
+					doro 的生成结果
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-0 h-full">
@@ -188,7 +188,7 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 						scrollBehavior: 'smooth'
 					}}
 				>
-					{content || 'Prisma 在等待你的指示送达...'}
+					{content || 'doro 在等待你的指示送达...'}
 					<span className="animate-pulse text-blue-400">▋</span>
 				</div>
 			</CardContent>

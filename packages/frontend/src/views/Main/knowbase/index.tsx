@@ -180,7 +180,7 @@ const Knowledges: React.FC<KnowledgesProps<KnowledgeVo>> = ({
 		<>
 			<PageHeader
 				title="知识库"
-				description="上传信息来和 Prisma 共享, Prisma 在思考时会使用这些信息, 这很重要 "
+				description="上传信息来和 doro 共享, doro 在思考时会使用这些信息, 这很重要 "
 			></PageHeader>
 			<div className="pl-10 pr-10">
 				<ConfigDataTable dataTableConfig={dataTableConfig} data={knowledgeData} />

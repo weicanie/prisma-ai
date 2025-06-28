@@ -245,7 +245,7 @@ export const routes = [
 						path: '',
 						element: (
 							<UpdateBreadRouter>
-								<>学习路线</>
+								<>技术学习路线 coming soon</>
 							</UpdateBreadRouter>
 						)
 					},
@@ -253,15 +253,7 @@ export const routes = [
 						path: 'road',
 						element: (
 							<UpdateBreadRouter>
-								<>技术学习路线</>
-							</UpdateBreadRouter>
-						)
-					},
-					{
-						path: 'doit',
-						element: (
-							<UpdateBreadRouter>
-								<>项目亮点实现</>
+								<>技术学习路线 coming soon</>
 							</UpdateBreadRouter>
 						)
 					},
@@ -269,15 +261,7 @@ export const routes = [
 						path: 'questions',
 						element: (
 							<UpdateBreadRouter>
-								<>简历延申八股</>
-							</UpdateBreadRouter>
-						)
-					},
-					{
-						path: 'mock-interview',
-						element: (
-							<UpdateBreadRouter>
-								<>模拟面试</>
+								<>简历延申八股 coming soon</>
 							</UpdateBreadRouter>
 						)
 					}
@@ -310,7 +294,5 @@ export const path_name: Record<string, string> = {
 	'/main/knowledge/detail': '知识库-详情',
 
 	'/main/offer/road': '面向offer学习-技术学习路线',
-	'/main/offer/doit': '面向offer学习-项目亮点实现',
-	'/main/offer/questions': '面向offer学习-简历延申八股',
-	'/main/offer/mock-interview': '面向offer学习-模拟面试'
+	'/main/offer/questions': '面向offer学习-简历延申八股'
 };

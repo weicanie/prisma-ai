@@ -24,7 +24,8 @@ try {
 	try {
 		const { default: madge } = await import('madge');
 		const res = await madge(entryFile, {
-			// excludeRegExp: ['.*\.(dto|d|controller|service|gateway)\.ts$', 'utils.ts', 'decorator.ts']
+			//只绘制service,controller,module,gateway间的依赖关系
+			excludeRegExp: ['^(?!.*\\.(service|controller|module|gateway)\\.ts$).*\\.ts$']
 		});
 		const writtenPath = await res.image(writtenImagePath);
 		console.log('Image written to ' + writtenPath);

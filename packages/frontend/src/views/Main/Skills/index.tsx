@@ -182,7 +182,7 @@ const Skills: React.FC<SkillsProps<SkillVo>> = ({
 			<PageHeader
 				title={title ?? '职业技能'}
 				description={
-					description ?? '上传您的专业技能, Prisma 会在优化您的简历时会着重参考您的专业技能'
+					description ?? '上传您的专业技能, doro 会在优化您的简历时会着重参考您的专业技能'
 				}
 			></PageHeader>
 			<div className="pl-10 pr-10">

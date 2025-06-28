@@ -1,5 +1,7 @@
 //TODO copilot包体积太大,需要优化
 import '@ant-design/v5-patch-for-react-19';
+import { CopilotKit } from '@copilotkit/react-core';
+import { CopilotSidebar } from '@copilotkit/react-ui';
 import '@copilotkit/react-ui/styles.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -7,7 +9,6 @@ import { useRoutes } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import './index.css';
 import { routes } from './router/router';
-
 const queryClient = new QueryClient({
 	defaultOptions: {
 		queries: {
@@ -30,20 +31,22 @@ function APP() {
 		<QueryClientProvider client={queryClient}>
 			<Toaster />
 			<ReactQueryDevtools initialIsOpen={false} />
-			{/* <CopilotKit runtimeUrl={import.meta.env.VITE_API_BASE_URL + '/copilotkit' || '/api'}>
+			<div className="flex max-[900px]:flex-col">{useRoutes(routes)}</div>
+
+			<CopilotKit runtimeUrl={import.meta.env.VITE_API_BASE_URL + '/copilotkit' || '/api'}>
 				<CopilotSidebar
 					defaultOpen={false}
 					instructions={
 						'You are assisting the user as best as you can. Answer in the best way possible given the data you have.'
 					}
 					labels={{
-						title: 'Prisma',
-						initial: 'Prisma 为你效劳!'
+						title: 'doro',
+						initial: 'doro 为你效劳!'
 					}}
-				> */}
-			<div className="flex max-[900px]:flex-col">{useRoutes(routes)}</div>
-			{/* </CopilotSidebar>
-			</CopilotKit> */}
+				>
+					<div className="flex max-[900px]:flex-col">{useRoutes(routes)}</div>
+				</CopilotSidebar>
+			</CopilotKit>
 		</QueryClientProvider>
 	);
 }
