@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ChainModule } from '../../chain/chain.module';
 import { AichatController } from './aichat.controller';
 import { AichatService } from './aichat.service';
@@ -7,6 +7,6 @@ import { AichatService } from './aichat.service';
 	controllers: [AichatController],
 	providers: [AichatService],
 	exports: [AichatService],
-	imports: [forwardRef(() => ChainModule)]
+	imports: [ChainModule]
 })
 export class AichatModule {}

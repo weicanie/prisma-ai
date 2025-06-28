@@ -1,7 +1,7 @@
 import { jsonMd_obj } from '@prism-ai/shared';
 import { StructuredOutputParser } from 'langchain/output_parsers';
 import z from 'zod';
-import { ChainService } from '../chain/chain.service';
+import { WithFormfixChain } from '../chain/abstract';
 
 /**
  * 一个更健壮的结构化输出解析器，用于解析LLM的输出。尤其是deepseek模型的输出,它极其执着于返回markdown格式的json块。
@@ -13,14 +13,14 @@ export class RubustStructuredOutputParser<
 > extends StructuredOutputParser<T> {
 	constructor(
 		schema: T,
-		private readonly chainService: ChainService
+		private readonly chainService: WithFormfixChain
 	) {
 		super(schema);
 	}
 
 	static from<T extends z.ZodTypeAny>(
 		schema: T,
-		chainService: ChainService
+		chainService: WithFormfixChain
 	): RubustStructuredOutputParser<T> {
 		return new RubustStructuredOutputParser(schema, chainService);
 	}

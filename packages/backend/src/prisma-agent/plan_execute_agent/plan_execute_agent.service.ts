@@ -1,10 +1,10 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { Runnable, RunnableSequence } from '@langchain/core/runnables';
 import { MemorySaver } from '@langchain/langgraph';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ProjectDto } from '@prism-ai/shared';
 import { z } from 'zod';
-import { ChainService } from '../../chain/chain.service';
+import { WithFormfixChain } from '../../chain/abstract';
 import { ModelService } from '../../model/model.service';
 import { RubustStructuredOutputParser } from '../../utils/RubustStructuredOutputParser';
 import { Reflection } from '../types';
@@ -36,7 +36,8 @@ export class PlanExecuteAgentService {
 
 	constructor(
 		private readonly modelService: ModelService,
-		private readonly chainService: ChainService
+		@Inject(WithFormfixChain)
+		private readonly chainService: WithFormfixChain
 	) {
 		const checkpointer = new MemorySaver();
 		const checkpointer2 = new MemorySaver();

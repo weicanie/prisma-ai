@@ -23,8 +23,6 @@ import {
 	ReviewType,
 	RunningConfig
 } from './types';
-//TODO 将原来的llm调用升级成Agent调用,知识库集成、human review、反思
-//TODO 简历灵感菇 -> doro
 //TODO 通过mcp server 调用 cursor 的Agent
 
 const outputDir = path.resolve(process.cwd(), 'agent_output');

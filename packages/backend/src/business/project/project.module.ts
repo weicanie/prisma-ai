@@ -1,4 +1,4 @@
-import { forwardRef, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as bodyParser from 'body-parser';
 import { ChainModule } from '../../chain/chain.module';
@@ -6,6 +6,7 @@ import { EventBusModule } from '../../EventBus/event-bus.module';
 import { PrismaAgentModule } from '../../prisma-agent/prisma-agent.module';
 import { RedisModule } from '../../redis/redis.module';
 import { TaskQueueModule } from '../../task-queue/task-queue.module';
+import { SkillModule } from '../skill/skill.module';
 import { SseModule } from '../sse/sse.module';
 import { Project, ProjectSchema } from './entities/project.entity';
 import { ProjectMined, ProjectMinedSchema } from './entities/projectMined.entity';
@@ -20,12 +21,13 @@ import { ProjectService } from './project.service';
 	exports: [ProjectService, ProjectImplementService, ProjectProcessService],
 	//Schema 注入模块作为 Model,然后实例化以操控mongodb数据库
 	imports: [
-		forwardRef(() => ChainModule),
-		forwardRef(() => EventBusModule),
+		ChainModule,
+		EventBusModule,
 		RedisModule,
-		forwardRef(() => TaskQueueModule),
-		forwardRef(() => SseModule),
-		forwardRef(() => PrismaAgentModule),
+		TaskQueueModule,
+		SseModule,
+		SkillModule,
+		PrismaAgentModule,
 		MongooseModule.forFeature([
 			{ name: Project.name, schema: ProjectSchema },
 			{ name: ProjectPolished.name, schema: ProjectPolishedSchema },

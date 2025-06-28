@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
 	JobVo,
@@ -20,11 +20,12 @@ import { from, mergeMap } from 'rxjs';
 import { ChainService } from '../../chain/chain.service';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { RedisService } from '../../redis/redis.service';
+import { DeepSeekStreamChunk } from '../../type/sse';
 import { PopulateFields } from '../../utils/type';
 import { Job, JobDocument } from '../job/entities/job.entity';
 import { JobService } from '../job/job.service';
 import { Project, ProjectDocument } from '../project/entities/project.entity';
-import { DeepSeekStreamChunk, ProjectService } from '../project/project.service';
+import { ProjectService } from '../project/project.service';
 import { Skill, SkillDocument } from '../skill/entities/skill.entity';
 import { SkillService } from '../skill/skill.service';
 import { LLMSseService, redisStoreResult } from '../sse/llm-sse.service';
@@ -32,7 +33,8 @@ import { CreateResumeDto } from './dto/create-resume.dto';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import { Resume, ResumeDocument } from './entities/resume.entity';
 import { ResumeMatched, ResumeMatchedDocument } from './entities/resumeMatched.entity';
-
+//TODO 学习路线CRUD
+//* 简历版本控制,数组 {版本号, changelog},仿git即可
 @Injectable()
 export class ResumeService {
 	@InjectModel(Resume.name)
@@ -50,19 +52,19 @@ export class ResumeService {
 		resumeMatchJob: 'resumeMatchJob'
 	};
 
+	public methodPool = {
+		resumeMatchJob: this.resumeMatchJob
+	};
+
 	logger: Logger;
 
 	constructor(
 		public chainService: ChainService,
 		public eventBusService: EventBusService,
 		public redisService: RedisService,
-		@Inject(forwardRef(() => ProjectService))
 		private readonly projectService: ProjectService,
-		@Inject(forwardRef(() => JobService))
 		private readonly jobService: JobService,
-		@Inject(forwardRef(() => SkillService))
 		private readonly skillService: SkillService,
-		@Inject(forwardRef(() => LLMSseService))
 		public LLMSseService: LLMSseService
 	) {}
 
@@ -70,11 +72,10 @@ export class ResumeService {
 		if (recover) {
 			return this.LLMSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);
 		}
-		return this.LLMSseService.handleSseRequestAndResponse(
-			sessionId,
-			userInfo,
-			this.methodKeys.resumeMatchJob
-		);
+		return this.LLMSseService.handleSseRequestAndResponse(sessionId, userInfo, {
+			funcKey: this.methodKeys.resumeMatchJob,
+			funcPool: this.methodPool
+		});
 	}
 
 	async resumeMatchJob(input: MatchJobDto, userInfo: UserInfoFromToken, taskId: string) {

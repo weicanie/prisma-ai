@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { lookupResultSchema, ProjectStatus, ProjectVo, UserInfoFromToken } from '@prism-ai/shared';
 import { Model } from 'mongoose';
@@ -14,17 +14,6 @@ import { ProjectPolished, ProjectPolishedDocument } from './entities/projectPoli
 
 //FIXME 用validation pipe 结合 zodSchema生成的 dto验证用户上传的数据格式
 // 其它用于验证llm生成的数据格式和指定数据格式
-
-export interface DeepSeekStreamChunk {
-	id: string;
-	content: string | ''; //生成内容
-	additional_kwargs: {
-		reasoning_content: string | null; //推理内容
-	};
-	tool_calls: [];
-	tool_call_chunks: [];
-	invalid_tool_calls: [];
-}
 
 @Injectable()
 export class ProjectService {
@@ -43,7 +32,6 @@ export class ProjectService {
 		public chainService: ChainService,
 		public eventBusService: EventBusService,
 		public redisService: RedisService,
-		@Inject(forwardRef(() => LLMSseService))
 		public LLMSseService: LLMSseService,
 		public projectChainService: ProjectChainService
 	) {}

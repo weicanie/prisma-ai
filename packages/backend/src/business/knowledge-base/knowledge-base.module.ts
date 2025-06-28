@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { OssModule } from '../../oss/oss.module';
 import { PrismaAgentModule } from '../../prisma-agent/prisma-agent.module';
@@ -10,7 +10,7 @@ import { KnowledgebaseService } from './knowledge-base.service';
 	imports: [
 		MongooseModule.forFeature([{ name: Knowledgebase.name, schema: KnowledgebaseSchema }]),
 		OssModule,
-		forwardRef(() => PrismaAgentModule)
+		PrismaAgentModule
 	],
 	controllers: [KnowledgebaseController],
 	providers: [KnowledgebaseService],

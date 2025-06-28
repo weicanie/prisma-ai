@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { StreamingChunk } from '@prism-ai/shared';
-import { PersistentTask } from '../task-queue/task-queue.service';
+import { PersistentTask } from '../type/taskqueue';
 import { EventBus } from './EventBus';
 /* 事件名列表 */
 export enum EventList {

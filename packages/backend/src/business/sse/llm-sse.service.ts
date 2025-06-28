@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
 	DataChunkErrVO,
 	DataChunkVO,
@@ -11,15 +11,23 @@ import { catchError, mergeMap, Observable, timeout } from 'rxjs';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { RedisService } from '../../redis/redis.service';
 import { LLMSseSessionPoolService } from '../../session/llm-sse-session-pool.service';
-import { PersistentTask, TaskQueueService, TaskStatus } from '../../task-queue/task-queue.service';
-import { ProjectProcessService } from '../project/project-process.service';
-import { ProjectService } from '../project/project.service';
-import { ResumeService } from '../resume/resume.service';
+import { TaskQueueService } from '../../task-queue/task-queue.service';
+import { PersistentTask, TaskStatus } from '../../type/taskqueue';
 import { LLMCacheService } from './LLMCache.service';
 /**
  * sse返回LLM生成内容的任务
  */
-interface LLMSseTask extends PersistentTask {}
+interface LLMSseTask extends PersistentTask {
+	metadata: {
+		funcKey: string;
+		/**
+		 * 用于通过funcKey找到对应的函数
+		 * 该函数即为流式数据源
+		 */
+		funcPool: Record<string, SseFunc>;
+		cancelFn?: () => void;
+	};
+}
 /**
  * LLM生成的chunk
  */
@@ -54,13 +62,8 @@ export type SseFunc = (
  * 其中func参数返回流式数据的且返回的chunk转换为LLMStreamingChunk即可
  */
 @Injectable()
-export class LLMSseService implements OnApplicationBootstrap {
+export class LLMSseService {
 	private readonly logger = new Logger(LLMSseService.name);
-
-	/**
-	 * 任务metadata指定funcKey,任务处理其会执行其指定的函数
-	 */
-	funcPool: Record<string, SseFunc> = {};
 
 	/**
 	 * 存储每个任务的chunk数组池
@@ -80,14 +83,7 @@ export class LLMSseService implements OnApplicationBootstrap {
 		private eventBusService: EventBusService,
 		private redisService: RedisService,
 		private readonly sessionPool: LLMSseSessionPoolService,
-		private readonly llmCache: LLMCacheService,
-		/* 模块间的 Provider 循环依赖,模块之间和 Provider 之间都需要 forwardRef */
-		@Inject(forwardRef(() => ProjectService))
-		public projectService: ProjectService,
-		@Inject(forwardRef(() => ResumeService))
-		public resumeService: ResumeService,
-		@Inject(forwardRef(() => ProjectProcessService))
-		public projectProcessService: ProjectProcessService
+		private readonly llmCache: LLMCacheService
 	) {
 		/* 注册任务处理器 */
 		try {
@@ -97,20 +93,6 @@ export class LLMSseService implements OnApplicationBootstrap {
 			throw error;
 		}
 		this.logger.log(`SSE任务处理器已注册: ${this.taskType.project}`);
-	}
-
-	onApplicationBootstrap() {
-		/* 注册任务处理器内调用的业务函数 */
-		//project
-		this.funcPool[this.projectProcessService.methodKeys.lookupProject] =
-			this.projectProcessService.lookupProject.bind(this.projectProcessService);
-		this.funcPool[this.projectProcessService.methodKeys.polishProject] =
-			this.projectProcessService.polishProject.bind(this.projectProcessService);
-		this.funcPool[this.projectProcessService.methodKeys.mineProject] =
-			this.projectProcessService.mineProject.bind(this.projectProcessService);
-		//resume
-		this.funcPool[this.resumeService.methodKeys.resumeMatchJob] =
-			this.resumeService.resumeMatchJob.bind(this.resumeService);
 	}
 
 	/* sse数据推送任务处理器
@@ -129,7 +111,7 @@ export class LLMSseService implements OnApplicationBootstrap {
 			throw new Error('会话上下文不完整，请先创建会话');
 		}
 		/* 调用llm开启流式传输 */
-		const func: SseFunc = this.funcPool[metadata.funcKey];
+		const func: SseFunc = metadata.funcPool[metadata.funcKey];
 		const observable = await func(
 			context.input,
 			context.userInfo!,
@@ -265,13 +247,13 @@ export class LLMSseService implements OnApplicationBootstrap {
 	private async createAndEnqueueTaskProject(
 		sessionId: string,
 		userInfo: UserInfoFromToken,
-		funcKey: string
+		metadata: LLMSseTask['metadata']
 	) {
 		const task = await this.taskQueueService.createAndEnqueueTask(
 			sessionId,
 			userInfo.userId,
 			this.taskType.project,
-			{ funcKey } //流式数据源,函数
+			metadata
 		);
 		return task;
 	}
@@ -306,7 +288,7 @@ export class LLMSseService implements OnApplicationBootstrap {
 	async handleSseRequestAndResponse(
 		sessionId: string,
 		userInfo: UserInfoFromToken,
-		funcKey: string
+		metadata: LLMSseTask['metadata']
 	) {
 		/* 1、检查是否已建立会话 */
 		const existingSession = await this.sessionPool.getSession(sessionId);
@@ -351,7 +333,7 @@ export class LLMSseService implements OnApplicationBootstrap {
 		}
 
 		/* 3、创建task并入队 */
-		const task = await this.createAndEnqueueTaskProject(sessionId, userInfo, funcKey);
+		const task = await this.createAndEnqueueTaskProject(sessionId, userInfo, metadata);
 
 		/* 4、订阅任务的chunk生成事件并返回数据 */
 		return new Observable<DataChunkVO>(subscriber => {

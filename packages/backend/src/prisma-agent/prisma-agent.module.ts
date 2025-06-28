@@ -31,9 +31,9 @@ import { ReflectAgentService } from './reflect_agent/reflect_agent.service';
 		PromptModule,
 		ClientModule,
 		VectorStoreModule,
-		forwardRef(() => TaskQueueModule),
 		OssModule,
-		forwardRef(() => EventBusModule),
+		EventBusModule,
+		TaskQueueModule,
 		forwardRef(() => ChainModule)
 	],
 	exports: [

@@ -4,7 +4,8 @@ import { CreateJobDto } from '@prism-ai/shared';
 import { Model } from 'mongoose';
 import * as puppeteer from 'puppeteer';
 import { ChainService } from '../../chain/chain.service';
-import { PersistentTask, TaskQueueService } from '../../task-queue/task-queue.service';
+import { TaskQueueService } from '../../task-queue/task-queue.service';
+import { PersistentTask } from '../../type/taskqueue';
 import { StartCrawlDto } from './dto/start-crawl.dto';
 import { Job, JobDocument } from './entities/job.entity';
 

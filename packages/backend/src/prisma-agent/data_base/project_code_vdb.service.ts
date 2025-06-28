@@ -5,7 +5,8 @@ import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import * as path from 'path';
 import Parser from 'tree-sitter';
 import { ModelService } from '../../model/model.service';
-import { PersistentTask, TaskQueueService } from '../../task-queue/task-queue.service';
+import { TaskQueueService } from '../../task-queue/task-queue.service';
+import { PersistentTask } from '../../type/taskqueue';
 import { VectorStoreService } from '../../vector-store/vector-store.service';
 
 /**

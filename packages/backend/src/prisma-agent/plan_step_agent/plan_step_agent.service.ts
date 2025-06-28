@@ -6,10 +6,10 @@ import {
 	RunnableSequence
 } from '@langchain/core/runnables';
 import { MemorySaver } from '@langchain/langgraph';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ProjectDto } from '@prism-ai/shared';
 import { z } from 'zod';
-import { ChainService } from '../../chain/chain.service';
+import { WithFormfixChain } from '../../chain/abstract';
 import { ModelService } from '../../model/model.service';
 import { RubustStructuredOutputParser } from '../../utils/RubustStructuredOutputParser';
 import { ReflectAgentService } from '../reflect_agent/reflect_agent.service';
@@ -73,7 +73,8 @@ export class PlanStepAgentService {
 	constructor(
 		private readonly modelService: ModelService,
 		private readonly reflectAgentService: ReflectAgentService,
-		private readonly chainService: ChainService
+		@Inject(WithFormfixChain)
+		private readonly chainService: WithFormfixChain
 	) {
 		const checkpointer = new MemorySaver();
 		this.workflow = PlanStepGraph.compile({ checkpointer });

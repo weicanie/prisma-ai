@@ -5,7 +5,7 @@ import { ChatDeepSeek } from '@langchain/deepseek';
 import { Annotation } from '@langchain/langgraph';
 import { ChatOpenAI } from '@langchain/openai';
 import z from 'zod';
-import { retrievalGraderSchema } from './c_retrieve_agent.service';
+import { retrievalGraderSchema } from './type';
 
 // 表示我们图的状态。
 export const GraphState = Annotation.Root({

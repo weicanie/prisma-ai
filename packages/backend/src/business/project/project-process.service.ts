@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
 	jsonMd_obj,
@@ -21,11 +21,13 @@ import { ChainService } from '../../chain/chain.service';
 import { ProjectChainService } from '../../chain/project-chain.service';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { RedisService } from '../../redis/redis.service';
+import { DeepSeekStreamChunk } from '../../type/sse';
+import { SkillService } from '../skill/skill.service';
 import { LLMSseService, redisStoreResult } from '../sse/llm-sse.service';
 import { Project, ProjectDocument } from './entities/project.entity';
 import { ProjectMined, ProjectMinedDocument } from './entities/projectMined.entity';
 import { ProjectPolished, ProjectPolishedDocument } from './entities/projectPolished.entity';
-import { DeepSeekStreamChunk, ProjectService } from './project.service';
+import { ProjectService } from './project.service';
 
 @Injectable()
 export class ProjectProcessService {
@@ -44,15 +46,20 @@ export class ProjectProcessService {
 	};
 	logger = new Logger(ProjectProcessService.name);
 
+	public methodPool = {
+		polishProject: this.polishProject,
+		mineProject: this.mineProject,
+		lookupProject: this.lookupProject
+	};
+
 	constructor(
 		public chainService: ChainService,
 		public projectChainService: ProjectChainService,
 		public eventBusService: EventBusService,
 		public redisService: RedisService,
-		@Inject(forwardRef(() => LLMSseService))
 		public LLMSseService: LLMSseService,
-		@Inject(forwardRef(() => ProjectService))
-		public projectService: ProjectService
+		public projectService: ProjectService,
+		public skillService: SkillService
 	) {}
 
 	/**
@@ -62,11 +69,10 @@ export class ProjectProcessService {
 		if (recover) {
 			return this.LLMSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);
 		}
-		return this.LLMSseService.handleSseRequestAndResponse(
-			sessionId,
-			userInfo,
-			this.methodKeys.lookupProject
-		);
+		return this.LLMSseService.handleSseRequestAndResponse(sessionId, userInfo, {
+			funcKey: this.methodKeys.lookupProject,
+			funcPool: this.methodPool
+		});
 	}
 
 	/**
@@ -76,11 +82,10 @@ export class ProjectProcessService {
 		if (recover) {
 			return this.LLMSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);
 		}
-		return this.LLMSseService.handleSseRequestAndResponse(
-			sessionId,
-			userInfo,
-			this.methodKeys.polishProject
-		);
+		return this.LLMSseService.handleSseRequestAndResponse(sessionId, userInfo, {
+			funcKey: this.methodKeys.polishProject,
+			funcPool: this.methodPool
+		});
 	}
 
 	/**
@@ -90,11 +95,10 @@ export class ProjectProcessService {
 		if (recover) {
 			return this.LLMSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);
 		}
-		return this.LLMSseService.handleSseRequestAndResponse(
-			sessionId,
-			userInfo,
-			this.methodKeys.mineProject
-		);
+		return this.LLMSseService.handleSseRequestAndResponse(sessionId, userInfo, {
+			funcKey: this.methodKeys.mineProject,
+			funcPool: this.methodPool
+		});
 	}
 
 	/**
@@ -498,7 +502,7 @@ export class ProjectProcessService {
 				});
 		});
 
-		const chain = await this.projectChainService.mineChain(true, userInfo);
+		const chain = await this.projectChainService.mineChain(true, userInfo, this.skillService);
 		let projectMined = await chain.stream({
 			project,
 			userInfo,

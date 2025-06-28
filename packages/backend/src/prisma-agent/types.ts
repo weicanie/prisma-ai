@@ -1,14 +1,21 @@
-import { Runnable } from '@langchain/core/runnables';
-import { ProjectDto } from '@prism-ai/shared';
+import { type Runnable } from '@langchain/core/runnables';
+import { type ProjectDto } from '@prism-ai/shared';
 import { z } from 'zod';
-import { EventBusService } from '../EventBus/event-bus.service';
-import { CRetrieveAgentService } from './c_retrieve_agent/c_retrieve_agent.service';
-import { KnowledgeVDBService } from './data_base/konwledge_vdb.service';
-import { ProjectCodeVDBService } from './data_base/project_code_vdb.service';
-import { PlanExecuteAgentService } from './plan_execute_agent/plan_execute_agent.service';
-import { PlanStepAgentService } from './plan_step_agent/plan_step_agent.service';
-import { ReflectAgentService, reflectionSchema } from './reflect_agent/reflect_agent.service';
-
+import { type EventBusService } from '../EventBus/event-bus.service';
+import { type CRetrieveAgentService } from './c_retrieve_agent/c_retrieve_agent.service';
+import { type KnowledgeVDBService } from './data_base/konwledge_vdb.service';
+import { type ProjectCodeVDBService } from './data_base/project_code_vdb.service';
+import { type PlanExecuteAgentService } from './plan_execute_agent/plan_execute_agent.service';
+import { type PlanStepAgentService } from './plan_step_agent/plan_step_agent.service';
+import { type ReflectAgentService } from './reflect_agent/reflect_agent.service';
+/**
+ * @description 反思的结构化输出Zod Schema
+ */
+export const reflectionSchema = z.object({
+	evaluation: z.string().describe('对输入内容的总体评价'),
+	critique: z.string().describe('具体的批评，指出哪些地方做得不好或不应该做'),
+	advice: z.string().describe('具体的改进建议，指出应该如何修改或应该做什么')
+});
 type ChainReturned<T extends (...args: any) => Runnable> = T extends (...args: any) => infer R
 	? R
 	: never;

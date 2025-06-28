@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ProjectVo } from '@prism-ai/shared';
 import { PrismaAgentService } from '../../prisma-agent/prisma-agent.service';
-import { PersistentTask, TaskQueueService } from '../../task-queue/task-queue.service';
+import { TaskQueueService } from '../../task-queue/task-queue.service';
+import { PersistentTask } from '../../type/taskqueue';
 
 interface LightspotImplementTask extends PersistentTask {
 	metadata: {

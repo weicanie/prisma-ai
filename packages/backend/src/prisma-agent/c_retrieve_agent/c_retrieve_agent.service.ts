@@ -1,31 +1,14 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { RunnableSequence } from '@langchain/core/runnables';
+import { VectorStoreRetriever } from '@langchain/core/vectorstores';
 import { ChatOpenAI } from '@langchain/openai';
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { formatDocumentsAsString } from 'langchain/util/document';
-import z from 'zod';
-import { ChainService } from '../../chain/chain.service';
+import { WithFormfixChain } from '../../chain/abstract';
 import { ModelService } from '../../model/model.service';
 import { RubustStructuredOutputParser } from '../../utils/RubustStructuredOutputParser';
-import { KnowledgeIndex, KnowledgeVDBService } from '../data_base/konwledge_vdb.service';
 import { CRAGGraph } from './node_edge_graph';
-
-export const retrievalGraderSchema = z
-	.object({
-		score: z
-			.number()
-			.min(1)
-			.max(10)
-			.describe('文档与问题的相关性评分，1表示不相关，10表示非常相关。'),
-		justification: z.string().describe('评分的简要理由。')
-	})
-	.describe('对检索到的文档与问题的相关性进行评分的工具。');
-
-export const rewriteQuerySchema = z.object({
-	rewrittenQuery: z
-		.string()
-		.describe('为搜索引擎重写的简洁、关键词驱动的查询语句。输出最佳语句(1条)')
-});
+import { retrievalGraderSchema, rewriteQuerySchema } from './type';
 
 /**
  * 按CRAG Agent的思路，检索知识库，并返回评估、精炼、网络搜索补充后的文档
@@ -39,9 +22,8 @@ export class CRetrieveAgentService {
 
 	constructor(
 		private readonly modelService: ModelService,
-		@Inject(forwardRef(() => KnowledgeVDBService))
-		private readonly knowledgeVDBService: KnowledgeVDBService,
-		private readonly chainService: ChainService
+		@Inject(WithFormfixChain)
+		private readonly chainService: WithFormfixChain
 	) {
 		this.workflow = CRAGGraph.compile();
 	}
@@ -54,8 +36,8 @@ export class CRetrieveAgentService {
 	 * @param topK - 每次检索的召回数量
 	 * @returns
 	 */
-	async invoke(question: string, prefix: KnowledgeIndex, userId: string, topK: number) {
-		const retriever = await this.knowledgeVDBService.getRetriever(prefix, userId, topK);
+	async invoke(question: string, retriever: VectorStoreRetriever) {
+		// const retriever = await this.knowledgeVDBService.getRetriever(prefix, userId, topK);
 		const model = this.modelService.getLLMDeepSeekRaw('deepseek-chat') as ChatOpenAI;
 		const result = await this.workflow.invoke(
 			{

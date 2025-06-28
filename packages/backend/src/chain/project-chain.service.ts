@@ -14,14 +14,12 @@ import {
 	UserInfoFromToken
 } from '@prism-ai/shared';
 import { z } from 'zod';
-import { DeepSeekStreamChunk } from '../business/project/project.service';
-import { SkillService } from '../business/skill/skill.service';
 import { ModelService } from '../model/model.service';
 import { KnowledgeVDBService } from '../prisma-agent/data_base/konwledge_vdb.service';
 import { ProjectCodeVDBService } from '../prisma-agent/data_base/project_code_vdb.service';
-import { PrismaAgentService } from '../prisma-agent/prisma-agent.service';
 import { ReflectAgentService } from '../prisma-agent/reflect_agent/reflect_agent.service';
 import { PromptService } from '../prompt/prompt.service';
+import { DeepSeekStreamChunk } from '../type/sse';
 import { RubustStructuredOutputParser } from '../utils/RubustStructuredOutputParser';
 import { ChainService } from './chain.service';
 
@@ -46,11 +44,9 @@ export class ProjectChainService {
 		public modelService: ModelService,
 		public promptService: PromptService,
 		public chainService: ChainService,
-		public prismaAgentService: PrismaAgentService,
 		private readonly knowledgeVDBService: KnowledgeVDBService,
 		private readonly projectCodeVDBService: ProjectCodeVDBService,
-		private readonly reflectAgentService: ReflectAgentService,
-		private readonly skillService: SkillService
+		private readonly reflectAgentService: ReflectAgentService
 	) {}
 
 	/**
@@ -226,11 +222,13 @@ export class ProjectChainService {
 
 	async mineChain(
 		stream: true,
-		userInfo: UserInfoFromToken
+		userInfo: UserInfoFromToken,
+		skillService: any
 	): Promise<RunnableSequence<ProjectProcessingInput, DeepSeekStreamChunk>>;
 	async mineChain(
 		stream: false,
-		userInfo: UserInfoFromToken
+		userInfo: UserInfoFromToken,
+		skillService: any
 	): Promise<
 		RunnableSequence<
 			ProjectProcessingInput,
@@ -243,11 +241,11 @@ export class ProjectChainService {
 	 * @description 集成了知识库检索和用户反馈反思功能
 	 * @param stream - 是否以流式模式返回
 	 */
-	async mineChain(stream = false, userInfo: UserInfoFromToken) {
+	async mineChain(stream = false, userInfo: UserInfoFromToken, skillService: any) {
 		const schema = projectMinedSchema;
 		const schema0 = projectSchema;
 		//只取第一个用户技能
-		let userSkills = await this.skillService.findAll(userInfo);
+		let userSkills = await skillService.findAll(userInfo);
 		const userSkillsMd = skillsToMarkdown(userSkills[0]);
 		const promptTemplate = (await this.promptService.minePrompt()).partial({
 			userSkills: userSkillsMd

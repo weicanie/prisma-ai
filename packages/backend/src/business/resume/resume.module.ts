@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ChainModule } from '../../chain/chain.module';
 import { EventBusModule } from '../../EventBus/event-bus.module';
@@ -24,14 +24,13 @@ import { ResumeService } from './resume.service';
 			{ name: ResumeMatched.name, schema: ResumeMatchedSchema },
 			{ name: Job.name, schema: JobSchema }
 		]),
-		forwardRef(() => ProjectModule),
-		forwardRef(() => JobModule),
+		ProjectModule,
+		JobModule,
 		SkillModule,
-		forwardRef(() => ChainModule),
-
-		forwardRef(() => EventBusModule),
+		ChainModule,
+		EventBusModule,
 		RedisModule,
-		forwardRef(() => SseModule)
+		SseModule
 	],
 	controllers: [ResumeController],
 	providers: [ResumeService],

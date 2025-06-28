@@ -1,19 +1,11 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { Runnable, RunnableSequence } from '@langchain/core/runnables';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { z } from 'zod';
-import { ChainService } from '../../chain/chain.service';
+import { WithFormfixChain } from '../../chain/abstract';
 import { ModelService } from '../../model/model.service';
 import { RubustStructuredOutputParser } from '../../utils/RubustStructuredOutputParser';
-
-/**
- * @description 反思的结构化输出Zod Schema
- */
-export const reflectionSchema = z.object({
-	evaluation: z.string().describe('对输入内容的总体评价'),
-	critique: z.string().describe('具体的批评，指出哪些地方做得不好或不应该做'),
-	advice: z.string().describe('具体的改进建议，指出应该如何修改或应该做什么')
-});
+import { reflectionSchema } from '../types';
 
 export type Reflection = z.infer<typeof reflectionSchema>;
 /**
@@ -23,7 +15,8 @@ export type Reflection = z.infer<typeof reflectionSchema>;
 export class ReflectAgentService {
 	constructor(
 		private readonly modelService: ModelService,
-		private readonly chainService: ChainService
+		@Inject(WithFormfixChain)
+		private readonly chainService: WithFormfixChain
 	) {}
 
 	/**

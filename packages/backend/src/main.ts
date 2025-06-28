@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { AppModule } from './app.module';
-import { MCPClientService } from './mcp-client/mcp-client.service';
 import { TaskQueueService } from './task-queue/task-queue.service';
 
 async function bootstrap() {
@@ -13,8 +12,6 @@ async function bootstrap() {
 	const PORT = process.env.PORT ?? 3000;
 	await app.listen(PORT);
 	try {
-		const clientService = app.get(MCPClientService);
-		clientService.showUsage();
 		const taskQueueService = app.get(TaskQueueService);
 		// 启动时恢复队列状态 (暂时关闭，直到任务中止和去重功能实现)
 		// taskQueueService.initialize();
