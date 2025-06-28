@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0](https://github.com/weicanie/prisma-ai/compare/v1.0.0...v2.0.0) (2025-06-28)
+
+### Features
+
+- 实现项目亮点实现Agent ([7f5bfd1](https://github.com/weicanie/prisma-ai/commit/7f5bfd1fbf2e2220f4679e5684e38b331e23cf73))
+- 提供agent配置功能 ([fdc0a6f](https://github.com/weicanie/prisma-ai/commit/fdc0a6f624f7d8aef85bea76a0b74ecd20f79c46))
+- 完善项目需求实现Agent ([81b79f2](https://github.com/weicanie/prisma-ai/commit/81b79f2369cda0c33d38fb1a837cb1b344388ceb))
+- 项目经验处理流程升级的前端实现 ([529e43e](https://github.com/weicanie/prisma-ai/commit/529e43e3e485d1cbc3f51478513d275a942f6667))
+- 优化了职业技能表单的交互 ([9a479d7](https://github.com/weicanie/prisma-ai/commit/9a479d78ccadfc87bd74c911723b47037b4fdc3d))
+- 知识库、Agent完善 ([5d94151](https://github.com/weicanie/prisma-ai/commit/5d941517ed1e83c79a7cad0f399d32f65ee48115))
+- ai聊天功能 ([5301f42](https://github.com/weicanie/prisma-ai/commit/5301f4293857ef7fa49d33b402d33b940bdce3ea))
+
 # 1.0.0 (2025-06-15)
 
 ### Bug Fixes
