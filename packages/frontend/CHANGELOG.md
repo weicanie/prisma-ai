@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.1.0](https://github.com/weicanie/prisma-ai/compare/v2.0.0...v2.1.0) (2025-06-30)
+
+### Bug Fixes
+
+- type error ([2f756ab](https://github.com/weicanie/prisma-ai/commit/2f756ab8a06d37470d65cb29e77ee3ff7c17485d))
+
+### Features
+
+- v2更新、完善 ([c3337df](https://github.com/weicanie/prisma-ai/commit/c3337df125184f88b9b370fcf8493db85b965c59))
+
 # [2.0.0](https://github.com/weicanie/prisma-ai/compare/v1.0.0...v2.0.0) (2025-06-28)
 
 ### Features
