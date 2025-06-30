@@ -46,13 +46,13 @@ const knowledgeFormSchema = z.object({
 	tag: z.array(z.string()).min(1, '至少需要添加一个标签'),
 	type: z.enum(
 		[
-			'userProjectDoc',
-			'userProjectCode',
-			'openSourceProjectDoc',
-			'openSourceProjectRepo',
-			'techDoc',
-			'interviewQuestion',
-			'other'
+			KnowledgeTypeEnum.userProjectDoc,
+			KnowledgeTypeEnum.userProjectCode,
+			KnowledgeTypeEnum.openSourceProjectDoc,
+			KnowledgeTypeEnum.openSourceProjectRepo,
+			KnowledgeTypeEnum.techDoc,
+			KnowledgeTypeEnum.interviewQuestion,
+			KnowledgeTypeEnum.other
 		],
 		{
 			required_error: '请选择知识类型'
@@ -72,7 +72,7 @@ export const KnowledgeForm = memo(() => {
 			name: knowledgeData.name || '',
 			fileType: knowledgeData.fileType || 'txt',
 			tag: knowledgeData.tag || [],
-			type: knowledgeData.type as `${KnowledgeTypeEnum}`,
+			type: knowledgeData.type as KnowledgeTypeEnum,
 			content: knowledgeData.content || ''
 		}
 	});

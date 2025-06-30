@@ -1,4 +1,4 @@
-import { type CreateKnowledgeDto } from '@prism-ai/shared';
+import { KnowledgeTypeEnum, type CreateKnowledgeDto } from '@prism-ai/shared';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 interface KnowledgeState {
@@ -10,7 +10,7 @@ const initialState: KnowledgeState = {
 		name: '',
 		fileType: 'txt',
 		tag: [],
-		type: 'other',
+		type: KnowledgeTypeEnum.other,
 		content: ''
 	}
 };
