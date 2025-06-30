@@ -1,10 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import {
 	DataChunkErrVO,
 	DataChunkVO,
 	LLMSessionRequest,
-	StreamingChunk,
-	UserFeedback,
 	UserInfoFromToken
 } from '@prism-ai/shared';
 import { catchError, mergeMap, Observable, timeout } from 'rxjs';
@@ -13,6 +11,8 @@ import { RedisService } from '../../redis/redis.service';
 import { LLMSseSessionPoolService } from '../../session/llm-sse-session-pool.service';
 import { TaskQueueService } from '../../task-queue/task-queue.service';
 import { PersistentTask, TaskStatus } from '../../type/taskqueue';
+import { WithFuncPool } from '../../utils/abstract';
+import { LLMStreamingChunk, SseFunc } from '../../utils/type';
 import { LLMCacheService } from './LLMCache.service';
 /**
  * sse返回LLM生成内容的任务
@@ -24,14 +24,11 @@ interface LLMSseTask extends PersistentTask {
 		 * 用于通过funcKey找到对应的函数
 		 * 该函数即为流式数据源
 		 */
-		funcPool: Record<string, SseFunc>;
+		poolName: string;
 		cancelFn?: () => void;
 	};
 }
-/**
- * LLM生成的chunk
- */
-interface LLMStreamingChunk extends StreamingChunk {}
+
 /**
  * redis中结果的存储形式
  */
@@ -42,15 +39,6 @@ export interface redisStoreResult {
 	isReasoning?: boolean; // 是否是推理阶段
 }
 
-/**
- * 返回sse数据的函数
- */
-export type SseFunc = (
-	input: any,
-	userInfo: UserInfoFromToken,
-	taskId: string,
-	userFeedback: UserFeedback
-) => Promise<Observable<LLMStreamingChunk>>;
 /* 
 
 */
@@ -62,7 +50,7 @@ export type SseFunc = (
  * 其中func参数返回流式数据的且返回的chunk转换为LLMStreamingChunk即可
  */
 @Injectable()
-export class LLMSseService {
+export class LLMSseService implements OnModuleInit {
 	private readonly logger = new Logger(LLMSseService.name);
 
 	/**
@@ -78,12 +66,19 @@ export class LLMSseService {
 		project: 'sse_llm'
 	};
 
+	/**
+	 * 提供数据源函数的service
+	 */
+	pools: Record<string, WithFuncPool> = {};
+
 	constructor(
 		private taskQueueService: TaskQueueService,
 		private eventBusService: EventBusService,
 		private redisService: RedisService,
 		private readonly sessionPool: LLMSseSessionPoolService,
-		private readonly llmCache: LLMCacheService
+		private readonly llmCache: LLMCacheService,
+		@Inject('WithFuncPoolProjectProcess') private readonly withFuncPoolProjectProcess: WithFuncPool,
+		@Inject('WithFuncPoolResumeService') private readonly withFuncPoolResumeService: WithFuncPool
 	) {
 		/* 注册任务处理器 */
 		try {
@@ -93,6 +88,11 @@ export class LLMSseService {
 			throw error;
 		}
 		this.logger.log(`SSE任务处理器已注册: ${this.taskType.project}`);
+	}
+
+	onModuleInit() {
+		this.pools[this.withFuncPoolProjectProcess.poolName] = this.withFuncPoolProjectProcess;
+		this.pools[this.withFuncPoolResumeService.poolName] = this.withFuncPoolResumeService;
 	}
 
 	/* sse数据推送任务处理器
@@ -111,7 +111,7 @@ export class LLMSseService {
 			throw new Error('会话上下文不完整，请先创建会话');
 		}
 		/* 调用llm开启流式传输 */
-		const func: SseFunc = metadata.funcPool[metadata.funcKey];
+		const func: SseFunc = this.pools[metadata.poolName].funcPool[metadata.funcKey];
 		const observable = await func(
 			context.input,
 			context.userInfo!,

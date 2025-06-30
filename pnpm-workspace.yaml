@@ -2,3 +2,4 @@ packages:
   - 'packages/*'
 onlyBuiltDependencies:
   - sharp
+  - tree-sitter

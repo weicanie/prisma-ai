@@ -58,8 +58,10 @@ export function TeamSwitcher({
 						side={isMobile ? 'bottom' : 'right'}
 						sideOffset={4}
 					>
-						<DropdownMenuLabel className="text-xs text-muted-foreground">Prisma-AI产品</DropdownMenuLabel>
-						{teams.map((team, index) => (
+						<DropdownMenuLabel className="text-xs text-muted-foreground">
+							Prisma-AI产品
+						</DropdownMenuLabel>
+						{teams.map(team => (
 							<DropdownMenuItem
 								key={team.name}
 								onClick={() => setActiveTeam(team)}

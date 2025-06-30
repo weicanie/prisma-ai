@@ -18,7 +18,8 @@ export class LLMCacheService {
 		private readonly vectorStoreService: VectorStoreService,
 		private readonly redisService: RedisService
 	) {
-		this.initCacheIndex();
+		//不在计划中,腾出一个index
+		// this.initCacheIndex();
 	}
 
 	// 初始化缓存向量索引

@@ -28,6 +28,9 @@ services:
       - '3003:3003'
     volumes:
       - ./docker-data/nest-app/logs:/app/packages/backend/logs
+      - ./packages/backend/agent_output:/app/packages/backend/agent_output
+      - ./packages/backend/prisma_agent_config.json:/app/packages/backend/prisma_agent_config.json
+      - ./projects:/app/projects
   mysql-container:
     image: docker.1ms.run/library/mysql
     #占用的主机端口:网络内访问使用的端口
@@ -73,12 +76,14 @@ services:
       timeout: 5s
       retries: 5
   minio-container:
-    image: docker.1ms.run/bitnami/minio
+    image: docker.1ms.run/bitnami/minio:2025.4.3
     ports:
       - '9003:9000'
+      - '9004:9001'
     volumes:
       - ./docker-data/minio:/bitnami/minio/data
     restart: unless-stopped
+    user: root
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 10s
@@ -86,7 +91,9 @@ services:
       retries: 5
     environment:
       MINIO_ROOT_USER: admin
-      MINIO_ROOT_PASSWORD: admin123
+      MINIO_ROOT_PASSWORD: admin123.
+      MINIO_DEFAULT_BUCKETS: prisma-ai
+    command: server /bitnami/minio/data --console-address :9001
   nginx-container:
     image: docker.1ms.run/library/nginx:alpine
     ports:
@@ -102,5 +109,6 @@ services:
     restart: unless-stopped
     depends_on:
       - prisma-ai-backend
+      - minio-container
     
 #使用默认桥接网络

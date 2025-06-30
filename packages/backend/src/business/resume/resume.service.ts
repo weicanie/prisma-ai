@@ -21,14 +21,13 @@ import { ChainService } from '../../chain/chain.service';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { RedisService } from '../../redis/redis.service';
 import { DeepSeekStreamChunk } from '../../type/sse';
-import { PopulateFields } from '../../utils/type';
+import { WithFuncPool } from '../../utils/abstract';
+import { PopulateFields, SseFunc } from '../../utils/type';
 import { Job, JobDocument } from '../job/entities/job.entity';
 import { JobService } from '../job/job.service';
 import { Project, ProjectDocument } from '../project/entities/project.entity';
-import { ProjectService } from '../project/project.service';
 import { Skill, SkillDocument } from '../skill/entities/skill.entity';
-import { SkillService } from '../skill/skill.service';
-import { LLMSseService, redisStoreResult } from '../sse/llm-sse.service';
+import { redisStoreResult } from '../sse/llm-sse.service';
 import { CreateResumeDto } from './dto/create-resume.dto';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import { Resume, ResumeDocument } from './entities/resume.entity';
@@ -36,7 +35,7 @@ import { ResumeMatched, ResumeMatchedDocument } from './entities/resumeMatched.e
 //TODO 学习路线CRUD
 //* 简历版本控制,数组 {版本号, changelog},仿git即可
 @Injectable()
-export class ResumeService {
+export class ResumeService implements WithFuncPool {
 	@InjectModel(Resume.name)
 	private resumeModel: Model<ResumeDocument>;
 	@InjectModel(Project.name)
@@ -48,13 +47,13 @@ export class ResumeService {
 	@InjectModel(ResumeMatched.name)
 	private resumeMatchedModel: Model<ResumeMatchedDocument>;
 
-	public methodKeys = {
+	public funcKeys = {
 		resumeMatchJob: 'resumeMatchJob'
 	};
 
-	public methodPool = {
-		resumeMatchJob: this.resumeMatchJob
-	};
+	public funcPool: Record<string, SseFunc>;
+
+	poolName = 'ResumeService';
 
 	logger: Logger;
 
@@ -62,20 +61,11 @@ export class ResumeService {
 		public chainService: ChainService,
 		public eventBusService: EventBusService,
 		public redisService: RedisService,
-		private readonly projectService: ProjectService,
-		private readonly jobService: JobService,
-		private readonly skillService: SkillService,
-		public LLMSseService: LLMSseService
-	) {}
-
-	async SseMatchResult(sessionId: string, userInfo: UserInfoFromToken, recover: boolean) {
-		if (recover) {
-			return this.LLMSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);
-		}
-		return this.LLMSseService.handleSseRequestAndResponse(sessionId, userInfo, {
-			funcKey: this.methodKeys.resumeMatchJob,
-			funcPool: this.methodPool
-		});
+		private readonly jobService: JobService
+	) {
+		this.funcPool = {
+			resumeMatchJob: this.resumeMatchJob.bind(this)
+		};
 	}
 
 	async resumeMatchJob(input: MatchJobDto, userInfo: UserInfoFromToken, taskId: string) {

@@ -1,7 +1,7 @@
 import { jsonMd_obj } from '@prism-ai/shared';
 import { StructuredOutputParser } from 'langchain/output_parsers';
 import z from 'zod';
-import { WithFormfixChain } from '../chain/abstract';
+import { WithFormfixChain } from '../utils/abstract';
 
 /**
  * 一个更健壮的结构化输出解析器，用于解析LLM的输出。尤其是deepseek模型的输出,它极其执着于返回markdown格式的json块。
@@ -34,8 +34,10 @@ export class RubustStructuredOutputParser<
 				const result = await super.parse(jsonMd_obj(text));
 				return result;
 			} catch (_error) {
-				const errorMessage = JSON.stringify(error.format());
-				const fomartFixChain = await this.chainService.fomartFixChain(this.schema, errorMessage);
+				const fomartFixChain = await this.chainService.fomartFixChain(
+					this.schema,
+					'错误信息未提供'
+				);
 				const result = await fomartFixChain.invoke({ input: text });
 				return result;
 			}

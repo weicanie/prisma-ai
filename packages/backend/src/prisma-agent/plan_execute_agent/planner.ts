@@ -34,7 +34,7 @@ export async function uploadCode(
 	}
 
 	console.log('---NODE: UPLOAD CODE---');
-	const { projectPath, userId, projectInfo, sessionId = crypto.randomUUID() } = state;
+	const { projectPath, userId, projectInfo } = state;
 	const { projectCodeVDBService, eventBusService } = config.configurable;
 
 	if (!projectPath) throw new Error('Project path is not set');
@@ -44,9 +44,9 @@ export async function uploadCode(
 
 	const task = await projectCodeVDBService.storeToVDB(
 		userId,
-		projectInfo.info.name,
+		projectInfo!.info.name,
 		projectPath,
-		sessionId
+		crypto.randomUUID()
 	);
 	console.log('---CODE UPLOAD AND EMBEDDING STARTED---');
 
@@ -96,12 +96,12 @@ export async function retrieveNode(
 			projectName
 		),
 		agentConfig.CRAG
-			? knowledgeVDBService.retrieveCodeAndDoc_CRAG(
+			? knowledgeVDBService.retrieveKonwbase_CRAG(
 					lightSpot,
 					agentConfig.topK.plan.knowledge,
 					userId
 				)
-			: knowledgeVDBService.retrieveCodeAndDoc(lightSpot, agentConfig.topK.plan.knowledge, userId)
+			: knowledgeVDBService.retrieveKonwbase(lightSpot, agentConfig.topK.plan.knowledge, userId)
 	]);
 
 	console.log(

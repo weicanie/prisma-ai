@@ -180,6 +180,7 @@ export const OriginalProject: React.FC<OriginalProjectProps> = ({
 											isDark={isDark}
 											resultData={projectData.lookupResult}
 											mergedData={null}
+											handleFeedback={() => {}}
 										/>
 									</>
 								)}

@@ -53,12 +53,12 @@ async function retrieveNode(
 			projectName
 		),
 		agentConfig.CRAG
-			? knowledgeVDBService.retrieveCodeAndDoc_CRAG(
+			? knowledgeVDBService.retrieveKonwbase_CRAG(
 					query,
 					agentConfig.topK.plan_step.knowledge,
 					userId
 				)
-			: knowledgeVDBService.retrieveCodeAndDoc(query, agentConfig.topK.plan_step.knowledge, userId)
+			: knowledgeVDBService.retrieveKonwbase(query, agentConfig.topK.plan_step.knowledge, userId)
 	]);
 
 	const newStepPlan: Plan_step = {

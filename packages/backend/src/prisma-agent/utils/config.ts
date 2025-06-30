@@ -1,4 +1,4 @@
-import * as fs from 'fs/promises';
+import * as fs from 'fs';
 import * as path from 'path';
 interface AgentConfig {
 	_uploadedProjects: string[];
@@ -17,13 +17,18 @@ interface AgentConfig {
 			projectCode: number;
 		};
 	};
+	model: {
+		plan: 'deepseek-reasoner' | 'deepseek-chat';
+		plan_step: 'deepseek-reasoner' | 'deepseek-chat';
+		replan: 'deepseek-reasoner' | 'deepseek-chat';
+	};
 }
 const agentConfigPath = path.join(process.cwd(), 'prisma_agent_config.json');
 
-export async function getAgentConfig() {
-	const agentConfig: AgentConfig = JSON.parse(await fs.readFile(agentConfigPath, 'utf-8'));
+export function getAgentConfig() {
+	const agentConfig: AgentConfig = JSON.parse(fs.readFileSync(agentConfigPath, 'utf-8'));
 	return agentConfig;
 }
-export async function updateAgentConfig(agentConfig: AgentConfig) {
-	await fs.writeFile(agentConfigPath, JSON.stringify(agentConfig, null, 2));
+export function updateAgentConfig(agentConfig: AgentConfig) {
+	fs.writeFileSync(agentConfigPath, JSON.stringify(agentConfig, null, 2));
 }

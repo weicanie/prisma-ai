@@ -4,7 +4,6 @@ import { PineconeStore } from '@langchain/pinecone';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Pinecone, ServerlessSpecCloudEnum } from '@pinecone-database/pinecone';
-import * as fs from 'fs';
 import { EmbeddingModelService } from './embedding-model.service';
 /**pinecone云向量数据库的使用
  *  储存：带有向量和数据的record -> index（数据库,需要预先建立!需要VPN!）
@@ -32,27 +31,43 @@ export class VectorStoreService {
 		});
 		this.logger.log('Pinecone 客户端初始化成功');
 	}
-
 	/**
-	 * 文档向量化并储存：新建索引
-	 * @param splitDocs 要添加的文档数组
-	 * @param embeddings 用于向量化的嵌入模型
+	 * 创建空的向量索引
+	 * @param indexName 索引名
+	 * @param dimension 向量维度
+	 * @returns {Promise<void>}
 	 */
-	async embedAndStoreToIndex(splitDocs: Document[], embeddings: Embeddings, indexName: string) {
-		await PineconeStore.fromDocuments(splitDocs, embeddings, {
-			pineconeIndex: this.pinecone.Index(indexName)
-		});
+	async createEmptyIndex(indexName: string, dimension: number): Promise<void> {
+		try {
+			await this.pinecone.createIndex({
+				name: indexName,
+				dimension: dimension,
+				metric: 'cosine',
+				spec: {
+					serverless: {
+						cloud: serverlessConfig.cloud,
+						region: serverlessConfig.region
+					}
+				}
+			});
+			this.logger.log(`成功创建索引: ${indexName}, 维度: ${dimension}`);
+		} catch (error) {
+			this.logger.error(`创建索引 ${indexName} 失败:`, error);
+			throw new Error(`创建索引失败: ${(error as Error).message}`);
+		}
 	}
 
 	/**
 	 * 文档向量化并储存到已有索引
 	 * @param documents 要添加的文档数组
 	 * @param embeddings 用于向量化的嵌入模型
+	 * @param namespace 命名空间
 	 */
 	async addDocumentsToIndex(
 		documents: Document[],
 		indexName: string,
-		embeddings: Embeddings
+		embeddings: Embeddings,
+		namespace?: string
 	): Promise<void> {
 		try {
 			if (!(await this.indexExists(indexName))) {
@@ -60,7 +75,8 @@ export class VectorStoreService {
 			}
 			const index = this.pinecone.Index(indexName);
 			const pineconeStore = await PineconeStore.fromExistingIndex(embeddings, {
-				pineconeIndex: index
+				pineconeIndex: index,
+				namespace
 			});
 			//会去调用embeddings的embedDocuments方法
 			await pineconeStore.addDocuments(documents);
@@ -90,9 +106,14 @@ export class VectorStoreService {
 	 * @param config 检索器配置
 	 * @returns 检索器
 	 */
-	async getRetrieverOfIndex(indexName: string, embeddings: Embeddings, topK: number = 3) {
+	async getRetrieverOfIndex(
+		indexName: string,
+		embeddings: Embeddings,
+		topK: number = 3,
+		namespace?: string
+	) {
 		const index = this.pinecone.Index(indexName);
-		const vectorStore = new PineconeStore(embeddings, { pineconeIndex: index });
+		const vectorStore = new PineconeStore(embeddings, { pineconeIndex: index, namespace });
 
 		//FIXME 能返回元数据?
 		const retriever = vectorStore.asRetriever(topK);
@@ -144,57 +165,10 @@ export class VectorStoreService {
 	}
 
 	/**
-	 * 创建空的向量索引
-	 * @param indexName 索引名
-	 * @param dimension 向量维度
-	 * @returns {Promise<void>}
-	 */
-	async createEmptyIndex(indexName: string, dimension: number): Promise<void> {
-		try {
-			await this.pinecone.createIndex({
-				name: indexName,
-				dimension: dimension,
-				metric: 'cosine',
-				spec: {
-					serverless: {
-						cloud: serverlessConfig.cloud,
-						region: serverlessConfig.region
-					}
-				}
-			});
-			this.logger.log(`成功创建索引: ${indexName}, 维度: ${dimension}`);
-		} catch (error) {
-			this.logger.error(`创建索引 ${indexName} 失败:`, error);
-			throw new Error(`创建索引失败: ${(error as Error).message}`);
-		}
-	}
-
-	/**
 	 * 获取本地嵌入模型实例
 	 * @returns {HuggingFaceTransformersEmbeddings} 本地 SBERT 模型实例
 	 */
 	getLocalEmbeddings(): Embeddings {
 		return this.embeddingModelService;
 	}
-}
-
-/**
- * @param directory 相对于项目根目录的路径
- * @param filename
- * @param dataObj
- * @description 将数据对象以json格式写入文件
- */
-export function saveToFile(directory: string = './db', filename: string, dataObj: any) {
-	if (!fs.existsSync(directory)) {
-		fs.mkdirSync(directory, { recursive: true });
-	}
-	filename = filename.replace('.json', '');
-	const filePath = `${directory}/${filename}.json`;
-	fs.writeFile(filePath, JSON.stringify(dataObj), err => {
-		if (err) {
-			console.error(`Error writing ${filename}.json:`, err);
-		} else {
-			console.log('${filename}.json written successfully:', filePath);
-		}
-	});
 }

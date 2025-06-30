@@ -31,7 +31,7 @@ function APP() {
 		<QueryClientProvider client={queryClient}>
 			<Toaster />
 			<ReactQueryDevtools initialIsOpen={false} />
-			<div className="flex max-[900px]:flex-col">{useRoutes(routes)}</div>
+			{/* <div className="flex max-[900px]:flex-col">{useRoutes(routes)}</div> */}
 
 			<CopilotKit runtimeUrl={import.meta.env.VITE_API_BASE_URL + '/copilotkit' || '/api'}>
 				<CopilotSidebar

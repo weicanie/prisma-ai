@@ -80,7 +80,7 @@ export class ProjectChainService {
 				},
 
 				//TODO 多轮检索(不使用CRAG), 比如每个亮点分别检索并标注其属于哪个亮点
-				//TODO 使用SRAG将幻觉拉到最低,将相关性拉到最高
+				//TODO 使用SRAG降低幻觉,提高相关性
 				// 知识库集成：检索相关代码和文档
 				retrievedProjectCodes: async (i: ProjectProcessingInput) => {
 					try {
@@ -120,7 +120,7 @@ export class ProjectChainService {
 								break;
 						}
 						// 使用 CRAG 版本的检索可以获得更高质量的知识
-						return await this.knowledgeVDBService.retrieveCodeAndDoc(
+						return await this.knowledgeVDBService.retrieveKonwbase(
 							docsQuery,
 							5, // topK
 							i.userInfo.userId
@@ -132,7 +132,7 @@ export class ProjectChainService {
 
 				// 2. 反思逻辑：如果用户要求，则生成反思内容
 				reflection: async (i: ProjectProcessingInput) => {
-					console.log('🚀 ~ reflection: ~ i:', i);
+					// console.log('🚀 ~ reflection:', i);
 					if (i.userFeedback.reflect && i.userFeedback.content) {
 						const reflectionResult = await reflectChain.invoke({
 							content: i.userFeedback.content,
@@ -246,7 +246,7 @@ export class ProjectChainService {
 		const schema0 = projectSchema;
 		//只取第一个用户技能
 		let userSkills = await skillService.findAll(userInfo);
-		const userSkillsMd = skillsToMarkdown(userSkills[0]);
+		const userSkillsMd = userSkills[0] ? skillsToMarkdown(userSkills[0]) : '';
 		const promptTemplate = (await this.promptService.minePrompt()).partial({
 			userSkills: userSkillsMd
 		});

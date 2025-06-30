@@ -39,12 +39,12 @@ export async function retrieveNode(
 	const agentConfig = await getAgentConfig();
 
 	const retrievedDomainDocs = agentConfig.CRAG
-		? await knowledgeVDBService.retrieveCodeAndDoc_CRAG(
+		? await knowledgeVDBService.retrieveKonwbase_CRAG(
 				stepResult.output.userFeedback,
 				agentConfig.topK.replan.knowledge,
 				userId
 			)
-		: await knowledgeVDBService.retrieveCodeAndDoc(
+		: await knowledgeVDBService.retrieveKonwbase(
 				stepResult.output.userFeedback,
 				agentConfig.topK.replan.knowledge,
 				userId

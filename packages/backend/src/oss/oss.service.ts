@@ -4,6 +4,10 @@ import * as Minio from 'minio';
 export class OssService {
 	@Inject('OSS-CLIENT')
 	private ossClient: Minio.Client;
+
+	@Inject('OSS-PRESIGN-CLIENT')
+	private presignOssClient: Minio.Client;
+
 	private logger = new Logger();
 
 	/**
@@ -62,9 +66,22 @@ export class OssService {
 	 */
 	async presignedPutObject(userId: string, name: string, bucketName = 'prisma-ai', expire = 3600) {
 		try {
-			return await this.ossClient.presignedPutObject(bucketName, `${userId}${name}`, expire); // 桶名、对象名、预签名URL过期时间
+			// 1. 使用预签名客户端（endpoint: 'nginx-container'）生成 URL
+			// 此时 URL 为 http://nginx-container/prisma-ai/...
+			let presignedUrl = await this.presignOssClient.presignedPutObject(
+				bucketName,
+				`${userId}/${name}`,
+				expire
+			);
+
+			// 2. 将 URL 中的内部主机地址替换为前端可访问的、经过 Nginx 代理的地址
+			presignedUrl = presignedUrl.replace('nginx-container', 'localhost/oss');
+
+			// 3. 返回给前端的 URL 为 http://localhost/oss/prisma-ai/...
+			return presignedUrl;
 		} catch (error) {
-			this.logger.error(error, 'OssController ~ presignedPutObject');
+			this.logger.error(error, 'OssService ~ presignedPutObject');
+			throw new Error(`Failed to generate presigned URL: ${error.message}`);
 		}
 	}
 }

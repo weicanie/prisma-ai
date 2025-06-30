@@ -1,7 +1,6 @@
 {
   "_uploadedProjects": [
-    "prisma-chat",
-    "C:\\Users\\user\\Desktop\\项目：简历到offer\\prisma-ai\\projects\\prisma-chat"
+    "/app/projects/prisma-chat"
   ],
   "CRAG": false,
   "topK": {
@@ -17,5 +16,10 @@
       "knowledge": 10,
       "projectCode": 10
     }
+  },
+  "model": {
+    "plan": "deepseek-chat",
+    "plan_step": "deepseek-chat",
+    "replan": "deepseek-reasoner"
   }
 }

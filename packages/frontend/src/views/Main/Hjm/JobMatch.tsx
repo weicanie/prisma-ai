@@ -136,7 +136,7 @@ export function JobMatch() {
 					{resumeIdToMatch ? (
 						<p className="text-sm text-green-600">已选择简历ID: {resumeIdToMatch}</p>
 					) : (
-						<p className="text-sm text-yellow-600">请先前往"简历"页面，选择一份用于匹配的简历。</p>
+						<p className="text-sm text-yellow-600">请先选择一份用于匹配的简历。</p>
 					)}
 				</CardHeader>
 				<CardContent className="space-y-4">

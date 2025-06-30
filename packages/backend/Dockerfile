@@ -12,7 +12,7 @@ RUN npm install -g pnpm@${PNPM_VERSION}
 # 设置工作目录（容器内部）
 WORKDIR /app
 
-#COPY 电脑文件系统 容器文件系统
+# COPY 电脑文件系统 容器文件系统
 # 复制整个monorepo的package.json和pnpm配置文件
 COPY ./package.json ./pnpm-lock.yaml ./pnpm-workspace.yaml* ./
 
@@ -28,6 +28,8 @@ COPY ./packages/backend ./packages/backend
 COPY ./packages/shared ./packages/shared
 # 复制本地部署模型要用到的文件
 COPY ./models ./models
+# 用户项目代码
+COPY ./projects ./projects
 
 # 首先构建共享包
 RUN pnpm --filter @prism-ai/shared build
@@ -70,7 +72,6 @@ COPY --from=builder /app/packages/backend/prisma ./packages/backend/prisma
 COPY --from=builder /app/packages/backend/ai_data ./packages/backend/ai_data
 # 启动脚本
 COPY --from=builder /app/packages/backend/scripts ./packages/backend/scripts
-
 # 生成 Prisma 客户端 (在启动命令中migrate)
 RUN pnpm --filter backend exec prisma generate
 

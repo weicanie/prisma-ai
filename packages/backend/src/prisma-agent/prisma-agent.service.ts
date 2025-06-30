@@ -7,9 +7,10 @@ import * as readline from 'readline';
 import { ZodError } from 'zod';
 import { EventBusService } from '../EventBus/event-bus.service';
 import { ModelService } from '../model/model.service';
+import { projectsDirPath } from '../utils/constants';
 import { CRetrieveAgentService } from './c_retrieve_agent/c_retrieve_agent.service';
 import { KnowledgeVDBService } from './data_base/konwledge_vdb.service';
-import { ProjectCodeVDBService, projectsDirPath } from './data_base/project_code_vdb.service';
+import { ProjectCodeVDBService } from './data_base/project_code_vdb.service';
 import { InterruptType } from './human_involve_agent/node';
 import { PlanExecuteAgentService } from './plan_execute_agent/plan_execute_agent.service';
 import { PlanStepAgentService } from './plan_step_agent/plan_step_agent.service';
@@ -23,7 +24,6 @@ import {
 	ReviewType,
 	RunningConfig
 } from './types';
-//TODO 通过mcp server 调用 cursor 的Agent
 
 const outputDir = path.resolve(process.cwd(), 'agent_output');
 const humanFeedbackPath = path.join(outputDir, 'human_feedback.json');
@@ -175,7 +175,7 @@ export class PrismaAgentService {
 					JSON.stringify(
 						{
 							output: {
-								userFeedback: '你的反馈内容(你来写)',
+								userFeedback: '你的反馈(由你撰写)',
 								writtenCodeFiles: 'cursor的修改总结清单(由cursor生成)',
 								summary: 'cursor的最终总结(由cursor生成)'
 							}
@@ -204,19 +204,26 @@ export class PrismaAgentService {
 			if (interruptData.type === InterruptType.HumanReview) {
 				await displayHumanFeedback(InterruptType.HumanReview);
 				// 这是来自 waitForHumanReview 的审核请求
-				this.logger.log(`\n=== 需要您审核 (${interruptData.type}) ===`);
-				this.logger.log(`1. 请审核输出文件: ${interruptData.outputPath}`);
-				this.logger.log(`2. 请在以下文件中输入您的反馈: ${humanFeedbackPath}`);
+				this.logger.log(
+					`\n=== 需要您审核输出文件: ${this.getRealFilePath(interruptData.outputPath)} ===`
+				);
+				this.logger.log(
+					`1. 请在以下文件中输入您的反馈: ${this.getRealFilePath(humanFeedbackPath)}`
+				);
 				this.logger.log(
 					`action: accept（完全接受并继续） | fix（手动修改然后继续） | redo（反馈并重做,反馈内容填在content里）`
 				);
-				this.logger.log(`3. 输入 'do' 继续, 或输入 'exit' 退出.`);
+				this.logger.log(`2. 输入 'do' 继续, 或输入 'exit' 退出.`);
 			} else if (interruptData.type === InterruptType.ExecuteStep) {
 				await displayHumanFeedback(InterruptType.ExecuteStep);
 				// 这是来自 executeStep 的执行请求
 				this.logger.log(`\n=== 需要执行步骤 ===`);
-				this.logger.log(`1. 请根据以下文件中的描述执行编码任务: ${interruptData.outputPath}`);
-				this.logger.log(`2. 请在以下文件中输入结果反馈: ${humanFeedbackPath}`);
+				this.logger.log(
+					`1. 请根据以下文件中的描述执行编码任务: ${this.getRealFilePath(interruptData.outputPath)}`
+				);
+				this.logger.log(
+					`2. 请在以下文件中输入结果反馈: ${this.getRealFilePath(humanFeedbackPath)}`
+				);
 				this.logger.log(`3. 输入 'do' 继续, 或输入 'exit' 退出.`);
 			} else {
 				this.logger.error('未知的中断类型:', interruptData.type);
@@ -402,5 +409,17 @@ export class PrismaAgentService {
 		this.logger.log('---工作流已完成---');
 		// 步骤5: 返回工作流的最终状态。
 		return finalState;
+	}
+
+	/**
+	 * @description 将容器内路径转换为真实文件路径（挂载的卷）
+	 * @param filePath 文件路径
+	 * @returns 真实文件路径
+	 */
+	private getRealFilePath(filePath: string) {
+		if (process.env.NODE_ENV === 'production') {
+			filePath = filePath.replace('/app', './');
+		}
+		return filePath;
 	}
 }

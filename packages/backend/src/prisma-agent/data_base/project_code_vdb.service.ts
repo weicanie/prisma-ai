@@ -1,5 +1,5 @@
 import { Document } from '@langchain/core/documents';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import * as fs from 'fs';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import * as path from 'path';
@@ -7,6 +7,7 @@ import Parser from 'tree-sitter';
 import { ModelService } from '../../model/model.service';
 import { TaskQueueService } from '../../task-queue/task-queue.service';
 import { PersistentTask } from '../../type/taskqueue';
+import { projectsDirPath } from '../../utils/constants';
 import { VectorStoreService } from '../../vector-store/vector-store.service';
 
 /**
@@ -16,7 +17,6 @@ interface ProjectEmbeddingTaskMetadata {
 	userId: string;
 	projectName: string;
 	projectPath: string;
-	indexName: string;
 }
 
 /**
@@ -26,22 +26,19 @@ interface ProjectEmbeddingTask extends PersistentTask {
 	metadata: ProjectEmbeddingTaskMetadata;
 }
 
-/**
- * 项目代码向量索引的前缀枚举
- */
-export enum ProjectCodeIndexPrefix {
-	PROJECT_CODE = 'agent-projectCode'
+export enum ProjectCodeIndex {
+	CODEBASE = 'codebase' //代码库（用户项目代码、开源项目代码）
 }
 
-export const projectsDirPath = path.join(process.cwd(), '..', '..', 'projects');
-
 @Injectable()
-export class ProjectCodeVDBService {
+export class ProjectCodeVDBService implements OnModuleInit {
 	private readonly logger = new Logger(ProjectCodeVDBService.name);
 	readonly taskTypeCodeEmbedding = 'project_code_embedding';
 
 	private parser: Parser;
 	private languageGrammars: { [key: string]: any } = {};
+
+	private readonly vdbIndexs = [ProjectCodeIndex.CODEBASE];
 
 	/**
 	 * 支持的语言及其文件扩展名
@@ -89,22 +86,18 @@ export class ProjectCodeVDBService {
 		}
 	}
 
-	private getIndexName(userId: string, projectName: string) {
-		/* pinecone索引名称长度限制为45字符 */
-		if (projectName.length > 40) {
-			throw new Error('项目名称长度不能超过40个字符');
-		}
-		return `${projectName.toLowerCase().trim()}-${userId}`;
-	}
-
 	/**
-	 * 删除项目代码的向量索引
-	 * @param userId - 用户ID
-	 * @param projectName - 项目名称
+	 * 确保用到的向量索引存在
 	 */
-	public async deleteIndex(userId: string, projectName: string) {
-		const indexName = this.getIndexName(userId, projectName);
-		await this.vectorStoreService.pinecone.deleteIndex(indexName);
+	async onModuleInit() {
+		for (const index of this.vdbIndexs) {
+			if (!(await this.vectorStoreService.indexExists(index))) {
+				await this.vectorStoreService.createEmptyIndex(
+					index,
+					this.modelService.getEmbedModelOpenAI().dimensions ?? 1536
+				);
+			}
+		}
 	}
 
 	/**
@@ -133,7 +126,6 @@ export class ProjectCodeVDBService {
 	 * @param projectName - 项目名称
 	 * @param projectPath - 项目的绝对路径
 	 * @param sessionId - 会话ID, 用于追踪任务
-	 * @param lang - 项目主要语言 (默认为 'typescript')
 	 * @returns {Promise<PersistentTask>} - 创建的后台任务
 	 */
 	async storeToVDB(
@@ -142,7 +134,6 @@ export class ProjectCodeVDBService {
 		projectPath: string,
 		sessionId: string
 	): Promise<PersistentTask> {
-		const indexName = await this.getIndexName(userId, projectName);
 		const task = await this.taskQueueService.createAndEnqueueTask(
 			sessionId,
 			userId,
@@ -150,8 +141,7 @@ export class ProjectCodeVDBService {
 			{
 				userId,
 				projectName,
-				projectPath,
-				indexName
+				projectPath
 			} as ProjectEmbeddingTaskMetadata
 		);
 		this.logger.log(`已创建项目代码向量化任务: ${task.id}`);
@@ -172,13 +162,13 @@ export class ProjectCodeVDBService {
 		userId: string,
 		projectName: string
 	): Promise<string> {
-		const indexName = await this.getIndexName(userId, projectName);
+		const namespace = this._getRepoNamespace(projectName, userId);
 		const embeddings = this.modelService.getEmbedModelOpenAI();
-
 		const retriever = await this.vectorStoreService.getRetrieverOfIndex(
-			indexName,
+			ProjectCodeIndex.CODEBASE,
 			embeddings,
-			topK
+			topK,
+			namespace
 		);
 		const docs = await retriever.invoke(query);
 		return docs.map(doc => `${doc.metadata.source}\n${doc.pageContent}`).join('\n');
@@ -192,26 +182,14 @@ export class ProjectCodeVDBService {
 	 */
 	private async _projectCodeEmbeddingTaskHandler(task: ProjectEmbeddingTask): Promise<void> {
 		this.logger.log(`开始执行项目代码向量化任务: ${task.id}`);
-		const { projectPath, indexName } = task.metadata;
-
-		// 1. 向量索引存在、不存在都新建（存在则清空）
-		const indexExists = await this.vectorStoreService.indexExists(indexName);
-		if (!indexExists) {
-			const embedding = this.modelService.getEmbedModelOpenAI();
-			await this.vectorStoreService.createEmptyIndex(indexName, embedding.dimensions ?? 1536);
-		} else {
-			this.logger.warn(`索引 ${indexName} 已存在,跳过创建`);
-			//删除旧的索引(目前存在问题,删除后无法重新创建)
-			// await this.vectorStoreService.pinecone.deleteIndex(indexName);
-			// const embedding = this.modelService.getEmbedModelOpenAI();
-			// await this.vectorStoreService.createEmptyIndex(indexName, embedding.dimensions ?? 1536);
-		}
+		const { projectPath, projectName, userId } = task.metadata;
 
 		// 2. 遍历项目文件
 		const files = await this._getProjectFiles(projectPath);
 		this.logger.log(`在项目 ${projectPath} 中找到 ${files.length} 个待处理文件`);
 
 		// 3. 对每个文件进行处理
+		const chunksToEmbed: Document[] = [];
 		for (const file of files) {
 			try {
 				const fileExtension = path.extname(file).toLowerCase();
@@ -239,17 +217,23 @@ export class ProjectCodeVDBService {
 							metadata: { source: relativePath, lang }
 						})
 				);
-
-				const embeddings = this.modelService.getEmbedModelOpenAI();
-				await this.vectorStoreService.addDocumentsToIndex(documents, indexName, embeddings);
-				this.logger.log(`已处理文件 ${relativePath}，存入 ${documents.length} 个代码块。`);
+				chunksToEmbed.push(...documents);
 			} catch (error) {
 				this.logger.error(`处理文件 ${file} 失败:`, error);
 				throw error;
 			}
 		}
-
-		this.logger.log(`项目代码向量化任务 ${task.id} 完成。`);
+		const namespace = this._getRepoNamespace(projectName, userId);
+		const embeddings = this.modelService.getEmbedModelOpenAI();
+		await this.vectorStoreService.addDocumentsToIndex(
+			chunksToEmbed,
+			ProjectCodeIndex.CODEBASE,
+			embeddings,
+			namespace
+		);
+		this.logger.log(
+			`项目代码向量化任务 ${task.id} 完成。共上传 ${chunksToEmbed.length} 个代码块。`
+		);
 	}
 
 	/**
@@ -333,24 +317,28 @@ export class ProjectCodeVDBService {
 		const tsQuery = `
       [
         (import_statement) @chunk
-        (export_statement) @chunk
+        (export_declaration) @chunk
         (function_declaration) @chunk
+        (method_definition) @chunk
         (class_declaration) @chunk
         (lexical_declaration (variable_declarator value: [(arrow_function) (function)])) @chunk
         (interface_declaration) @chunk
         (type_alias_declaration) @chunk
         (expression_statement (assignment_expression)) @chunk
+        (export_declaration (variable_declaration)) @chunk
       ]
     `;
 
 		const jsQuery = `
       [
         (import_statement) @chunk
-        (export_statement) @chunk
+        (export_declaration) @chunk
         (function_declaration) @chunk
+        (method_definition) @chunk
         (class_declaration) @chunk
         (lexical_declaration (variable_declarator value: [(arrow_function) (function)])) @chunk
         (expression_statement (assignment_expression)) @chunk
+        (export_declaration (variable_declaration)) @chunk
       ]
     `;
 
@@ -429,13 +417,10 @@ export class ProjectCodeVDBService {
 				chunks.push(tree.rootNode.text);
 			}
 
+			this.logger.log(`tree-sitter 切分成功,共 ${chunks.length} 个代码块`);
 			return chunks;
 		} catch (error) {
 			//FIXME 修正Query的错误, Error: Query error of type TSQueryErrorNodeType
-			// this.logger.error(
-			// 	`Tree-sitter query for lang ${lang} failed, falling back to Langchain's RecursiveCharacterTextSplitter.`,
-			// 	error.message
-			// );
 
 			const lcLang = this._mapToLangchainLang(lang);
 			let splitter: RecursiveCharacterTextSplitter;
@@ -455,5 +440,12 @@ export class ProjectCodeVDBService {
 			}
 			return await splitter.splitText(sourceCode);
 		}
+	}
+
+	/**
+	 * 生成代码库的命名空间名称，区分不同用户。
+	 */
+	private _getRepoNamespace(repoName: string, userId: string): string {
+		return `${repoName}-${userId}`;
 	}
 }

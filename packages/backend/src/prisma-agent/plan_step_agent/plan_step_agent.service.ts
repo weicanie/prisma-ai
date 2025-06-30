@@ -9,11 +9,13 @@ import { MemorySaver } from '@langchain/langgraph';
 import { Inject, Injectable } from '@nestjs/common';
 import { ProjectDto } from '@prism-ai/shared';
 import { z } from 'zod';
-import { WithFormfixChain } from '../../chain/abstract';
+
 import { ModelService } from '../../model/model.service';
+import { WithFormfixChain } from '../../utils/abstract';
 import { RubustStructuredOutputParser } from '../../utils/RubustStructuredOutputParser';
 import { ReflectAgentService } from '../reflect_agent/reflect_agent.service';
 import { Knowledge, Plan, Reflection, Step, Step_prompt } from '../types';
+import { getAgentConfig } from '../utils/config';
 import { PlanStepGraph } from './planner_step';
 
 /**
@@ -100,7 +102,7 @@ export class PlanStepAgentService {
 		},
 		z.infer<typeof stepAnalysisSchema>
 	> {
-		const model = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+		const model = this.modelService.getLLMDeepSeekRaw(getAgentConfig().model.plan_step);
 		if (!model) throw new Error('Model not found');
 		const parser = RubustStructuredOutputParser.from(stepAnalysisSchema, this.chainService);
 
@@ -181,7 +183,7 @@ export class PlanStepAgentService {
 		},
 		z.infer<typeof stepPlanSchema>
 	> {
-		const model = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+		const model = this.modelService.getLLMDeepSeekRaw(getAgentConfig().model.plan_step);
 		if (!model) throw new Error('Model not found');
 		const parser = RubustStructuredOutputParser.from(stepPlanSchema, this.chainService);
 
@@ -245,7 +247,7 @@ export class PlanStepAgentService {
 		},
 		string
 	> {
-		const model = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+		const model = this.modelService.getLLMDeepSeekRaw(getAgentConfig().model.plan_step);
 		if (!model) throw new Error('Model not found');
 		const parser = RubustStructuredOutputParser.from(completedPlanSchema, this.chainService);
 

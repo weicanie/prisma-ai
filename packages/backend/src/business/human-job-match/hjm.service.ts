@@ -49,8 +49,12 @@ interface JobMatchTask extends PersistentTask {
 	metadata: JobMatchTaskMetadata;
 }
 
-enum IndexMap {
-	JOBS = 'jobs-index' // 岗位索引
+enum JobIndex {
+	JOBS = 'jobs' // 岗位索引
+}
+
+enum JobIndexNamespace {
+	JOBS = 'job-crawled' // 岗位索引
 }
 
 @Injectable()
@@ -59,6 +63,8 @@ export class HjmService implements OnModuleInit {
 	// 定义任务类型常量
 	readonly taskTypeJobEmbedding = 'job_embedding';
 	readonly taskTypeJobMatch = 'job_match';
+
+	private readonly vdbIndexs = [JobIndex.JOBS];
 
 	userInfoSpider = {
 		userId: 'system',
@@ -102,14 +108,13 @@ export class HjmService implements OnModuleInit {
 	async onModuleInit() {
 		try {
 			this.logger.log('正在检查 Pinecone 连接...');
-			const jobsIndexExists = await this.vectorStoreService.indexExists(IndexMap.JOBS);
-			if (!jobsIndexExists) {
-				console.log(`索引 '${IndexMap.JOBS}' 不存在，将自动创建...`);
-				const dimension = this.vectorStoreService.embeddingModelService.dimensions;
-				if (!dimension) {
-					throw new Error('无法从 embeddingModelService 获取向量维度，初始化失败。');
+			for (const index of this.vdbIndexs) {
+				if (!(await this.vectorStoreService.indexExists(index))) {
+					await this.vectorStoreService.createEmptyIndex(
+						index,
+						this.vectorStoreService.embeddingModelService.dimensions ?? 768
+					);
 				}
-				await this.vectorStoreService.createEmptyIndex(IndexMap.JOBS, dimension);
 			}
 			this.logger.log('Pinecone 连接验证成功');
 		} catch (error) {
@@ -225,7 +230,12 @@ export class HjmService implements OnModuleInit {
 				// 4. 使用SBERT模型将所有文本块向量化并存储
 				const embeddings = this.vectorStoreService.getLocalEmbeddings();
 				try {
-					await this.vectorStoreService.addDocumentsToIndex(allChunks, IndexMap.JOBS, embeddings);
+					await this.vectorStoreService.addDocumentsToIndex(
+						allChunks,
+						JobIndex.JOBS,
+						embeddings,
+						this._getUserNamespace(JobIndexNamespace.JOBS, userInfo)
+					);
 				} catch (error) {
 					console.error('使用SBERT模型进行向量化失败', error);
 					throw error;
@@ -302,7 +312,7 @@ export class HjmService implements OnModuleInit {
 		}
 
 		// 5. 使用平均后的单一向量，在向量数据库中查找最相似的 topK 个岗位块
-		const candidateJobChunks = await this.findSimilarJobs(resumeVector, topK);
+		const candidateJobChunks = await this.findSimilarJobs(userInfo, resumeVector, topK);
 		if (candidateJobChunks.length === 0) {
 			return;
 		}
@@ -384,16 +394,22 @@ export class HjmService implements OnModuleInit {
 
 	/**
 	 * 根据简历向量在岗位索引中查找相似的岗位
+	 * @param userInfo - 用户信息
 	 * @param resumeVector - 简历文本生成的向量
-	 * @param k - 需要返回的最相似的岗位数量
-	 * @returns {Promise<Document[]>} 包含岗位信息的文档列表
+	 * @param k - 返回最相似的岗位数量
+	 * @returns 返回一个包含岗位信息的文档数组
 	 */
-	async findSimilarJobs(resumeVector: number[], k: number): Promise<Document[]> {
+	async findSimilarJobs(
+		userInfo: UserInfoFromToken,
+		resumeVector: number[],
+		k: number
+	): Promise<Document[]> {
 		try {
-			const indexName = IndexMap.JOBS;
+			const indexName = JobIndex.JOBS;
 			const index = this.vectorStoreService.pinecone.Index(indexName);
+			const namespace = this._getUserNamespace(JobIndexNamespace.JOBS, userInfo);
 
-			const queryResult = await index.query({
+			const queryResult = await index.namespace(namespace).query({
 				vector: resumeVector,
 				topK: k,
 				includeMetadata: true // 确保返回元数据，其中包含岗位信息
@@ -423,6 +439,15 @@ export class HjmService implements OnModuleInit {
 			}
 
 			throw new Error(`查询向量数据库失败: ${errorMessage}`);
+		}
+	}
+
+	private _getUserNamespace(namespace: JobIndexNamespace, userInfo: UserInfoFromToken): string {
+		switch (namespace) {
+			case JobIndexNamespace.JOBS:
+				return `${namespace}-${userInfo.userId}`;
+			default:
+				throw new Error(`不支持的命名空间: ${namespace}`);
 		}
 	}
 }

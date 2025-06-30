@@ -1,6 +1,6 @@
 ![logo](images/readme/logo.png)
 
-# prisma-ai: 开源免费，一站式解决项目经验没亮点、简历石沉大海等痛点
+# prisma-ai: 一站式解决项目经验没亮点、简历石沉大海等痛点
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](...)
 
@@ -41,7 +41,7 @@ git clone https://hf-mirror.com/moka-ai/m3e-base models/moka-ai/m3e-base
 
 ```bash
 # 构建服务,在仓库根目录执行
-docker compose -f compose.yaml up --build
+docker compose -f compose.yaml up --attach prisma-ai-backend --build
 ```
 
 然后浏览器访问`localhost`即可使用!
@@ -90,10 +90,6 @@ pnpm run dev
 - 解决1: AI Agent 面向岗位定制简历，匹配化、契合化👌
 - 解决2: 爬取招聘网站岗位数据、SBERT模型+相似度搜索进行人岗匹配,找到匹配你的岗位👌
 
-痛点3: 八股太多了背了忘忘了背😤
-解决1: 爬取面试题数据，根据简历延伸细节、匹配八股👌(因为面试官一般是根据你的简历来聊的，当然基础的八股得熟)
-解决2: 仿anki科学刷八股、费曼学习法突破难啃八股👌(借助llm)
-
 <br/>
 
 ## 2、可以在下一秒用到吗？
@@ -113,7 +109,8 @@ docker一行命令构建、启动🥰。
 ### 项目经验分析、优化、亮点挖掘
 
 - 优秀的简历质量指标和流程设计，源自c开头的某位老师，专为it岗位的同学设计，我主要做了整个流程的prompt抽象和进一步的扩展🧐。
-- 知识库集成、反思功能, 你提供的自己的项目信息、相关领域知识越丰富, ai 越强大
+- 本地 OSS + pinecone 实现的强大知识库集成功能, 你提供的自己的项目信息、相关领域知识越丰富, ai 越强大
+- 反思功能, 根据你的反馈进行实时调整
 
 ### 项目亮点的实现
 
@@ -167,7 +164,6 @@ v2.0.0 Planer_Executor + CRAG + Human-in-the-loop 的 AI Agent
 - √ 领域知识库、项目代码知识库集成
 - √ 项目亮点实现的 Agent, Human-in-the-loop、反思
 - √ 原有项目经验处理流程的 Agent 增强, 知识库集成、反思
-- [ ] 项目亮点实现 Agent 的容器部署
 
 <br/>
 
@@ -201,8 +197,14 @@ v2.0.0 Planer_Executor + CRAG + Human-in-the-loop 的 AI Agent
 
 ## 8、文档教程
 
-1、[教程：v2.0.0使用教程](/doc/教程：v2.0.0使用教程.md)
-2、[教程：岗位数据爬取](/doc/教程：岗位数据爬取.md)
+[1、环境配置](</doc/教程：(一)环境配置.md>)
+<br/>
+[2、知识库构建](</doc/教程：(二)知识库构建.md>)
+<br/>
+[3、项目亮点实现](</doc/教程：(三)项目亮点实现.md>)
+<br/>
+[4、岗位数据爬取](</doc/教程：(四)岗位数据爬取.md>)
+<br/>
 
 <br/>
 

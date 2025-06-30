@@ -157,7 +157,7 @@ export function projectSchemaToMarkdown(project: z.infer<typeof projectSchemaFor
 export const skillsToMarkdown = (data: CreateSkillDto): string => {
 	let markdown = '## 职业技能\n\n';
 
-	data.content.forEach(skillGroup => {
+	data?.content?.forEach(skillGroup => {
 		if (skillGroup.type) {
 			markdown += `* ${skillGroup.type}:`;
 			if (skillGroup.content && skillGroup.content.length > 0) {

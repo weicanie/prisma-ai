@@ -5,7 +5,6 @@ import { Model } from 'mongoose';
 import { ChainService } from '../../chain/chain.service';
 import { ProjectChainService } from '../../chain/project-chain.service';
 import { EventBusService } from '../../EventBus/event-bus.service';
-import { LLMSseService } from '../sse/llm-sse.service';
 import { RedisService } from './../../redis/redis.service';
 import { ProjectDto } from './dto/project.dto';
 import { Project, ProjectDocument } from './entities/project.entity';
@@ -32,7 +31,6 @@ export class ProjectService {
 		public chainService: ChainService,
 		public eventBusService: EventBusService,
 		public redisService: RedisService,
-		public LLMSseService: LLMSseService,
 		public projectChainService: ProjectChainService
 	) {}
 

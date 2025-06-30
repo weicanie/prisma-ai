@@ -2,7 +2,7 @@ import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf';
 import { CheerioWebBaseLoader } from '@langchain/community/document_loaders/web/cheerio';
 import { GithubRepoLoader } from '@langchain/community/document_loaders/web/github';
 import { Document } from '@langchain/core/documents';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { FileTypeEnum, KnowledgeTypeEnum, KnowledgeVo, UserInfoFromToken } from '@prism-ai/shared';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { ModelService } from '../../model/model.service';
@@ -11,16 +11,19 @@ import { getOssObjectNameFromURL } from '../../utils/getOssObjectNameFromURL';
 import { VectorStoreService } from '../../vector-store/vector-store.service';
 import { CRetrieveAgentService } from '../c_retrieve_agent/c_retrieve_agent.service';
 import { ProjectCodeVDBService } from './project_code_vdb.service';
-
 /**
  * 知识库向量索引的前缀枚举
  */
+export enum KnowledgeNamespace {
+	PROJECT_DOC_USER = 'project-doc-user', //用户项目文档
+	PROJECT_DOC_OPEN = 'project-doc-open', //开源项目文档
+	TECH_DOC = 'tech-doc', //技术文档
+	INTERVIEW_QUESTION = 'interview-question', //面试题
+	OTHER = 'other' //其它
+}
+
 export enum KnowledgeIndex {
-	PROJECT_CODE = 'knowbase-project-code', //开源、其它项目代码
-	PROJECT_DOC = 'knowbase-project-doc', //用户、开源、其它项目文档
-	TECH_DOC = 'knowbase-tech-doc', //技术文档
-	INTERVIEW_QUESTION = 'knowbase-question', //面试题
-	OTHER = 'knowbase-other' //其它
+	KNOWLEDGEBASE = 'knowledgebase' //知识库
 }
 
 /**
@@ -40,10 +43,12 @@ interface KnowledgeChunkDoc extends Document {
 }
 
 @Injectable()
-export class KnowledgeVDBService {
+export class KnowledgeVDBService implements OnModuleInit {
 	private readonly logger = new Logger(KnowledgeVDBService.name);
 
 	private readonly embedModel = this.modelService.getEmbedModelOpenAI();
+
+	private readonly vdbIndexs = [KnowledgeIndex.KNOWLEDGEBASE];
 
 	constructor(
 		private readonly vectorStoreService: VectorStoreService,
@@ -56,6 +61,17 @@ export class KnowledgeVDBService {
 	) {}
 
 	/**
+	 * 确保用到的向量索引存在
+	 */
+	async onModuleInit() {
+		for (const index of this.vdbIndexs) {
+			if (!(await this.vectorStoreService.indexExists(index))) {
+				await this.vectorStoreService.createEmptyIndex(index, this.embedModel.dimensions ?? 1536);
+			}
+		}
+	}
+
+	/**
 	 * 主入口点：处理知识，将其加载、分割、嵌入并存储到向量数据库。
 	 * @param knowledge - 从数据库获取的知识对象
 	 * @param userInfo - 当前用户信息
@@ -65,7 +81,7 @@ export class KnowledgeVDBService {
 		this.logger.log(`开始处理知识 [${knowledge.name}] (ID: ${id})...`);
 
 		try {
-			// 1. 数据加载
+			//  数据加载
 			const documents = await this._loadDocuments(knowledge);
 			if (!documents || documents.length === 0) {
 				this.logger.warn(`知识 [${knowledge.name}] 未加载到任何文档，已跳过。`);
@@ -73,14 +89,9 @@ export class KnowledgeVDBService {
 			}
 			this.logger.log(`  - 已加载 ${documents.length} 个原始文档。`);
 
-			// 2. 切分
+			//  切分
 			const chunks = await this._splitDocuments(documents, type);
 			this.logger.log(`  - 已将文档分割成 ${chunks.length} 个块。`);
-
-			// 3. 嵌入与存储
-			const indexName = this._getIndexName(type, userInfo.userId);
-			// 索引不存在则创建
-			await this._ensureIndexExists(indexName);
 
 			const embeddings = this.embedModel;
 			// 为每个块添加原始知识库ID的元数据
@@ -89,8 +100,22 @@ export class KnowledgeVDBService {
 				chunk.metadata.source = chunk.metadata.source || knowledge.name; // 确保有source
 			});
 
-			await this.vectorStoreService.addDocumentsToIndex(chunks, indexName, embeddings);
-			this.logger.log(`知识 [${knowledge.name}] (ID: ${id}) 处理完成，已存入索引 '${indexName}'。`);
+			let indexName: KnowledgeIndex;
+			let namespace: string;
+			if (
+				type === KnowledgeTypeEnum.openSourceProjectRepo ||
+				type === KnowledgeTypeEnum.userProjectCode
+			) {
+				this.logger.log(`知识 [${knowledge.name}] (ID: ${id}) 应该存入代码库，知识库已忽略。`);
+			} else {
+				//存入知识库
+				indexName = KnowledgeIndex.KNOWLEDGEBASE;
+				namespace = this._getUserNamespaceByType(type, userInfo.userId);
+				await this.vectorStoreService.addDocumentsToIndex(chunks, indexName, embeddings, namespace);
+				this.logger.log(
+					`知识 [${knowledge.name}] (ID: ${id}) 处理完成，已存入索引 '${indexName}/${namespace}'。`
+				);
+			}
 		} catch (error) {
 			this.logger.error(`处理知识 [${knowledge.name}] (ID: ${id}) 时出错:`, error);
 			throw error; // 将错误向上抛出，以便调用者可以处理
@@ -99,19 +124,19 @@ export class KnowledgeVDBService {
 
 	/**
 	 * 从对应索引召回topK个文档
-	 * @param prefix - 知识库索引前缀 (e.g., KnowledgeIndex.PROJECT_CODE)
+	 * @param namespace - 知识库索引前缀 (e.g., KnowledgeNamespace.PROJECT_CODE)
 	 * @param query - 用户的查询字符串
 	 * @param topK - 需要返回的文档数量
 	 * @param userId - 当前用户的ID
 	 * @returns {Promise<KnowledgeChunkDoc[]>} - 匹配的文档片段数组
 	 */
 	async retrieve(
-		prefix: KnowledgeIndex,
+		namespace: KnowledgeNamespace,
 		query: string,
 		topK: number,
 		userId: string
 	): Promise<KnowledgeChunkDoc[]> {
-		const indexName = `${prefix}-${userId}`;
+		const indexName = this._getUserNamespace(namespace, userId);
 		const embeddings = this.embedModel;
 		const retriever = await this.vectorStoreService.getRetrieverOfIndex(
 			indexName,
@@ -128,28 +153,30 @@ export class KnowledgeVDBService {
 	 * @param userId - 当前用户的ID
 	 * @returns {Promise<KnowledgeChunkDoc[]>} - 匹配的文档片段数组
 	 */
-	async retrieveCodeAndDoc(query: string, topK: number, userId: string): Promise<string> {
-		let prefixs = [
-			KnowledgeIndex.PROJECT_CODE,
-			KnowledgeIndex.PROJECT_DOC,
-			KnowledgeIndex.TECH_DOC
-		];
+	async retrieveKonwbase(query: string, topK: number, userId: string): Promise<string> {
+		let namespaces = [
+			KnowledgeNamespace.PROJECT_DOC_USER,
+			KnowledgeNamespace.PROJECT_DOC_OPEN,
+			KnowledgeNamespace.TECH_DOC
+		].map(namespace => this._getUserNamespace(namespace, userId));
 		//过滤掉不存在的索引
-		const indexNames = prefixs.map(prefix => `${prefix}-${userId}`);
-		const exists = await Promise.all(
-			indexNames.map(indexName => this.vectorStoreService.indexExists(indexName))
-		);
-		prefixs = prefixs.filter((_, index) => exists[index]);
+
 		const retrievers = await Promise.all(
-			prefixs.map(prefix => this.getRetriever(prefix, userId, topK))
+			namespaces.map(namespace =>
+				this.getRetriever(
+					KnowledgeIndex.KNOWLEDGEBASE,
+					namespace as KnowledgeNamespace,
+					userId,
+					topK
+				)
+			)
 		);
 
 		const docs = await Promise.all(retrievers.map(retriever => retriever.invoke(query)));
 		const texts = docs.map(doc => doc.map(doc => doc.pageContent).join('\n'));
 		const text = `
-		### 代码参考
-		${texts[0]}
 		### 项目文档参考
+		${texts[0]}
 		${texts[1]}
 		### 技术文档参考
 		${texts[2]}
@@ -159,29 +186,32 @@ export class KnowledgeVDBService {
 	/**
 	 * retrieveCodeAndDoc的CRAG检索版本
 	 */
-	async retrieveCodeAndDoc_CRAG(query: string, topK: number, userId: string): Promise<string> {
-		let prefixs = [
-			KnowledgeIndex.PROJECT_CODE,
-			KnowledgeIndex.PROJECT_DOC,
-			KnowledgeIndex.TECH_DOC
-		];
-		//过滤掉不存在的索引
-		const indexNames = prefixs.map(prefix => `${prefix}-${userId}`);
-		const exists = await Promise.all(
-			indexNames.map(indexName => this.vectorStoreService.indexExists(indexName))
-		);
-		prefixs = prefixs.filter((_, index) => exists[index]);
+	async retrieveKonwbase_CRAG(query: string, topK: number, userId: string): Promise<string> {
+		let namespaces = [
+			KnowledgeNamespace.PROJECT_DOC_USER,
+			KnowledgeNamespace.PROJECT_DOC_OPEN,
+			KnowledgeNamespace.TECH_DOC
+		].map(namespace => this._getUserNamespace(namespace, userId));
+
 		const retrievers = await Promise.all(
-			prefixs.map(prefix => this.getRetriever(prefix, userId, topK))
+			namespaces.map(namespace =>
+				this.getRetriever(
+					KnowledgeIndex.KNOWLEDGEBASE,
+					namespace as KnowledgeNamespace,
+					userId,
+					topK
+				)
+			)
 		);
+
 		const docs = await Promise.all(
 			retrievers.map(retriever => this.cRetrieveAgentService.invoke(query, retriever))
 		);
+
 		const texts = docs;
 		const text = `
-		### 代码参考
-		${texts[0]}
 		### 项目文档参考
+		${texts[0]}
 		${texts[1]}
 		### 技术文档参考
 		${texts[2]}
@@ -191,17 +221,23 @@ export class KnowledgeVDBService {
 
 	/**
 	 * 获取特定向量索引的检索器
-	 * @param prefix 知识库索引前缀 (e.g., KnowledgeIndex.PROJECT_CODE)
+	 * @param namespace 知识库索引前缀 (e.g., KnowledgeNamespace.PROJECT_CODE)
 	 * @param userId 当前用户的ID
 	 * @param topK 每次检索的召回数量
 	 */
-	async getRetriever(prefix: KnowledgeIndex, userId: string, topK: number) {
-		const indexName = `${prefix}-${userId}`;
+	async getRetriever(
+		index: KnowledgeIndex,
+		namespace: KnowledgeNamespace,
+		userId: string,
+		topK: number
+	) {
+		const namespaceUser = this._getUserNamespace(namespace, userId);
 		const embeddings = this.embedModel;
 		const retriever = await this.vectorStoreService.getRetrieverOfIndex(
-			indexName,
+			index,
 			embeddings,
-			topK
+			topK,
+			namespaceUser
 		);
 		return retriever;
 	}
@@ -337,34 +373,39 @@ export class KnowledgeVDBService {
 	}
 
 	/**
-	 * 根据知识类型和用户ID生成完整的索引名称。
+	 * 将知识类型映射到命名空间,并生成知识库中用户的命名空间名称。
 	 * @private
 	 */
-	private _getIndexName(type: KnowledgeTypeEnum, userId: string): string {
-		let prefix: KnowledgeIndex;
+	private _getUserNamespaceByType(type: KnowledgeTypeEnum, userId: string): string {
+		let namespace: KnowledgeNamespace;
 		switch (type) {
-			case KnowledgeTypeEnum.openSourceProjectRepo:
-				prefix = KnowledgeIndex.PROJECT_CODE;
-				break;
 			case KnowledgeTypeEnum.userProjectDoc:
+				namespace = KnowledgeNamespace.PROJECT_DOC_USER;
+				break;
 			case KnowledgeTypeEnum.openSourceProjectDoc:
-				prefix = KnowledgeIndex.PROJECT_DOC;
+				namespace = KnowledgeNamespace.PROJECT_DOC_OPEN;
 				break;
 			case KnowledgeTypeEnum.techDoc:
-				prefix = KnowledgeIndex.TECH_DOC;
+				namespace = KnowledgeNamespace.TECH_DOC;
 				break;
 			case KnowledgeTypeEnum.interviewQuestion:
-				prefix = KnowledgeIndex.INTERVIEW_QUESTION;
+				namespace = KnowledgeNamespace.INTERVIEW_QUESTION;
 				break;
 			case KnowledgeTypeEnum.other:
-				prefix = KnowledgeIndex.OTHER;
+				namespace = KnowledgeNamespace.OTHER;
 				break;
 			default:
 				// 兜底策略，确保总有一个地方存储
 				this.logger.warn(`未知的知识类型 '${type}'，将使用 'other' 索引。`);
-				prefix = KnowledgeIndex.OTHER;
+				namespace = KnowledgeNamespace.OTHER;
 				break;
 		}
-		return `${prefix}-${userId}`;
+		return this._getUserNamespace(namespace, userId);
+	}
+	/**
+	 * 生成知识库用户的命名空间名称，区分不同用户。
+	 */
+	private _getUserNamespace(namespace: KnowledgeNamespace, userId: string): string {
+		return `${namespace}-${userId}`;
 	}
 }

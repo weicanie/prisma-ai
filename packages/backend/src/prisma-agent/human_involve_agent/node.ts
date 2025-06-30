@@ -39,9 +39,7 @@ export class HumanInvolve {
 
 		// 1. 将 review 内容写入文件
 		const outputPath = await this.writeReviewFile(reviewType, content);
-		console.log(
-			`Content for review [${reviewType}] written to ${outputPath}. Waiting for human input...`
-		);
+		this.logger.log(`待 review 内容已写入文件: ${outputPath}. 等待用户输入...`);
 
 		// 2. 中断流程，等待用户输入
 		const userInput: HumanInput = interrupt({

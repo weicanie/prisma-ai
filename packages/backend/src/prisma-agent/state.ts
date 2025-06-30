@@ -156,7 +156,7 @@ const SubAgentState = Annotation.Root({
 		reviewPath: string | null;
 	}>({
 		reducer: (x, y) => {
-			console.log('humanIO reducer', x, y);
+			// console.log('humanIO reducer', x, y);
 			return y ? { ...x, ...y } : x;
 		},
 		default: () => ({ input: null, output: null, reviewPath: null })

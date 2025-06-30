@@ -4,10 +4,11 @@ import { MemorySaver } from '@langchain/langgraph';
 import { Inject, Injectable } from '@nestjs/common';
 import { ProjectDto } from '@prism-ai/shared';
 import { z } from 'zod';
-import { WithFormfixChain } from '../../chain/abstract';
 import { ModelService } from '../../model/model.service';
+import { WithFormfixChain } from '../../utils/abstract';
 import { RubustStructuredOutputParser } from '../../utils/RubustStructuredOutputParser';
 import { Reflection } from '../types';
+import { getAgentConfig } from '../utils/config';
 import { PlanGraph } from './planner';
 import { ReplanGraph } from './replanner';
 
@@ -68,7 +69,7 @@ export class PlanExecuteAgentService {
 		},
 		z.infer<typeof analysisSchema>
 	> {
-		const model = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+		const model = this.modelService.getLLMDeepSeekRaw(getAgentConfig().model.plan);
 		const parser = RubustStructuredOutputParser.from(analysisSchema, this.chainService);
 
 		const prompt = ChatPromptTemplate.fromMessages([
@@ -156,7 +157,7 @@ export class PlanExecuteAgentService {
 		},
 		z.infer<typeof planSchema>
 	> {
-		const model = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+		const model = this.modelService.getLLMDeepSeekRaw(getAgentConfig().model.plan);
 		const parser = RubustStructuredOutputParser.from(planSchema, this.chainService);
 
 		const prompt = ChatPromptTemplate.fromMessages([
@@ -256,7 +257,7 @@ export class PlanExecuteAgentService {
 		},
 		z.infer<typeof analysisSchema>
 	> {
-		const model = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+		const model = this.modelService.getLLMDeepSeekRaw(getAgentConfig().model.replan);
 		const parser = RubustStructuredOutputParser.from(analysisSchema, this.chainService);
 		const prompt = ChatPromptTemplate.fromMessages([
 			[
@@ -357,7 +358,7 @@ export class PlanExecuteAgentService {
 		},
 		z.infer<typeof planSchema>
 	> {
-		const model = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+		const model = this.modelService.getLLMDeepSeekRaw(getAgentConfig().model.replan);
 		const parser = RubustStructuredOutputParser.from(planSchema, this.chainService);
 		const prompt = ChatPromptTemplate.fromMessages([
 			[

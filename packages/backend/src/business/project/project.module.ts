@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { forwardRef, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as bodyParser from 'body-parser';
 import { ChainModule } from '../../chain/chain.module';
@@ -17,22 +17,35 @@ import { ProjectController } from './project.controller';
 import { ProjectService } from './project.service';
 @Module({
 	controllers: [ProjectController],
-	providers: [ProjectService, ProjectImplementService, ProjectProcessService],
-	exports: [ProjectService, ProjectImplementService, ProjectProcessService],
+	providers: [
+		ProjectService,
+		ProjectImplementService,
+		ProjectProcessService,
+		{
+			provide: 'WithFuncPoolProjectProcess',
+			useExisting: ProjectProcessService
+		}
+	],
+	exports: [
+		ProjectService,
+		ProjectImplementService,
+		ProjectProcessService,
+		'WithFuncPoolProjectProcess'
+	],
 	//Schema 注入模块作为 Model,然后实例化以操控mongodb数据库
 	imports: [
 		ChainModule,
 		EventBusModule,
 		RedisModule,
 		TaskQueueModule,
-		SseModule,
 		SkillModule,
 		PrismaAgentModule,
 		MongooseModule.forFeature([
 			{ name: Project.name, schema: ProjectSchema },
 			{ name: ProjectPolished.name, schema: ProjectPolishedSchema },
 			{ name: ProjectMined.name, schema: ProjectMinedSchema }
-		])
+		]),
+		forwardRef(() => SseModule)
 	] //forFeature指定模块可用的集合（表）
 })
 export class ProjectModule implements NestModule {

@@ -3,24 +3,30 @@ import { InjectModel } from '@nestjs/mongoose';
 import {
 	CreateKnowledgeDto,
 	FileTypeEnum,
+	KnowledgeTypeEnum,
 	KnowledgeVo,
 	PaginatedKnsResult,
 	UpdateKnowledgeDto,
 	UserInfoFromToken
 } from '@prism-ai/shared';
 import { Model, Types } from 'mongoose';
+import * as path from 'path';
 import { OssService } from '../../oss/oss.service';
 import { KnowledgeVDBService } from '../../prisma-agent/data_base/konwledge_vdb.service';
+import { ProjectCodeVDBService } from '../../prisma-agent/data_base/project_code_vdb.service';
+import { cloneProjectScriptPath, projectsDirPath } from '../../utils/constants';
+import { executeShellScript } from '../../utils/execute_shell_script';
 import { getOssObjectNameFromURL } from '../../utils/getOssObjectNameFromURL';
 import { Knowledgebase, KnowledgebaseDocument } from './entities/knowledge-base.entity';
 
 @Injectable()
 export class KnowledgebaseService {
+	@InjectModel(Knowledgebase.name)
+	private knowledgebaseModel: Model<KnowledgebaseDocument>;
 	constructor(
-		@InjectModel(Knowledgebase.name)
-		private knowledgebaseModel: Model<KnowledgebaseDocument>,
 		private ossService: OssService,
-		private knowledgeVDBService: KnowledgeVDBService
+		private knowledgeVDBService: KnowledgeVDBService,
+		private projectCodeVDBService: ProjectCodeVDBService
 	) {}
 
 	/**
@@ -32,6 +38,7 @@ export class KnowledgebaseService {
 		createKnowledgeDto: CreateKnowledgeDto,
 		userInfo: UserInfoFromToken
 	): Promise<KnowledgeVo> {
+		//如果是文档,则验证文档是否上传OSS
 		if (createKnowledgeDto.fileType === FileTypeEnum.doc) {
 			const fileObjName = getOssObjectNameFromURL(createKnowledgeDto.content);
 			const fileExists = await this.ossService.checkFileExists(fileObjName!);
@@ -39,14 +46,12 @@ export class KnowledgebaseService {
 				throw new Error('文件不存在,请不要修改知识内容中的URL');
 			}
 		}
-
 		const createdKnowledgebase = new this.knowledgebaseModel({
 			...createKnowledgeDto,
 			userInfo
 		});
 
 		const saved = await createdKnowledgebase.save();
-
 		const embedKnowledgeDto = {
 			id: (saved._id as Types.ObjectId).toString(),
 			name: saved.name,
@@ -58,9 +63,40 @@ export class KnowledgebaseService {
 			updatedAt: saved.updatedAt
 		};
 
-		await this.knowledgeVDBService.storeKnowledgeToVDB(embedKnowledgeDto, userInfo);
+		if (
+			createKnowledgeDto.type === KnowledgeTypeEnum.userProjectCode ||
+			createKnowledgeDto.type === KnowledgeTypeEnum.openSourceProjectRepo
+		) {
+			//代码库
+			this.storeCodeToVDB(createKnowledgeDto.content, userInfo);
+		} else {
+			//文档库
+			this.knowledgeVDBService.storeKnowledgeToVDB(embedKnowledgeDto, userInfo);
+		}
 
 		return embedKnowledgeDto as KnowledgeVo;
+	}
+
+	/**
+	 * 用户clone项目到指定目录并上传项目代码到向量数据库
+	 * @param projectRepoPath 项目仓库地址
+	 * @param userInfo 用户信息
+	 */
+	async storeCodeToVDB(projectRepoPath: string, userInfo: UserInfoFromToken) {
+		const projectName = path.basename(projectRepoPath).replace('.git', '');
+		//clone项目到指定目录
+		await executeShellScript(cloneProjectScriptPath, [
+			projectRepoPath,
+			`${projectsDirPath}/${projectName}`
+		]);
+		//上传项目代码到向量数据库
+		const projectPath = path.resolve(projectsDirPath, projectName);
+		await this.projectCodeVDBService.storeToVDB(
+			userInfo.userId,
+			projectName,
+			projectPath,
+			crypto.randomUUID()
+		);
 	}
 
 	async findAll(

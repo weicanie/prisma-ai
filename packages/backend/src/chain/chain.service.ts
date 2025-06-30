@@ -25,7 +25,8 @@ import { AgentService } from '../agent/agent.service';
 import { MCPClientService } from '../mcp-client/mcp-client.service';
 import { ModelService } from '../model/model.service';
 import { PromptService, role } from '../prompt/prompt.service';
-import { WithFormfixChain } from './abstract';
+import { WithFormfixChain } from '../utils/abstract';
+
 @Injectable()
 export class ChainService implements WithFormfixChain {
 	constructor(

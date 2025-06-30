@@ -22,15 +22,16 @@ import { ProjectChainService } from '../../chain/project-chain.service';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { RedisService } from '../../redis/redis.service';
 import { DeepSeekStreamChunk } from '../../type/sse';
+import { WithFuncPool } from '../../utils/abstract';
+import { SseFunc } from '../../utils/type';
 import { SkillService } from '../skill/skill.service';
-import { LLMSseService, redisStoreResult } from '../sse/llm-sse.service';
+import { redisStoreResult } from '../sse/llm-sse.service';
 import { Project, ProjectDocument } from './entities/project.entity';
 import { ProjectMined, ProjectMinedDocument } from './entities/projectMined.entity';
 import { ProjectPolished, ProjectPolishedDocument } from './entities/projectPolished.entity';
-import { ProjectService } from './project.service';
 
 @Injectable()
-export class ProjectProcessService {
+export class ProjectProcessService implements WithFuncPool {
 	@InjectModel(Project.name)
 	private projectModel: Model<ProjectDocument>;
 
@@ -39,66 +40,28 @@ export class ProjectProcessService {
 
 	@InjectModel(ProjectMined.name)
 	private projectMinedModel: Model<ProjectMinedDocument>;
-	public methodKeys = {
+	public funcKeys = {
 		polishProject: 'polishProject',
 		mineProject: 'mineProject',
 		lookupProject: 'lookupProject'
 	};
 	logger = new Logger(ProjectProcessService.name);
 
-	public methodPool = {
-		polishProject: this.polishProject,
-		mineProject: this.mineProject,
-		lookupProject: this.lookupProject
-	};
+	public funcPool: Record<string, SseFunc>;
+	poolName = 'ProjectProcessService';
 
 	constructor(
 		public chainService: ChainService,
 		public projectChainService: ProjectChainService,
 		public eventBusService: EventBusService,
 		public redisService: RedisService,
-		public LLMSseService: LLMSseService,
-		public projectService: ProjectService,
 		public skillService: SkillService
-	) {}
-
-	/**
-	 * @param sessionId 会话id,用于找到任务
-	 */
-	async SseLookupResult(sessionId: string, userInfo: UserInfoFromToken, recover: boolean) {
-		if (recover) {
-			return this.LLMSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);
-		}
-		return this.LLMSseService.handleSseRequestAndResponse(sessionId, userInfo, {
-			funcKey: this.methodKeys.lookupProject,
-			funcPool: this.methodPool
-		});
-	}
-
-	/**
-	 * @param sessionId 会话id,用于找到任务
-	 */
-	async SsePolishResult(sessionId: string, userInfo: UserInfoFromToken, recover: boolean) {
-		if (recover) {
-			return this.LLMSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);
-		}
-		return this.LLMSseService.handleSseRequestAndResponse(sessionId, userInfo, {
-			funcKey: this.methodKeys.polishProject,
-			funcPool: this.methodPool
-		});
-	}
-
-	/**
-	 * @param sessionId 会话id,用于找到任务
-	 */
-	async SseMineResult(sessionId: string, userInfo: UserInfoFromToken, recover: boolean) {
-		if (recover) {
-			return this.LLMSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);
-		}
-		return this.LLMSseService.handleSseRequestAndResponse(sessionId, userInfo, {
-			funcKey: this.methodKeys.mineProject,
-			funcPool: this.methodPool
-		});
+	) {
+		this.funcPool = {
+			polishProject: this.polishProject.bind(this),
+			mineProject: this.mineProject.bind(this),
+			lookupProject: this.lookupProject.bind(this)
+		};
 	}
 
 	/**
@@ -112,7 +75,7 @@ export class ProjectProcessService {
 	 * @param existingProjectId 已存在的项目ID
 	 * @returns 返回一个处理函数，接收redis存储的结果将其存储到数据库
 	 */
-	private async _resultHandlerCreater(
+	private _resultHandlerCreater = async (
 		schema: ZodSchema,
 		model: typeof Model,
 		userInfo: UserInfoFromToken,
@@ -120,7 +83,7 @@ export class ProjectProcessService {
 		statusMerged: ProjectStatus,
 		inputSchema = projectSchema,
 		existingProjectId: ProjectDocument
-	) {
+	) => {
 		//格式验证及修复、数据库存储
 		return async (resultRedis: redisStoreResult) => {
 			let results = jsonMd_obj(resultRedis.content); //[合并前,合并后]
@@ -168,7 +131,7 @@ export class ProjectProcessService {
 			// this.projectService.updateProject(existingProjectId.id, resultSaveAfterMerge, userInfo);
 			await resultSave_model.save();
 		};
-	}
+	};
 
 	/**
 	 * 项目经验文本转换为json格式对象并提交
@@ -282,16 +245,15 @@ export class ProjectProcessService {
 	}
 
 	/**
-	 *
 	 * @param resultRedis SSE任务完成后从redis中取出的结果
 	 * @param userInfo 用户信息
 	 * @param project 用户输入项目信息
 	 */
-	private async _handleLookupResult(
+	private _handleLookupResult = async (
 		resultRedis: redisStoreResult,
 		userInfo: UserInfoFromToken,
 		project: ProjectDto
-	) {
+	) => {
 		// 1. 从Redis结果中解析出LLM的输出内容
 		let lookupResult = jsonMd_obj(resultRedis.content); // 从markdown代码块中提取json
 
@@ -328,7 +290,7 @@ export class ProjectProcessService {
 		};
 
 		await this.projectModel.updateOne(query, updateOperation);
-	}
+	};
 
 	/**
 	 * 项目经验 -> 打磨后的项目经验

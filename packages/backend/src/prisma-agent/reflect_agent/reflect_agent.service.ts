@@ -2,7 +2,8 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { Runnable, RunnableSequence } from '@langchain/core/runnables';
 import { Inject, Injectable } from '@nestjs/common';
 import { z } from 'zod';
-import { WithFormfixChain } from '../../chain/abstract';
+import { WithFormfixChain } from '../../utils/abstract';
+
 import { ModelService } from '../../model/model.service';
 import { RubustStructuredOutputParser } from '../../utils/RubustStructuredOutputParser';
 import { reflectionSchema } from '../types';

@@ -1,6 +1,7 @@
 {
 	"name": "@prism-ai/shared",
 	"version": "2.0.0",
+	"private": true,
 	"description": "Shared types and utilities",
 	"main": "dist/index.js",
 	"module": "dist/index.mjs",
@@ -22,5 +23,5 @@
 			"types": "./dist/index.d.ts"
 		}
 	},
-	"gitHead": "fb77cd2257d3e01512dfaab4a6b7d306784a3922"
+	"gitHead": "d528dbb9c4aa674d7948ddd6244cf8752c172994"
 }

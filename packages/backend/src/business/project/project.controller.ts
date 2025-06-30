@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Sse } from '@nestjs/common';
 import { ImplementDto, ProjectStatus, UserInfoFromToken } from '@prism-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
+import { LLMSseService } from '../sse/llm-sse.service';
 import { ProjectDto } from './dto/project.dto';
 import { ProjectImplementService } from './project-implement.service';
 import { ProjectProcessService } from './project-process.service';
@@ -11,7 +12,8 @@ export class ProjectController {
 	constructor(
 		private readonly projectService: ProjectService,
 		private readonly projectImplementService: ProjectImplementService,
-		private readonly projectProcessService: ProjectProcessService
+		private readonly projectProcessService: ProjectProcessService,
+		private readonly llmSseService: LLMSseService
 	) {}
 
 	/**
@@ -28,7 +30,14 @@ export class ProjectController {
 		@Query('recover') recover: boolean,
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
-		return this.projectProcessService.SseLookupResult(sessionId, userInfo, recover);
+		const metadata = {
+			funcKey: this.projectProcessService.funcKeys.lookupProject,
+			poolName: this.projectProcessService.poolName
+		};
+		if (recover) {
+			return this.llmSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);
+		}
+		return this.llmSseService.handleSseRequestAndResponse(sessionId, userInfo, metadata);
 	}
 
 	/**
@@ -44,7 +53,14 @@ export class ProjectController {
 		@Query('recover') recover: boolean,
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
-		return this.projectProcessService.SsePolishResult(sessionId, userInfo, recover);
+		const metadata = {
+			funcKey: this.projectProcessService.funcKeys.polishProject,
+			poolName: this.projectProcessService.poolName
+		};
+		if (recover) {
+			return this.llmSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);
+		}
+		return this.llmSseService.handleSseRequestAndResponse(sessionId, userInfo, metadata);
 	}
 
 	/**
@@ -60,7 +76,14 @@ export class ProjectController {
 		@Query('recover') recover: boolean,
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
-		return this.projectProcessService.SseMineResult(sessionId, userInfo, recover);
+		const metadata = {
+			funcKey: this.projectProcessService.funcKeys.mineProject,
+			poolName: this.projectProcessService.poolName
+		};
+		if (recover) {
+			return this.llmSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);
+		}
+		return this.llmSseService.handleSseRequestAndResponse(sessionId, userInfo, metadata);
 	}
 
 	/**

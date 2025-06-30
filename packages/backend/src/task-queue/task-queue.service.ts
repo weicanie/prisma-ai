@@ -154,10 +154,12 @@ export class TaskQueueService {
 										error
 									});
 								}
+								throw error;
 							});
 					})
 					.catch(error => {
 						this.logger.error(`更新任务状态失败: ${taskId}`, error);
+						throw error;
 					})
 					.finally(() => {
 						this.activeCount--;
@@ -198,6 +200,7 @@ export class TaskQueueService {
 		// 检查会话是否已有关联任务
 		const existingTaskId = await this.getSessionTaskId(sessionId);
 		if (existingTaskId) {
+			this.logger.log(`会话${sessionId}已有关联任务: ${existingTaskId},不新建任务`);
 			const existingTask = await this.getTask(existingTaskId);
 			if (existingTask) {
 				// 任务仍在进行中，直接返回

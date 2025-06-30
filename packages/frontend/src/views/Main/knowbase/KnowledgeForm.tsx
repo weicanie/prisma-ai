@@ -47,6 +47,7 @@ const knowledgeFormSchema = z.object({
 	type: z.enum(
 		[
 			'userProjectDoc',
+			'userProjectCode',
 			'openSourceProjectDoc',
 			'openSourceProjectRepo',
 			'techDoc',

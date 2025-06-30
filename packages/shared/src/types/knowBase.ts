@@ -1,7 +1,8 @@
 export const type_content_Map: Record<string, string> = {
 	userProjectDoc: '我的项目文档',
+	userProjectCode: '我的项目github仓库',
 	openSourceProjectDoc: '开源项目文档',
-	openSourceProjectRepo: '开源项目github仓库地址',
+	openSourceProjectRepo: '开源项目github仓库',
 	techDoc: '技术文档',
 	interviewQuestion: '面试题',
 	other: '其他'
@@ -10,6 +11,7 @@ export const type_content_Map: Record<string, string> = {
 export enum KnowledgeTypeEnum {
 	userProjectDoc = 'userProjectDoc', //我的项目文档
 	openSourceProjectDoc = 'openSourceProjectDoc', //开源项目文档
+	userProjectCode = 'userProjectCode', //我的项目代码仓库
 	openSourceProjectRepo = 'openSourceProjectRepo', //开源项目github仓库地址
 	techDoc = 'techDoc', //技术文档
 	interviewQuestion = 'interviewQuestion', //面试题
@@ -48,7 +50,7 @@ export interface CreateKnowledgeDto {
   4.其它 'other'
 
   */
-	type: `${KnowledgeTypeEnum}`; //知识类型
+	type: KnowledgeTypeEnum; //知识类型
 	/* 
 	1.txt: 文本内容
   2.doc: 文档oss url（前端直传用户上传的pdf文档）
