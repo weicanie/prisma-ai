@@ -16,11 +16,18 @@ import { ProjectQueryKey } from '../../../query/keys';
 import { findAllProjects, implementProject } from '../../../services/project';
 import type { contextInput } from '../../../services/sse/sse';
 import { useSseAnswer } from '../../../services/sse/useSseAnswer';
-import { OriginalProject } from './Action-Result/OriginalProject';
-import { ProjectResult } from './Action-Result/ProjectResult';
+import { OriginalProject } from './cpns/OriginalProject';
+import { ProjectResult } from './cpns/ProjectResult';
 //TODO 将调用llm、获取sse返回过程封装成一个统一的组件
 interface ActionProps {
 	_?: string;
+}
+
+enum ActionType {
+	lookup = 'lookup',
+	polish = 'polish',
+	mine = 'mine',
+	collaborate = 'collaborate'
 }
 
 const Action: React.FC<ActionProps> = () => {
@@ -61,7 +68,7 @@ const Action: React.FC<ActionProps> = () => {
 			const result = jsonMd_obj(content);
 			if (Array.isArray(result)) {
 				const [resultData, mergedData] = result;
-				console.log('🚀 ~ sse最终结果:', result);
+				console.log('sse最终结果:', result);
 
 				setResultData(resultData);
 				if (mergedData) {
@@ -78,6 +85,15 @@ const Action: React.FC<ActionProps> = () => {
 			}, 0);
 		}
 	}, [done]);
+
+	/**
+	 * llm生成结果对应的操作类型，影响结果的展示和反思重做的调用
+	 * 1. 如果项目状态为lookuped，则操作类型为lookup
+	 * 2. 如果项目状态为polished，则操作类型为polish
+	 * 3. 如果项目状态为mined，则操作类型为mine
+	 * 4. 否则为collaborate
+	 */
+	const [actionType, setActionType] = useState<ActionType>(ActionType.lookup);
 
 	const ImplementRequest = useCustomMutation(implementProject);
 
@@ -98,30 +114,15 @@ const Action: React.FC<ActionProps> = () => {
 
 	// 根据项目状态确定可用操作
 	const getAvailableActions = (status: ProjectStatus) => {
-		switch (status) {
-			case ProjectStatus.committed:
-				return ['lookup'];
-			case ProjectStatus.lookuped:
-			case ProjectStatus.polishing:
-				return ['polish'];
-			case ProjectStatus.polished:
-			case ProjectStatus.mining:
-				return ['mine'];
-			case ProjectStatus.mined:
-			case ProjectStatus.accepted:
-				return ['collaborate'];
-			default:
-				return [];
+		const availableActions = ['mine', 'collaborate'];
+		if (status === ProjectStatus.lookuped) {
+			availableActions.push('polish');
+		} else {
+			availableActions.push('lookup');
 		}
+		return availableActions;
 	};
-
 	const availableActions = getAvailableActions(projectData.status);
-	const actionType: 'lookup' | 'polish' | 'mine' | 'collaborate' | null = availableActions[0] as
-		| 'lookup'
-		| 'polish'
-		| 'mine'
-		| 'collaborate'
-		| null;
 
 	// 处理AI分析
 	const handleLookup = () => {
@@ -131,6 +132,7 @@ const Action: React.FC<ActionProps> = () => {
 		};
 		setInput({ input: projectDto });
 		setUrlPath('/project/lookup');
+		setActionType(ActionType.lookup);
 		navigate('#reasoning');
 	};
 
@@ -143,6 +145,7 @@ const Action: React.FC<ActionProps> = () => {
 		};
 		setInput({ input: projectLookupedDto });
 		setUrlPath('/project/polish');
+		setActionType(ActionType.polish);
 		navigate('#reasoning');
 	};
 
@@ -154,6 +157,7 @@ const Action: React.FC<ActionProps> = () => {
 		};
 		setInput({ input: projectDto });
 		setUrlPath('/project/mine');
+		setActionType(ActionType.mine);
 		navigate('#reasoning');
 	};
 
@@ -169,6 +173,7 @@ const Action: React.FC<ActionProps> = () => {
 			projectPath
 		};
 		ImplementRequest.mutate(implementDto);
+		setActionType(ActionType.collaborate);
 	};
 
 	/* 用户点击完成优化后更新左侧的项目经验,并更新所有状态 */

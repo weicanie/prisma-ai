@@ -7,7 +7,7 @@ import { useParams } from 'react-router-dom';
 import { useCustomQuery } from '../../../query/config';
 import { ResumeQueryKey } from '../../../query/keys';
 import { findAllUserResumes } from '../../../services/resume';
-import { OriginalProject } from '../Projects/Action-Result/OriginalProject';
+import { OriginalProject } from '../Projects/cpns/OriginalProject';
 
 interface ResumeReadProps {
 	_?: string;

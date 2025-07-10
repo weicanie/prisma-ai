@@ -1,4 +1,3 @@
-//TODO copilot包体积太大,需要优化
 import '@ant-design/v5-patch-for-react-19';
 import { CopilotKit } from '@copilotkit/react-core';
 import { CopilotSidebar } from '@copilotkit/react-ui';

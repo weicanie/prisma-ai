@@ -1,13 +1,13 @@
 import {
 	projectSchema,
 	type ImplementDto,
+	type PersistentTaskVo,
 	type ProjectDto,
 	type ProjectVo,
 	type ServerDataFormat as SDF
 } from '@prism-ai/shared';
 import { ZodError } from 'zod';
 import { instance } from './config';
-import type { PersistentTaskVo } from './hjm';
 /**
  * 上传JSON新建项目经验
  * @param project JSON格式的项目经验对象

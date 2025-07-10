@@ -7,10 +7,10 @@ import { Button } from '@/components/ui/button';
 import type { ProjectMinedDto, ProjectPolishedDto } from '@prism-ai/shared';
 import { Code, Lightbulb, Pyramid, Sparkles, Zap } from 'lucide-react';
 import React, { useState } from 'react';
-import FeedBack from './FeedBack';
+import FeedBack from '../FeedBack';
+import { headerMap, type ProjectResultProps } from '../ProjectResult';
 import { MinedPolishedLightspotSection } from './MinedLightspotSection';
 import { PolishedLightspotSection } from './PolishedLightspotSection';
-import { headerMap, type ProjectResultProps } from './ProjectResult';
 type ProejctPMResultCardProps = Pick<
 	ProjectResultProps,
 	'actionType' | 'resultData' | 'mergedData' | 'handleMerge'

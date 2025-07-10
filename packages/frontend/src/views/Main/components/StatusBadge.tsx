@@ -4,13 +4,11 @@ import React from 'react';
 
 const project = {
 	text: {
-		[ProjectStatus.committed]: '初提交-大橘未定',
-		[ProjectStatus.lookuped]: '已分析-连携看破',
-		[ProjectStatus.polishing]: '初露锋芒',
-		[ProjectStatus.polished]: '已优化-寒气练成',
-		[ProjectStatus.mining]: '雪花沉睡',
-		[ProjectStatus.mined]: '已挖掘-黄金奖杯',
-		[ProjectStatus.accepted]: 'Agent-指引明路'
+		[ProjectStatus.committed]: '已提交',
+		[ProjectStatus.lookuped]: '已分析',
+		[ProjectStatus.polished]: '已优化',
+		[ProjectStatus.mined]: '已挖掘',
+		[ProjectStatus.accepted]: 'Agent'
 	},
 	color: {
 		[ProjectStatus.committed]: 'bg-amber-400',
@@ -23,8 +21,8 @@ const project = {
 
 const resume = {
 	text: {
-		[ResumeStatus.committed]: '未定制-大橘未定',
-		[ResumeStatus.matched]: '已定制-指引明路'
+		[ResumeStatus.committed]: '未定制',
+		[ResumeStatus.matched]: '已定制'
 	},
 	color: {
 		[ResumeStatus.committed]: 'bg-amber-400',

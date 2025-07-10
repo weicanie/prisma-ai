@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import type { ResumeVo } from '@prism-ai/shared';
 import { Code, FileText } from 'lucide-react';
 import React, { Fragment } from 'react';
-import { OriginalProject } from '../../Projects/Action-Result/OriginalProject';
+import { OriginalProject } from '../../Projects/cpns/OriginalProject';
 import ClickCollapsible from '../../components/ClickCollapsible';
 import { StatusBadge } from '../../components/StatusBadge';
 

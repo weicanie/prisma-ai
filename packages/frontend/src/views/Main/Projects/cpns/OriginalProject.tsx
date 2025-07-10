@@ -4,6 +4,7 @@ import { Separator } from '@/components/ui/separator';
 import { type ProjectVo } from '@prism-ai/shared';
 import { ArrowRight, Code, Sparkles, Target, Users } from 'lucide-react';
 import React from 'react';
+import ClickCollapsible from '../../components/ClickCollapsible';
 import { StatusBadge } from '../../components/StatusBadge';
 import { ProjectAnalysisResultCard } from './ProjectAnalysisResultCard';
 
@@ -99,93 +100,101 @@ export const OriginalProject: React.FC<OriginalProjectProps> = ({
 
 					{/* 项目亮点 */}
 					{projectData.lightspot && (
-						<div>
-							<h4
-								className={`font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
+						<>
+							<ClickCollapsible
+								title={
+									<h4
+										className={`font-semibold text-lg mb-3 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
+									>
+										<Sparkles className="w-5 h-5" />
+										项目亮点
+									</h4>
+								}
+								defaultOpen={false}
 							>
-								<Sparkles className="w-5 h-5" />
-								项目亮点
-							</h4>
-							<div className="space-y-4">
-								{projectData.lightspot.team?.length > 0 && (
-									<div>
-										<h5
-											className={`font-medium mb-2 flex items-center gap-2 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}
-										>
-											<Users className="w-4 h-4" />
-											团队贡献
-										</h5>
-										<ul className="space-y-1">
-											{projectData.lightspot.team.map((item, index) => (
-												<li
-													key={index}
-													className={`flex items-start gap-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
+								<div>
+									<div className="space-y-4">
+										{projectData.lightspot.team?.length > 0 && (
+											<div>
+												<h5
+													className={`font-medium mb-2 flex items-center gap-2 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}
 												>
-													<ArrowRight className="w-4 h-4 mt-0.5 text-blue-500 flex-shrink-0" />
-													<span>{item}</span>
-												</li>
-											))}
-										</ul>
-									</div>
-								)}
+													<Users className="w-4 h-4" />
+													团队贡献
+												</h5>
+												<ul className="space-y-1">
+													{projectData.lightspot.team.map((item, index) => (
+														<li
+															key={index}
+															className={`flex items-start gap-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
+														>
+															<ArrowRight className="w-4 h-4 mt-0.5 text-blue-500 flex-shrink-0" />
+															<span>{item}</span>
+														</li>
+													))}
+												</ul>
+											</div>
+										)}
 
-								{projectData.lightspot.skill?.length > 0 && (
-									<div>
-										<h5
-											className={`font-medium mb-2 flex items-center gap-2 ${isDark ? 'text-green-400' : 'text-green-600'}`}
-										>
-											<Code className="w-4 h-4" />
-											技术亮点
-										</h5>
-										<ul className="space-y-1">
-											{projectData.lightspot.skill.map((item, index) => (
-												<li
-													key={index}
-													className={`flex items-start gap-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
+										{projectData.lightspot.skill?.length > 0 && (
+											<div>
+												<h5
+													className={`font-medium mb-2 flex items-center gap-2 ${isDark ? 'text-green-400' : 'text-green-600'}`}
 												>
-													<ArrowRight className="w-4 h-4 mt-0.5 text-green-500 flex-shrink-0" />
-													<span>{item}</span>
-												</li>
-											))}
-										</ul>
-									</div>
-								)}
+													<Code className="w-4 h-4" />
+													技术亮点
+												</h5>
+												<ul className="space-y-1">
+													{projectData.lightspot.skill.map((item, index) => (
+														<li
+															key={index}
+															className={`flex items-start gap-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
+														>
+															<ArrowRight className="w-4 h-4 mt-0.5 text-green-500 flex-shrink-0" />
+															<span>{item}</span>
+														</li>
+													))}
+												</ul>
+											</div>
+										)}
 
-								{projectData.lightspot.user?.length > 0 && (
-									<div>
-										<h5
-											className={`font-medium mb-2 flex items-center gap-2 ${isDark ? 'text-purple-400' : 'text-purple-600'}`}
-										>
-											<Target className="w-4 h-4" />
-											用户价值
-										</h5>
-										<ul className="space-y-1">
-											{projectData.lightspot.user.map((item, index) => (
-												<li
-													key={index}
-													className={`flex items-start gap-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
+										{projectData.lightspot.user?.length > 0 && (
+											<div>
+												<h5
+													className={`font-medium mb-2 flex items-center gap-2 ${isDark ? 'text-purple-400' : 'text-purple-600'}`}
 												>
-													<ArrowRight className="w-4 h-4 mt-0.5 text-purple-500 flex-shrink-0" />
-													<span>{item}</span>
-												</li>
-											))}
-										</ul>
+													<Target className="w-4 h-4" />
+													用户价值
+												</h5>
+												<ul className="space-y-1">
+													{projectData.lightspot.user.map((item, index) => (
+														<li
+															key={index}
+															className={`flex items-start gap-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
+														>
+															<ArrowRight className="w-4 h-4 mt-0.5 text-purple-500 flex-shrink-0" />
+															<span>{item}</span>
+														</li>
+													))}
+												</ul>
+											</div>
+										)}
 									</div>
-								)}
+								</div>
+							</ClickCollapsible>
 
-								{projectData.lookupResult && showAnalysis && (
-									<>
-										<Separator />
-										<ProjectAnalysisResultCard
-											isDark={isDark}
-											resultData={projectData.lookupResult}
-											mergedData={null}
-											handleFeedback={() => {}}
-										/>
-									</>
-								)}
-							</div>
-						</div>
+							{projectData.lookupResult && showAnalysis && (
+								<>
+									<Separator />
+									<ProjectAnalysisResultCard
+										isDark={isDark}
+										resultData={projectData.lookupResult}
+										mergedData={null}
+										handleFeedback={() => {}}
+									/>
+								</>
+							)}
+						</>
 					)}
 				</CardContent>
 			</Card>
