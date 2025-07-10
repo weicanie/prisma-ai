@@ -2,18 +2,11 @@ import type {
 	HjmMatchDto,
 	JobVo,
 	MatchedJobVo,
+	PersistentTaskVo,
 	ServerDataFormat as SDF,
 	StartCrawlDto
 } from '@prism-ai/shared';
 import { instance } from './config';
-
-export interface PersistentTaskVo {
-	id: string; // 任务唯一标识
-	status: 'pending' | 'processing' | 'completed' | 'failed'; // 任务状态
-	resultKey?: string;
-	progress?: number;
-	error?: string;
-}
 
 /**
  * 启动爬虫任务来抓取招聘信息

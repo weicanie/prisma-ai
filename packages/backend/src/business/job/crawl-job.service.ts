@@ -50,6 +50,7 @@ export class CrawlJobService {
 	@InjectModel(Job.name) private jobModel: Model<JobDocument>;
 	taskType = 'crawl-job';
 
+	//爬取到的岗位数据用户间共享,人岗匹配后用户可将公共岗位数据转为自己的岗位数据
 	userInfoSpider = {
 		userId: 'system',
 		username: '系统爬虫'

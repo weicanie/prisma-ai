@@ -7,6 +7,7 @@ import { HjmModule } from './business/human-job-match/hjm.module';
 import { JobModule } from './business/job/job.module';
 import { KnowledgebaseModule } from './business/knowledge-base/knowledge-base.module';
 import { ProjectModule } from './business/project/project.module';
+import { QuestionModule } from './business/question/question.module';
 import { ResumeModule } from './business/resume/resume.module';
 import { SkillModule } from './business/skill/skill.module';
 import { SseModule } from './business/sse/sse.module';
@@ -49,7 +50,8 @@ import { UserModule } from './user/user.module';
 		CopilotModule,
 		KnowledgebaseModule,
 		HjmModule,
-		PrismaAgentModule
+		PrismaAgentModule,
+		QuestionModule
 	],
 	providers: [
 		{

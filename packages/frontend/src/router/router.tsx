@@ -20,6 +20,7 @@ const Skills = lazy(() => import('../views/Main/Skills'));
 const SkillRead = lazy(() => import('../views/Main/Skills/SkillRead'));
 const DataCrawl = lazy(() => import('../views/Main/Hjm/DataCrawl'));
 const JobMatch = lazy(() => import('../views/Main/Hjm/JobMatch'));
+const Anki = lazy(() => import('../views/Main/Anki/Anki'));
 
 export const routes = [
 	{
@@ -264,6 +265,14 @@ export const routes = [
 								<>简历延申八股 coming soon</>
 							</UpdateBreadRouter>
 						)
+					},
+					{
+						path: 'anki',
+						element: (
+							<UpdateBreadRouter>
+								<Anki />
+							</UpdateBreadRouter>
+						)
 					}
 				]
 			}
@@ -293,6 +302,7 @@ export const path_name: Record<string, string> = {
 	'/main/knowledge': '知识库',
 	'/main/knowledge/detail': '知识库-详情',
 
+	'/main/offer/anki': '面向offer学习-集成面试题库和 anki',
 	'/main/offer/road': '面向offer学习-技术学习路线',
 	'/main/offer/questions': '面向offer学习-简历延申八股'
 };

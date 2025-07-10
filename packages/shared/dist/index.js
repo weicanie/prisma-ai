@@ -51,6 +51,7 @@ __export(index_exports, {
   skillItemSchema: () => skillItemSchema,
   skillSchema: () => skillSchema,
   skillsToMarkdown: () => skillsToMarkdown,
+  startCrawlQuestionSchema: () => startCrawlQuestionSchema,
   type_content_Map: () => type_content_Map
 });
 module.exports = __toCommonJS(index_exports);
@@ -4407,6 +4408,12 @@ var projectSchemaForm = z.object({
   lightspot: getLightspotSchemaForm()
 });
 
+// src/types/question.ts
+var startCrawlQuestionSchema = z.object({
+  list: z.string().url({ message: "\u5FC5\u987B\u662F\u5408\u6CD5\u7684URL" }).min(1, "URL\u4E0D\u80FD\u4E3A\u7A7A"),
+  domain: z.string().url({ message: "\u5FC5\u987B\u662F\u5408\u6CD5\u7684URL" }).min(1, "URL\u4E0D\u80FD\u4E3A\u7A7A")
+});
+
 // src/types/resume.ts
 var ResumeStatus = /* @__PURE__ */ ((ResumeStatus2) => {
   ResumeStatus2["committed"] = "committed";
@@ -4474,15 +4481,15 @@ function markdownToProjectSchema(markdown) {
   if (nameMatch && nameMatch[1]) {
     result.info.name = nameMatch[1].trim();
   }
-  const roleMatch = markdown.match(/角色和职责：(.+?)(?:\n|$)/);
+  const roleMatch = markdown.match(/角色与职责：(.+?)(?:\n|$)/);
   if (roleMatch && roleMatch[1]) {
     result.info.desc.role = roleMatch[1].trim();
   }
-  const contributeMatch = markdown.match(/核心贡献和参与程度：(.+?)(?:\n|$)/);
+  const contributeMatch = markdown.match(/核心贡献与参与程度：(.+?)(?:\n|$)/);
   if (contributeMatch && contributeMatch[1]) {
     result.info.desc.contribute = contributeMatch[1].trim();
   }
-  const bgMatch = markdown.match(/背景和目的：(.+?)(?:\n|$)/);
+  const bgMatch = markdown.match(/背景与目的：(.+?)(?:\n|$)/);
   if (bgMatch && bgMatch[1]) {
     result.info.desc.bgAndTarget = bgMatch[1].trim();
   }
@@ -4534,11 +4541,11 @@ function projectSchemaToMarkdown(project) {
   markdown += `#### 1.2 \u9879\u76EE\u4ECB\u7ECD
 
 `;
-  markdown += `* \u89D2\u8272\u548C\u804C\u8D23\uFF1A${project.info.desc.role}
+  markdown += `* \u89D2\u8272\u4E0E\u804C\u8D23\uFF1A${project.info.desc.role}
 `;
-  markdown += `* \u6838\u5FC3\u8D21\u732E\u548C\u53C2\u4E0E\u7A0B\u5EA6\uFF1A${project.info.desc.contribute}
+  markdown += `* \u6838\u5FC3\u8D21\u732E\u4E0E\u53C2\u4E0E\u7A0B\u5EA6\uFF1A${project.info.desc.contribute}
 `;
-  markdown += `* \u80CC\u666F\u548C\u76EE\u7684\uFF1A${project.info.desc.bgAndTarget}
+  markdown += `* \u80CC\u666F\u4E0E\u76EE\u7684\uFF1A${project.info.desc.bgAndTarget}
 
 `;
   markdown += `#### 1.3 \u9879\u76EE\u6280\u672F\u6808
@@ -4651,6 +4658,7 @@ var markdownToSkills = (markdown) => {
   skillItemSchema,
   skillSchema,
   skillsToMarkdown,
+  startCrawlQuestionSchema,
   type_content_Map
 });
 //! crepe编辑器中无序列表项 - 会转为 *: 统一用*,且会跟<br />

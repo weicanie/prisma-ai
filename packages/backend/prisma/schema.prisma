@@ -46,16 +46,23 @@ model ai_conversation {
 
 //面试题
 model article {
-  id        Int       @id @default(autoincrement())
-  user_id   Int
-  create_at DateTime? @default(now()) @db.Timestamp(0)
-  update_at DateTime? @default(now()) @db.Timestamp(0)
-  title     String    @db.VarChar(255)
-  content   String    @db.LongText
-  gist      String    @db.LongText
-  type      String    @db.VarChar(255)
-  hard      Int
-  user      user      @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "article_ibfk_1")
+  id              Int       @id @default(autoincrement())
+  link            String    @unique @db.VarChar(500) // 题目链接（去掉query和hash）
+  user_id         Int
+  create_at       DateTime? @default(now()) @db.Timestamp(0)
+  update_at       DateTime? @default(now()) @db.Timestamp(0)
+  title           String    @db.LongText
+  quiz_type       String    @db.VarChar(255) //题目考察方式（问答题、选择题）
+  content         String    @db.LongText
+  content_mindmap String?   @db.LongText //用于生成思维导图的精炼后的内容
+  user_note       String?   @db.LongText //用户笔记
+  gist            String    @db.LongText
+  content_type    String    @db.VarChar(255) //题目内容类型（javascript、css）
+  hard            String    @db.VarChar(255)
+  anki_note_id    BigInt?   @db.BigInt //anki中对应笔记id
+  time_create     DateTime? @default(now()) @db.Timestamp(0) //题目创建时间
+  time_update     DateTime? @default(now()) @db.Timestamp(0) //题目更新时间
+  user            user      @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "article_ibfk_1")
 
   @@index([user_id], map: "user_id")
 }

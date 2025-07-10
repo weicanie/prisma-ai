@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# --- 自动重试 git push 脚本 ---
+# --- 自动重试 git pull 脚本 ---
 
 # 设置最大重试次数，以防止无限循环
 MAX_RETRIES=20
@@ -10,32 +10,32 @@ RETRY_DELAY=5
 # 初始化尝试计数器
 count=0
 
-# 开始一个无限循环，直到 push 成功或达到最大重试次数
+# 开始一个无限循环，直到 pull 成功或达到最大重试次数
 while true; do
     # 增加尝试次数计数
     ((count++))
 
     # 打印当前尝试的信息
-    echo "🚀 [尝试 #$count] 正在执行 git push..."
+    echo "🚀 [尝试 #$count] 正在执行 git pull..."
 
     # 执行 git pull 命令
     # 我们将所有输出（标准输出和标准错误）都重定向，以便脚本可以捕获它们
     # 同时在屏幕上显示它们
     git pull
 
-    # 获取 git push 命令的退出码
+    # 获取 git pull 命令的退出码
     # $? 是一个特殊变量，它存储了上一个执行命令的退出状态
     exit_code=$?
 
     # 检查退出码
     if [ $exit_code -eq 0 ]; then
-        # 如果退出码为 0，表示 push 成功
-        echo "✅ Git push 成功！"
+        # 如果退出码为 0，表示 pull 成功
+        echo "✅ Git pull 成功！"
         # 退出循环
         break
     else
-        # 如果退出码非 0，表示 push 失败
-        echo "❌ [尝试 #$count] Git push 失败，退出码: $exit_code"
+        # 如果退出码非 0，表示 pull 失败
+        echo "❌ [尝试 #$count] Git pull 失败，退出码: $exit_code"
         
         # 检查是否已达到最大重试次数
         if [ $count -ge $MAX_RETRIES ]; then

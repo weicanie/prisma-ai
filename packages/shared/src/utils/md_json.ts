@@ -34,19 +34,19 @@ export function markdownToProjectSchema(markdown: string): z.infer<typeof projec
 	}
 
 	// 处理角色和职责
-	const roleMatch = markdown.match(/角色和职责：(.+?)(?:\n|$)/);
+	const roleMatch = markdown.match(/角色与职责：(.+?)(?:\n|$)/);
 	if (roleMatch && roleMatch[1]) {
 		result.info.desc.role = roleMatch[1].trim();
 	}
 
 	// 处理核心贡献
-	const contributeMatch = markdown.match(/核心贡献和参与程度：(.+?)(?:\n|$)/);
+	const contributeMatch = markdown.match(/核心贡献与参与程度：(.+?)(?:\n|$)/);
 	if (contributeMatch && contributeMatch[1]) {
 		result.info.desc.contribute = contributeMatch[1].trim();
 	}
 
 	// 处理项目背景和目的
-	const bgMatch = markdown.match(/背景和目的：(.+?)(?:\n|$)/);
+	const bgMatch = markdown.match(/背景与目的：(.+?)(?:\n|$)/);
 	if (bgMatch && bgMatch[1]) {
 		result.info.desc.bgAndTarget = bgMatch[1].trim();
 	}
@@ -121,9 +121,9 @@ export function projectSchemaToMarkdown(project: z.infer<typeof projectSchemaFor
 
 	// 项目介绍
 	markdown += `#### 1.2 项目介绍\n\n`;
-	markdown += `* 角色和职责：${project.info.desc.role}\n`;
-	markdown += `* 核心贡献和参与程度：${project.info.desc.contribute}\n`;
-	markdown += `* 背景和目的：${project.info.desc.bgAndTarget}\n\n`;
+	markdown += `* 角色与职责：${project.info.desc.role}\n`;
+	markdown += `* 核心贡献与参与程度：${project.info.desc.contribute}\n`;
+	markdown += `* 背景与目的：${project.info.desc.bgAndTarget}\n\n`;
 
 	// 技术栈
 	markdown += `#### 1.3 项目技术栈\n\n`;

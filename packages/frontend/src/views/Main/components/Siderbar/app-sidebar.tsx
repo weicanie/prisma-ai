@@ -1,4 +1,3 @@
-
 import {
 	Briefcase,
 	FileText,
@@ -94,8 +93,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				icon: Rocket,
 				url: '/main/offer',
 				items: [
-					{ title: '技术学习路线', url: '/main/offer/road' },
-					{ title: '简历延申八股', url: '/main/offer/questions' }
+					{
+						title: '集成面试题库和 anki',
+						url: '/main/offer/anki'
+					},
+					{ title: '简历延申八股', url: '/main/offer/questions' },
+					{ title: '学习路线', url: '/main/offer/road' }
 				]
 			}
 		]

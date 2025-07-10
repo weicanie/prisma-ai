@@ -26,6 +26,13 @@ import { MCPClientService } from '../mcp-client/mcp-client.service';
 import { ModelService } from '../model/model.service';
 import { PromptService, role } from '../prompt/prompt.service';
 import { WithFormfixChain } from '../utils/abstract';
+import { RubustStructuredOutputParser } from '../utils/RubustStructuredOutputParser';
+
+const markdownNormalizeSchema = z.object({
+	normalized_blocks: z
+		.array(z.string())
+		.describe('标准化后的Markdown代码块，必须与输入的顺序和数量完全一致')
+});
 
 @Injectable()
 export class ChainService implements WithFormfixChain {
@@ -128,6 +135,57 @@ export class ChainService implements WithFormfixChain {
 			// 不添加会阻截流式输出的Runnable
 		]);
 
+		return chain;
+	}
+
+	/**
+	 * 将批量的异常Markdown代码块字符串转换为标准格式
+	 */
+	async createMarkdownCodeBlockNormalizeChain() {
+		const outputParser = RubustStructuredOutputParser.from(markdownNormalizeSchema, this);
+		const prompt = ChatPromptTemplate.fromMessages([
+			[
+				'system',
+				`你是一个Markdown格式化专家。用户会提供一个包含多个异常代码块字符串的JSON数组。
+				异常代码字符串的内容是"复制/n/n\`混乱代码块\`"，混乱代码块中是行序号和代码行组成的字符串
+你的任务是将每个字符串转换为标准的Markdown代码块,即根据行序号将混乱代码块转换为标准的Markdown代码块
+- 识别代码的语言。
+- 保持良好的缩进。
+- **严格保持数组中代码块的原始顺序和数量**，并返回一个包含标准化后代码块的JSON对象。
+
+注意：你不能改变任意代码行的内容，你只能根据行序号将混乱代码块转换为标准的Markdown代码块,并且转换后的代码块前后没有空行。
+
+示例：
+原始异常代码块：
+\`1#div1 .c .d {{}} 2.f .c .d {{}} 3.a .c .e {{}} 4#div1 .f {{}} 5.c .d{{}}\`
+转换后：
+\`\`\`css
+#div1 .c .d {{}} 
+.f .c .d {{}} 
+.a .c .e {{}} 
+#div1 .f {{}} 
+.c .d{{}}
+\`\`\`
+格式说明:
+{instructions}
+`
+			],
+			['human', '请标准化以下代码块：\n\n{code_blocks}']
+		]);
+
+		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+		const chain = RunnableSequence.from<
+			{ code_blocks: string[] },
+			z.infer<typeof markdownNormalizeSchema>
+		>([
+			{
+				code_blocks: input => JSON.stringify(input.code_blocks),
+				instructions: () => outputParser.getFormatInstructions()
+			},
+			prompt,
+			llm,
+			outputParser
+		]);
 		return chain;
 	}
 
@@ -467,5 +525,97 @@ export class ChainService implements WithFormfixChain {
 			console.error('创建查询链失败:', error);
 			throw error;
 		}
+	}
+
+	/**
+	 * @description 获取用于为面试题生成思维导图的Chain
+	 */
+	async getMindmapGenerationChain() {
+		// 定义LLM响应的期望JSON结构，我们期望得到一个包含多个markdown字符串的数组
+		const parser = RubustStructuredOutputParser.from(
+			z.object({
+				results: z
+					.array(z.string().describe('转换后的 markmap Markdown 文本'))
+					.describe('与输入顺序严格对应的Markdown文本数组')
+			}),
+			this
+		);
+
+		// 这是给LLM的指令模板
+		const system_prompt_template = `
+# 角色
+你是一位资深的IT技术导师和学习专家，非常擅长将复杂的技术知识点，提炼成结构清晰、易于记忆的思维导图。
+
+# 任务
+你的任务是将用户提供的多个“面试题答案文本”转换为一个JSON对象，该对象包含一个名为 "results" 的数组，数组中的每一项都是一份专门用于 \`markmap\` 生成思维导图的 Markdown 文本字符串。数组的顺序必须与输入问题的顺序严格对应。
+
+# 核心要求
+1.  **高度浓缩**: 提取核心关键词和概念，摒弃冗长的解释和例子。
+2.  **层次分明**: 使用 Markdown 的标题 (\`#\`, \`##\`, \`###\`) 和列表 (\`-\`) 来构建清晰的树状逻辑结构。
+你需要准确识别出原始文本中的信息层次,其通常包含以下层次：
+核心主题: 这是思维导图的根节点。通常就是问题本身。
+主要分支: 这是对核心主题的展开，通常是定义、特性、优点、应用场景等大的分类。例如：“定义与特性”、“核心应用场景”。
+关键子项: 这是主要分支下的具体条目。例如，在“核心应用场景”下，有“导航栏固定”、“表头固定”等。
+细节与补充: 一些关键的属性或简短的说明，用于丰富子项。例如，在“导航栏固定”下，可以补充 top: 0 这样的关键代码或“方便访问”这样的核心目的。
+3.  **便于记忆**: 最终的输出应该像一份知识点大纲，帮助用户快速回顾和记忆。
+4.  **格式遵循**: 你的最终输出必须是一个严格的JSON对象，格式如 {{ "results": ["markdown1", "markdown2", ...] }}，不要包含任何额外的解释或说明。
+
+# 工作流程
+1.  **识别根节点**: 将核心主题作为一级标题 (\`#\`)。
+2.  **构建主要分支**: 识别答案中的主要逻辑类别（如：定义、特性、应用场景、优缺点等），作为二级标题 (\`##\`)。
+3.  **提取关键子项**: 在每个主干下，将具体的关键子项提炼为三级标题 (\`###\`) 或无序列表 (\`-\`)。
+4.  **补充关键细节**: 对每个分支，可以提取关键的属性、作用或示例作为子列表项，注意简洁、精炼。例如，对于代码，只提取其核心参数或目的。
+如果知识结构的呈现需要更复杂的层次,你可以进一步延申。
+
+# 示例
+这是用户期望的转换效果：
+
+## 输入示例 (这是一个JSON字符串，包含一个问题):
+\`\`\`json
+[
+  {{
+    "title": "position 的 sticky 有什么应用场景？",
+    "content": "position: sticky 是一种结合了 relative 和 fixed 特性的定位方式...",
+    "gist": "导航栏固定, 内容目录, 表头固定"
+  }}
+]
+\`\`\`
+
+## 输出示例 (这正是你被期望生成的严格JSON格式):
+\`\`\`json
+{{
+  "results": [
+    "# position: sticky\\n\\n## 定义与特性\\n- 结合 \`relative\` 和 \`fixed\`\\n- 滚动到阈值时固定 (Sticks when scrolled to a threshold)\\n\\n## 核心应用场景\\n ### 导航栏固定 (Navbar)\\n  - 关键: \`top: 0\`\\n  - 目的: 方便随时访问\\n ### 内容目录 (TOC)\\n  - 目的: 方便页面内跳转\\n ### 表头固定 (Table Header)\\n  - 场景: 长表格数据查看\\n  - 关键: \`top: 0\`，作用于 \`<th>\`\\n ### 侧边栏浮动 (Sidebar)\\n  - 目的: 避免滚动回顶部查找\\n ### 分段内容标题 (Section Title)\\n  - 效果: 吸顶效果，清晰指示当前章节\\n ### 电商信息固定 (E-commerce)\\n  - 内容: 购物车、价格\\n  - 目的: 方便快速操作"
+  ]
+}}
+\`\`\`
+注意：不允许列表中出现标题，如"## 应用场景 - ### 导航栏固定"是禁止的，应该使用"## 应用场景 ### 导航栏固定"
+---
+现在，请根据以上规则，处理用户接下来提供的文本。
+Human:
+请为以下面试题数据生成思维导图的Markdown文本。
+{format_instructions}
+\`\`\`json
+{questions}
+\`\`\`
+`;
+		const prompt = ChatPromptTemplate.fromMessages([['system', system_prompt_template]]);
+
+		const model = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+
+		// 将Prompt, Model, Parser链接成一个可执行的调用链
+		const chain = RunnableSequence.from<
+			{ questions: Record<string, string | number>[] },
+			z.infer<typeof parser.schema>
+		>([
+			{
+				questions: input => JSON.stringify(input.questions),
+				format_instructions: () => parser.getFormatInstructions()
+			},
+			prompt,
+			model,
+			parser
+		]);
+		return chain;
 	}
 }

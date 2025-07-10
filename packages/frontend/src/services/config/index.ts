@@ -9,6 +9,7 @@ const config: RequestConfig<unknown, ServerDataFormat> = {
 		config => {
 			//添加token
 			const token = localStorage.getItem('token');
+			console.log('🚀 ~ token:', token);
 			if (token && config.headers) {
 				config.headers['Authorization'] = `Bearer ${token}`;
 			}
