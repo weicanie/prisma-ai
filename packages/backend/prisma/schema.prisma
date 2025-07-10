@@ -29,6 +29,7 @@ model user {
   email           String            @db.VarChar(100)
   article         article[]
   ai_conversation ai_conversation[]
+  user_project    user_project[]
 }
 
 model ai_conversation {
@@ -65,4 +66,37 @@ model article {
   user            user      @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "article_ibfk_1")
 
   @@index([user_id], map: "user_id")
+}
+
+//上传知识库的项目
+model user_project {
+  id           Int            @id @default(autoincrement())
+  user_id      Int
+  project_name String         @db.VarChar(255)
+  project_file project_file[]
+  user         user           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, project_name])
+}
+
+//项目文件
+model project_file {
+  id              Int                  @id @default(autoincrement())
+  file_path       String               @db.VarChar(1024) // 文件相对于项目根目录的路径
+  hash            String               @db.VarChar(256) // 文件内容的 SHA256 哈希值
+  user_project_id Int
+  user_project    user_project         @relation(fields: [user_project_id], references: [id], onDelete: Cascade)
+  chunks          project_file_chunk[]
+
+  @@unique([user_project_id, file_path])
+}
+
+//知识库中的项目文件块
+model project_file_chunk {
+  id              Int          @id @default(autoincrement())
+  project_file_id Int
+  vector_id       String       @unique @db.VarChar(255) // 文件块在向量数据库中的id
+  project_file    project_file @relation(fields: [project_file_id], references: [id], onDelete: Cascade)
+
+  @@index([project_file_id])
 }

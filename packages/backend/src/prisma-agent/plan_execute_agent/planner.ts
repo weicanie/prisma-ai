@@ -8,7 +8,6 @@ import { reflect } from '../reflect_agent/node';
 import { GraphState } from '../state';
 import { Plan, ReviewType, RunningConfig, UserAction } from '../types';
 import { getAgentConfig, updateAgentConfig } from '../utils/config';
-//TODO 现在先不更新项目代码知识库,后续使用cursor来感知项目代码库? 增量更新?(通过metadata)
 const agentConfigPath = path.join(process.cwd(), 'prisma_agent_config.json');
 interface NodeConfig extends RunnableConfig {
 	configurable: RunningConfig;
@@ -42,7 +41,8 @@ export async function uploadCode(
 	if (!projectInfo?.info.name) throw new Error('Project name is not set');
 	if (!projectCodeVDBService) throw new Error('projectCodeVDBService not found in runningConfig');
 
-	const task = await projectCodeVDBService.storeToVDB(
+	//增量更新项目代码知识库
+	const task = await projectCodeVDBService.syncToVDB(
 		userId,
 		projectInfo!.info.name,
 		projectPath,

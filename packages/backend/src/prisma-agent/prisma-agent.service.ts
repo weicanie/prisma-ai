@@ -126,7 +126,6 @@ export class PrismaAgentService {
 		stepResult.stepDescription =
 			state.plan?.output.implementationPlan?.[state.currentStepIndex]?.stepDescription!;
 		console.log('---STEP RESULT RECEIVED---');
-		// 返回一个更新列表的函数，而不是直接修改
 		return {
 			stepResultList: (state.stepResultList || []).concat(stepResult),
 			currentStepIndex: state.currentStepIndex + 1

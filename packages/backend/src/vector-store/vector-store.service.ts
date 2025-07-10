@@ -62,13 +62,14 @@ export class VectorStoreService {
 	 * @param documents 要添加的文档数组
 	 * @param embeddings 用于向量化的嵌入模型
 	 * @param namespace 命名空间
+	 * @returns {Promise<string[]>} 添加的文档的 vector ID 列表
 	 */
 	async addDocumentsToIndex(
 		documents: Document[],
 		indexName: string,
 		embeddings: Embeddings,
 		namespace?: string
-	): Promise<void> {
+	): Promise<string[]> {
 		try {
 			if (!(await this.indexExists(indexName))) {
 				throw new Error(`索引 ${indexName} 不存在，请先创建索引`);
@@ -79,8 +80,9 @@ export class VectorStoreService {
 				namespace
 			});
 			//会去调用embeddings的embedDocuments方法
-			await pineconeStore.addDocuments(documents);
+			const vectorIds = await pineconeStore.addDocuments(documents);
 			this.logger.log(`成功添加 ${documents.length} 个文档到索引 ${indexName}`);
+			return vectorIds;
 		} catch (error) {
 			const errorMessage = (error as Error).message;
 			this.logger.error(`向索引 ${indexName} 添加文档失败:`, error);
@@ -118,6 +120,33 @@ export class VectorStoreService {
 		//FIXME 能返回元数据?
 		const retriever = vectorStore.asRetriever(topK);
 		return retriever;
+	}
+
+	/**
+	 * 从向量索引中删除向量
+	 * @param vectorIds 要删除的向量 ID 列表
+	 * @param indexName 索引名
+	 * @param namespace 命名空间
+	 * @returns {Promise<void>}
+	 */
+	async deleteVectors(vectorIds: string[], indexName: string, namespace?: string): Promise<void> {
+		if (vectorIds.length === 0) {
+			this.logger.log('没有需要删除的向量，跳过删除操作。');
+			return;
+		}
+
+		try {
+			const index = this.pinecone.Index(indexName);
+			await index.namespace(namespace || '').deleteMany(vectorIds);
+			this.logger.log(
+				`成功从索引 ${indexName} 的命名空间 "${namespace || 'default'}" 中删除 ${
+					vectorIds.length
+				} 个向量`
+			);
+		} catch (error) {
+			this.logger.error(`从索引 ${indexName} 删除向量失败:`, error);
+			throw new Error(`删除向量失败: ${(error as Error).message}`);
+		}
 	}
 
 	/**

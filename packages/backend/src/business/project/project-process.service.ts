@@ -128,7 +128,6 @@ export class ProjectProcessService implements WithFuncPool {
 				}
 			);
 
-			// this.projectService.updateProject(existingProjectId.id, resultSaveAfterMerge, userInfo);
 			await resultSave_model.save();
 		};
 	};
@@ -197,6 +196,17 @@ export class ProjectProcessService implements WithFuncPool {
 		taskId: string,
 		userFeedback: UserFeedback = { reflect: false, content: '' }
 	): Promise<Observable<StreamingChunk>> {
+		const existingPolishingProject = await this.projectPolishedModel
+			.findOne({
+				'info.name': project.info.name,
+				'userInfo.userId': userInfo.userId
+			})
+			.exec();
+		//删除现存的打磨后的项目经验
+		if (existingPolishingProject) {
+			await this.projectPolishedModel.deleteOne({ _id: existingPolishingProject._id });
+		}
+
 		this.eventBusService.once(EventList.taskCompleted, ({ task }) => {
 			if (task.id !== taskId) {
 				return; // 确保只接收当前任务的结果
@@ -233,7 +243,9 @@ export class ProjectProcessService implements WithFuncPool {
 		return from(lookupStream).pipe(
 			mergeMap(async (chunk: DeepSeekStreamChunk) => {
 				const done = !chunk.content && chunk.additional_kwargs.reasoning_content === null;
-				const isReasoning = chunk.additional_kwargs.reasoning_content !== null;
+				const isReasoning =
+					chunk.additional_kwargs.reasoning_content !== null &&
+					chunk.additional_kwargs.reasoning_content !== undefined;
 				return {
 					content: !isReasoning ? chunk.content : '',
 					reasonContent: isReasoning ? chunk.additional_kwargs?.reasoning_content! : '',
@@ -415,17 +427,7 @@ export class ProjectProcessService implements WithFuncPool {
 			.exec();
 
 		if (existingMiningProject) {
-			if (!userFeedback.reflect) {
-				return from(
-					Promise.resolve({
-						content: `\`\`\`json\n[${JSON.stringify(existingProject)},${JSON.stringify(existingMiningProject)}]\n\`\`\``, //与llm返回格式保持一致,前端统一解析
-						done: true,
-						isReasoning: false
-					})
-				);
-			} else {
-				await this.projectMinedModel.deleteOne({ _id: existingMiningProject._id });
-			}
+			await this.projectMinedModel.deleteOne({ _id: existingMiningProject._id });
 		}
 
 		const resultHandler = await this._resultHandlerCreater(

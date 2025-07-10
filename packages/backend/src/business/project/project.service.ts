@@ -180,9 +180,7 @@ export class ProjectService {
 			throw new Error(`Project with ID "${id}" not found or user unauthorized.`);
 		}
 
-		const lookupResult = await this.lookupProjectUnStream(existingProject, userInfo);
-
-		return { ...existingProject, lookupResult } as ProjectVo;
+		return { ...existingProject } as ProjectVo;
 	}
 
 	/**

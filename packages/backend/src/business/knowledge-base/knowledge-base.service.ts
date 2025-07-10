@@ -91,7 +91,7 @@ export class KnowledgebaseService {
 		]);
 		//上传项目代码到向量数据库
 		const projectPath = path.resolve(projectsDirPath, projectName);
-		await this.projectCodeVDBService.storeToVDB(
+		await this.projectCodeVDBService.syncToVDB(
 			userInfo.userId,
 			projectName,
 			projectPath,
