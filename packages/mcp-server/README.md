@@ -1,206 +1,126 @@
-# MCP Server - 时间工具服务
+# MCP IO 服务器架构文档
 
-这是一个基于 Model Context Protocol (MCP) 的服务器，提供一个获取当前时间的工具，支持可选时区参数。使用 NestJS 11 和 TypeScript 构建，通过 StreamableHTTP 与 MCP client 通信。
+## 1. 概述
 
-## 功能特性
+本项目实现了一个基于 `FastAPI` 和 `FastMCP` 的服务器，旨在为 AI Agent 提供异步的输入/输出（I/O）能力。服务器通过两种方式与外部世界交互：
 
-- 提供 `getCurrentTime` 工具，用于获取当前时间
-- 支持可选时区参数，如 'Asia/Shanghai', 'America/New_York' 等
-- 使用 StreamableHTTP 与 MCP client 通信
-- 基于 NestJS 11 和 TypeScript 构建
-- **新增：支持无状态模式，每个请求独立隔离，避免请求 ID 冲突**
-- 代码结构清晰，注释完善，易于扩展
+1.  **MCP (Model Context Protocol)**: Agent 可以调用服务器注册的 `tool` 来请求输入或提交输出。
+2.  **RESTful API**: 外部客户端（例如，用户界面、测试脚本）可以通过 HTTP 请求为 Agent 提供输入，或获取 Agent 处理完成的输出。
 
-## 技术栈
+这种架构解耦了 Agent 的核心逻辑与外部 I/O，允许 Agent 在需要时暂停执行以等待用户输入，并在完成后将结果异步传递给外部系统。
 
-- NestJS 11
-- TypeScript
-- @modelcontextprotocol/sdk
-- StreamableHTTP 通信协议
-- Zod 用于参数验证
+## 2. 核心组件
 
-## 快速开始
+系统由以下几个核心组件构成：
 
-### 安装依赖
+### 2.1. FastAPI 应用
 
-```bash
-$ pnpm install
+- **框架**: `FastAPI`
+- **职责**: 作为 Web 服务器的骨架，处理所有 HTTP 请求。它承载了 RESTful API 和 FastMCP 服务。
+- **主文件**: `src/main.py`
+
+### 2.2. FastMCP 服务器
+
+- **框架**: `FastMCP`
+- **职责**: 实现 MCP 协议，向 AI Agent 暴露工具 (`tool`)。Agent 通过调用这些工具与服务器进行交互。
+- **挂载点**: 在 FastAPI 应用的 `/mcp` 路径下运行。
+
+### 2.3. IO 工具 (`io_tools`)
+
+这是 Agent 可以调用的核心功能，定义在 `src/mcp_server/io_tools.py` 中。
+
+- `i_tool(session_id: str) -> str`:
+
+  - **功能**: Agent 调用此工具来获取输入。
+  - **机制**: 当被调用时，它会从与 `session_id` 关联的输入队列中异步等待一条消息。在消息到达之前，Agent 的执行将在此处暂停。
+
+- `o_tool(session_id: str, output: str) -> str`:
+  - **功能**: Agent 调用此工具来提交其最终输出。
+  - **机制**: 它将接收到的 `output` 存储在一个以 `session_id` 为键的共享哈希表（字典）中，供外部通过 RESTful API 拉取。
+
+### 2.4. RESTful API (`api`)
+
+这是外部与服务器交互的 HTTP 接口，定义在 `src/mcp_server/api.py` 中，所有端点都在 `/agent` 前缀下。
+
+- `POST /agent/input/{session_id}`:
+
+  - **功能**: 向指定的会话提供输入。
+  - **机制**: 接收请求体中的数据，并将其放入与 `session_id` 对应的输入队列中。如果 `i_tool` 正在等待该会话的输入，它将被唤醒并接收此数据。
+
+- `GET /agent/output/{session_id}`:
+  - **功能**: 获取指定会话的输出结果。
+  - **机制**: 检查与 `session_id` 关联的输出存储。如果 `o_tool` 已经提交了输出，接口会返回该输出并将其从存储中删除。如果输出尚不存在，则返回 `404 Not Found`。
+
+### 2.5. 共享状态 (`state`)
+
+为了在不同的组件（MCP 工具和 API 端点）之间安全地共享数据，我们使用了集中的状态管理，定义在 `src/mcp_server/state.py`。
+
+- `input_queues: DefaultDict[str, asyncio.Queue]`:
+
+  - **类型**: 一个默认字典，其值为 `asyncio.Queue`。
+  - **职责**: 核心的消息队列。每个 `session_id` 都有自己的输入队列。`defaultdict` 的使用简化了代码，无需在首次访问时手动检查和创建队列。
+  - **线程安全**: `asyncio.Queue` 本身是为异步环境设计的，其操作是原子的，因此在单个 FastAPI 进程内是安全的。
+
+- `output_storage: dict[str, Any]`:
+
+  - **类型**: 标准字典。
+  - **职责**: 存储由 `o_tool` 产生的输出，直到被 `/agent/output` 接口消费。
+
+- `output_storage_lock: asyncio.Lock`:
+  - **职责**: 一个异步锁，用于保护对 `output_storage` 的并发访问（读/写），确保在多任务环境下操作的原子性，防止竞态条件。
+
+## 3. 工作流程与数据流
+
+一个典型的会话流程如下：
+
+1.  **Agent 等待输入**: AI Agent 在其任务流程中需要用户输入时，调用 `i_tool(session_id="some-uuid")`。服务器的 `i_tool` 开始在 `input_queues["some-uuid"]` 上等待。
+
+2.  **外部提供输入**: 用户通过一个前端应用（或其他客户端）与系统交互。该客户端向 `POST /agent/input/some-uuid` 发送一个包含输入数据的请求。
+
+3.  **输入传递给 Agent**: API 端点接收到请求，并将输入数据放入 `input_queues["some-uuid"]` 队列。`i_tool` 立刻获取到数据，解除阻塞，并将数据返回给 Agent。Agent 继续其处理任务。
+
+4.  **Agent 产生输出**: Agent 完成任务后，调用 `o_tool(session_id="some-uuid", output="final result")`。服务器的 `o_tool` 将 "final result" 存储在 `output_storage["some-uuid"]` 中。
+
+5.  **外部获取输出**: 外部客户端轮询 `GET /agent/output/some-uuid` 接口。
+    - 起初，由于 `o_tool` 可能还未被调用，接口返回 404。
+    - 一旦 `o_tool` 存储了结果，下一次轮询请求将成功，并收到包含 "final result" 的 200 OK 响应。服务器同时会清除该输出，以防重复获取。
+
+## 4. 系统架构图
+
+![1751805862314](image/README/1751805862314.png)
+
+```mermaid
+---
+config:
+  theme: neo
+  look: neo
+---
+sequenceDiagram
+    participant Client as 外部客户端
+    participant Server as FastAPI / MCP 服务器
+    participant Agent as AI Agent
+    par "1. Agent请求输入"
+        Agent->>+Server: 调用 mcp_server.i_tool(session_id)
+        Note over Server: i_tool 在输入队列上等待
+    and "2. 客户端提供输入"
+        Client->>+Server: POST /agent/input/{session_id} <br> (携带输入数据)
+        Server-->>-Client: 202 Accepted
+    end
+    Server-->>+Agent: i_tool 返回输入数据
+    Note over Agent: Agent 继续处理...
+    Agent->>+Server: 调用 mcp_server.o_tool(session_id, output)
+    Note over Server: o_tool 将输出存入哈希表
+    Server-->>-Agent: 返回确认消息
+    loop 轮询获取输出
+        Client->>+Server: GET /agent/output/{session_id}
+        alt 输出已就绪
+            Server-->>-Client: 200 OK (携带输出数据)
+        else 输出未就绪
+            Server-->>-Client: 404 Not Found
+        end
+    end
 ```
 
-### 运行服务器
+## 功能完善
 
-```bash
-# 开发模式（自动重载）
-$ pnpm run start:dev
-
-# 生产模式
-$ pnpm run start:prod
-```
-
-服务器将在以下端口启动：
-
-- NestJS 应用: 端口 3000（包含 MCP 端点: /mcp）
-
-## 使用方法
-
-MCP 服务器启动后，可以通过以下两种方式连接：
-
-### 1. 标准 MCP 客户端连接
-
-使用支持 MCP 的客户端（如 Claude Desktop）连接到 `http://localhost:3000/mcp`，然后使用 `getCurrentTime` 工具。
-
-### 2. 直接 HTTP 请求
-
-可以直接向 `/mcp` 端点发送 POST 请求，格式为 JSON-RPC 2.0：
-
-```json
-{
-	"jsonrpc": "2.0",
-	"id": "request-id",
-	"method": "callTool",
-	"params": {
-		"name": "getCurrentTime",
-		"params": {
-			"timezone": "Asia/Shanghai"
-		}
-	}
-}
-```
-
-### 工具参数
-
-- `timezone` (可选): 时区字符串，例如 'Asia/Shanghai', 'America/New_York' 等。如不提供，则使用系统默认时区。
-
-### 返回结果
-
-工具返回以下 JSON 格式数据：
-
-```json
-{
-	"currentTime": "2025-05-15 14:30:45",
-	"timezone": "Asia/Shanghai",
-	"utcTime": "2025-05-15T06:30:45.123Z"
-}
-```
-
-## 项目结构
-
-- `src/mcp-server.service.ts`: MCP 服务器实现，包含获取时间工具的逻辑
-- `src/mcp-server.module.ts`: MCP 服务器模块，用于整合到 NestJS 应用
-- `src/app.module.ts`: 主应用模块
-- `src/main.ts`: 应用入口
-
-## 开发
-
-### 添加新工具
-
-可以在 `mcp-server.service.ts` 文件的 `registerTools` 方法中添加新的工具。
-
-```typescript
-// 示例：添加新工具
-this.server.tool(
-	'newToolName',
-	'新工具描述',
-	{
-		param1: z.string().describe('参数1描述'),
-		param2: z.number().optional().describe('可选参数2描述')
-	},
-	async ({ param1, param2 }) => {
-		// 实现工具逻辑
-		return {
-			content: [
-				{
-					type: 'text',
-					text: JSON.stringify({ result: 'result data' }, null, 2)
-				}
-			]
-		};
-	}
-);
-```
-
-## 测试
-
-```bash
-# 单元测试
-$ pnpm run test
-
-# e2e 测试
-$ pnpm run test:e2e
-```
-
-## 许可证
-
-[MIT licensed](LICENSE)
-
-## Project setup
-
-```bash
-$ pnpm install
-```
-
-## Compile and run the project
-
-```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
-```
-
-## Run tests
-
-```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+防止 cursor mcp client 超时,和 cursor agent 约定'user reset'时重新调用 i_tool

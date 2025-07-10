@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcp-server-test123"
+version = "0.1.0"
+description = "一个使用 FastMCP 构建的示例服务器"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Your Name", email = "you@example.com" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "fastapi[standard]>=0.115.14",
+    "fastmcp>=2.10.1",
+    "pyotp>=2.9.0",
+    "pytz>=2025.2",
+    "tavily-python>=0.7.9",
+]
+
+[project.scripts]
+start = "main:main"
