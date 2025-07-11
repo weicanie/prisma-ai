@@ -43,7 +43,7 @@ const AIChat: React.FC = () => {
 	const onSubmit = async (val: string) => {
 		if (!val) return;
 		if (loading) {
-			message.error('Request is in progress, please wait for the request to complete.');
+			message.error('消息正在请求中，您可以等待请求完成或立即创建新对话...');
 			return;
 		}
 		setLoading(true);
@@ -75,19 +75,15 @@ const AIChat: React.FC = () => {
 	};
 
 	const handleNewConversation = useCallback(async () => {
-		console.log('🚀 ~ handleNewConversation ~ handleNewConversation执行');
-
 		if (loading) {
-			message.error(
-				'Message is Requesting, you can create a new conversation after request done or abort it right now...'
-			);
+			message.error('消息正在请求中，您可以等待请求完成或立即创建新对话...');
 			return;
 		}
 
 		const now = dayjs().valueOf().toString();
 		const newConversation: ConversationDto = {
 			keyname: now,
-			label: `New Conversation ${now}`,
+			label: `对话-${now}`,
 			id: -1, // Temporary id
 			content: [],
 			user_id: -1,
@@ -104,7 +100,7 @@ const AIChat: React.FC = () => {
 		try {
 			await storeConversation(newConversation.keyname, newConversation.label, []);
 		} catch {
-			message.error('Failed to create new conversation on server.');
+			message.error('创建新对话失败，请稍后重试...');
 			// Revert state if API call fails
 			setConversations(prev => prev.filter(c => c.keyname !== now));
 		}
@@ -137,7 +133,7 @@ const AIChat: React.FC = () => {
 					handleNewConversation();
 				}
 			} catch {
-				message.error('Failed to fetch conversation history.');
+				message.error('获取对话历史失败，请稍后重试...');
 			} finally {
 				setIsFetchingHistory(false);
 			}
@@ -157,7 +153,7 @@ const AIChat: React.FC = () => {
 					// Update local history
 					setMessageHistory(prev => ({ ...prev, [curConversation]: messages }));
 				} catch {
-					message.error('Failed to save conversation.');
+					message.error('保存对话失败，请稍后重试...');
 				}
 			}
 		};
@@ -178,7 +174,7 @@ const AIChat: React.FC = () => {
 					width={24}
 					height={24}
 				/>
-				<span>Ant Design X</span>
+				<span>AI Chat</span>
 			</div>
 
 			{/* 🌟 添加会话 */}
@@ -188,7 +184,7 @@ const AIChat: React.FC = () => {
 				className={styles.addBtn}
 				icon={<PlusOutlined />}
 			>
-				New Conversation
+				创建新对话
 			</Button>
 
 			{/* 🌟 会话管理 */}

@@ -1,4 +1,5 @@
 import { type Runnable } from '@langchain/core/runnables';
+import { Logger } from '@nestjs/common';
 import { type ProjectDto } from '@prism-ai/shared';
 import { z } from 'zod';
 import { type EventBusService } from '../EventBus/event-bus.service';
@@ -50,6 +51,7 @@ export interface RunningConfig {
 	cRetrieveAgentService: CRetrieveAgentService;
 	//事件总线服务
 	eventBusService: EventBusService;
+	logger: Logger;
 }
 
 // --- Shared Types ---

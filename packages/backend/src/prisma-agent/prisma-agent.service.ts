@@ -31,7 +31,7 @@ const graphStatePath = path.join(outputDir, 'graph_state.json');
 
 @Injectable()
 export class PrismaAgentService {
-	private readonly logger = new Logger(PrismaAgentService.name);
+	private readonly logger = new Logger('Prisma Agent');
 	private workflow: ReturnType<typeof this.buildGraph>;
 	constructor(
 		private readonly planExecuteAgentService: PlanExecuteAgentService,
@@ -84,12 +84,12 @@ export class PrismaAgentService {
 				}
 				// 如果 plan 为空或者 plan 的步骤为空，则结束
 				if (!state.plan || state.plan.output.implementationPlan.length === 0) {
-					console.log('---Replan resulted in no steps, ending workflow.---');
+					this.logger.log('---步骤已全部完成，结束工作流---');
 					return END;
 				}
 				// 如果当前步骤索引大于或等于计划步骤数，也结束
 				if (state.currentStepIndex >= state.plan.output.implementationPlan.length) {
-					console.log('---All replanned steps are completed, ending workflow.---');
+					this.logger.log('---步骤已全部完成，结束工作流---');
 					return END;
 				}
 
@@ -110,22 +110,22 @@ export class PrismaAgentService {
 	private async executeStep(
 		state: typeof GraphState.State
 	): Promise<Partial<typeof GraphState.State>> {
-		console.log('---NODE: EXECUTE STEP---');
-		console.log('Waiting for developer to execute the step and provide results...');
+		this.logger.log('---节点: 执行步骤---');
+		this.logger.log('等待开发者执行步骤并提供结果...');
 
 		// 保存 stepPlan 到文件
 		const stepPlanPath = path.join(outputDir, 'plan_step_for_execution.json');
 		await fs.writeFile(stepPlanPath, JSON.stringify(state.stepPlan, null, 2));
 
 		const stepResult: Result_step = interrupt({
-			message: 'Please execute the current step and provide the results.',
+			message: '请执行当前步骤并提供结果。',
 			stepPlan: state.stepPlan,
 			outputPath: stepPlanPath,
 			type: InterruptType.ExecuteStep
 		});
 		stepResult.stepDescription =
 			state.plan?.output.implementationPlan?.[state.currentStepIndex]?.stepDescription!;
-		console.log('---STEP RESULT RECEIVED---');
+		this.logger.log('---步骤执行结果已接收---');
 		return {
 			stepResultList: (state.stepResultList || []).concat(stepResult),
 			currentStepIndex: state.currentStepIndex + 1
@@ -210,7 +210,7 @@ export class PrismaAgentService {
 					`1. 请在以下文件中输入您的反馈: ${this.getRealFilePath(humanFeedbackPath)}`
 				);
 				this.logger.log(
-					`action: accept（完全接受并继续） | fix（手动修改然后继续） | redo（反馈并重做,反馈内容填在content里）`
+					`命令: accept（完全接受并继续） | fix（手动修改然后继续） | redo（反馈并重做,反馈内容填在content里）`
 				);
 				this.logger.log(`2. 输入 'do' 继续, 或输入 'exit' 退出.`);
 			} else if (interruptData.type === InterruptType.ExecuteStep) {
@@ -345,7 +345,8 @@ export class PrismaAgentService {
 			knowledgeVDBService: this.knowledgeVDBService,
 			projectCodeVDBService: this.projectCodeVDBService,
 			cRetrieveAgentService: this.cRetrieveAgentService,
-			eventBusService: this.eventBusService
+			eventBusService: this.eventBusService,
+			logger: this.logger
 		};
 
 		// 步骤2: 构建线程配置，它将被传递给工作流的 stream 方法。

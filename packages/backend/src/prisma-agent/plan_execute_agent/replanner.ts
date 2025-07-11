@@ -24,12 +24,12 @@ export async function retrieveNode(
 	state: typeof GraphState.State,
 	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---Replan NODE: RETRIEVE KNOWLEDGE---');
+	config.configurable.logger.log('---节点: 检索知识---');
 	const { stepResult, userId } = state;
 	const { knowledgeVDBService } = config.configurable;
 
 	if (!stepResult?.output.userFeedback) {
-		console.log('No user feedback provided, skipping retrieval.');
+		config.configurable.logger.log('没有用户反馈, 跳过检索.');
 		return {};
 	}
 	if (!knowledgeVDBService) {
@@ -68,13 +68,14 @@ export async function retrieveNode(
  * @output {Partial<GraphState>} - eplan文件内容和路径更新到 `state.replanState.projectCodes`。
  */
 export async function codeGetNode(
-	state: typeof GraphState.State
+	state: typeof GraphState.State,
+	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---Replan NODE: GET MODIFIED CODE---');
+	config.configurable.logger.log('---节点: 获取修改的代码---');
 	const { stepResult, projectPath } = state;
 
 	if (!stepResult?.output.writtenCodeFiles || stepResult.output.writtenCodeFiles.length === 0) {
-		console.log('No written code files recorded, skipping code retrieval.');
+		config.configurable.logger.log('没有记录的修改代码, 跳过检索.');
 		return {};
 	}
 	if (!projectPath) {
@@ -118,9 +119,10 @@ export async function codeGetNode(
  * @output {Partial<GraphState>} - 更新 `eplan.reflectIO.input` 以便 `reflect` 节点可以使用。
  */
 export async function prepareReflection(
-	state: typeof GraphState.State
+	state: typeof GraphState.State,
+	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---Replan NODE: PREPARE REFLECTION---');
+	config.configurable.logger.log('---节点: 准备反思---');
 	const { plan, stepResult, replanState } = state;
 
 	const context = `
@@ -158,7 +160,7 @@ export async function reAnalyze(
 	state: typeof GraphState.State,
 	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---Replan NODE: RE-ANALYZE---');
+	config.configurable.logger.log('---节点: 重分析---');
 	const {
 		projectInfo,
 		lightSpot,
@@ -232,7 +234,7 @@ export async function rePlan(
 	state: typeof GraphState.State,
 	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---Replan NODE: RE-PLAN---');
+	config.configurable.logger.log('---节点: 重计划---');
 	const {
 		projectInfo,
 		lightSpot,
@@ -318,8 +320,11 @@ function shouldEnd(state: typeof GraphState.State) {
  * 条件边: "是否需要反思" (shouldReflect)
  * @description 在人类审核后，根据用户的行为（接受、拒绝、反馈）来决定下一步走向。
  */
-export async function shouldReflect(state: typeof GraphState.State): Promise<Command> {
-	console.log('---Replan NODE: ROUTE AFTER REVIEW---');
+export async function shouldReflect(
+	state: typeof GraphState.State,
+	config: NodeConfig
+): Promise<Command> {
+	config.configurable.logger.log('---边: 是否反思---');
 
 	const { type } = state.humanIO.output!;
 	const userInput = state.humanIO.input;
@@ -328,13 +333,13 @@ export async function shouldReflect(state: typeof GraphState.State): Promise<Com
 		throw new Error('Review type is missing in humanIO.output.');
 	}
 	if (!userInput) {
-		console.error('User input is missing in shouldReflect edge.');
+		config.configurable.logger.error('用户输入缺失.');
 		return new Command({ goto: END }); // Should not happen
 	}
 
 	switch (userInput.action) {
 		case UserAction.ACCEPT:
-			console.log('User accepted. Continuing...');
+			config.configurable.logger.log('用户接受了. 继续...');
 			switch (type) {
 				case ReviewType.RE_ANALYSIS:
 					return new Command({ goto: 're_plan' });
@@ -344,10 +349,10 @@ export async function shouldReflect(state: typeof GraphState.State): Promise<Com
 					throw new Error(`Invalid review type for ACCEPT action: ${type}`);
 			}
 		case UserAction.REDO:
-			console.log('User rejected or provided feedback. Reflecting...');
+			config.configurable.logger.log('用户进行了回绝或提供了反馈. 反思...');
 			return new Command({ goto: 'prepare_reflection' });
 		case UserAction.FIX: {
-			console.log('User fixed. Continuing...');
+			config.configurable.logger.log('用户进行了修正. 继续...');
 			if (!state.humanIO.reviewPath) {
 				throw new Error('Review path is missing for FIX action.');
 			}
@@ -403,21 +408,21 @@ export async function shouldReflect(state: typeof GraphState.State): Promise<Com
  * 条件边：反思之后 (afterReflect)
  * @description 在反思节点结束后，根据我们是从哪个阶段（需求分析或计划）进入反思的，来决定是重新需求分析还是重新计划。
  */
-function afterReflect(state: typeof GraphState.State) {
-	console.log('---Replan EDGE: AFTER REFLECT---');
+function afterReflect(state: typeof GraphState.State, config: NodeConfig) {
+	config.configurable.logger.log('---边: 反思后路由---');
 	const reviewType = state.humanIO.output?.type; // Check which stage we were reviewing
 	if (!reviewType) {
 		throw new Error('Review type is missing in humanIO.output.');
 	}
 	switch (reviewType) {
 		case ReviewType.RE_ANALYSIS:
-			console.log('Re-analyzing after reflection...');
+			config.configurable.logger.log('重新分析...');
 			return 're_analyze';
 		case ReviewType.RE_PLAN:
-			console.log('Re-planning after reflection...');
+			config.configurable.logger.log('重新计划...');
 			return 're_plan';
 		default:
-			console.error('Could not determine next step after reflection.');
+			config.configurable.logger.error('无法确定下一步.');
 			return END; // Should not happen
 	}
 }

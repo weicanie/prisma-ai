@@ -29,7 +29,7 @@ def main():
     服务主入口函数。
     使用 uvicorn 启动 FastAPI 应用。
     """
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)
 
 
 if __name__ == "__main__":

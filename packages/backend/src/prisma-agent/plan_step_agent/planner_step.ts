@@ -28,7 +28,7 @@ async function retrieveNode(
 	state: typeof GraphState.State,
 	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---PlanStep NODE: RETRIEVE KNOWLEDGE FOR STEP---');
+	config.configurable.logger.log('---节点: 检索知识---');
 	const { projectInfo, plan, currentStepIndex, userId } = state;
 	const knowledgeVDBService = config.configurable?.knowledgeVDBService;
 	const projectCodeVDBService = config.configurable?.projectCodeVDBService;
@@ -42,7 +42,7 @@ async function retrieveNode(
 	const currentStep = plan.output.implementationPlan[currentStepIndex];
 	const query = currentStep.stepDescription;
 
-	console.log(`Retrieving knowledge for step: "${query}"`);
+	config.configurable.logger.log(`检索知识: 根据步骤 "${query}" 检索项目代码和领域知识`);
 	const agentConfig = await getAgentConfig();
 
 	const [projectDocs, domainDocs] = await Promise.all([
@@ -87,7 +87,7 @@ async function analyzeStep(
 	state: typeof GraphState.State,
 	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---PlanStep NODE: ANALYZE STEP---');
+	config.configurable.logger.log('---节点: 分析步骤---');
 	const { projectInfo, plan, currentStepIndex, reflection, stepPlan } = state;
 	if (!projectInfo || !plan) throw new Error('Project info or plan not set.');
 	const stepAnalysisChain = config.configurable?.stepAnalysisChain;
@@ -135,7 +135,7 @@ async function planStep(
 	state: typeof GraphState.State,
 	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---PlanStep NODE: PLAN STEP---');
+	config.configurable.logger.log('---节点: 计划步骤---');
 	const { stepPlan, reflection } = state;
 	if (!stepPlan) throw new Error('Step plan not set.');
 
@@ -179,7 +179,7 @@ async function generateFinalPromptNode(
 	state: typeof GraphState.State,
 	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---PlanStep NODE: GENERATE FINAL PROMPT---');
+	config.configurable.logger.log('---节点: 生成最终Prompt---');
 	const { stepPlan } = state;
 	const finalPromptChain = config.configurable?.finalPromptChain;
 	if (!stepPlan || !finalPromptChain) {
@@ -204,29 +204,20 @@ async function generateFinalPromptNode(
  * @output {} - 无状态变更，仅执行文件写入操作。
  */
 async function writePromptToFileNode(
-	state: typeof GraphState.State
+	state: typeof GraphState.State,
+	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---PlanStep NODE: WRITE PROMPT TO FILE---');
+	config.configurable.logger.log('---节点: 写入Prompt到文件---');
 	const { finalPrompt, projectPath } = state;
 	if (!finalPrompt || !projectPath) {
 		throw new Error('Missing finalPrompt or projectPath.');
 	}
 
-	//写入目标项目的agent_output目录
-	const outputDir = path.join(projectPath, 'agent_output');
-	//不存在则新建目录
-	if (!(await fs.stat(outputDir)).isDirectory()) {
-		await fs.mkdir(outputDir, { recursive: true });
-	}
-	const outputPath = path.join(outputDir, 'cursor_input.md');
-	await fs.writeFile(outputPath, finalPrompt);
-
 	//写入agent_output/cursor_input.md
 	const cursorInputPath = path.join(process.cwd(), 'agent_output', 'cursor_input.md');
 	await fs.writeFile(cursorInputPath, finalPrompt);
 
-	console.log(`Final prompt written to ${outputPath}`);
-	console.log(`Final prompt written to ${cursorInputPath}`);
+	config.configurable.logger.log(`最终Prompt已写入 ${cursorInputPath}`);
 
 	return {};
 }
@@ -236,8 +227,8 @@ async function writePromptToFileNode(
  * @description 根据审核的阶段和用户的操作决定下一步。
  * @param state
  */
-async function shouldReflect(state: typeof GraphState.State) {
-	console.log('---PlanStep EDGE: ROUTE AFTER REVIEW---');
+async function shouldReflect(state: typeof GraphState.State, config: NodeConfig) {
+	config.configurable.logger.log('---边: 是否反思---');
 	const { type } = state.humanIO.output!;
 	const userInput = state.humanIO.input;
 
@@ -250,7 +241,7 @@ async function shouldReflect(state: typeof GraphState.State) {
 
 	switch (userInput.action) {
 		case UserAction.ACCEPT:
-			console.log('User accepted. Continuing...');
+			config.configurable.logger.log('用户接受了. 继续...');
 			switch (type) {
 				case ReviewType.ANALYSIS_STEP:
 					return new Command({ goto: 'plan_step' });
@@ -260,10 +251,10 @@ async function shouldReflect(state: typeof GraphState.State) {
 					throw new Error('Invalid review type');
 			}
 		case UserAction.REDO:
-			console.log('User rejected or provided feedback. Reflecting...');
+			config.configurable.logger.log('用户进行了回绝或提供了反馈. 反思...');
 			return new Command({ goto: 'prepare_reflection' });
 		case UserAction.FIX:
-			console.log('User fixed. Continuing...');
+			config.configurable.logger.log('用户进行了修正. 继续...');
 			let fixedContent = await fs.readFile(state.humanIO.reviewPath!, 'utf-8');
 			const fileExtension = path.extname(state.humanIO.reviewPath!);
 			const isJson = fileExtension === '.json';
@@ -312,21 +303,24 @@ async function shouldReflect(state: typeof GraphState.State) {
  * @input {GraphState} state - 从 `state.humanIO.output.type` 判断反思前的阶段。
  * @output {'analyze_step' | 'plan_step' | 'end'} - 返回下一个节点的名称：'analyze_step', 'plan_step', 或 'end'（异常情况）。
  */
-function afterReflect(state: typeof GraphState.State): 'analyze_step' | 'plan_step' | 'end' {
-	console.log('---PlanStep EDGE: AFTER REFLECT---');
+function afterReflect(
+	state: typeof GraphState.State,
+	config: NodeConfig
+): 'analyze_step' | 'plan_step' | 'end' {
+	config.configurable.logger.log('---边: 反思后路由---');
 	const reviewType = state.humanIO.output?.type; // Check which stage we were reviewing
 	if (!reviewType) {
 		throw new Error('Review type is missing in humanIO.output.');
 	}
 	switch (reviewType) {
 		case ReviewType.ANALYSIS_STEP:
-			console.log('Re-analyzing after reflection...');
+			config.configurable.logger.log('重新分析...');
 			return 'analyze_step';
 		case ReviewType.PLAN_STEP:
-			console.log('Re-planning after reflection...');
+			config.configurable.logger.log('重新计划...');
 			return 'plan_step';
 		default:
-			console.error('Could not determine next step after reflection.');
+			config.configurable.logger.error('无法确定下一步.');
 			return 'end'; // Should not happen
 	}
 }
@@ -338,7 +332,11 @@ function afterReflect(state: typeof GraphState.State): 'analyze_step' | 'plan_st
  *                           - 根据 `humanIO.output.type` 判断是步骤分析内容还是步骤计划内容。
  * @output {Partial<GraphState>} - 更新 `reflectIO.input`，为 `reflect` 节点提供输入。
  */
-function prepareReflection(state: typeof GraphState.State): Partial<typeof GraphState.State> {
+function prepareReflection(
+	state: typeof GraphState.State,
+	config: NodeConfig
+): Partial<typeof GraphState.State> {
+	config.configurable.logger.log('---节点: 准备反思---');
 	const { stepPlan, humanIO, plan } = state;
 	const reviewType = humanIO.output?.type;
 	const userFeedback = humanIO.input?.content ?? '无用户反馈';

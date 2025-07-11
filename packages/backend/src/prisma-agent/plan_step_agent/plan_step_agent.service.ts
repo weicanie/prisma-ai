@@ -321,9 +321,10 @@ ${p.questionsClarificationList.map((c: string) => `  - ${c}`).join('\n')}
 `;
 
 			// 2. 构建 Context
-			// 在实际场景中，这里可能需要更复杂的逻辑来从知识库中提取与plan相关的代码文件
 			const context = `
 ## 上下文信息
+以下信息可能与任务相关，也可能无关，你需要自行判断。
+\`\`\`markdown
 
 ### 相关代码文件:
 \`\`\`
@@ -333,6 +334,7 @@ ${knowledge.retrievedProjectCodes}
 ### 相关领域知识:
 \`\`\`
 ${knowledge.retrievedDomainDocs}
+\`\`\`
 \`\`\`
 `;
 
@@ -372,8 +374,8 @@ ${knowledge.retrievedDomainDocs}
 			// 4. 组装最终Prompt
 			const finalPrompt = `
 ${systemPrompt}
-${context}
 ${userPrompt}
+${context}
 `;
 
 			return finalPrompt;

@@ -13,9 +13,6 @@ export enum role {
 
 @Injectable()
 export class PromptService implements OnModuleInit {
-	/**
-	 * prompt插槽: instructions
-	 */
 	private polishT: string;
 	private lookupT: string;
 	private matchT: string;
@@ -24,15 +21,8 @@ export class PromptService implements OnModuleInit {
 	private diffLearnT: string;
 	private textToJsonT: string;
 	private resultsToTextT: string;
-
-	/**
-	 * prompt插槽: fewShot、instructions
-	 */
 	private mineT: string;
 
-	/**
-	 * key -> 示例prompt
-	 */
 	private readonly fewShotMap: Record<string, string> = {};
 
 	constructor() {}
@@ -40,28 +30,34 @@ export class PromptService implements OnModuleInit {
 	async onModuleInit() {
 		try {
 			const promises = [
-				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/polish-T.md')),
-				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/mine-T.md')),
-				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/lookup-T.md')),
-				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/match-T.md')),
-				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/hjm_rerank-T.md')),
-				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/hjm_transform-T.md')),
-				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/diff_learn-T.md')),
-				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/text_to_json.md')),
-				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/results_to_text.md')),
-				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/mine-fewshot.md'))
+				this._readPromptFile(
+					path.join(process.cwd(), 'ai_data/prompt/project_process/polish-T.md')
+				),
+				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/project_process/mine-T.md')),
+				this._readPromptFile(
+					path.join(process.cwd(), 'ai_data/prompt/project_process/lookup-T.md')
+				),
+				this._readPromptFile(
+					path.join(process.cwd(), 'ai_data/prompt/project_process/mine-fewshot.md')
+				),
+				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/hjm/match-T.md')),
+				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/hjm/hjm_rerank-T.md')),
+				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/hjm/hjm_transform-T.md')),
+				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/learn/diff_learn-T.md')),
+				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/unuse/text_to_json.md')),
+				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/unuse/results_to_text.md'))
 			];
 			const [
 				polishT,
 				mineT,
 				lookupT,
+				mineFewShot,
 				matchT,
 				hjmRerankT,
 				hjmTransformT,
 				diffLearnT,
 				textToJsonT,
-				resultsToTextT,
-				mineFewShot
+				resultsToTextT
 			] = await Promise.all(promises);
 			this.polishT = polishT as string;
 			this.mineT = mineT as string;

@@ -32,7 +32,7 @@ export async function uploadCode(
 		await updateAgentConfig(agentConfig);
 	}
 
-	console.log('---NODE: UPLOAD CODE---');
+	config.configurable.logger.log('---节点: 项目代码同步到知识库---');
 	const { projectPath, userId, projectInfo } = state;
 	const { projectCodeVDBService, eventBusService } = config.configurable;
 
@@ -48,7 +48,7 @@ export async function uploadCode(
 		projectPath,
 		crypto.randomUUID()
 	);
-	console.log('---CODE UPLOAD AND EMBEDDING STARTED---');
+	config.configurable.logger.log('---项目代码同步开始---');
 
 	await new Promise((resolve, reject) => {
 		try {
@@ -62,7 +62,7 @@ export async function uploadCode(
 		}
 	});
 
-	console.log('---CODE UPLOAD AND EMBEDDING COMPLETE---');
+	config.configurable.logger.log('---项目代码同步完成---');
 	return {};
 }
 
@@ -76,7 +76,7 @@ export async function retrieveNode(
 	state: typeof GraphState.State,
 	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---Plan NODE: RETRIEVE KNOWLEDGE---');
+	config.configurable.logger.log('---节点: 检索知识---');
 	const { projectInfo, lightSpot, userId } = state;
 	const { knowledgeVDBService, projectCodeVDBService } = config.configurable;
 	if (!projectInfo || !lightSpot || !userId || !knowledgeVDBService || !projectCodeVDBService) {
@@ -85,7 +85,7 @@ export async function retrieveNode(
 
 	const projectName = projectInfo.info.name;
 
-	console.log(`Retrieving knowledge for: "${lightSpot}"`);
+	config.configurable.logger.log(`检索知识:根据功能亮点 "${lightSpot}" 检索项目代码和领域知识`);
 
 	const agentConfig = await getAgentConfig();
 	const [projectDocs, domainDocs] = await Promise.all([
@@ -104,8 +104,8 @@ export async function retrieveNode(
 			: knowledgeVDBService.retrieveKonwbase(lightSpot, agentConfig.topK.plan.knowledge, userId)
 	]);
 
-	console.log(
-		`Retrieved ${projectDocs.length} project code snippets and ${domainDocs.length} domain docs.`
+	config.configurable.logger.log(
+		`检索到 ${projectDocs.length} 个项目代码片段和 ${domainDocs.length} 个领域知识.`
 	);
 
 	return {
@@ -126,7 +126,7 @@ export async function analyze(
 	state: typeof GraphState.State,
 	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---Plan NODE: ANALYZE---');
+	config.configurable.logger.log('---节点: 需求分析---');
 	if (!state.projectInfo) throw new Error('Project info is not set.');
 	const { analysisChain } = config.configurable;
 	if (!analysisChain) throw new Error('Analysis chain not found in configurable');
@@ -170,7 +170,7 @@ export async function plan(
 	state: typeof GraphState.State,
 	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---Plan NODE: PLAN---');
+	config.configurable.logger.log('---节点: 计划---');
 	if (!state.projectInfo) throw new Error('Project info is not set.');
 	if (!state.plan?.output.highlightAnalysis) throw new Error('Analysis is not available.');
 	const { planChain } = config.configurable;
@@ -214,9 +214,10 @@ export async function plan(
  * @output {Partial<GraphState>} - 更新 `state.reflectIO.input` 以便 `reflect` 节点可以使用。
  */
 export async function prepareReflection(
-	state: typeof GraphState.State
+	state: typeof GraphState.State,
+	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
-	console.log('---Plan NODE: PREPARE REFLECTION---');
+	config.configurable.logger.log('---节点: 准备反思---');
 	const { plan, humanIO } = state;
 	const { type } = humanIO.output!;
 	if (!type) {
@@ -269,8 +270,11 @@ ${JSON.stringify(plan?.output.implementationPlan, null, 2)}
  * @description 在人类审核后，根据用户的行为（接受、拒绝、反馈）来决定下一步走向。
  * @input {GraphState} state - 从 `state.humanIO.input` 获取用户的操作。
  */
-export async function shouldReflect(state: typeof GraphState.State): Promise<Command> {
-	console.log('---Plan NODE: ROUTE AFTER REVIEW---');
+export async function shouldReflect(
+	state: typeof GraphState.State,
+	config: NodeConfig
+): Promise<Command> {
+	config.configurable.logger.log('---边: 是否反思---');
 
 	const { type } = state.humanIO.output!;
 	const userInput = state.humanIO.input;
@@ -279,13 +283,13 @@ export async function shouldReflect(state: typeof GraphState.State): Promise<Com
 		throw new Error('Review type is missing in humanIO.output.');
 	}
 	if (!userInput) {
-		console.error('User input is missing in shouldReflect edge.');
+		config.configurable.logger.error('用户输入缺失.');
 		return new Command({ goto: END }); // Should not happen
 	}
 
 	switch (userInput.action) {
 		case UserAction.ACCEPT:
-			console.log('User accepted. Continuing...');
+			config.configurable.logger.log('用户接受了. 继续...');
 			switch (type) {
 				case ReviewType.ANALYSIS:
 					return new Command({ goto: 'plan_top' });
@@ -295,10 +299,10 @@ export async function shouldReflect(state: typeof GraphState.State): Promise<Com
 					throw new Error(`Invalid review type for ACCEPT action: ${type}`);
 			}
 		case UserAction.REDO:
-			console.log('User rejected or provided feedback. Reflecting...');
+			config.configurable.logger.log('用户进行了回绝或提供了反馈. 反思...');
 			return new Command({ goto: 'prepare_reflection' });
 		case UserAction.FIX:
-			console.log('User fixed. Continuing...');
+			config.configurable.logger.log('用户进行了修正. 继续...');
 			if (!state.humanIO.reviewPath) {
 				throw new Error('Review path is missing for FIX action.');
 			}
@@ -352,18 +356,18 @@ export async function shouldReflect(state: typeof GraphState.State): Promise<Com
  * @input {GraphState} state - 从 `state.humanIO.output.type` 判断反思前的阶段。
  * @output {'analyze' | 'plan' | 'end'} - 返回下一个节点的名称：'analyze', 'plan', 或 'end'（异常情况）。
  */
-function afterReflect(state: typeof GraphState.State) {
-	console.log('---Plan EDGE: AFTER REFLECT---');
+function afterReflect(state: typeof GraphState.State, config: NodeConfig) {
+	config.configurable.logger.log('---边: 反思后路由---');
 	const reviewType = state.humanIO.output?.type; // Check which stage we were reviewing
 	if (!reviewType) {
 		throw new Error('Review type is missing in humanIO.output.');
 	}
 	switch (reviewType) {
 		case ReviewType.ANALYSIS:
-			console.log('Re-analyzing after reflection...');
+			config.configurable.logger.log('重新分析...');
 			return 'analyze';
 		case ReviewType.PLAN:
-			console.log('Re-planning after reflection...');
+			config.configurable.logger.log('重新计划...');
 			return 'plan_top';
 		default:
 			throw new Error('Could not determine next step after reflection.');

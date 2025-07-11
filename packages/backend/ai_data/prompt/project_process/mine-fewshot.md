@@ -1,3 +1,5 @@
+<examples>
+
 ## 1. PrismaTrip - H5民宿预订平台
 
 ### 项目信息
@@ -228,3 +230,5 @@ Node.js/Express, Redis, Docker, Nginx, Elasticsearch, Kibana
   - 日志与监控:部署了Elasticsearch和Kibana进行日志分析，能够快速定位并响应系统故障，确保了系统的稳定运行。
 - 用户体验/业务价值
   - 用户体验:通过用户调研和前端反馈，优化API的数据结构和调用流程，用户满意度提高了30%，前端开发者的工作效率提升了25%。
+
+</examples>

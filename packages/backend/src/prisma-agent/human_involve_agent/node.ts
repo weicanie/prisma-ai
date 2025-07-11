@@ -34,12 +34,12 @@ export class HumanInvolve {
 		state: typeof GraphState.State,
 		config: NodeConfig
 	): Promise<Partial<typeof GraphState.State>> {
-		console.log('---NODE: HUMAN REVIEW---');
+		this.logger.log('---节点: 等待人类评审---');
 		const { type: reviewType, content } = state.humanIO.output as HumanOutput;
 
 		// 1. 将 review 内容写入文件
 		const outputPath = await this.writeReviewFile(reviewType, content);
-		this.logger.log(`待 review 内容已写入文件: ${outputPath}. 等待用户输入...`);
+		this.logger.log(`待评审内容已写入文件: ${outputPath}. 等待用户输入...`);
 
 		// 2. 中断流程，等待用户输入
 		const userInput: HumanInput = interrupt({
@@ -49,7 +49,7 @@ export class HumanInvolve {
 			reviewType: reviewType
 		});
 
-		console.log('---HUMAN INPUT RECEIVED---', userInput);
+		this.logger.log('---人类输入已接收---', userInput);
 
 		// 3. 将用户输入更新到 state
 		return {
@@ -86,7 +86,6 @@ export class HumanInvolve {
 		try {
 			// 使用 fs/promises 异步写入
 			await fs.writeFile(filePath, content, { encoding: 'utf-8' });
-			this.logger.log(`Successfully wrote to ${filePath}`);
 			return filePath;
 		} catch (error) {
 			this.logger.error(`Failed to write to ${filePath}`, error);

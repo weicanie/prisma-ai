@@ -16,12 +16,12 @@ export async function reflect(
 		throw new Error('Reflect chain not found in configurable');
 	}
 
-	console.log('---Reflect NODE: REFLECT---');
+	config.configurable.logger.log('---节点: 反思---');
 	const reflection = await reflectChain.invoke({
 		content: input.content,
 		context: input.context ?? '无'
 	});
-	console.log('---REFLECTION---', reflection);
+	config.configurable.logger.log('---反思结果---', reflection);
 	return {
 		reflectIO: {
 			...state.reflectIO,

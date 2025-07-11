@@ -3,12 +3,12 @@ from fastmcp import FastMCP
 server = FastMCP()
 # FIXME cursor 解析不出来参数的描述
 @server.tool
-async def i_tool(session_id: str) -> str:
+async def get_input(session_id: str) -> str:
     """
     Agent调用此工具以获取用户输入。
 
-    它会为指定的会话ID异步等待输入。当通过 /agent/input/{session_id} 接口收到输入后，
-    此函数将返回收到的数据。
+    它会为指定的会话ID异步等待输入。当用户通过 /agent/input/{session_id} 接口进行输入后，
+    此函数将返回收到的用户输入。
 
     :param session_id: 唯一的会话标识符。
     :return: 用户提供的输入字符串。
@@ -24,12 +24,12 @@ async def i_tool(session_id: str) -> str:
     return input_data
 
 @server.tool
-async def o_tool(session_id: str, output: str) -> str:
+async def return_output(session_id: str, output: str) -> str:
     """
     Agent调用此工具以返回输出。
 
     它会将 Agent 的输出存储在共享的哈希表中，键为会话ID。
-    存储后的数据可以通过 /agent/output/{session_id} 接口获取。
+    存储后的数据可以通过 /agent/output/{session_id} 接口供用户获取获取。
 
     :param session_id: 唯一的会话标识符。
     :param output: Agent 生成的输出字符串。
@@ -41,5 +41,6 @@ async def o_tool(session_id: str, output: str) -> str:
         output_storage[session_id] = output
     print('output_storage',output_storage)
     return "Output received and stored." 
+
 if __name__ == "__main__":
     server.run(transport='stdio')
