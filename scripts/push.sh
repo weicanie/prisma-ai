@@ -26,11 +26,6 @@ while true; do
     # pnpm exec lerna publish --conventional-commits 3.0.0
 
 
-    # git config --global --unset https.proxy
-    # git config --global https.proxy https://ghfast.top
-
-    # 获取 git push 命令的退出码
-    # $? 是一个特殊变量，它存储了上一个执行命令的退出状态
     exit_code=$?
 
     # 检查退出码
@@ -42,6 +37,13 @@ while true; do
     else
         # 如果退出码非 0，表示 push 失败
         echo "❌ [尝试 #$count] Git push 失败，退出码: $exit_code"
+        
+        # 当重试次数为3时，设置代理
+        if [ $count -eq 3 ]; then
+            echo "🔄 [尝试 #3] 失败，尝试切换代理..."
+            git config --global https.proxy https://ghfast.top
+            echo "✅ 代理已切换至 https://ghfast.top"
+        fi
         
         # 检查是否已达到最大重试次数
         if [ $count -ge $MAX_RETRIES ]; then

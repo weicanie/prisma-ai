@@ -37,6 +37,13 @@ while true; do
         # 如果退出码非 0，表示 pull 失败
         echo "❌ [尝试 #$count] Git pull 失败，退出码: $exit_code"
         
+        # 当重试次数为3时，设置代理
+        if [ $count -eq 3 ]; then
+            echo "🔄 [尝试 #3] 失败，尝试切换代理..."
+            git config --global https.proxy https://ghfast.top
+            echo "✅ 代理已切换至 https://ghfast.top"
+        fi
+        
         # 检查是否已达到最大重试次数
         if [ $count -ge $MAX_RETRIES ]; then
             echo "🚫 已达到最大重试次数 ($MAX_RETRIES)，停止脚本。"
