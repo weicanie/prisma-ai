@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.0.0](https://github.com/weicanie/prisma-ai/compare/v2.1.0...v3.0.0) (2025-07-11)
+
+### Features
+
+- 集成面试题库和 anki ([ae52e1f](https://github.com/weicanie/prisma-ai/commit/ae52e1f2f9953c595c279b684d9c9c35625ccdeb))
+- 优化prompt、Agent CLI ([3d397e2](https://github.com/weicanie/prisma-ai/commit/3d397e23b1778e0938c85d277c1a67ca678f04e7))
+- 重塑项目经验处理流程 ([899a624](https://github.com/weicanie/prisma-ai/commit/899a624c7a103070c0c394e1ddb335073271fbb3))
+
 # [2.1.0](https://github.com/weicanie/prisma-ai/compare/v2.0.0...v2.1.0) (2025-06-30)
 
 ### Bug Fixes

@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.0.0](https://github.com/weicanie/prisma-ai/compare/v2.1.0...v3.0.0) (2025-07-11)
+
+### Features
+
+- 集成 cursor agent的 mcp server初步实现 ([7c22acf](https://github.com/weicanie/prisma-ai/commit/7c22acf680197dfcf709c6dfc00c0650c1bf56fc))
+- 集成面试题库和 anki ([ae52e1f](https://github.com/weicanie/prisma-ai/commit/ae52e1f2f9953c595c279b684d9c9c35625ccdeb))
+- 项目代码知识库增量构建 ([56aaaa0](https://github.com/weicanie/prisma-ai/commit/56aaaa0c115dcb6b5c66ba47790125bf5b7a7857))
+- 优化prompt、Agent CLI ([3d397e2](https://github.com/weicanie/prisma-ai/commit/3d397e23b1778e0938c85d277c1a67ca678f04e7))
+- 重塑项目经验处理流程 ([899a624](https://github.com/weicanie/prisma-ai/commit/899a624c7a103070c0c394e1ddb335073271fbb3))
+
 # [2.1.0](https://github.com/weicanie/prisma-ai/compare/v2.0.0...v2.1.0) (2025-06-30)
 
 ### Bug Fixes

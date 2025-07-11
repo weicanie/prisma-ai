@@ -1,0 +1,11 @@
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+# [3.0.0](https://github.com/weicanie/prisma-ai/compare/v2.1.0...v3.0.0) (2025-07-11)
+
+### Features
+
+- 集成 cursor agent的 mcp server初步实现 ([7c22acf](https://github.com/weicanie/prisma-ai/commit/7c22acf680197dfcf709c6dfc00c0650c1bf56fc))
+- 优化prompt、Agent CLI ([3d397e2](https://github.com/weicanie/prisma-ai/commit/3d397e23b1778e0938c85d277c1a67ca678f04e7))
