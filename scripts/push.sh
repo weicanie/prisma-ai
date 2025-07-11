@@ -21,8 +21,13 @@ while true; do
     # 执行 git push 命令
     # 我们将所有输出（标准输出和标准错误）都重定向，以便脚本可以捕获它们
     # 同时在屏幕上显示它们
-    git push
+    # git push
+    git push origin --tags
     # pnpm exec lerna publish --conventional-commits 3.0.0
+
+
+    # git config --global --unset https.proxy
+    # git config --global https.proxy https://ghfast.top
 
     # 获取 git push 命令的退出码
     # $? 是一个特殊变量，它存储了上一个执行命令的退出状态

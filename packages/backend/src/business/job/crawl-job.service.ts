@@ -234,10 +234,9 @@ export class CrawlJobService {
 		});
 
 		//会导致认证页面加载不出来,无法手动验证,所以暂时注释掉
-		// 过滤掉图片、样式、字体、媒体等资源的请求
+		// 过滤掉图片、样式、字体、媒体等资源的请求,阻止加载不必要的资源以提高速度
 		/*     await page.setRequestInterception(true);
     page.on('request', (request) => {
-      // 阻止加载不必要的资源以提高速度
       const resourceType = request.resourceType();
       if (['image', 'stylesheet', 'font', 'media'].includes(resourceType)) {
         request.abort();

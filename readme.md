@@ -1,232 +1,187 @@
 ![logo](images/readme/logo.png)
 
-# prisma-ai: 一站式解决项目经验没亮点、简历石沉大海等痛点
+<div align="center">
+
+# Prisma-AI: Your AI Career Co-pilot
+
+开源免费的AI求职co-pilot，自动化从准备简历到拿到offer的整个流程。优化您的项目、定制您的简历、为您匹配工作，并帮助您做好面试准备。
+
+</div>
+
+<p align="center">
+  <a href="https://github.com/weicanie/prisma-ai/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License">
+  </a>
+  <a href="https://github.com/weicanie/prisma-ai/issues">
+    <img src="https://img.shields.io/github/issues/weicanie/prisma-ai.svg" alt="Issues">
+  </a>
+  <a href="https://github.com/weicanie/prisma-ai/stargazers">
+    <img src="https://img.shields.io/github/stars/weicanie/prisma-ai.svg" alt="Stars">
+  </a>
+  <a href="#">
+    <img src="https://img.shields.io/badge/QQ%20Group-930291816-green.svg" alt="QQ Group">
+  </a>
+</p>
+
+<p align="center">
+  <a href="README.md">简体中文</a> | <a href="i18n/README-EN.md">English</a>
+</p>
+
+---
+
+## 🎯 核心价值
+
+Prisma-AI 旨在解决求职者在准备简历和寻找工作时最头疼的**3个问题**：
+
+1.  **项目经验平平无奇**：只会罗列技术和基础业务，缺乏深度和亮点。
+    - **解决方案**：AI Agent不仅能深度分析、优化您的项目描述，挖掘潜在亮点，更能**直接为您规划并实现这些亮点**，让您的项目经验脱胎换骨。
+2.  **简历与岗位不匹配**：海投简历如同石沉大海，面试机会寥寥无几。
+    - **解决方案**：通过内置爬虫和本地AI模型，精准匹配最适合您的岗位，并**为每个岗位量身定制您的简历**，大幅提升面试成功率。
+3.  **八股背了忘忘了背**：低效重复一遍又一遍，背了忘忘了背
+    - **解决方案**：深度集成前后端专业题库、学习神器Anki、思维导图进行理解与记忆，让你融会贯通、笑傲八股。
+
+---
+
+## ✨ 功能特性
+
+| 模块                  | 功能                                                                                   | 状态 |
+| :-------------------- | :------------------------------------------------------------------------------------- | :--- |
+| **🤖 AI 核心 **       | 基于 `Planer-Executor` + `CRAG` + `Human-in-the-loop` 架构，具有卓越的复杂任务实现能力 | ✅   |
+|                       | 深度集成用户项目代码、领域知识库，提供精准上下文                                       | ✅   |
+|                       | 支持用户反馈与多轮反思，持续优化输出质量                                               | ✅   |
+| **📄 简历优化、落地** | AI进行深度分析、优化、亮点挖掘                                                         | ✅   |
+|                       | AI Agent **实现**项目亮点和功能                                                        | ✅   |
+| **💼岗位匹配、契合**  | 内置爬虫实时获取海量岗位数据                                                           | ✅   |
+|                       | AI进行高效向量检索，精准找到匹配你的岗位                                               | ✅   |
+|                       | `LLM`对匹配结果进行重排和深度分析                                                      | ✅   |
+|                       | `Agent `根据目标岗位优化和定制简历                                                     | ✅   |
+| **📚 高效学习、备战** | 集成专业前后端面试题库                                                                 | ✅   |
+|                       | 联动`Anki`与`思维导图`，打造最高效的面试学习路径                                       | ✅   |
+| **📦 便捷部署**       | 提供 `Docker` 一键部署，零配置启动                                                     | ✅   |
+|                       | 内置 `MinIO` 对象存储服务                                                              | ✅   |
+
+---
+
+## 📚 文档与教程
+
+我们为您准备了详细的文档，帮助您迅速掌握 Prisma-AI。
+
+| 分类             | 文档                                                                                  |
+| :--------------- | :------------------------------------------------------------------------------------ |
+| **🚀快速上手**   | [5分钟完成环境配置](doc/教程：1、环境配置.md)                                         |
+|                  | [3分钟构建个人知识库](doc/教程：2、知识库构建.md)                                     |
+| **💡核心工作流** | [2分钟掌握项目经验分析、优化与亮点挖掘](doc/教程：3、项目经验分析、优化、亮点挖掘.md) |
+|                  | [2分钟掌握AI Agent 协同实现项目亮点](doc/教程：4、项目亮点实现.md)                    |
+|                  | [5分钟获取最匹配自己的岗位](doc/教程：5、获取匹配自己的岗位.md)                       |
+|                  | [3分钟掌握面向目标岗位定制简历](doc/教程：6、面向岗位定制简历.md)                     |
+|                  | [5分钟玩转面试题库与Anki集成](doc/教程：7、面试题库和%20anki集成教程.md)              |
+| **🤔方法论**     | [如何写好一份技术简历](doc/方法论：1、简历应该怎么写.md)                              |
+|                  | [为什么以及如何使用Anki进行高效学习](doc/方法论：2、为什么以及如何使用%20anki.md)     |
+|                  | [curosr等AI工具的局限性、克服](doc/方法论：3、cursor等AI 编程工具的局限性及克服)      |
+
+---
+
+## 🛠️ 技术栈
+
+| 类别         | 技术                                                |
+| :----------- | :-------------------------------------------------- |
+| **项目前端** | `React ` `Vite` `React-Query` `Redux` `TailwindCSS` |
+| **项目后端** | `Nest.js ` `MySQL` `MongoDB` `Redis`                |
+| **AI 核心**  | `LangChain` `LangGraph` `CopilotKit`                |
+| **DevOps**   | `Docker` `Nginx` `Github Action`                    |
+
+---
+
+## 🚀 快速启动
+
+### 🐳 Docker (推荐)
+
+1.  **克隆仓库**
+    ```bash
+    git clone https://github.com/weicanie/prisma-ai.git
+    cd prisma-ai
+    ```
+2.  **配置环境**
+    - [5分钟完成环境配置](doc/教程：1、环境配置.md)
+3.  **配置本地模型** (用于人岗匹配)
+    ```bash
+    # 下载模型到本地
+    git clone https://hf-mirror.com/moka-ai/m3e-base models/moka-ai/m3e-base
+    # 配置python环境
+    ./python-setup.sh
+    # 获取模型onnx文件
+    ./model-onnx.sh
+    ```
+    > **注意**：您需要先将本地模型配置完毕,以在容器中使用模型。
+4.  **启动服务**
+    ```bash
+    # 在仓库根目录执行
+    docker compose -f compose.yaml up --build
+    ```
+5.  浏览器访问 `http://localhost` 即可使用!
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](...)
+### 👨‍💻 本地开发
 
-简体中文 | [English](i18n/README-EN.md)
+1.  **克隆并安装依赖**
+    ```bash
+    git clone https://github.com/weicanie/prisma-ai.git
+    cd prisma-ai
+    pnpm install
+    ```
+2.  **配置环境**
+    [5分钟完成环境配置](doc/教程：1、环境配置.md)
+3.  **配置本地模型** (同Docker步骤)
+4.  确保通过本地或容器方式提供
 
-<br/>
+- mysql（latest容器）
+- redis（latest容器）
+- mongodb（latest容器）
+- minio（2025.4.3 bitbami/minio容器）
 
-## ⚡快速开始
+5.  **启动项目**
+    ```bash
+    # 在仓库根目录执行
+    pnpm run dev
+    ```
 
-建议使用`docker`构建、启动本项目,除了你的 apikey 外零配置。
+---
 
-没有安装`docker`环境的可以按照[1分钟学会Win/Linux/Mac上安装Docker，零失败](https://www.bilibili.com/video/BV1vm421T7Kw/?spm_id_from=333.337.search-card.all.click&vd_source=fb073c2174b0ff1ae25a8042f5eaf690)来安装。
+## 🗺️ 路线图
 
-<br/>
+- [ ] **Agent 深度集成**：深度集成 `Cursor`，实现信息搜索、代码检索等工具和模型的复用。
+- [ ] **AI 模拟面试**：以费曼学习法为核心方法论，以掌握目标岗位、自身简历对应面试题、项目亮点、岗位考察点为目的，基于Agent和知识库的模拟面试。
 
-### 🔑环境配置
+---
 
-[5分钟完成环境配置](</doc/教程：(一)环境配置.md>)
+## 🤝 欢迎贡献
 
-<br/>
+我们热烈欢迎任何形式的贡献！如果您对这个项目感兴趣，可以通过以下方式参与：
 
-### 🚀使用教程
+- ⭐ 给项目一个 **Star**！
+- 🤔 在 **Issues** 中提出问题或建议。
+- 💡 提交 **Pull Request** 改进代码或文档。
 
-[3分钟完成知识库构建](</doc/教程：(二)知识库构建.md>)
+我们相信，通过社区的力量，可以让 Prisma-AI 变得更加强大。
 
-<br/>
+---
 
-[1分钟学会项目亮点实现](</doc/教程：(三)项目亮点实现.md>)
+## 💬 加入社区
 
-<br/>
+欢迎加入我们的QQ群，一起交流、讨论和进步！
 
-[5分钟获取匹配自己的岗位](</doc/教程：(四)获取匹配自己的岗位.md>)
+**群号：930291816**
 
-<br/>
+<img src="./images/readme/qq.jpg" alt="QQ交流群：930291816" style="width:200px;" />
 
-### 🐳 Docker
+---
 
-```bash
-# 克隆仓库
-git clone https://github.com/weicanie/prisma-ai.git
-```
+## ⚖️ 声明
 
-然后打开`packages/backend`, 配置`.env、.env.production`对应的环境变量。
-然后配置人岗匹配用到的模型：
-
-```bash
-# 下载模型到本地
-git clone https://hf-mirror.com/moka-ai/m3e-base models/moka-ai/m3e-base
-# 配置python环境
-./python-setup.sh
-# 获取模型onnx文件
-./model-onnx.sh
-```
-
-注意：你需要先将本地模型配置完毕,以在容器中使用模型
-
-```bash
-# 构建服务,在仓库根目录执行
-docker compose -f compose.yaml up --attach prisma-ai-backend --build
-```
-
-然后浏览器访问`localhost`即可使用!
-
-<br/>
-
-### 👨‍💻本地启动
-
-```bash
-# 克隆仓库
-git clone https://github.com/weicanie/prisma-ai.git
-
-# 安装依赖
-pnpm install
-```
-
-然后打开`packages/backend`, 配置`.env、.env.development`对应的环境变量。
-然后配置人岗匹配用到的模型：
-
-```bash
-# 下载模型到本地
-git clone https://hf-mirror.com/moka-ai/m3e-base models/moka-ai/m3e-base
-# 配置python环境
-./python-setup.sh
-# 获取模型onnx文件
-./model-onnx.sh
-```
-
-```bash
-# 启动项目,在仓库根目录执行
-pnpm run dev
-```
-
-<br/>
-
-## 1、项目的核心价值/解决的痛点
-
-痛点1: 项目经验没亮点，只会罗列些常见技术和业务😤
-解决:
-
-- AI Agent 进行深度分析、改进，深度挖掘亮点👌
-- AI Agent 进行项目亮点的需求分析、开发计划、代码**实现**👌
-
-痛点2: 简历海投，岗位不匹配也摁投，海投几千，面试寥寥!😤
-
-- 解决1: AI Agent 面向岗位定制简历，匹配化、契合化👌
-- 解决2: 爬取招聘网站岗位数据、SBERT模型+相似度搜索进行人岗匹配,找到匹配你的岗位👌
-
-<br/>
-
-## 2、可以在下一秒用到吗？
-
-docker一行命令构建、启动🥰。
-
-当然也支持本地node环境启动。
-
-有帮助的话点个star吧，这对我真的很重要😉。
-
-欢迎提issue、提功能!
-
-<br/>
-
-## 3、痛点是如何解决的?
-
-### 项目经验分析、优化、亮点挖掘
-
-- 优秀的简历质量指标和流程设计，源自c开头的某位老师，专为it岗位的同学设计，我主要做了整个流程的prompt抽象和进一步的扩展🧐。
-- 本地 OSS + pinecone 实现的强大知识库集成功能, 你提供的自己的项目信息、相关领域知识越丰富, ai 越强大
-- 反思功能, 根据你的反馈进行实时调整
-
-### 项目亮点的实现
-
-- Planer_Executor架构 + CRAG + Human-in-the-loop 的 AI Agent
-
-  - 多轮分析、计划
-  - 需求分析评审、实现计划评审
-  - 对Planer_Executor架构进行增强,更深、更细的思考、分析、规划
-  - 对RAG进行增强的CRAG,更精准、更丰富的知识获取
-  - 通过 prompt 集成cursor、windsurf将亮点自动落地
-
-直接使用cursor、windsurf的工作流：
-
-- 输入prompt
-- ai 开始工作
-
-使用本项目的工作流：
-
-- 建立项目代码知识库、领域知识库
-- 输入要实现的亮点(功能)
-- 检索相关代码和知识，进行需求分析
-- 你来评审需求分析
-  - 想自己纠正？没问题,完全支持
-  - 不满意想反馈？没问题,ai会根据你的反馈进行反思,然后做得更好
-- 检索相关代码和知识，进行亮点实现的整体计划
-- 你来评审整个计划，支持纠正、反馈
-- 检索相关代码和知识，进行具体步骤的需求分析、评审、计划、评审
-- 执行
-- 反馈
-- 根据执行结果进行重新分析、计划
-
-### 面向岗位定制简历
-
-- 内置爬虫爬取某boss实时岗位数据，本地部署SBERT双塔模型进行召回、llm进行重排🥴。
-- 使用ai集成知识库,面向岗位将你的简历与岗位进行匹配化、契合化
-
-<br/>
-
-## 4、项目目前的进展
-
-v1.0.0 开箱即用的流程llm
-
-- √ 项目经验分析、优化、亮点挖掘
-- √ 根据岗位定制简历
-- √ 内置爬虫爬取岗位数据(测试爬了差不多两千条数据ip被封了一天😂，悲，现在大大改进了伪装但还没实测)
-- √ 本地部署SBERT模型做岗位信息嵌入、pinecone数据库做岗位信息召回、llm做重排和分析
-- √ 人岗匹配前端实现
-
-v2.0.0 Planer_Executor + CRAG + Human-in-the-loop 的 AI Agent
-
-- √ 领域知识库、项目代码知识库集成
-- √ 项目亮点实现的 Agent, Human-in-the-loop、反思
-- √ 原有项目经验处理流程的 Agent 增强, 知识库集成、反思
-
-<br/>
-
-## 5、接下来还会发生什么?
-
-我所在的项目组(9个人，本硕都有)正在进行大量企业、个人走访和人岗数据收集及分析项目，在这个过程中获得的insight和数据会持续更新到这个项目中🧐。
-
-<br/>
-
-## 6、欢迎contribute
-
-欢迎任何形式的contribute，欢迎star、issue、pr😉。
-
-项目后端: nest(ts)，mysql、mongodb、redis，langchain、langgraph、copilotkit
-
-项目前端: react(ts)、vite、react-query、redux、tailwind
-
-1、monorepo + 全链路类型安全，清晰的dto、vo；
-2、清晰统一的响应和错误处理；
-3、清晰的模块划分、组件封装；
-
-<br/>
-
-## 7、声明
-
-1、[项目](https://github.com/weicanie/prisma-ai)提供的爬虫工具和相关功能仅限爬取完全公开且未设访问限制的数据，且禁止用于：
+1.  运行本项目产出的所有数据都应只作为参考和学习使用。
+2.  AI亦会犯错，请仔细甄别其生成结果的准确性。
+3.  [项目](https://github.com/weicanie/prisma-ai)提供的爬虫工具和相关功能仅限爬取完全公开且未设访问限制的数据，使用者需自行承担因使用不当而产生的任何法律风险，开发者概不负责。且禁止用于：
 
 - (1) 违反目标网站Robots协议或用户条款；
 - (2) 商业竞争、数据转售等牟利行为；
 - (3) 高频访问干扰网站正常运行。
-- (4) 任何违反中华人民共和国相关法律法规的行为，包括但不限于违反《中华人民共和国刑法》第二百八十五条、《中华人民共和国刑法》第二百八十六条、《中华人民共和国刑法》第二百五十三条、《民法总则》第111条、《反不正当竞争法》、《网络安全法》的任何行为。
-
-<br/>
-使用者需自行承担法律风险，开发者概不负责。
-
-<br/>
-
-2、运行本项目产出的所有数据都应该只作为参考和学习用。
-
-3、AI也会犯错, AI 生成结果请仔细甄别。
-
-<br/>
-
-## 8、欢迎加群交流
-
-930291816
-
-<img src="./images/readme/qq.jpg" alt="930291816" style="zoom: 25%;position:relative;left:0;" />
+- (4) 任何违反中华人民共和国相关法律法规的行为，包括但不限于违反《中华人民共和国刑法》、《民法总则》、《反不正当竞争法》、《网络安全法》的任何行为。
