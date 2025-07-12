@@ -1,6 +1,4 @@
-<div align="center">
 ![logo](images/readme/logo.png)
-</div>
 
 <div align="center">
 
