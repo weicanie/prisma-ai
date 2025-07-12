@@ -1,4 +1,6 @@
-![logo](images/readme/logo.png)
+<p align="center">
+<img src="https://github.com/weicanie/prisma-ai/blob/main/images/readme/logo.png" alt="Logo"/>
+</p>
 
 <div align="center">
 
