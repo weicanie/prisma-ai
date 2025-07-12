@@ -21,8 +21,7 @@ while true; do
     # 执行 git push 命令
     # 我们将所有输出（标准输出和标准错误）都重定向，以便脚本可以捕获它们
     # 同时在屏幕上显示它们
-    # git push
-    git push origin --tags
+    git push
     # pnpm exec lerna publish --conventional-commits 3.0.0
 
 
@@ -38,7 +37,7 @@ while true; do
         # 如果退出码非 0，表示 push 失败
         echo "❌ [尝试 #$count] Git push 失败，退出码: $exit_code"
         
-        # 当重试次数为3时，设置代理
+        # 当重试次数为3时，（重新）设置代理
         if [ $count -eq 3 ]; then
             echo "🔄 [尝试 #3] 失败，尝试切换代理..."
             git config --global https.proxy https://ghfast.top
