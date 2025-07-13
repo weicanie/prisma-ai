@@ -97,9 +97,9 @@ Prisma-AI 旨在解决求职者在准备简历和寻找工作时最头疼的**3�
     # 下载模型到本地
     git clone https://hf-mirror.com/moka-ai/m3e-base models/moka-ai/m3e-base
     # 配置python环境
-    ./python-setup.sh
+    ./scripts/python-setup.sh
     # 获取模型onnx文件
-    ./model-onnx.sh
+    ./scripts/model-onnx.sh
     ```
     > **注意**：您需要先将本地模型配置完毕,以在容器中使用模型。
 4.  **启动服务**
