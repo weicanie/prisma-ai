@@ -21,7 +21,7 @@ while true; do
     # 执行 git pull 命令
     # 我们将所有输出（标准输出和标准错误）都重定向，以便脚本可以捕获它们
     # 同时在屏幕上显示它们
-    git pull
+    git pull git@github.com:weicanie/prisma-ai.git
 
     # 获取 git pull 命令的退出码
     # $? 是一个特殊变量，它存储了上一个执行命令的退出状态

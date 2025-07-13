@@ -21,7 +21,7 @@ while true; do
     # 执行 git push 命令
     # 我们将所有输出（标准输出和标准错误）都重定向，以便脚本可以捕获它们
     # 同时在屏幕上显示它们
-    git push
+    git push git@github.com:weicanie/prisma-ai.git
     # pnpm exec lerna publish --conventional-commits 3.0.0
 
 
