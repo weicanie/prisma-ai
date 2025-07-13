@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.1](https://github.com/weicanie/prisma-ai/compare/v3.0.0...v3.0.1) (2025-07-13)
+
+### Bug Fixes
+
+- docker构建的要复制目录丢失问题 ([eeaeab4](https://github.com/weicanie/prisma-ai/commit/eeaeab490df9b5ea39dd1af684cc6da457930a44))
+- docker构建的要复制目录丢失问题 ([fceeaac](https://github.com/weicanie/prisma-ai/commit/fceeaac145874553b53e7b58dc4b52c92f674d1e))
+- tag v3.0.0 missed ([fbb9001](https://github.com/weicanie/prisma-ai/commit/fbb9001d089b80d655ef0930130b1f4e7f4d38d6))
+
+### Features
+
+- 完善文档和readme ([c76d584](https://github.com/weicanie/prisma-ai/commit/c76d5843ae7a4885faa3067dd4586269242da789))
+- v3.0.1 ([d9c8794](https://github.com/weicanie/prisma-ai/commit/d9c87943e80becfd365a55470dd0aa74548fc7da))
+
 **Note:** Version bump only for package root
 
 # [3.0.0](https://github.com/weicanie/prisma-ai/compare/v2.1.0...v3.0.0) (2025-07-11)
