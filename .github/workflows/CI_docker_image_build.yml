@@ -98,7 +98,7 @@ jobs:
           # Docker 构建上下文的路径，'.' 表示项目根目录。
           context: .
           # Dockerfile 的路径，优先使用手动输入的路径，如果未提供，则使用默认的后端 Dockerfile 路径。
-          file: ${{ github.event.inputs.dockerfile_path || './packages/backend/Dockerfile' }}
+          file: ${{ github.event.inputs.dockerfile_path || './packages/backend/Dockerfile.publish' }}
           # 多平台构建，为不同平台的用户提供适配的镜像
           platforms: linux/amd64,linux/arm64
           # 设置为 true，表示在构建成功后将镜像推送到 Docker Hub。
