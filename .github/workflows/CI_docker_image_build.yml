@@ -49,7 +49,7 @@ jobs:
         with:
           # 定义镜像的完整名称，格式为 '用户名/镜像名'
           # 如果是手动触发，使用输入的 image_name；否则，默认使用 'prisma-ai-backend'
-          images: weicanie/${{ github.event.inputs.image_name || 'prisma-ai-backend' }}
+          images: onlyie/${{ github.event.inputs.image_name || 'prisma-ai-backend' }}
           # 定义标签的生成规则，可以同时生成多个标签
           tags: |
             # type=schedule: 如果由定时任务触发，则生成 'nightly' 标签
