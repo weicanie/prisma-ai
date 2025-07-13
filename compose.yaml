@@ -31,6 +31,7 @@ services:
       - ./packages/backend/agent_output:/app/packages/backend/agent_output
       - ./packages/backend/prisma_agent_config.json:/app/packages/backend/prisma_agent_config.json
       - ./projects:/app/projects
+      - ./models:/app/models
   mysql-container:
     image: docker.1ms.run/library/mysql
     #占用的主机端口:网络内访问使用的端口

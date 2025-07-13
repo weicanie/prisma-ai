@@ -5,7 +5,7 @@ packages/backend/generated
 /docker-data
 **/*.log
 /nginx/logs/*
-/projects
+/projects/*
 
 # Node.js
 /node_modules
@@ -35,6 +35,6 @@ yarn-error.log*
 Thumbs.db
 
 # models
-/models
+/models/*
 
 .VSCodeCounter

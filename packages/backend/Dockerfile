@@ -26,10 +26,7 @@ RUN pnpm install --frozen-lockfile
 # 复制后端项目和共享包目录下所有文件（.dockerignore中忽略的文件不会被复制）
 COPY ./packages/backend ./packages/backend
 COPY ./packages/shared ./packages/shared
-# 复制本地部署模型要用到的文件
-COPY ./models ./models
-# 用户项目代码
-COPY ./projects ./projects
+
 
 # 首先构建共享包
 RUN pnpm --filter @prism-ai/shared build
@@ -55,8 +52,6 @@ RUN npm install -g pnpm@${PNPM_VERSION}
 COPY --from=builder /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml* ./
 COPY --from=builder /app/packages/backend/package.json ./packages/backend/
 COPY --from=builder /app/packages/shared/package.json ./packages/shared/
-# 复制模型文件
-COPY --from=builder /app/models ./models
 
 #只安装生产依赖
 RUN pnpm install --prod --frozen-lockfile
