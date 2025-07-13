@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 ARG NODE_VERSION=20.11.0
 ARG PNPM_VERSION=9.15.4
 
@@ -11,6 +13,9 @@ RUN npm install -g pnpm@${PNPM_VERSION}
 
 # 设置工作目录（容器内部）
 WORKDIR /app
+
+# 为 sharp 设置国内镜像源，解决下载超时问题
+# ENV SHARP_DIST_BASE_URL="https://npmmirror.com/mirrors/sharp-libvips"
 
 # COPY 电脑文件系统 容器文件系统
 # 复制整个monorepo的package.json和pnpm配置文件
@@ -67,12 +72,20 @@ COPY --from=builder /app/packages/backend/prisma ./packages/backend/prisma
 COPY --from=builder /app/packages/backend/ai_data ./packages/backend/ai_data
 # 启动脚本
 COPY --from=builder /app/packages/backend/scripts ./packages/backend/scripts
+COPY --from=builder /app/packages/backend/agent_output ./packages/backend/agent_output
+
+# 修复启动脚本可能的行结束符问题（Windows CRLF -> Unix LF）
+RUN sed -i 's/\r$//' /app/packages/backend/scripts/start.sh
+
+# 确保启动脚本有执行权限
+RUN chmod +x /app/packages/backend/scripts/start.sh
+
 # 生成 Prisma 客户端 (在启动命令中migrate)
 RUN pnpm --filter backend exec prisma generate
 
 # 将 /app/packages/backend目录及其所有内容的所有权递归地更改为 node 用户。
 # 解决权限问题，允许 node 用户写入 node_modules（用于Prisma引擎）和 logs 等目录。
-RUN chown -R node:node /app/packages/backend
+RUN chown -R node:node /app
 
 # 切换到非root用户
 USER node
@@ -80,5 +93,8 @@ USER node
 # 暴露后端服务端口
 EXPOSE 3003
 
-# 启动服务
+# 启动服务 - 方案1：使用shell脚本
 CMD ["/app/packages/backend/scripts/start.sh"]
+
+# 启动服务 - 方案2：直接执行命令
+# CMD ["sh", "-c", "cd /app && pnpm --filter backend exec prisma migrate deploy && node /app/packages/backend/dist/main.js"]

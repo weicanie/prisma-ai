@@ -1,0 +1,26 @@
+# push和PR合并前检查docker能否成功构建
+name: CI - Test Docker Build
+
+on:
+  push:
+    branches:
+      - '**' # 当有代码推送到任何分支时触发（包括 PR 合并）
+  pull_request:
+    branches:
+      - '**' # 当有 PR 创建或更新时触发，用于合并前检查
+
+jobs:
+  test-docker-build:
+    name: Test Docker Image Build
+    runs-on: ubuntu-latest
+    steps:
+      # 步骤1：检出代码
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 步骤2：使用 docker-compose 构建所有服务
+      # 这个步骤会读取根目录的 compose.yaml 文件，
+      # 并构建其中定义的所有服务（如 prisma-ai-backend 和 nginx-container），
+      # 这是测试多服务 Docker 配置是否正确的最佳方式。
+      - name: Build Docker images with compose
+        run: docker compose build --no-cache --progress=plain

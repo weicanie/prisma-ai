@@ -1,0 +1,114 @@
+services:
+  prisma-ai-backend:
+    # 生产环境：从 Docker Hub 拉取镜像
+    image: weicanie/prisma-ai-backend:latest
+    depends_on:
+      # mysql经常需要启动好几次才能成功,得在它启动成功后再启动服务
+      mysql-container:
+        condition: service_healthy
+      redis-container:
+        condition: service_healthy
+      mongo-container:
+        condition: service_healthy
+      minio-container:
+        condition: service_healthy
+    restart: unless-stopped
+    container_name: backend
+    # 将指定的文件的环境变量加载到容器中
+    env_file:
+      - ./packages/backend/.env
+      - ./packages/backend/.env.production
+    environment:
+      NODE_ENV: production
+      MONGO_HOST: mongo-container
+      # 覆盖env_file中的同名环境变量
+      DATABASE_URL: mysql://root:qwqw1314.@mysql-container:3306/prisma-ai
+    ports:
+      - '3003:3003'
+    volumes:
+      - ./docker-data/nest-app/logs:/app/packages/backend/logs
+      - ./packages/backend/agent_output:/app/packages/backend/agent_output
+      - ./packages/backend/prisma_agent_config.json:/app/packages/backend/prisma_agent_config.json
+      - ./projects:/app/projects
+      - ./models:/app/models
+  mysql-container:
+    image: docker.1ms.run/library/mysql
+    #占用的主机端口:网络内访问使用的端口
+    ports:
+      - '3308:3306'
+      # 目录内不能有文件,否则报错
+    volumes:
+      - ./docker-data/mysql:/var/lib/mysql
+    environment:
+      # 初始数据库
+      MYSQL_DATABASE: prisma-ai
+      MYSQL_ROOT_PASSWORD: qwqw1314.
+      # 允许任何主机连接
+      MYSQL_ROOT_HOST: '%'
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  redis-container:
+    image: docker.1ms.run/library/redis
+    ports:
+      - '6377:6379'
+    volumes:
+      - ./docker-data/redis:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  mongo-container:
+    image: docker.1ms.run/library/mongo
+    ports:
+      - '27018:27017'
+    volumes:
+      - ./docker-data/mongo:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  minio-container:
+    image: docker.1ms.run/bitnami/minio:2025.4.3
+    ports:
+      - '9003:9000'
+      - '9004:9001'
+    volumes:
+      - ./docker-data/minio:/bitnami/minio/data
+    restart: unless-stopped
+    user: root
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: admin123.
+      MINIO_DEFAULT_BUCKETS: prisma-ai
+    command: server /bitnami/minio/data --console-address :9001
+  nginx-container:
+    build:
+      context: .
+      dockerfile: ./packages/frontend/Dockerfile
+    ports:
+      - '80:80' # HTTP
+      # HTTPS (如需启用)
+      # - '443:443' 
+    volumes:
+      - ./nginx/logs:/var/log/nginx # Nginx 日志
+      # 如果启用 HTTPS，还需要
+      # - ./nginx/ssl:/etc/nginx/ssl
+    restart: unless-stopped
+    depends_on:
+      - prisma-ai-backend
+      - minio-container
+    
+#使用默认桥接网络

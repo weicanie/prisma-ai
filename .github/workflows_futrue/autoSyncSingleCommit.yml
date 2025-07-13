@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: IGNORE autoSyncSingleCommit # 步骤名称：忽略自动同步
         run: |
-          echo This single commit has came from a merged commit. We will ignore it. This case is handled in autoSyncMergedPullRequest workflow for merge commits comming from merged pull requests only! Beware, the regular merge commits are not handled by any workflow for the moment.
+          此单次提交源自一个合并提交。我们将忽略它。这种情况仅在“autoSyncMergedPullRequest”工作流中针对来自合并PR的合并提交进行处理！请注意，目前常规的合并提交并未由任何工作流进行处理。
 
   # 作业2：处理单个提交的推送
   autoSyncSingleCommit:

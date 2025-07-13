@@ -16,17 +16,15 @@ jobs:
       matrix:
         # 定义构建矩阵，尽管这里只有一个组合，但这种写法方便未来扩展
         platform: [ubuntu-latest] # 运行平台
-        node-version: [18.15.0] # Node.js 版本
+        node-version: [20.11.0] # Node.js 版本
     runs-on: ${{ matrix.platform }} # 从矩阵中获取运行平台
-    env:
-      PUPPETEER_SKIP_DOWNLOAD: true # 设置环境变量，跳过 Puppeteer 的下载（如果 Cypress 依赖了它）
     steps:
       # 步骤1：检出代码
       - uses: actions/checkout@v4
       # 步骤2：设置 pnpm 包管理器
       - uses: pnpm/action-setup@v3
         with:
-          version: 9.0.4 # 指定 pnpm 版本
+          version: 9.15.0 # 指定 pnpm 版本
       # 步骤3：设置 Node.js 环境
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4

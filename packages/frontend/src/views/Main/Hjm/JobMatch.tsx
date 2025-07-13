@@ -21,7 +21,7 @@ import Resumes from '../Resumes';
 
 interface PolledTask {
 	id: string;
-	status: 'pending' | 'processing' | 'completed' | 'failed';
+	status: 'pending' | 'processing' | 'completed' | 'failed' | 'running';
 	progress?: number;
 	error?: string;
 }
@@ -38,7 +38,7 @@ function useTaskPolling(taskId: string | null) {
 				const response = await getTaskResult(taskId);
 				if (response.code === '0') {
 					const { task, result: taskResult } = response.data;
-					setTaskData(task);
+					setTaskData(task as PolledTask);
 					if (task.status === 'completed') {
 						setResult(taskResult || []);
 						clearInterval(interval);
@@ -104,7 +104,7 @@ export function JobMatch() {
 		}
 	};
 
-  //添加选择列
+	//添加选择列
 	const ResumeProps = {
 		selectColShow: true,
 		//将选中状态存储到store
@@ -121,81 +121,84 @@ export function JobMatch() {
 	};
 
 	return (
-		<>		
-				<PageHeader
-					title={ '简历匹配岗位'}
-					description={'通过相似性检索，将您的简历与岗位数据进行匹配'}
-				></PageHeader>
-		<div className="space-y-6 p-4 md:p-10 pb-16">
-			<Card className='bg-background/50'>
-				<CardHeader>
-					<CardTitle>简历匹配岗位</CardTitle>
-					<CardDescription>
-						选择一份简历后，系统将根据简历内容，在已获取的岗位数据中进行检索和重排，返回最匹配的岗位列表。
-					</CardDescription>
-					{resumeIdToMatch ? (
-						<p className="text-sm text-green-600">已选择简历ID: {resumeIdToMatch}</p>
-					) : (
-						<p className="text-sm text-yellow-600">请先选择一份用于匹配的简历。</p>
-					)}
-				</CardHeader>
-				<CardContent className="space-y-4">
-					<div className="grid w-full max-w-sm items-center gap-1.5">
-						<Label htmlFor="topK">召回数量 (Top K)</Label>
-						<Input
-							id="topK"
-							name="topK"
-							type="number"
-							value={matchInputs.topK}
-							onChange={handleInputChange}
-						/>
-					</div>
-					<div className="grid w-full max-w-sm items-center gap-1.5">
-						<Label htmlFor="rerankTopN">重排数量 (Top N)</Label>
-						<Input
-							id="rerankTopN"
-							name="rerankTopN"
-							type="number"
-							value={matchInputs.rerankTopN}
-							onChange={handleInputChange}
-						/>
-					</div>
-				</CardContent>
-				<CardFooter>
-					<Button onClick={handleStartMatch} disabled={!resumeIdToMatch || (!!matchTaskId && taskData?.status !== 'completed' && taskData?.status !== 'failed')}>
-						开始匹配
-					</Button>
-				</CardFooter>
-				{taskData && (
-					<CardContent>
-						<p className="text-sm font-medium">匹配任务进度</p>
-						<p className="text-sm text-muted-foreground">状态: {taskData.status}</p>
-						{taskData.error && <p className="text-sm text-destructive">错误: {taskData.error}</p>}
-					</CardContent>
-				)}
-			</Card>
-
-			{result && (
-				<Card className='bg-background/50'>
+		<>
+			<PageHeader
+				title={'简历匹配岗位'}
+				description={'通过相似性检索，将您的简历与岗位数据进行匹配'}
+			></PageHeader>
+			<div className="space-y-6 p-4 md:p-10 pb-16">
+				<Card className="bg-background/50">
 					<CardHeader>
-						<CardTitle>匹配结果</CardTitle>
+						<CardTitle>简历匹配岗位</CardTitle>
+						<CardDescription>
+							选择一份简历后，系统将根据简历内容，在已获取的岗位数据中进行检索和重排，返回最匹配的岗位列表。
+						</CardDescription>
+						{resumeIdToMatch ? (
+							<p className="text-sm text-green-600">已选择简历ID: {resumeIdToMatch}</p>
+						) : (
+							<p className="text-sm text-yellow-600">请先选择一份用于匹配的简历。</p>
+						)}
 					</CardHeader>
 					<CardContent className="space-y-4">
-						{result.length > 0 ? (
-							result.map(job => (
-								<JobCard key={job.id} jobData={job} addBtn={true}></JobCard>
-							))
-						) : (
-							<p>未找到匹配的岗位。</p>
-						)}
+						<div className="grid w-full max-w-sm items-center gap-1.5">
+							<Label htmlFor="topK">召回数量 (Top K)</Label>
+							<Input
+								id="topK"
+								name="topK"
+								type="number"
+								value={matchInputs.topK}
+								onChange={handleInputChange}
+							/>
+						</div>
+						<div className="grid w-full max-w-sm items-center gap-1.5">
+							<Label htmlFor="rerankTopN">重排数量 (Top N)</Label>
+							<Input
+								id="rerankTopN"
+								name="rerankTopN"
+								type="number"
+								value={matchInputs.rerankTopN}
+								onChange={handleInputChange}
+							/>
+						</div>
 					</CardContent>
+					<CardFooter>
+						<Button
+							onClick={handleStartMatch}
+							disabled={
+								!resumeIdToMatch ||
+								(!!matchTaskId && taskData?.status !== 'completed' && taskData?.status !== 'failed')
+							}
+						>
+							开始匹配
+						</Button>
+					</CardFooter>
+					{taskData && (
+						<CardContent>
+							<p className="text-sm font-medium">匹配任务进度</p>
+							<p className="text-sm text-muted-foreground">状态: {taskData.status}</p>
+							{taskData.error && <p className="text-sm text-destructive">错误: {taskData.error}</p>}
+						</CardContent>
+					)}
 				</Card>
-			)}
-		</div>
 
-		<Resumes {...ResumeProps}></Resumes>
+				{result && (
+					<Card className="bg-background/50">
+						<CardHeader>
+							<CardTitle>匹配结果</CardTitle>
+						</CardHeader>
+						<CardContent className="space-y-4">
+							{result.length > 0 ? (
+								result.map(job => <JobCard key={job.id} jobData={job} addBtn={true}></JobCard>)
+							) : (
+								<p>未找到匹配的岗位。</p>
+							)}
+						</CardContent>
+					</Card>
+				)}
+			</div>
+
+			<Resumes {...ResumeProps}></Resumes>
 		</>
-
 	);
 }
 
