@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.1.0](https://github.com/weicanie/prisma-ai/compare/v3.0.1...v3.1.0) (2025-07-13)
+
+### Bug Fixes
+
+- dockerfile for publish ([423d696](https://github.com/weicanie/prisma-ai/commit/423d696de05e4667d5f89517474d5efe2b527dba))
+- dockerfile for publish ([c55e680](https://github.com/weicanie/prisma-ai/commit/c55e680ec391467d94ccb665c47ded52da63cf9e))
+- fix CI ([7c887d9](https://github.com/weicanie/prisma-ai/commit/7c887d99332109a4875b1f55e521e21958188ff6))
+- update CI_docker_image_build.yml ([9be4bac](https://github.com/weicanie/prisma-ai/commit/9be4baca30d1634cb0c9dae50d4edf718b76708b))
+
+### Features
+
+- 完善CI流程 ([bfdee36](https://github.com/weicanie/prisma-ai/commit/bfdee365ad8c7d3d44d9cee71f56c7ff99683ae1))
+- 修复并升级项目的CI/CD ([39e4148](https://github.com/weicanie/prisma-ai/commit/39e4148b19c053ed040efee06a1dff868188f92c))
+
 ## [3.0.1](https://github.com/weicanie/prisma-ai/compare/v3.0.0...v3.0.1) (2025-07-13)
 
 ### Bug Fixes

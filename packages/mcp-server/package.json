@@ -1,6 +1,6 @@
 {
 	"name": "mcp-server",
-	"version": "3.0.1",
+	"version": "3.1.0",
 	"private": true,
 	"scripts": {
 		"dev": "uv run start",
