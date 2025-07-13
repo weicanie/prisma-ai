@@ -105,7 +105,7 @@ Prisma-AI 旨在解决求职者在准备简历和寻找工作时最头疼的**3�
 4.  **启动服务**
     ```bash
     # 在仓库根目录执行
-    docker compose -f compose.yaml up --build
+    docker compose -f compose.prod.yaml up --build
     ```
 5.  浏览器访问 `http://localhost` 即可使用!
 

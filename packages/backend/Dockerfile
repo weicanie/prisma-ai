@@ -85,7 +85,7 @@ RUN pnpm --filter backend exec prisma generate
 
 # 将 /app/packages/backend目录及其所有内容的所有权递归地更改为 node 用户。
 # 解决权限问题，允许 node 用户写入 node_modules（用于Prisma引擎）和 logs 等目录。
-RUN chown -R node:node /app
+RUN chown -R node:node /app/packages/backend
 
 # 切换到非root用户
 USER node
@@ -94,7 +94,7 @@ USER node
 EXPOSE 3003
 
 # 启动服务 - 方案1：使用shell脚本
-CMD ["/app/packages/backend/scripts/start.sh"]
+CMD ["bash", "/app/packages/backend/scripts/start.sh"]
 
 # 启动服务 - 方案2：直接执行命令
 # CMD ["sh", "-c", "cd /app && pnpm --filter backend exec prisma migrate deploy && node /app/packages/backend/dist/main.js"]

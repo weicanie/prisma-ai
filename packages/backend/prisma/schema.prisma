@@ -88,7 +88,9 @@ model project_file {
   user_project    user_project         @relation(fields: [user_project_id], references: [id], onDelete: Cascade)
   chunks          project_file_chunk[]
 
-  @@unique([user_project_id, file_path])
+  // 在复合唯一索引中，只使用 file_path 字段的前 255 个字符来创建索引。
+  // 这样既保留了字段的完整长度，又解决了索引超长的问题。
+  @@unique([user_project_id, file_path(length: 255)])
 }
 
 //知识库中的项目文件块

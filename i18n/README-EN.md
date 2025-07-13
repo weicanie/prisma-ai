@@ -1,145 +1,184 @@
-![logo](../images/readme/logo.png)
+<p align="center">
+<img src="https://github.com/weicanie/prisma-ai/blob/main/images/readme/logo.png" alt="Logo"/>
+</p>
 
-# prisma-ai: Free & Open Source, One-Stop Solution for Resume Optimization and Job Matching
+<div align="center">
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](...)
+# Prisma-AI: Your AI Career Co-pilot
 
-[简体中文](../README.md) | English
+An open-source, free AI Career co-pilot that automates the entire process from resume preparation to receiving an offer. It optimizes your projects, customizes your resume, matches you with jobs, and helps you prepare for interviews.
 
-## ⚡Quick Start
+</div>
 
-```bash
-# Clone the repository
-git clone https://github.com/weicanie/prisma-ai.git
+<p align="center">
+  <a href="https://github.com/weicanie/prisma-ai/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License">
+  </a>
+  <a href="https://github.com/weicanie/prisma-ai/issues">
+    <img src="https://img.shields.io/github/issues/weicanie/prisma-ai.svg" alt="Issues">
+  </a>
+  <a href="https://github.com/weicanie/prisma-ai/stargazers">
+    <img src="https://img.shields.io/github/stars/weicanie/prisma-ai.svg" alt="Stars">
+  </a>
+  <a href="#">
+    <img src="https://img.shields.io/badge/QQ%20Group-930291816-green.svg" alt="QQ Group">
+  </a>
+</p>
 
-# Install dependencies
-pnpm install
-```
+<p align="center">
+  <a href="../README.md">简体中文</a> | <a href="README-EN.md">English</a>
+</p>
 
-Then navigate to packages/backend and configure the environment variables in .env and .env.development.
-Next, configure the models for job matching:
+---
 
-```bash
-# Download models locally
-git clone https://hf-mirror.com/moka-ai/m3e-base models/moka-ai/m3e-base
-# Set up Python environment
-./python-setup.sh
-# Get model ONNX files
-./model-onnx.sh
-```
+## 🎯 Core Value
 
-```bash
-# Start the project (run from repository root)
-pnpm run dev
-```
+Prisma-AI aims to solve the **3 biggest headaches** job seekers face when preparing resumes and searching for jobs:
 
-## 🐳 Docker
+1.  **Mediocre Project Experience**: Merely listing technologies and basic business logic, lacking depth and highlights.
+    - **Solution**: The AI Agent not only deeply analyzes and optimizes your project descriptions to unearth potential highlights but can also **directly plan and implement these highlights for you**, transforming your project experience.
+2.  **Resume-Job Mismatch**: Sending out generic resumes feels like casting a net into the ocean, resulting in few interview opportunities.
+    - **Solution**: Using a built-in crawler and local AI models, it accurately matches you with the most suitable positions and **tailors your resume for each job**, significantly increasing your interview success rate.
+3.  **Endless Rote Memorization**: Inefficiently cramming and forgetting technical interview questions.
+    - **Solution**: Deep integration with professional front-end and back-end question banks, the learning tool Anki, and mind maps to facilitate true understanding and retention, helping you master the key concepts.
 
-```bash
-# Clone the repository
-git clone https://github.com/weicanie/prisma-ai.git
-```
+---
 
-Then navigate to packages/backend and configure the environment variables in .env and .env.production.
-Next, configure the models for job matching:
+## ✨ Features
 
-```bash
-# Download models locally
-git clone https://hf-mirror.com/moka-ai/m3e-base models/moka-ai/m3e-base
-# Set up Python environment
-./python-setup.sh
-# Get model ONNX files
-./model-onnx.sh
-```
+| Module                                      | Functionality                                                                                                    |
+| :------------------------------------------ | :--------------------------------------------------------------------------------------------------------------- |
+| **🤖 AI Core**                              | Built on a `Planer-Executor` + `CRAG` + `Human-in-the-loop` architecture for exceptional complex task execution. |
+|                                             | Deeply integrates with user's project code and domain knowledge bases to provide precise context.                |
+|                                             | Supports multiple rounds of user feedback and reflection to continuously improve output quality.                 |
+| **📄 Resume Optimization & Implementation** | AI performs in-depth analysis, optimization, and highlight mining.                                               |
+|                                             | AI Agent **implements** project highlights and features.                                                         |
+| **💼 Job Matching & Tailoring**             | Built-in crawler gathers massive job data in real-time.                                                          |
+|                                             | AI uses efficient vector search, reranking, and deep analysis to find jobs that perfectly match your profile.    |
+|                                             | AI optimizes and customizes your resume for target positions.                                                    |
+| **📚 Efficient Learning & Interview Prep**  | Integrated with professional front-end and back-end interview question banks.                                    |
+|                                             | Works with `Anki` and `Mind Maps` to create the most efficient learning path for interviews.                     |
+| **📦 Easy Deployment**                      | Provides one-click deployment with `Docker` for a zero-configuration start.                                      |
 
-Note: You need to configure the local models first to use them in the container
+---
 
-```bash
-# Build and start services (run from repository root)
-docker compose -f compose.yaml up --build
-```
+## 📚 Documentation
 
-Then visit localhost in your browser to start using the application!
+We have prepared detailed documentation to help you get started with Prisma-AI quickly.
 
-## 1. Core Value & Pain Points Solved
+| Category              | Document                                                                                                                          |
+| :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
+| **🚀 Quick Start**    | [5-Minute Environment Setup](../doc/教程：1、环境配置.md)                                                                         |
+|                       | [3-Minute Personal Knowledge Base Setup](../doc/教程：2、知识库构建.md)                                                           |
+| **💡 Core Workflows** | [2-Minute Guide to Project Experience Analysis, Optimization & Highlight Mining](../doc/教程：3、项目经验分析、优化、亮点挖掘.md) |
+|                       | [2-Minute Guide to Implementing Project Highlights with AI Agent](../doc/教程：4、项目亮点实现.md)                                |
+|                       | [5-Minute Guide to Finding Your Perfect Job Match](../doc/教程：5、获取匹配自己的岗位.md)                                         |
+|                       | [3-Minute Guide to Customizing Your Resume for Target Jobs](../doc/教程：6、面向岗位定制简历.md)                                  |
+|                       | [5-Minute Guide to Using the Interview Bank with Anki Integration](../doc/教程：7、面试题库和%20anki集成教程.md)                  |
+| **🤔 Methodology**    | [How to Write a Great Technical Resume](../doc/方法论：1、简历应该怎么写.md)                                                      |
+|                       | [Why and How to Use Anki for Efficient Learning](../doc/方法论：2、为什么以及如何使用%20anki.md)                                  |
+|                       | [Limitations of AI Tools like Cursor and How to Overcome Them](../doc/方法论：3、cursor等AI%20编程工具的局限性及克服.md)          |
 
-**Pain Point 1**: Project experience lacks highlights, only lists common technologies and business logic 😤  
-**Solution**: DeepSeek-R1 performs in-depth analysis and improvement, deeply mining highlights 👌
+---
 
-**Pain Point 2**: Mass resume submissions without job matching, sending thousands with few interviews! 😤  
-**Solution 1**: DeepSeek-R1 customizes resumes for specific positions, making them more targeted and relevant 👌  
-**Solution 2**: Crawl job data from recruitment websites, use SBERT model + DeepSeek-V3 for job-candidate matching 👌
+## 🚀 Quick Start
 
-**Pain Point 3**: Too many interview questions to memorize, forget after learning, learn after forgetting 😤  
-**Solution 1**: Crawl interview question data, extend details based on resume, match relevant questions 👌 (since interviewers usually chat based on your resume, though basic knowledge must be solid)  
-**Solution 2**: Anki-style scientific review system, Feynman learning method to tackle difficult concepts 👌 (with LLM assistance)
+### 🐳 Docker (Recommended)
 
-## 2. Can You Use It Right Now?
+1.  **Clone the Repository**
+    ```bash
+    git clone https://github.com/weicanie/prisma-ai.git
+    cd prisma-ai
+    ```
+2.  **Configure Environment**
+    - [5-Minute Environment Setup](../doc/教程：1、环境配置.md)
+3.  **Configure Local Model** (for job matching)
+    ```bash
+    # Download the model locally
+    git clone https://hf-mirror.com/moka-ai/m3e-base models/moka-ai/m3e-base
+    # Set up the Python environment
+    ./scripts/python-setup.sh
+    # Get the model's ONNX file
+    ./scripts/model-onnx.sh
+    ```
+    > **Note**: You need to configure the local model before using it inside the container.
+4.  **Start the Services**
+    ```bash
+    # Execute from the repository root
+    docker compose -f compose.prod.yaml up --build
+    ```
+5.  Open your browser and navigate to `http://localhost` to start using it!
 
-Yes, absolutely yes.
+### 👨‍💻 Local Development
 
-Free and open source, continuously updated.  
-Project repository: [GitHub Link]
+1.  **Clone and Install Dependencies**
+    ```bash
+    git clone https://github.com/weicanie/prisma-ai.git
+    cd prisma-ai
+    pnpm install
+    ```
+2.  **Configure Environment**
+    [5-Minute Environment Setup](../doc/教程：1、环境配置.md)
+3.  **Configure Local Model** (Same as Docker steps)
+4.  Ensure the following services are available locally or via containers:
+    - mysql (latest container)
+    - redis (latest container)
+    - mongodb (latest container)
+    - minio (2025.4.3 bitnami/minio container)
+5.  **Start the Project**
+    ```bash
+    # Execute from the repository root
+    pnpm run dev
+    ```
 
-Demo website: ICP filing approved, currently undergoing public security filing.
+---
 
-One-command Docker build and start 🥰.  
-Zero configuration except for your DeepSeek and other API keys.
+## 🗺️ Roadmap
 
-Also supports local Node.js environment startup.
+- [ ] **Deeper Agent Integration**: Deep integration with `Cursor` to reuse tools and models for information search, code retrieval, etc.
+- [ ] **AI Mock Interviews**: Based on the Feynman learning technique, conduct mock interviews using the Agent and knowledge base, focusing on mastering interview questions, project highlights, and key assessment points for target positions.
 
-If this helps you, please give it a star, it really means a lot to me 😉.
+---
 
-Welcome to submit issues and feature requests, I'll implement anything 🥺.
+## 🛠️ Tech Stack
 
-## 3. How Is the Core Value Implemented?
+| Category     | Technology                                          |
+| :----------- | :-------------------------------------------------- |
+| **Frontend** | `React ` `Vite` `React-Query` `Redux` `TailwindCSS` |
+| **Backend**  | `Nest.js ` `MySQL` `MongoDB` `Redis`                |
+| **AI Core**  | `LangChain` `LangGraph` `fastmcp` `CopilotKit`      |
+| **DevOps**   | `Docker` `Nginx` `Github Action`                    |
 
-1. Excellent resume quality metrics and process design, inspired by a teacher whose name starts with 'C', specifically designed for IT positions. I mainly abstracted the entire process into prompts and further extended it 🧐.
+---
 
-2. Primarily based on DeepSeek R1 5/28, high-quality prompts, full-process data structuring, high-quality output 🤩.
+## 🤝 Contributing
 
-3. Built-in crawler to scrape job data from Boss Zhipin, using SBERT dual-tower model for recall and LLM for reranking 🥴.
+We warmly welcome all forms of contributions! If you are interested in this project, you can get involved in the following ways:
 
-4. Learning path generation (offer-oriented learning), project highlight implementation (current approach reads your codebase, understands it, then generates solutions as prompts and context for professional code generation tools like Cursor and Windsurf - specialization and no reinventing the wheel)
+- ⭐ Give the project a **Star**!
+- 🤔 Ask questions or make suggestions in **Issues**.
+- 💡 Submit a **Pull Request** to improve the code or documentation.
 
-## 4. Current Project Progress
+We believe that with the power of the community, we can make Prisma-AI even better.
 
-1. (✓) Project experience analysis, optimization, and highlight mining
-2. (✓) Resume customization based on job requirements
-3. (✓) Built-in crawler for job data scraping (tested with ~2000 entries, IP got blocked for a day 😂, sad, now greatly improved disguise but not yet tested)
-4. (✓) Local deployment of SBERT model for job information embedding, Pinecone database for job information recall, LLM for reranking and analysis
-5. ( ) Frontend implementation for job matching
-   ...
+---
 
-## 5. What's Coming Next?
+## 💬 Join the Community
 
-My project team (9 people, both undergrad and grad students) is conducting extensive enterprise and individual interviews and job-candidate data collection and analysis. The insights and data gained from this process will be continuously updated to this project 🧐.
+Feel free to join our QQ group to communicate, discuss, and grow together!
 
-## 6. Welcome to Contribute
+**Group Number: 930291816**
 
-Welcome any form of contribution, welcome stars, issues, and PRs 😉.
+<img src="../images/readme/qq.jpg" alt="QQ Group: 930291816" style="width:200px;" />
 
-**Backend**: Nest.js (TypeScript), MySQL, MongoDB, Redis, LangChain, CopilotKit
+---
 
-**Frontend**: React (TypeScript), Vite, React-Query, Redux, Tailwind
+## ⚖️ Disclaimer
 
-1. Full-stack type safety with DTOs and VOs
-2. Clear and unified response handling and full-stack error handling
-3. Clear module separation and component encapsulation
-
-## 7. Welcome to Join Our Discussion Group
-
-QQ Group: 930291816
-
-<img src="../images/readme/qq.jpg" alt="930291816" style="zoom: 25%;position:relative;left:0;" />
-
-## 8. Disclaimer
-
-I oppose any form of resume fraud. Any data generated by running this project should only be used for reference and learning path planning.
-
-## 9. F&Q
-
-**Q1: What's the project's goal?**  
-The most effective one-stop IT employment solution.
-
-The project will add more customization features in the future, such as integrating Flowise for visual workflow customization. Also MCP functionality (which is already well-supported).
+1.  All data generated by this project should be used for reference and learning purposes only.
+2.  AI can make mistakes. Please carefully verify the accuracy of its generated results.
+3.  The crawler tools and related functions provided by the [project](https://github.com/weicanie/prisma-ai) are intended only for crawling publicly available data without access restrictions. Users are solely responsible for any legal risks arising from improper use; the developers assume no liability. It is prohibited to use them for:
+    - (1) Violating the target website's Robots protocol or user terms;
+    - (2) Commercial competition, data resale, or other profit-seeking activities;
+    - (3) High-frequency access that interferes with the normal operation of the website.
+    - (4) Any behavior that violates the relevant laws and regulations of the People's Republic of China.
