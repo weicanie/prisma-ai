@@ -12,6 +12,7 @@ assignees: ''
 **如何复现**
 复现此行为的步骤：
 比如
+
 1. 前往 '...'
 2. 点击 '....'
 3. 向下滚动到 '....'
@@ -25,10 +26,10 @@ assignees: ''
 
 **配置**
 
--   安装方式 [例如 docker, `pnpm dev`]
--   Prisma-AI 版本 [例如 1.2.11]
--   操作系统: [例如 macOS, Windows, Linux]
--   浏览器 [例如 chrome, safari]
+- 安装方式 [例如 docker, `pnpm dev`]
+- Prisma-AI 版本 [例如 3.1.1]
+- 操作系统: [例如 macOS, Windows, Linux]
+- 浏览器 [例如 chrome, safari]
 
 **其他信息**
 在此处添加有关问题的任何其他上下文。

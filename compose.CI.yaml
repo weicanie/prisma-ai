@@ -2,7 +2,7 @@ services:
   prisma-ai-backend:
     build:
       context: .
-      dockerfile: ./packages/backend/Dockerfile
+      dockerfile: ./packages/backend/Dockerfile.CI
     depends_on:
       # mysql经常需要启动好几次才能成功,得在它启动成功后再启动服务
       mysql-container:
@@ -33,7 +33,7 @@ services:
       - ./projects:/app/projects
       - ./models:/app/models
   mysql-container:
-    image: docker.1ms.run/library/mysql
+    image: library/mysql
     #占用的主机端口:网络内访问使用的端口
     ports:
       - '3308:3306'
@@ -53,7 +53,7 @@ services:
       timeout: 5s
       retries: 5
   redis-container:
-    image: docker.1ms.run/library/redis
+    image: library/redis
     ports:
       - '6377:6379'
     volumes:
@@ -65,7 +65,7 @@ services:
       timeout: 5s
       retries: 5
   mongo-container:
-    image: docker.1ms.run/library/mongo
+    image: library/mongo
     ports:
       - '27018:27017'
     volumes:
@@ -77,7 +77,7 @@ services:
       timeout: 5s
       retries: 5
   minio-container:
-    image: docker.1ms.run/bitnami/minio:2025.4.3
+    image: bitnami/minio:2025.4.3
     ports:
       - '9003:9000'
       - '9004:9001'

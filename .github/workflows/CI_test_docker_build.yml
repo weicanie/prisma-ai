@@ -19,8 +19,8 @@ jobs:
         uses: actions/checkout@v4
 
       # 步骤2：使用 docker-compose 构建所有服务
-      # 这个步骤会读取根目录的 compose.yaml 文件，
+      # 这个步骤会读取根目录的 compose.CI.yaml 文件，
       # 并构建其中定义的所有服务（如 prisma-ai-backend 和 nginx-container），
       # 这是测试多服务 Docker 配置是否正确的最佳方式。
       - name: Build Docker images with compose
-        run: docker compose build --no-cache --progress=plain
+        run: docker compose build -f compose.CI.yaml --no-cache --progress=plain
