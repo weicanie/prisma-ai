@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.1.3](https://github.com/weicanie/prisma-ai/compare/v3.1.2...v3.1.3) (2025-07-14)
+
+### Bug Fixes
+
+- nginx容器错误 ([6fa8e73](https://github.com/weicanie/prisma-ai/commit/6fa8e73b53f1f55be35bd0ef0a85a55a17bac731))
+
+### Features
+
+- 简化部署，修复一些页面的黑屏问题 ([85c7882](https://github.com/weicanie/prisma-ai/commit/85c78827bc52fa8fd5bc0276694c78a35a31ab45))
+
 ## [3.1.1](https://github.com/weicanie/prisma-ai/compare/v3.1.0...v3.1.1) (2025-07-14)
 
 ### Bug Fixes
