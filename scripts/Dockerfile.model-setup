@@ -5,10 +5,10 @@ FROM docker.1ms.run/python:3.9-slim
 WORKDIR /app
 
 # 复制依赖清单到工作目录
-COPY ./scripts/requirements.txt .
+COPY ./requirements.txt .
 
 # 复制模型转换脚本到工作目录，并赋予执行权限
-COPY ./scripts/model-onnx.sh .
+COPY ./model-onnx.sh .
 RUN chmod +x ./model-onnx.sh
 
 # 安装依赖

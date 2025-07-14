@@ -26,11 +26,11 @@ echo "模型输入路径 (容器内): $INPUT_MODEL_PATH"
 echo "模型输出路径 (容器内): $OUTPUT_ONNX_PATH"
 
 # 检查输入模型路径是否存在
-# if [ ! -d "$INPUT_MODEL_PATH" ]; then
-#     echo "错误: 输入模型路径 '$INPUT_MODEL_PATH' 不存在。"
-#     echo "请确认您已将 'm3e-base' 模型文件放置在项目根目录下的 'models/moka-ai/' 目录中。"
-#     exit 1
-# fi
+if [ ! -d "$INPUT_MODEL_PATH" ]; then
+    echo "错误: 输入模型路径 '$INPUT_MODEL_PATH' 不存在。"
+    echo "请确认您已将 'm3e-base' 模型文件放置在项目根目录下的 'models/moka-ai/' 目录中。"
+    exit 1
+fi
 
 # 创建输出目录（如果不存在）
 mkdir -p $OUTPUT_ONNX_PATH

@@ -6,48 +6,60 @@ import { defineConfig } from 'vite';
 // https://vite.dev/config/
 export default defineConfig({
 	plugins: [tailwindcss(), react()],
-	build: {
-		rollupOptions: {
-			output: {
-				manualChunks: {
-					'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-					'antd-vendor': ['antd'],
-					'antd-icon-vendor': ['@ant-design/icons'],
-					'antd-x-vendor': ['@ant-design/x'],
-					'copilotkit-core-vendor': ['@copilotkit/react-core'],
-					'copilotkit-ui-vendor': ['@copilotkit/react-ui'],
-					'milkdown-vendor': [
-						'@milkdown/core',
-						'@milkdown/react',
-						'@milkdown/crepe',
-						'@milkdown/preset-commonmark',
-						'@milkdown/preset-gfm',
-						'@milkdown/plugin-collab',
-						'@milkdown/plugin-listener',
-						'@milkdown/theme-nord',
-						'@milkdown/utils',
-						'@milkdown/ctx'
-					],
-					'radix-ui-vendor': [
-						'@radix-ui/react-avatar',
-						'@radix-ui/react-checkbox',
-						'@radix-ui/react-collapsible',
-						'@radix-ui/react-dialog',
-						'@radix-ui/react-dropdown-menu',
-						'@radix-ui/react-icons',
-						'@radix-ui/react-label',
-						'@radix-ui/react-popover',
-						'@radix-ui/react-select',
-						'@radix-ui/react-separator',
-						'@radix-ui/react-slot',
-						'@radix-ui/react-tabs',
-						'@radix-ui/react-tooltip'
-					],
-					'react-query-vendor': ['@tanstack/react-query', '@tanstack/react-query-devtools']
-				}
-			}
-		}
-	},
+	// build: {
+	// 	rollupOptions: {
+	// 		output: {
+	// 			manualChunks: {
+	// 				'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+	// 				'antd-vendor': ['antd'],
+	// 				'antd-icon-vendor': ['@ant-design/icons'],
+	// 				'antd-x-vendor': ['@ant-design/x'],
+	// 				'copilotkit-core-vendor': ['@copilotkit/react-core'],
+	// 				'copilotkit-ui-vendor': ['@copilotkit/react-ui'],
+	// 				'milkdown-vendor': [
+	// 					'@milkdown/core',
+	// 					'@milkdown/react',
+	// 					'@milkdown/crepe',
+	// 					'@milkdown/preset-commonmark',
+	// 					'@milkdown/preset-gfm',
+	// 					'@milkdown/plugin-collab',
+	// 					'@milkdown/plugin-listener',
+	// 					'@milkdown/theme-nord',
+	// 					'@milkdown/utils',
+	// 					'@milkdown/ctx'
+	// 				],
+	// 				'radix-ui-vendor': [
+	// 					'@radix-ui/react-avatar',
+	// 					'@radix-ui/react-checkbox',
+	// 					'@radix-ui/react-collapsible',
+	// 					'@radix-ui/react-dialog',
+	// 					'@radix-ui/react-dropdown-menu',
+	// 					'@radix-ui/react-icons',
+	// 					'@radix-ui/react-label',
+	// 					'@radix-ui/react-popover',
+	// 					'@radix-ui/react-select',
+	// 					'@radix-ui/react-separator',
+	// 					'@radix-ui/react-slot',
+	// 					'@radix-ui/react-tabs',
+	// 					'@radix-ui/react-tooltip'
+	// 				],
+	// 				'react-query-vendor': ['@tanstack/react-query', '@tanstack/react-query-devtools']
+	// 			}
+	// 		}
+	// 	}
+	// },
+	// build: {
+	// 	rollupOptions: {
+	// 		output: {
+	// 			manualChunks(id) {
+	// 				// 将所有 node_modules 的包都拆分到独立的 chunk 中
+	// 				if (id.includes('node_modules')) {
+	// 					return id.toString().split('node_modules/')[1].split('/')[0].toString();
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// },
 	define: {
 		// 定义如何处理 Vue 的特性（Milkdown crepe编辑器依赖Vue）
 		__VUE_OPTIONS_API__: true,
