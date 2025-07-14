@@ -18,6 +18,17 @@ else
   echo "ℹ️  正在检出 (checkout) 该 release..."
   # 检出 tag 会使 HEAD 'detached', 这是正常的，代表您正工作在一个特定的、不变的版本上。
   git checkout "$latest_tag"
+
+  COMPOSE_FILE="compose.yaml"
+  if [ -f "$COMPOSE_FILE" ]; then
+    echo "ℹ️  正在更新 $COMPOSE_FILE 文件中的镜像版本为 $latest_tag..."
+    # 使用 sed 命令来查找所有 'onlyie/' 开头的镜像，并将它们的 tag 更新为 '$latest_tag'
+    # -i.bak 会创建一个备份文件 compose.yaml.bak
+    sed -i.bak "s|\(image:.*docker\.1ms\.run/onlyie/[^:]*\):.*|\1:$latest_tag|g" "$COMPOSE_FILE"
+    echo "✅  $COMPOSE_FILE 文件更新完毕。"
+  else
+    echo "⚠️  警告: $COMPOSE_FILE 未找到，跳过镜像版本更新。"
+  fi
 fi
 
 START_SCRIPT="scripts/start.sh"
