@@ -2,6 +2,10 @@ services:
   prisma-ai-backend:
     # 生产环境：从 Docker Hub 拉取镜像
     image:  docker.1ms.run/onlyie/prisma-ai-backend:3.1.0
+    # 开发环境：从本地构建镜像
+    # build:
+    #   context: .
+    #   dockerfile: ./packages/backend/Dockerfile
     depends_on:
       # mysql经常需要启动好几次才能成功,得在它启动成功后再启动服务
       mysql-container:

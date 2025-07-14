@@ -50,7 +50,7 @@ export class AichatChainService {
 			memoryKey: 'history'
 		});
 
-		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
 		const outputParser = new StringOutputParser();
 
 		let lastInput = ''; //储存用户当前输入（以更新memory）

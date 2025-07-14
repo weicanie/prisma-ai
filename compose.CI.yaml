@@ -98,7 +98,7 @@ services:
   nginx-container:
     build:
       context: .
-      dockerfile: ./packages/frontend/Dockerfile
+      dockerfile: ./packages/frontend/Dockerfile.CI
     ports:
       - '80:80' # HTTP
       # HTTPS (如需启用)
