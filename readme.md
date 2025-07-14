@@ -86,31 +86,34 @@ Prisma-AI 旨在解决求职者在准备简历和寻找工作时最头疼的**3�
 ### 🐳 Docker (推荐)
 
 1.  **克隆仓库**
+
     ```bash
-    git clone https://github.com/weicanie/prisma-ai.git
-    cd prisma-ai
+    git clone https://github.com/weicanie/prisma-ai.git && cd prisma-ai
     ```
+
 2.  **配置环境**
     - [5分钟完成环境配置](doc/教程：1、环境配置.md)
 3.  **配置本地SBERT模型** (用于人岗匹配)
     ```bash
+    # 在prisma-ai目录执行
     ./scripts/model_setup.sh
     ```
     > **注意**：您需要先将本地模型配置完毕,以在容器中使用模型。
 4.  **启动服务**
+
     ```bash
-    # 在仓库根目录执行
-    docker compose -f compose.yaml up --attach prisma-ai-backend --build
+    # 在prisma-ai目录执行
+    ./scripts/start.sh
+
     ```
+
 5.  浏览器访问 `http://localhost` 即可使用!
 
 ### 👨‍💻 本地开发
 
 1.  **克隆并安装依赖**
     ```bash
-    git clone https://github.com/weicanie/prisma-ai.git
-    cd prisma-ai
-    pnpm install
+    git clone https://github.com/weicanie/prisma-ai.git && cd prisma-ai && pnpm install
     ```
 2.  **配置环境**
     [5分钟完成环境配置](doc/教程：1、环境配置.md)
