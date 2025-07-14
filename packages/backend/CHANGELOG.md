@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.1.1](https://github.com/weicanie/prisma-ai/compare/v3.1.0...v3.1.1) (2025-07-14)
+
+### Bug Fixes
+
+- 修复docker CI和首页内容 ([a475140](https://github.com/weicanie/prisma-ai/commit/a475140b7f1c2b16628a741adf4e7e534904e3b9))
+
 # [3.1.0](https://github.com/weicanie/prisma-ai/compare/v3.0.1...v3.1.0) (2025-07-13)
 
 ### Bug Fixes
