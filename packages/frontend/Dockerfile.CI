@@ -25,6 +25,9 @@ COPY ./packages/frontend ./packages/frontend
 
 RUN pnpm --filter @prism-ai/shared build
 
+# 在构建前，递归列出前端目录的所有文件，用于调试
+RUN ls -R packages/frontend
+
 RUN pnpm --filter frontend build
 
 FROM nginx:alpine
