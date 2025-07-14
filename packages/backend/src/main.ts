@@ -2,7 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import * as figlet from 'figlet';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { AppModule } from './app.module';
-import { TaskQueueService } from './task-queue/task-queue.service';
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
 	app.useGlobalPipes(new ZodValidationPipe());
@@ -13,7 +12,7 @@ async function bootstrap() {
 	await app.listen(PORT);
 
 	try {
-		const taskQueueService = app.get(TaskQueueService);
+		// const taskQueueService = app.get(TaskQueueService);
 		// 启动时恢复队列状态 (暂时关闭，直到任务中止和去重功能实现)
 		// taskQueueService.initialize();
 	} catch (error) {
