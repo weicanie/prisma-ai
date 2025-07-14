@@ -1,39 +1,20 @@
 #!/bin/bash
 # 这是一个用于将本地的 Hugging Face 模型转换为 ONNX 格式的脚本。
+# 此脚本设计在 Docker 容器内运行，该容器已预装所有必要的 Python 依赖。
 
 # --- 配置 ---
-# VENV_DIR: 虚拟环境的文件夹名称
-VENV_DIR=".venv"
-# MODEL_PATH: 相对于项目根目录的本地模型路径
-# **重要**: 请确保此路径指向您下载的原始模型文件夹
-MODEL_BASE_PATH="../models"
+# MODEL_BASE_PATH: 容器内的模型基础路径
+# **重要**: 此路径通过 Docker volume 映射到宿主机的 './models' 目录
+MODEL_BASE_PATH="/models"
 MODEL_NAME="moka-ai/m3e-base"
 
 # --- 脚本开始 ---
 echo "开始 ONNX 模型转换..."
 
-# 检查虚拟环境是否存在
-if [ ! -d "$VENV_DIR" ]; then
-    echo "错误: Python 虚拟环境 '$VENV_DIR' 未找到。"
-    echo "请先在本目录下运行 'bash python-setup.sh' 来创建环境并安装依赖。"
-    exit 1
-fi
-
-# 激活虚拟环境
-echo "正在激活虚拟环境..."
-# 根据操作系统选择不同的激活方式
-if [[ "$OSTYPE" == "linux-gnu"* || "$OSTYPE" == "darwin"* ]]; then
-    source $VENV_DIR/bin/activate
-elif [[ "$OSTYPE" == "cygwin" || "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
-    source $VENV_DIR/Scripts/activate
-else
-    echo "错误: 不支持的操作系统 '$OSTYPE'。请手动激活虚拟环境。"
-    exit 1
-fi
-
 # 检查 optimum-cli 是否可用
 if ! command -v optimum-cli &> /dev/null; then
-    echo "错误: 'optimum-cli' 命令未找到。请确认依赖已正确安装。"
+    echo "错误: 'optimum-cli' 命令未找到。"
+    echo "请确认 Docker 镜像已正确构建，并且 Python 依赖已安装。"
     exit 1
 fi
 
@@ -41,15 +22,15 @@ fi
 INPUT_MODEL_PATH="$MODEL_BASE_PATH/$MODEL_NAME"
 OUTPUT_ONNX_PATH="$INPUT_MODEL_PATH/onnx"
 
-echo "模型输入路径: $INPUT_MODEL_PATH"
-echo "模型输出路径: $OUTPUT_ONNX_PATH"
+echo "模型输入路径 (容器内): $INPUT_MODEL_PATH"
+echo "模型输出路径 (容器内): $OUTPUT_ONNX_PATH"
 
 # 检查输入模型路径是否存在
-if [ ! -d "$INPUT_MODEL_PATH" ]; then
-    echo "错误: 输入模型路径 '$INPUT_MODEL_PATH' 不存在。"
-    echo "请确认您已将 'm3e-base' 模型文件放置在 '$MODEL_BASE_PATH/moka-ai/' 目录下。"
-    exit 1
-fi
+# if [ ! -d "$INPUT_MODEL_PATH" ]; then
+#     echo "错误: 输入模型路径 '$INPUT_MODEL_PATH' 不存在。"
+#     echo "请确认您已将 'm3e-base' 模型文件放置在项目根目录下的 'models/moka-ai/' 目录中。"
+#     exit 1
+# fi
 
 # 创建输出目录（如果不存在）
 mkdir -p $OUTPUT_ONNX_PATH
@@ -67,4 +48,4 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "ONNX 模型转换成功！"
-echo "转换后的模型文件位于: $OUTPUT_ONNX_PATH"
+echo "转换后的模型文件位于您的项目 'models' 文件夹下。"

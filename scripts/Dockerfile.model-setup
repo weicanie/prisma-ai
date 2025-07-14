@@ -1,0 +1,19 @@
+# 使用一个官方的、轻量的 Python 镜像作为基础
+FROM docker.1ms.run/python:3.9-slim
+
+# 设置工作目录
+WORKDIR /app
+
+# 复制依赖清单到工作目录
+COPY ./scripts/requirements.txt .
+
+# 复制模型转换脚本到工作目录，并赋予执行权限
+COPY ./scripts/model-onnx.sh .
+RUN chmod +x ./model-onnx.sh
+
+# 安装依赖
+# 使用 --no-cache-dir 减小镜像体积
+# 使用 -i 指定清华大学的 PyPI 镜像源，以加速国内下载
+RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
+
+CMD ["./model-onnx.sh"]
