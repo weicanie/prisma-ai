@@ -25,6 +25,12 @@ export class UserController {
 		}
 		const code = Math.random().toString().slice(2, 8);
 		await this.redisService.set(`captcha_${address}`, code, 5 * 60);
+		if (process.env.DIRECT_CAPTCHA === 'true') {
+			return {
+				message: `你的验证码是${code}，请在5分钟内使用`,
+				data: code
+			};
+		}
 		await this.emailService.sendMail({
 			to: address,
 			subject: '注册验证码',

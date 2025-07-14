@@ -33,7 +33,7 @@ services:
       - ./models:/app/models
 
   nginx-container:
-    image: docker.1ms.run/onlyie/prisma-ai-nginx:3.1.0
+    image: docker.1ms.run/onlyie/prisma-ai-nginx:3.0.0
     ports:
       - '80:80' # HTTP
       # HTTPS (如需启用)
