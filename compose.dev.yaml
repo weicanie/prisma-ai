@@ -1,10 +1,9 @@
 # 本地构建镜像，用于开发环境
 services:
   prisma-ai-backend:
-    image:  docker.1ms.run/onlyie/prisma-ai-backend:3.1.0
-    # build:
-    #   context: .
-    #   dockerfile: ./docker/backend/Dockerfile
+    build:
+      context: .
+      dockerfile: ./docker/backend/Dockerfile
     depends_on:
       # mysql经常需要启动好几次才能成功,得在它启动成功后再启动服务
       mysql-container:
@@ -36,10 +35,9 @@ services:
       - ./models:/app/models
 
   nginx-container:
-    image: docker.1ms.run/library/nginx:alpine
-    # build:
-    #   context: .
-    #   dockerfile: ./docker/frontend/Dockerfile
+    build:
+      context: .
+      dockerfile: ./docker/frontend/Dockerfile
     ports:
       - '80:80' # HTTP
       # HTTPS (如需启用)
