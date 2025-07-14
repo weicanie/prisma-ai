@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.1.2](https://github.com/weicanie/prisma-ai/compare/v3.1.1...v3.1.2) (2025-07-14)
+
+### Bug Fixes
+
+- docker test CI ([e0f6231](https://github.com/weicanie/prisma-ai/commit/e0f62316fe4d24eb65baacfb2ba7693cc7ae66fe))
+- git windows大小写不区分与linux的兼容性问题\n\n导致docker test CI失败。开发环境git设置为区分大小写。 ([526b2d7](https://github.com/weicanie/prisma-ai/commit/526b2d7810ff78fefd2e73622ab2a7566672d08b))
+- knowbase leftover ([1cc3666](https://github.com/weicanie/prisma-ai/commit/1cc3666983b1780deb15964a8a1aaf38000f20aa))
+
 ## [3.1.1](https://github.com/weicanie/prisma-ai/compare/v3.1.0...v3.1.1) (2025-07-14)
 
 ### Bug Fixes
