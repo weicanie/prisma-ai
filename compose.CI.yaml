@@ -1,8 +1,9 @@
+# 本地构建镜像，用于docker test CI
 services:
   prisma-ai-backend:
     build:
       context: .
-      dockerfile: ./packages/backend/Dockerfile.CI
+      dockerfile: ./docker/backend/Dockerfile.CI
     depends_on:
       # mysql经常需要启动好几次才能成功,得在它启动成功后再启动服务
       mysql-container:
@@ -98,7 +99,7 @@ services:
   nginx-container:
     build:
       context: .
-      dockerfile: ./packages/frontend/Dockerfile.CI
+      dockerfile: ./docker/frontend/Dockerfile.CI
     ports:
       - '80:80' # HTTP
       # HTTPS (如需启用)

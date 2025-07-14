@@ -1,0 +1,112 @@
+name: Publish Docker Image # 工作流名称：发布 Docker 镜像
+
+on:
+  # 触发器1：手动触发 (workflow_dispatch)
+  # 允许在 GitHub Actions 页面手动运行此工作流，用于发布任意版本或测试。
+  workflow_dispatch:
+    inputs:
+      image_name:
+        description: '要构建的镜像名称 (例如 prisma-ai-backend 或 prisma-ai-frontend)'
+        required: true
+        type: string
+        default: 'prisma-ai-nginx'
+      dockerfile_path:
+        description: 'Dockerfile 的路径 (例如 ./docker/frontend/Dockerfile)'
+        required: true
+        type: string
+        default: './docker/frontend/Dockerfile'
+      version_tag:
+        description: '要推送的镜像版本标签 (例如 1.0.0)'
+        required: true
+        type: string
+
+  # 触发器2：发布 Release (release)
+  # 当在 GitHub 上创建新的 Release 时，自动触发此工作流。
+  release:
+    types: [published]
+
+jobs:
+  docker-publish:
+    name: Build and Push Docker Image # 任务名称
+    runs-on: ubuntu-latest # 运行环境
+    # 设置此任务所需的权限
+    permissions:
+      contents: read # 读取仓库内容的权限，用于 checkout
+      packages: write # 写入包的权限 (如果使用 GitHub Packages 作为镜像仓库)
+      id-token: write # (可选) 如果使用云服务商（如 AWS, GCP）的 OIDC 认证，则需要此权限
+
+    steps:
+      # 步骤1：检出代码
+      # 将当前仓库的代码下载到 Actions 的运行环境中。
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 步骤2：为 Docker 提取元数据 (如标签和注释)
+      # 使用 docker/metadata-action 自动生成一系列有意义的 Docker 标签。
+      - name: Extract metadata for Docker
+        id: meta # 为此步骤设置一个 ID，方便后续引用其输出
+        uses: docker/metadata-action@v5
+        with:
+          # 定义镜像的完整名称，格式为 '用户名/镜像名'
+          # 如果是手动触发，使用输入的 image_name；否则，默认使用 'prisma-ai-backend'
+          images: onlyie/${{ github.event.inputs.image_name || 'prisma-ai-backend' }}
+          # 定义标签的生成规则，可以同时生成多个标签
+          tags: |
+            # type=schedule: 如果由定时任务触发，则生成 'nightly' 标签
+            type=schedule
+            # type=ref,event=branch: 如果是分支推送，则使用分支名作为标签 (例如 'feature-xyz')
+            type=ref,event=branch
+            # type=ref,event=pr: 如果是 PR 事件，则使用 'pr-123' 作为标签
+            type=ref,event=pr
+            # type=semver,pattern={{version}}: 如果 git 标签是语义化版本 (如 v1.2.3)，则生成 'v1.2.3'
+            type=semver,pattern={{version}}
+            # type=semver,pattern={{major}}.{{minor}}: 同时生成主版本号和次版本号的标签 (如 'v1.2')
+            type=semver,pattern={{major}}.{{minor}}
+            # type=semver,pattern={{major}}: 同时生成主版本号的标签 (如 'v1')
+            type=semver,pattern={{major}}
+            # type=sha: 使用 git commit 的短哈希值作为标签 (如 'sha-a1b2c3d')
+            type=sha
+            # type=raw,value=...: 使用一个原始值作为标签。
+            # enable=...: 这个规则只在满足条件时生效。
+            # 此处表示，只有当工作流是手动触发时，才使用输入的 'version_tag' 作为标签。
+            type=raw,value=${{ github.event.inputs.version_tag }},enable=${{ github.event_name == 'workflow_dispatch' }}
+            # type=edge,branch=main: 如果是推送到 main 分支，则生成 'edge' 标签，代表最前沿的版本。
+            type=edge,branch=main
+
+      # 步骤3：设置 QEMU
+      # QEMU 是一个模拟器，用于在 Actions 的 x86 环境中模拟 ARM 等其他架构，是多平台构建的基础。
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # 步骤4：设置 Docker Buildx
+      # Buildx 是一个 Docker CLI 插件，它利用 QEMU 实现了跨平台构建。
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 步骤5：登录到 Docker Hub
+      # 使用在仓库 Secrets 中预先配置好的用户名和密码安全地登录到 Docker Hub。
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 步骤6：构建并推送 Docker 镜像
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          # Docker 构建上下文的路径，'.' 表示项目根目录。
+          context: .
+          # Dockerfile 的路径，优先使用手动输入的路径，如果未提供，则使用默认的后端 Dockerfile 路径。
+          file: ${{ github.event.inputs.dockerfile_path || './packages/frontend/Dockerfile.CI' }}
+          # 多平台构建，为不同平台的用户提供适配的镜像
+          platforms: linux/amd64,linux/arm64
+          # 设置为 true，表示在构建成功后将镜像推送到 Docker Hub。
+          push: true
+          # 使用步骤2 (id: meta) 生成的所有标签。
+          tags: ${{ steps.meta.outputs.tags }}
+          # 使用步骤2 (id: meta) 生成的元数据作为镜像的 labels。
+          labels: ${{ steps.meta.outputs.labels }}
+          # 启用 GitHub Actions 的缓存，可以显著加快后续的构建速度。
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

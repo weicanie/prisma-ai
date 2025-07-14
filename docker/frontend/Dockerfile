@@ -11,9 +11,6 @@ RUN npm install -g pnpm@${PNPM_VERSION}
 
 WORKDIR /app
 
-# 为 sharp 设置国内镜像源，解决下载超时问题
-# ENV SHARP_DIST_BASE_URL="https://npmmirror.com/mirrors/sharp-libvips"
-
 COPY ./package.json ./pnpm-lock.yaml ./pnpm-workspace.yaml* ./
 COPY ./packages/frontend/package.json ./packages/frontend/
 COPY ./packages/shared/package.json ./packages/shared/
@@ -30,7 +27,6 @@ RUN pnpm --filter frontend build
 FROM docker.1ms.run/library/nginx:alpine
 
 COPY --from=builder /app/packages/frontend/dist /usr/share/nginx/html
-
 
 COPY ./nginx/conf/default.conf /etc/nginx/conf.d/default.conf
 
