@@ -8,7 +8,7 @@ export class Knowledgebase implements Omit<KnowledgeVo, 'id' | 'createdAt' | 'up
 	@Prop({ required: true })
 	name: string;
 
-	@Prop({ required: true })
+	@Prop({ type: String, enum: FileTypeEnum, required: true })
 	fileType: FileTypeEnum;
 
 	/* 知识标签-由用户自定义*/
@@ -30,7 +30,7 @@ export class Knowledgebase implements Omit<KnowledgeVo, 'id' | 'createdAt' | 'up
   4.其它 'other'
 
   */
-	@Prop({ required: true })
+	@Prop({ type: String, enum: KnowledgeTypeEnum, required: true })
 	type: KnowledgeTypeEnum;
 
 	/* 

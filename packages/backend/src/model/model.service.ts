@@ -10,7 +10,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
 import { ChatHistoryService } from './chat_history.service';
-import { HAModelClientService } from './HAModelClient/services/HAModelClient.service';
+import { HAModelClientService } from './HAModelClient/HAModelClient.service';
 
 type EmbedOpenAIFields = Partial<OpenAIEmbeddingsParams> & {
 	verbose?: boolean;
