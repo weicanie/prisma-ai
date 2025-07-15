@@ -1,0 +1,42 @@
+# 定义工作流的名称
+name: '发布 Release'
+
+# 定义工作流的触发条件
+on:
+  push:
+    # 只有在推送了符合 'v*.*.*' 格式的 tag 时才触发
+    # 例如：v1.0.0, v2.3.4
+    tags:
+      - 'v*.*.*'
+
+# 定义工作流中的任务
+jobs:
+  create-release:
+    # 指定任务运行的操作系统环境
+    runs-on: ubuntu-latest
+
+    # 为此任务授予权限
+    permissions:
+      # 授予写权限，以便能够创建 Release
+      contents: write
+
+    # 定义任务中的步骤
+    steps:
+      # 第一步：检出代码
+      # 使用官方的 checkout action 来获取当前仓库的代码
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          # 获取所有历史记录，以便能生成完整的变更日志
+          fetch-depth: 0
+
+      # 第二步：创建 GitHub Release
+      # 使用一个流行的社区 action 'softprops/action-gh-release' 来自动创建 GitHub Release
+      - name: 创建 GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          # Release 的标题，这里设置为 "Release v1.0.0" 的形式
+          name: ${{ github.ref_name }}
+          # 自动生成 Release 的说明内容
+          # 这个功能会汇总从上一个 tag 到当前 tag 之间的所有 commit 信息作为 Release note
+          generate_release_notes: true
