@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.1.6](https://github.com/weicanie/prisma-ai/compare/v3.1.5...v3.1.6) (2025-07-15)
+
+### Bug Fixes
+
+- clone脚本丢失导致的项目代码无法上传问题 ([798586c](https://github.com/weicanie/prisma-ai/commit/798586cd4f006b1fafe44a730710fccec11338dc))
+
 ## [3.1.5](https://github.com/weicanie/prisma-ai/compare/v3.1.4...v3.1.5) (2025-07-14)
 
 ### Bug Fixes
