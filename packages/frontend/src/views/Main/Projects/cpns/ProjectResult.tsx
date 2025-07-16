@@ -1,14 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTheme } from '@/utils/theme';
-import type {
-	lookupResultDto,
-	ProjectDto,
-	projectLookupedDto,
-	ProjectMinedDto,
-	ProjectPolishedDto
+import {
+	ProjecctLLM,
+	type lookupResultDto,
+	type ProjectDto,
+	type projectLookupedDto,
+	type ProjectMinedDto,
+	type ProjectPolishedDto
 } from '@prism-ai/shared';
 import { Brain, Pyramid, Rocket, Sparkles } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { selectProjectLLM } from '../../../../store/projects';
 import Tabs from '../../components/Tabs';
 import { ProejctPMResultCard } from './ProejctPMResultCard';
 import { ProjectAnalysisResultCard } from './ProjectAnalysisResultCard';
@@ -142,6 +145,7 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 			});
 		}
 	}, [isReasoning, done, content]);
+	const selectedllm = useSelector(selectProjectLLM);
 	/* 思维链sse展示卡片 */
 	const reasonContentSection = () => (
 		<>
@@ -161,7 +165,7 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 						scrollBehavior: 'smooth'
 					}}
 				>
-					{reasonContent || 'doro 在等待你的指示送达...'}
+					{reasonContent || (selectedllm === ProjecctLLM.deepseek_reasoner ? 'doro 在等待你的指示送达...' : 'doro 正在后台动态思考...')}
 					{/* 添加一个闪烁的光标效果 */}
 					<span className="animate-pulse text-blue-400">▋</span>
 				</div>

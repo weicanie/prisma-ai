@@ -65,7 +65,7 @@ export const ProjectAnalysisResultCard: React.FC<ProjectAnalysisResultCardProps>
 						doro 深度分析结果
 					</h4>
 				}
-				defaultOpen={false}
+				defaultOpen={true}
 			>
 				{' '}
 				<CardContent className="space-y-6">

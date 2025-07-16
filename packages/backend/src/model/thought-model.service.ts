@@ -137,6 +137,16 @@ export class ThoughtModelService {
 	public async *_transformAIMessageStream(
 		stream: AsyncGenerator<AIMessageChunk>
 	): AsyncGenerator<StreamingChunk> {
+		//FIXME 会在第一个chunk产生时才发送，而不是流开始时
+		//可能是gemini的流式输出机制？或者langchain-google-genai的流式输出机制？
+		// 在流开始时立即发送一个默认消息
+		yield {
+			content: '',
+			reasonContent: 'Gemini 正在后台动态思考...',
+			isReasoning: true,
+			done: false
+		};
+
 		for await (const chunk of stream) {
 			this.logger.debug('chunk', chunk);
 			// 直接将 chunk 的内容作为答案返回，不进行思考与答案分离
