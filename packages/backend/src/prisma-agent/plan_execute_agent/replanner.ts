@@ -25,6 +25,7 @@ export async function retrieveNode(
 	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
 	config.configurable.logger.log('---节点: 检索知识---');
+	config.configurable.logger.log('stepResult', state.stepResult);
 	const { stepResult, userId } = state;
 	const { knowledgeVDBService } = config.configurable;
 
@@ -61,7 +62,7 @@ export async function retrieveNode(
 	};
 }
 
-/**
+/** 已弃用，使用增量同步的uploadCode代替
  * Replan - Code Get Node
  * @description 根据上一步执行结果中记录的已修改/创建的文件列表，读取这些文件的最新内容。
  * @input {GraphState} state - 从 `state.stepResult.output.writtenCodeFiles` 获取文件列表, 从 `state.projectPath` 获取项目根路径。
@@ -422,15 +423,15 @@ function afterReflect(state: typeof GraphState.State, config: NodeConfig) {
 			config.configurable.logger.log('重新计划...');
 			return 're_plan';
 		default:
-			config.configurable.logger.error('无法确定下一步.');
-			return END; // Should not happen
+			// 进行完对execute_step的反馈后，进入re_analyze
+			return 're_analyze';
 	}
 }
 
 // ----- 图 -----
 export const ReplanGraph = new StateGraph(GraphState)
 	.addNode('retrieve', retrieveNode)
-	.addNode('get_code', codeGetNode)
+	// .addNode('get_code', codeGetNode)
 	.addNode('upload_code', uploadCode)
 	.addNode('prepare_reflection', prepareReflection)
 	.addNode('reflect', reflect)
@@ -450,9 +451,7 @@ ReplanGraph
 	//根据`userFeedback`检索知识
 	.addEdge(START, 'retrieve')
 	//根据`writtenCodeFiles`获取所有修改或新增的代码
-	.addEdge('retrieve', 'get_code')
-	//更新目标项目代码知识库：删了重建
-	.addEdge('get_code', 'upload_code')
+	.addEdge('retrieve', 'upload_code')
 	//准备反思
 	.addEdge('upload_code', 'prepare_reflection')
 	//`反思Agent`：根据`userFeedback、summary、projectCodes`反思`originalPlan`即亮点实现计划，得到`Reflection`
@@ -475,6 +474,5 @@ ReplanGraph
 	.addEdge('reset_step_index', END) // "反思" -> ("需求分析" | "计划")：反思结束后，根据 afterReflect 的判断结果决定是重新需求分析还是重新计划
 	.addConditionalEdges('reflect', afterReflect, {
 		re_analyze: 're_analyze',
-		re_plan: 're_plan',
-		[END]: END
+		re_plan: 're_plan'
 	});

@@ -1,6 +1,8 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { Runnable, RunnableSequence } from '@langchain/core/runnables';
+import { ChatDeepSeek } from '@langchain/deepseek';
 import { MemorySaver } from '@langchain/langgraph';
+import { ChatOpenAI } from '@langchain/openai';
 import { Inject, Injectable } from '@nestjs/common';
 import { ProjectDto } from '@prism-ai/shared';
 import { z } from 'zod';
@@ -15,7 +17,6 @@ import { ReplanGraph } from './replanner';
 const analysisSchema = z.object({
 	highlightAnalysis: z.string().describe('对亮点的详细需求分析，包括功能点、非功能需求、约束等')
 });
-
 const planSchema = z.object({
 	implementationPlan: z
 		.array(
@@ -69,7 +70,14 @@ export class PlanExecuteAgentService {
 		},
 		z.infer<typeof analysisSchema>
 	> {
-		const model = this.modelService.getLLMDeepSeekRaw(getAgentConfig().model.plan);
+		let model: ChatOpenAI | ChatDeepSeek;
+		const modelName = getAgentConfig().model.plan;
+		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
+			model = this.modelService.getLLMGeminiRaw(modelName);
+			console.log('gemini-model', model);
+		} else {
+			model = this.modelService.getLLMDeepSeekRaw(modelName);
+		}
 		const parser = RubustStructuredOutputParser.from(analysisSchema, this.chainService);
 
 		const prompt = ChatPromptTemplate.fromMessages([
@@ -136,7 +144,6 @@ export class PlanExecuteAgentService {
 			},
 			prompt,
 			model,
-
 			parser
 		]);
 	}
@@ -157,7 +164,13 @@ export class PlanExecuteAgentService {
 		},
 		z.infer<typeof planSchema>
 	> {
-		const model = this.modelService.getLLMDeepSeekRaw(getAgentConfig().model.plan);
+		let model: ChatOpenAI | ChatDeepSeek;
+		const modelName = getAgentConfig().model.plan;
+		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
+			model = this.modelService.getLLMGeminiRaw(modelName);
+		} else {
+			model = this.modelService.getLLMDeepSeekRaw(modelName);
+		}
 		const parser = RubustStructuredOutputParser.from(planSchema, this.chainService);
 
 		const prompt = ChatPromptTemplate.fromMessages([
@@ -257,7 +270,13 @@ export class PlanExecuteAgentService {
 		},
 		z.infer<typeof analysisSchema>
 	> {
-		const model = this.modelService.getLLMDeepSeekRaw(getAgentConfig().model.replan);
+		let model: ChatOpenAI | ChatDeepSeek;
+		const modelName = getAgentConfig().model.replan;
+		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
+			model = this.modelService.getLLMGeminiRaw(modelName);
+		} else {
+			model = this.modelService.getLLMDeepSeekRaw(modelName);
+		}
 		const parser = RubustStructuredOutputParser.from(analysisSchema, this.chainService);
 		const prompt = ChatPromptTemplate.fromMessages([
 			[
@@ -358,7 +377,13 @@ export class PlanExecuteAgentService {
 		},
 		z.infer<typeof planSchema>
 	> {
-		const model = this.modelService.getLLMDeepSeekRaw(getAgentConfig().model.replan);
+		let model: ChatOpenAI | ChatDeepSeek;
+		const modelName = getAgentConfig().model.replan;
+		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
+			model = this.modelService.getLLMGeminiRaw(modelName);
+		} else {
+			model = this.modelService.getLLMDeepSeekRaw(modelName);
+		}
 		const parser = RubustStructuredOutputParser.from(planSchema, this.chainService);
 		const prompt = ChatPromptTemplate.fromMessages([
 			[

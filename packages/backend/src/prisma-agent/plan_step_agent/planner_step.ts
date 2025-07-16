@@ -274,9 +274,8 @@ async function shouldReflect(state: typeof GraphState.State, config: NodeConfig)
 						}
 					});
 				case ReviewType.PLAN_STEP:
-				case ReviewType.ANALYSIS_STEP:
 					return new Command({
-						goto: 'plan_step',
+						goto: 'generate_final_prompt',
 						update: {
 							stepPlan: {
 								output: {

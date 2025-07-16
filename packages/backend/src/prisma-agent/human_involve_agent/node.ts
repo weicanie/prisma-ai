@@ -55,7 +55,8 @@ export class HumanInvolve {
 		return {
 			humanIO: {
 				...state.humanIO,
-				input: userInput
+				input: userInput,
+				reviewPath: outputPath
 			}
 		};
 	}
@@ -63,8 +64,10 @@ export class HumanInvolve {
 	private getFilePath(reviewType: ReviewType): string {
 		switch (reviewType) {
 			case ReviewType.PLAN:
+			case ReviewType.RE_PLAN:
 				return path.join(this.outputDir, 'plan.json');
 			case ReviewType.ANALYSIS:
+			case ReviewType.RE_ANALYSIS:
 				return path.join(this.outputDir, 'analysis.md');
 			case ReviewType.PLAN_STEP:
 				return path.join(this.outputDir, 'plan_step.json');

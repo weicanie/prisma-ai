@@ -18,9 +18,9 @@ interface AgentConfig {
 		};
 	};
 	model: {
-		plan: 'deepseek-reasoner' | 'deepseek-chat';
-		plan_step: 'deepseek-reasoner' | 'deepseek-chat';
-		replan: 'deepseek-reasoner' | 'deepseek-chat';
+		plan: 'deepseek-reasoner' | 'deepseek-chat' | 'gemini-2.5-pro' | 'gemini-2.5-flash';
+		plan_step: 'deepseek-reasoner' | 'deepseek-chat' | 'gemini-2.5-pro' | 'gemini-2.5-flash';
+		replan: 'deepseek-reasoner' | 'deepseek-chat' | 'gemini-2.5-pro' | 'gemini-2.5-flash';
 	};
 }
 const agentConfigPath = path.join(process.cwd(), 'prisma_agent_config.json');

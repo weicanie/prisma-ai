@@ -241,15 +241,20 @@ export class PrismaAgentService {
 				try {
 					const feedbackContent = await fs.readFile(humanFeedbackPath, 'utf-8');
 					const feedbackJson = JSON.parse(feedbackContent);
-
 					// 使用 Zod schema 对用户在文件中输入的内容进行严格的格式校验。
-					if (interruptData.type) {
-						// 校验 HumanInput
-						validatedInput = humanInputSchema.parse(feedbackJson);
-					} else {
+					switch(interruptData.type) {
+						case InterruptType.ExecuteStep:
 						// 校验 Result_step
 						validatedInput = resultStepSchema.parse(feedbackJson);
+							break;
+						case InterruptType.HumanReview:
+						// 校验 HumanInput
+						validatedInput = humanInputSchema.parse(feedbackJson);
+							break;
+						default:
+							throw new Error('未知的 InterruptType')
 					}
+
 					this.logger.log('反馈校验成功。');
 				} catch (error) {
 					// 如果校验失败，打印详细错误，并让用户重新修改文件。

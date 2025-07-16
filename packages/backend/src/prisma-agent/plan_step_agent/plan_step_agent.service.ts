@@ -10,6 +10,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ProjectDto } from '@prism-ai/shared';
 import { z } from 'zod';
 
+import { ChatDeepSeek } from '@langchain/deepseek';
+import { ChatOpenAI } from '@langchain/openai';
 import { ModelService } from '../../model/model.service';
 import { WithFormfixChain } from '../../utils/abstract';
 import { RubustStructuredOutputParser } from '../../utils/RubustStructuredOutputParser';
@@ -102,7 +104,13 @@ export class PlanStepAgentService {
 		},
 		z.infer<typeof stepAnalysisSchema>
 	> {
-		const model = this.modelService.getLLMDeepSeekRaw(getAgentConfig().model.plan_step);
+		let model: ChatOpenAI | ChatDeepSeek;
+		const modelName = getAgentConfig().model.plan_step;
+		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
+			model = this.modelService.getLLMGeminiRaw(modelName);
+		} else {
+			model = this.modelService.getLLMDeepSeekRaw(modelName);
+		}
 		if (!model) throw new Error('Model not found');
 		const parser = RubustStructuredOutputParser.from(stepAnalysisSchema, this.chainService);
 
@@ -183,7 +191,13 @@ export class PlanStepAgentService {
 		},
 		z.infer<typeof stepPlanSchema>
 	> {
-		const model = this.modelService.getLLMDeepSeekRaw(getAgentConfig().model.plan_step);
+		let model: ChatOpenAI | ChatDeepSeek;
+		const modelName = getAgentConfig().model.plan_step;
+		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
+			model = this.modelService.getLLMGeminiRaw(modelName);
+		} else {
+			model = this.modelService.getLLMDeepSeekRaw(modelName);
+		}
 		if (!model) throw new Error('Model not found');
 		const parser = RubustStructuredOutputParser.from(stepPlanSchema, this.chainService);
 
@@ -247,7 +261,13 @@ export class PlanStepAgentService {
 		},
 		string
 	> {
-		const model = this.modelService.getLLMDeepSeekRaw(getAgentConfig().model.plan_step);
+		let model: ChatOpenAI | ChatDeepSeek;
+		const modelName = getAgentConfig().model.plan_step;
+		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
+			model = this.modelService.getLLMGeminiRaw(modelName);
+		} else {
+			model = this.modelService.getLLMDeepSeekRaw(modelName);
+		}
 		if (!model) throw new Error('Model not found');
 		const parser = RubustStructuredOutputParser.from(completedPlanSchema, this.chainService);
 
