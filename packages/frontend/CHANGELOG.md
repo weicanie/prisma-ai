@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.2.0](https://github.com/weicanie/prisma-ai/compare/v3.1.6...v3.2.0) (2025-07-16)
+
+### Features
+
+- 添加了gemini-2.5-pro、flash 的支持 ([b7ad6f9](https://github.com/weicanie/prisma-ai/commit/b7ad6f925772ae335a2de9178dee031ae70c8000))
+
 ## [3.1.3](https://github.com/weicanie/prisma-ai/compare/v3.1.2...v3.1.3) (2025-07-14)
 
 ### Bug Fixes
