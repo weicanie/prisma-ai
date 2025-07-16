@@ -92,7 +92,7 @@ export class PromptService implements OnModuleInit {
 	 * @param param1
 	 * @returns 填充后的promptT字符串
 	 */
-	private partialT(stringT: string, [slotName, contentP]: [string, string]) {
+	public partialT(stringT: string, [slotName, contentP]: [string, string]) {
 		if (!stringT.includes(slotName)) {
 			console.error(`所要填充的prompt模板字符串不具有插槽:${slotName},将不填充直接输出`);
 			return stringT;
@@ -102,14 +102,14 @@ export class PromptService implements OnModuleInit {
 	}
 	/**
 	 * 对项目经验进行亮点挖掘的prompt
-	 * 返回的prompt待填充的插槽：{instructions}、{instructions0}、{chat_history}、{input}、{reflection}、{retrievedProjectCodes}、{retrievedDomainDocs}、{userSkills}
+	 * 返回的prompt待填充的插槽：{instructions}、{instructions_mid}、{chat_history}、{input}、{reflection}、{retrievedProjectCodes}、{retrievedDomainDocs}、{userSkills}
 	 *
 	 */
-	async minePrompt() {
+	async minePrompt(partial: { userSkills: string }) {
 		this.mineT = this.partialT(this.mineT, ['{fewShot}', this.fewShotMap['mine']]);
 
 		const prompt = ChatPromptTemplate.fromMessages([
-			[`${role.SYSTEM}`, this.mineT],
+			[`${role.SYSTEM}`, this.partialT(this.mineT, ['{userSkills}', partial.userSkills])],
 			// [`${role.SYSTEM}`, `这是目前为止的聊天记录：{chat_history}`],
 			[`${role.HUMAN}`, '{input}']
 		]);
@@ -122,7 +122,7 @@ export class PromptService implements OnModuleInit {
 
 	/**
 	 * 在项目经验的分析结果的基础上对项目经验进行优化的prompt
-	 * @return prompt：{instructions}、{instructions0}、{chat_history}、{input}、{reflection}、{retrievedProjectCodes}、{retrievedDomainDocs}
+	 * @return prompt：{instructions}、{instructions_mid}、{chat_history}、{input}、{reflection}、{retrievedProjectCodes}、{retrievedDomainDocs}
 	 *
 	 */
 	async polishPrompt() {
@@ -135,7 +135,7 @@ export class PromptService implements OnModuleInit {
 	}
 	/**
 	 * 对项目经验进行分析的prompt
-	 * @return prompt：{instructions}、{instructions0}、{chat_history}、{input}、{reflection}、{retrievedProjectCodes}、{retrievedDomainDocs}
+	 * @return prompt：{instructions}、{instructions_mid}、{chat_history}、{input}、{reflection}、{retrievedProjectCodes}、{retrievedDomainDocs}
 	 *
 	 */
 	async lookupPrompt() {

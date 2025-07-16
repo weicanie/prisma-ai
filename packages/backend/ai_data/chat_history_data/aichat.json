@@ -34,5 +34,88 @@
       "additional_kwargs": {},
       "response_metadata": {}
     }
+  },
+  {
+    "type": "human",
+    "data": {
+      "input": "你好？",
+      "additional_kwargs": {},
+      "response_metadata": {}
+    }
+  },
+  {
+    "type": "ai",
+    "data": {
+      "content": "你好！很高兴继续我们的关于`useEffect`的讨论。你的“你好？”让我有点摸不着头脑，请问你需要我继续讲解哪个部分，或者你有什么新的问题吗？  我准备好了回答你的任何疑问，并根据你的反馈调整讲解深度。\n",
+      "tool_calls": [],
+      "invalid_tool_calls": [],
+      "additional_kwargs": {},
+      "response_metadata": {}
+    }
+  },
+  {
+    "type": "human",
+    "data": {
+      "input": "你是哪个厂家的模型？",
+      "additional_kwargs": {},
+      "response_metadata": {}
+    }
+  },
+  {
+    "type": "ai",
+    "data": {
+      "content": "我是一个大型语言模型，由 Google 训练。\n",
+      "tool_calls": [],
+      "invalid_tool_calls": [],
+      "additional_kwargs": {},
+      "response_metadata": {}
+    }
+  },
+  {
+    "type": "human",
+    "data": {
+      "input": "你是哪个厂家的模型？",
+      "additional_kwargs": {},
+      "response_metadata": {}
+    }
+  },
+  {
+    "type": "ai",
+    "data": {
+      "content": "我是一个大型语言模型，由 Google 训练。\n",
+      "tool_calls": [],
+      "invalid_tool_calls": [],
+      "additional_kwargs": {},
+      "response_metadata": {}
+    }
+  },
+  {
+    "type": "human",
+    "data": {
+      "input": "你的型号是？",
+      "additional_kwargs": {},
+      "response_metadata": {}
+    }
+  },
+  {
+    "type": "ai",
+    "data": {
+      "content": "我没有型号。我是一个大型语言模型，由 Google 训练。  我并没有像物理设备那样的“型号”。\n",
+      "tool_calls": [],
+      "invalid_tool_calls": [],
+      "additional_kwargs": {},
+      "response_metadata": {}
+    }
+  },
+  {
+    "type": "ai",
+    "data": {
+      "content": "好的，我们来一步一步解决这个问题。\n\n**目标：**\n求解方程 `x + 1 = 3` 中 `x` 的值。\n\n**步骤：**\n1.  为了在方程的一边单独得到 `x`，我们需要把 `+ 1` 从左边移走。\n2.  要去掉 `+ 1`，我们可以在方程的两边同时减去 1。\n3.  计算过程如下：\n    *   `x + 1 - 1 = 3 - 1`\n    *   `x = 2`\n\n**结论：**\n所以，x = 2。",
+      "reasonContent": "",
+      "tool_calls": [],
+      "invalid_tool_calls": [],
+      "additional_kwargs": {},
+      "response_metadata": {}
+    }
   }
 ]

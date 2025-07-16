@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Sse } from '@nestjs/common';
-import { ImplementDto, ProjectStatus, UserInfoFromToken } from '@prism-ai/shared';
+import { ImplementDto, ProjecctLLM, ProjectStatus, UserInfoFromToken } from '@prism-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { LLMSseService } from '../sse/llm-sse.service';
 import { ProjectDto } from './dto/project.dto';
@@ -28,11 +28,13 @@ export class ProjectController {
 	async lookupProject(
 		@Query('sessionId') sessionId: string,
 		@Query('recover') recover: boolean,
+		@Query('model') model: ProjecctLLM,
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
 		const metadata = {
 			funcKey: this.projectProcessService.funcKeys.lookupProject,
-			poolName: this.projectProcessService.poolName
+			poolName: this.projectProcessService.poolName,
+			model: model
 		};
 		if (recover) {
 			return this.llmSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);
@@ -51,11 +53,13 @@ export class ProjectController {
 	async polishProject(
 		@Query('sessionId') sessionId: string,
 		@Query('recover') recover: boolean,
+		@Query('model') model: ProjecctLLM,
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
 		const metadata = {
 			funcKey: this.projectProcessService.funcKeys.polishProject,
-			poolName: this.projectProcessService.poolName
+			poolName: this.projectProcessService.poolName,
+			model: model
 		};
 		if (recover) {
 			return this.llmSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);
@@ -74,11 +78,13 @@ export class ProjectController {
 	async mineProject(
 		@Query('sessionId') sessionId: string,
 		@Query('recover') recover: boolean,
+		@Query('model') model: ProjecctLLM,
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
 		const metadata = {
 			funcKey: this.projectProcessService.funcKeys.mineProject,
-			poolName: this.projectProcessService.poolName
+			poolName: this.projectProcessService.poolName,
+			model: model
 		};
 		if (recover) {
 			return this.llmSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);

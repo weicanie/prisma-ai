@@ -1,5 +1,6 @@
 import {
 	markdownToProjectSchema,
+	ProjecctLLM,
 	projectSchemaToMarkdown,
 	type ProjectDto
 } from '@prism-ai/shared';
@@ -44,7 +45,7 @@ const initialMd = `### 1、项目信息
 #### 2.3 用户体验/业务价值
   * `;
 
-const initialState: ProjectState = {
+const initialState: ProjectState & { model: ProjecctLLM } = {
 	data: {
 		info: {
 			name: '',
@@ -61,7 +62,8 @@ const initialState: ProjectState = {
 			user: []
 		}
 	},
-	dataMd: initialMd
+	dataMd: initialMd,
+	model: ProjecctLLM.gemini_2_5_pro
 };
 
 const projectSlice = createSlice({
@@ -78,7 +80,9 @@ const projectSlice = createSlice({
 			state.dataMd = dataMd;
 			state.data = markdownToProjectSchema(dataMd);
 		},
-
+		setLLM: (state, { payload }: PayloadAction<ProjecctLLM>) => {
+			state.model = payload;
+		},
 		resetProjectData: () => {
 			/* state = initialState;不会产生副作用、无法重置state对象。
 			因为代理对象没有被操作,因此真正的state对象也不会通过immer修改。
@@ -92,10 +96,11 @@ const projectSlice = createSlice({
 });
 
 // Actions
-export const { setDataFromDto, setDataFromMd, resetProjectData } = projectSlice.actions;
+export const { setDataFromDto, setDataFromMd, setLLM, resetProjectData } = projectSlice.actions;
 
 // Selectors
 export const selectProjectData = (state: { project: ProjectState }) => state.project.data;
 export const selectProjectMd = (state: { project: ProjectState }) => state.project.dataMd;
+export const selectProjectLLM = (state: { project: ProjectState & { model: ProjecctLLM } }) => state.project.model;
 // Reducer
 export const projectReducer = projectSlice.reducer;

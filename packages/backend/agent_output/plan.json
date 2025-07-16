@@ -1,173 +1,114 @@
 [
   {
-    "stepDescription": "设计并实现数据收集模块，用于从聊天记录、好友备注和互动历史中提取数据",
+    "stepDescription": "步骤一：后端简历数据持久化API实现。此步骤旨在为前端提供完整的简历数据管理能力。将实现一个基于文件系统的CRUD服务，并暴露RESTful API端点。这包括创建、读取、更新和删除简历数据的功能。数据将存储在服务器本地的一个`db.json`文件中，以满足个人使用和快速开发的需求。",
     "techStackList": [
-      "NestJS",
-      "Prisma",
-      "MySQL",
-      "Redis"
-    ],
-    "challengesList": [
-      "数据量大时的性能优化",
-      "确保数据隐私和安全",
-      "实时数据同步"
-    ],
-    "questionsList": [
-      "如何高效地从数据库中提取历史聊天记录？",
-      "如何处理数据中的敏感信息？"
-    ]
-  },
-  {
-    "stepDescription": "构建数据预处理模块，对收集到的数据进行清洗和格式化",
-    "techStackList": [
-      "Node.js",
+      "NestJS 10",
       "TypeScript",
-      "Prisma"
+      "Node.js fs/promises API",
+      "class-validator",
+      "uuid"
     ],
     "challengesList": [
-      "处理非结构化数据",
-      "确保数据一致性",
-      "处理多语言文本"
+      "确保对`db.json`文件的读写操作是原子的，防止并发请求（尽管可能性低）导致数据损坏。采用“读取-修改-写入临时文件-重命名”的模式来保证数据安全。",
+      "定义健壮的DTOs (Data Transfer Objects)并使用`class-validator`进行输入验证，确保API接口的稳健性。",
+      "设计清晰的错误处理逻辑，例如当请求更新或删除一个不存在的简历ID时，应返回标准的404 Not Found响应。"
     ],
     "questionsList": [
-      "如何标准化不同来源的数据格式？",
-      "如何处理数据中的噪声和无关信息？"
+      "确认简历ID的生成策略。当前计划使用`uuid`库生成，是否满足需求？",
+      "对于`GET /api/resumes`，是返回包含所有简历完整数据的数组，还是只返回元数据列表（如ID和标题）？根据需求分析，为满足简历工作台的功能，将实现返回完整数据列表。",
+      "除了主端点`GET /api/resumes`，是否需要一个`GET /api/resumes/:id`来获取单个简历？为提高灵活性，将一并实现此端点。"
     ]
   },
   {
-    "stepDescription": "实现文本嵌入模块，使用OpenAI的text-embedding-ada-002模型将文本转换为向量",
+    "stepDescription": "步骤二：前端项目初始化与开发环境配置。此步骤将搭建一个全新的、与后端分离的React单页应用（SPA）项目。我们将使用Vite进行项目初始化，因为它提供了极佳的开发体验和构建速度。关键任务是配置开发服务器代理，将所有`/api/*`请求转发到本地运行的NestJS后端服务，从而解决跨域（CORS）问题，并安装所有必需的前端依赖。",
     "techStackList": [
-      "langchain",
-      "OpenAI API",
-      "TypeScript"
-    ],
-    "challengesList": [
-      "API调用限制",
-      "处理大文本块的嵌入",
-      "成本控制"
-    ],
-    "questionsList": [
-      "如何优化嵌入过程的性能？",
-      "如何处理嵌入失败的情况？"
-    ]
-  },
-  {
-    "stepDescription": "设置Pinecone向量数据库，存储和管理文本嵌入向量",
-    "techStackList": [
-      "Pinecone",
-      "Node.js",
-      "TypeScript"
-    ],
-    "challengesList": [
-      "向量索引的优化",
-      "处理高维数据",
-      "确保查询性能"
-    ],
-    "questionsList": [
-      "如何设计高效的索引策略？",
-      "如何处理向量数据库的扩容问题？"
-    ]
-  },
-  {
-    "stepDescription": "开发检索增强生成(RAG)模块，整合langchain实现自然语言查询",
-    "techStackList": [
-      "langchain",
-      "Node.js",
-      "TypeScript"
-    ],
-    "challengesList": [
-      "减少LLM的幻想问题",
-      "提高检索的准确性",
-      "优化响应时间"
-    ],
-    "questionsList": [
-      "如何设置默认回答以避免误导用户？",
-      "如何优化查询的相关性评分？"
-    ]
-  },
-  {
-    "stepDescription": "设计并实现前端界面，支持用户通过自然语言查询好友信息",
-    "techStackList": [
-      "React",
+      "Vite",
+      "React 18",
       "TypeScript",
-      "styled-components"
+      "pnpm",
+      "Tailwind CSS"
     ],
     "challengesList": [
-      "设计直观的用户界面",
-      "处理复杂的用户查询",
-      "确保响应速度"
+      "从原`package.json`中精确筛选出所有前端需要的依赖，并排除Next.js特定或后端的包（如 `next`, `@sparticuz/chromium`）。",
+      "正确配置`vite.config.ts`中的代理规则，确保所有API请求都能被无缝转发到后端服务（例如：`localhost:3001` -> `localhost:3000/api`）。",
+      "初始化并配置Tailwind CSS，包括修改`tailwind.config.js`以正确扫描新项目结构中的所有组件和页面文件，确保样式能够被正确应用。"
     ],
     "questionsList": [
-      "如何设计用户友好的查询界面？",
-      "如何处理查询结果的展示逻辑？"
+      "原项目是否存在需要在前端使用的环境变量（例如，在`.env.local`中）？如果存在，需要将它们迁移到Vite的`.env`文件系统中。",
+      "项目是否依赖特定的Node.js版本？需要在`package.json`中明确`engines`字段以确保环境一致性。"
     ]
   },
   {
-    "stepDescription": "实现API接口，连接前端和RAG系统",
+    "stepDescription": "步骤三：基础组件与静态内容迁移。此步骤的核心是将原Next.js项目中的通用React组件、工具函数、静态资源（图片、字体）和全局样式迁移到新的Vite项目中。将从最基础的UI组件（如`@/components/ui`）开始，逐步迁移到更复杂的组合组件。所有对Next.js API（如`next/image`, `next/link`）的引用都将被替换为Web标准或React社区的等效实现。",
     "techStackList": [
-      "NestJS",
-      "RESTful API",
-      "GraphQL"
+      "React 18",
+      "TypeScript",
+      "Radix UI",
+      "clsx",
+      "tailwind-merge"
     ],
     "challengesList": [
-      "确保API的安全性",
-      "处理高并发请求",
-      "优化数据传输"
+      "系统性地识别并重构所有使用了Next.js内置组件或Hooks的组件，例如将`<Image>`替换为`<img>`，将`<Link>`替换为`react-router-dom`的`<Link>`。",
+      "处理全局CSS和字体。需要确保在应用的入口文件（如`main.tsx`）中正确导入了全局样式表，以保持视觉一致性。",
+      "迁移`src/lib/utils.ts`等工具函数时，需要检查是否存在对Node.js环境或Next.js环境的隐式依赖。"
     ],
     "questionsList": [
-      "如何设计高效的API端点？",
-      "如何处理API的版本控制？"
+      "原项目中的组件对`'use client'`指令的依赖程度如何？虽然在纯React SPA中此指令无效，但它的存在表明了组件的性质，有助于迁移过程。",
+      "静态资源（如`/avatar.png`）的引用路径需要如何调整以适应Vite的`public`目录或`assets`处理机制？"
     ]
   },
   {
-    "stepDescription": "进行系统集成测试，确保各模块协同工作",
+    "stepDescription": "步骤四：实现客户端路由与国际化（i18n）。此步骤将替换Next.js的两个核心功能：文件系统路由和国际化。我们将引入`react-router-dom`来定义应用的路由结构，例如`/`用于简历工作台，`/resumes/:id`用于简历编辑器。同时，引入`react-i18next`来替代`next-intl`，并迁移现有的翻译文件，确保多语言支持在新架构下无缝工作。",
     "techStackList": [
-      "Jest",
-      "Cypress",
-      "Postman"
+      "react-router-dom",
+      "react-i18next",
+      "i18next",
+      "i18next-browser-languagedetector"
     ],
     "challengesList": [
-      "模拟真实用户场景",
-      "处理边缘情况",
-      "确保系统稳定性"
+      "将原有的隐式文件路由，转换为`react-router-dom`的显式路由配置，这可能需要对应用结构进行一些调整。",
+      "全局搜索并替换所有`useRouter`（来自`next/navigation`）的用法为`useNavigate`或`useParams`等`react-router-dom`的Hooks。",
+      "配置`i18next`实例，加载翻译资源，并用`useTranslation` Hook替换所有`useTranslations`的调用。这需要细致地逐个文件进行修改。"
     ],
     "questionsList": [
-      "如何设计全面的测试用例？",
-      "如何处理测试中发现的数据不一致问题？"
+      "应用的具体路由结构是什么？初步规划为`/`（工作台）和`/resumes/:id`（编辑器），这是否覆盖了所有场景？",
+      "语言切换的UI逻辑是怎样的？需要确保新的i18n实现能够支持现有的语言选择器组件。"
     ]
   },
   {
-    "stepDescription": "部署系统到生产环境，并进行性能监控",
+    "stepDescription": "步骤五：状态管理与核心业务逻辑集成。此步骤将把前端应用与后端API连接起来，实现动态数据交互。我们将复用`Zustand`的`useResumeStore`，并扩展其功能以包含异步action，用于调用后端API。我们将完整实现“简历工作台”的功能，包括加载简历列表、创建新简历、以及触发更新和删除操作，并确保UI状态与后端数据同步。",
     "techStackList": [
-      "Docker",
-      "Kubernetes",
-      "Prometheus"
-    ],
-    "challengesList": [
-      "确保部署的稳定性",
-      "监控系统性能",
-      "处理生产环境的问题"
-    ],
-    "questionsList": [
-      "如何优化生产环境的配置？",
-      "如何设置有效的监控警报？"
-    ]
-  },
-  {
-    "stepDescription": "收集用户反馈并进行系统优化",
-    "techStackList": [
+      "Zustand",
       "React",
-      "NestJS",
-      "TypeScript"
+      "axios (或 fetch API)",
+      "sonner"
     ],
     "challengesList": [
-      "分析用户行为数据",
-      "处理用户反馈",
-      "持续优化系统"
+      "在Zustand store的action中优雅地处理API请求的生命周期，包括loading、success和error状态，并使用`sonner`库向用户提供即时反馈。",
+      "确保状态管理逻辑的纯粹性，API调用等副作用应被封装在异步action中。",
+      "在实现增、删、改操作后，如何高效地更新本地状态以反映变化？是重新获取整个列表，还是在本地进行乐观更新或直接更新？初期将采用更简单的“操作后重新获取”策略。"
     ],
     "questionsList": [
-      "如何有效地收集和分析用户反馈？",
-      "如何优先处理优化需求？"
+      "Zustand store的初始化时机是什么时候？计划在应用根组件加载时首次从API获取数据并初始化store。",
+      "当用户在多个简历之间切换时，`useResumeStore`是如何管理当前正在编辑的简历状态的？"
+    ]
+  },
+  {
+    "stepDescription": "步骤六：实现简历编辑器、预览与导出功能。这是收尾步骤，将完成项目的核心功能。确保基于Tiptap的富文本编辑器、所有交互式UI（如IconSelector）以及实时预览面板在新架构下完全正常工作。最后，重构导出功能：JSON导出将直接在前端完成；PDF导出则需调用已准备好的后端`/api/pdf/generate`服务，并处理返回的文件流以触发浏览器下载。",
+    "techStackList": [
+      "Tiptap",
+      "Framer Motion",
+      "React",
+      "DOM API (用于获取HTML)"
+    ],
+    "challengesList": [
+      "重构PDF导出逻辑是本步骤最大的挑战。需要编写一个可靠的函数来抓取预览组件的实时HTML内容，并确保其样式信息能被后端的Puppeteer正确渲染。这可能需要动态内联CSS规则或将样式表链接包含在发送的HTML中。",
+      "确保Tiptap编辑器的所有自定义扩展和功能（如颜色、高亮、对齐）在迁移后行为一致。",
+      "验证所有`framer-motion`动画在新路由系统下是否依然流畅，特别是在页面过渡时。"
+    ],
+    "questionsList": [
+      "原项目的`PdfExport.tsx`是使用`html2pdf.js`在客户端生成PDF，还是另有实现？需求明确要求使用后端服务，因此我们将完全重写此逻辑，不再使用`html2pdf.js`。",
+      "`GithubContribution`组件是否依赖特定的Next.js服务器端功能来获取数据？如果是，需要将其改造为纯客户端的API请求。"
     ]
   }
 ]

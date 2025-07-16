@@ -1,172 +1,119 @@
 [
   {
-    "stepDescription": "设计数据收集模块的数据库查询接口",
+    "stepDescription": "步骤 1: 初始化 NestJS 项目并安装核心依赖。使用 NestJS CLI 创建一个新的后端项目，并安装 `uuid` 用于生成唯一ID，`class-validator` 和 `class-transformer` 用于数据校验与转换。",
     "techStackList": [
-      "NestJS",
-      "Prisma ORM",
-      "MySQL"
+      "NestJS CLI",
+      "npm/yarn",
+      "TypeScript",
+      "uuid",
+      "class-validator",
+      "class-transformer"
     ],
     "challengesList": [
-      "处理大数据量时的查询性能优化",
-      "确保查询接口的安全性",
-      "实现高效的分页机制"
+      "确保所有依赖项版本与 NestJS 的核心版本兼容。",
+      "配置 `tsconfig.json` 以启用装饰器（decorators）和其他必要的 TypeScript 功能。"
     ],
     "questionsList": [
-      "如何平衡查询性能和内存使用？",
-      "是否需要为不同数据源设计不同的查询策略？"
+      "项目是否有统一的代码风格规范（如ESLint, Prettier配置）需要遵循？"
     ]
   },
   {
-    "stepDescription": "实现敏感数据脱敏处理机制",
+    "stepDescription": "步骤 2: 创建简历数据的 DTO (Data Transfer Objects)。根据 `src/config/initialResumeData.ts` 中的 `ResumeData` 类型，定义详细的 DTO 类。这将包括 `CreateResumeDto` 和 `UpdateResumeDto`，并为所有属性（包括嵌套对象和数组）添加 `class-validator` 装饰器以实现深度验证。",
     "techStackList": [
-      "Node.js",
-      "Lodash",
-      "Crypto"
+      "TypeScript",
+      "class-validator",
+      "class-transformer"
     ],
     "challengesList": [
-      "识别所有敏感字段",
-      "保持数据可用性的同时进行脱敏",
-      "处理嵌套数据结构中的敏感信息"
+      "为嵌套对象（如 `basic`）和对象数组（如 `education`, `projects`）正确配置 `@ValidateNested({ each: true })` 和 `@Type()` 装饰器，确保深层数据结构得到校验。",
+      "处理复杂类型（如富文本HTML字符串）的校验规则，确保既安全又灵活。",
+      "确保 DTO 定义与前端 `ResumeData` 类型完全同步，避免未来数据不匹配问题。"
     ],
     "questionsList": [
-      "脱敏后如何保持数据关联性？",
-      "是否需要可逆的脱敏方案？"
+      "对于 `PUT` 请求，是期望一个完整的 `ResumeData` 对象还是一个可以部分更新的对象？（需求明确指出是“完全替换”，因此 DTO 需包含所有可编辑字段）。"
     ]
   },
   {
-    "stepDescription": "构建Redis缓存层",
+    "stepDescription": "步骤 3: 实现原子化的 JSON 文件存储服务。创建一个可注入的 `JsonStorageService`，专门负责对 `data/db.json` 文件的读写。写操作必须遵循“读取 -> 内存修改 -> 写入临时文件 -> 重命名”的原子模式，以防止数据损坏。服务启动时需检查并创建 `data` 目录和 `db.json` 文件。",
     "techStackList": [
-      "Redis",
-      "Node.js",
-      "ioredis"
+      "Node.js `fs/promises` API",
+      "NestJS Dependency Injection"
     ],
     "challengesList": [
-      "设计合理的缓存键策略",
-      "处理缓存一致性问题",
-      "确定合适的缓存过期时间"
+      "健壮地实现原子写入逻辑，包括错误处理（例如，临时文件写入失败或重命名失败）。",
+      "确保文件路径相对于项目根目录是正确的，无论服务从哪个目录启动。",
+      "所有文件操作必须是异步的，避免阻塞 Node.js 事件循环。"
     ],
     "questionsList": [
-      "如何监控缓存命中率？",
-      "缓存失效策略如何设计？"
+      "当并发写入发生时，应采用何种锁定策略？（对于此项目，文件级操作的原子性已足够，无需实现复杂锁定机制）。"
     ]
   },
   {
-    "stepDescription": "实现数据变更监听机制",
+    "stepDescription": "步骤 4: 创建 `Resumes` 模块、控制器和服务。使用 NestJS CLI 生成 `ResumesModule`, `ResumesController`, 和 `ResumesService`。在模块中正确组织和声明这些组件，并注入 `JsonStorageService` 到 `ResumesService` 中。",
     "techStackList": [
-      "MySQL Binlog",
-      "Debezium",
-      "Kafka"
+      "NestJS CLI",
+      "NestJS Modules"
     ],
     "challengesList": [
-      "实时监听数据库变更",
-      "处理高频率变更事件",
-      "确保事件顺序一致性"
+      "确保依赖注入关系正确配置，`ResumesService` 能够成功访问 `JsonStorageService` 的实例。"
     ],
-    "questionsList": [
-      "如何降低监听对数据库性能的影响？",
-      "如何处理监听中断后的数据同步？"
-    ]
+    "questionsList": []
   },
   {
-    "stepDescription": "开发数据质量检查功能",
+    "stepDescription": "步骤 5: 实现创建简历 (POST /api/resumes) 的逻辑。在 `ResumesService` 中创建 `create` 方法，该方法接收 `CreateResumeDto`，生成 `id` (UUID V4)、`createdAt` 和 `updatedAt` 时间戳，组合成完整的简历对象，然后调用 `JsonStorageService` 持久化。控制器方法应返回 `201 Created` 状态码和新创建的完整简历对象。",
     "techStackList": [
-      "Node.js",
-      "Joi",
-      "Lodash"
+      "NestJS (@Post, @Body)",
+      "uuid",
+      "JsonStorageService"
     ],
     "challengesList": [
-      "定义全面的数据质量指标",
-      "处理数据不一致情况",
-      "生成易读的质量报告"
+      "确保服务器生成的字段（id, createdAt, updatedAt）会覆盖任何客户端可能意外传入的同名字段。",
+      "时间戳格式必须严格遵守 ISO 8601 标准。"
     ],
-    "questionsList": [
-      "如何量化数据质量？",
-      "质量检查的频率如何确定？"
-    ]
+    "questionsList": []
   },
   {
-    "stepDescription": "集成JWT鉴权机制",
+    "stepDescription": "步骤 6: 实现获取简历 (GET /api/resumes, GET /api/resumes/:id) 的逻辑。在 `ResumesService` 中实现 `findAll` 和 `findOne` 方法。`findAll` 返回所有简历的数组。`findOne` 根据 ID 查找简历，如果未找到，则必须抛出 NestJS 的 `NotFoundException` 以自动触发 `404 Not Found` 响应。",
     "techStackList": [
-      "NestJS",
-      "Passport.js",
-      "JWT"
+      "NestJS (@Get, @Param, NotFoundException)"
     ],
     "challengesList": [
-      "确保所有数据访问都经过授权",
-      "处理token过期和刷新",
-      "实现细粒度的权限控制"
+      "对于 `findAll`，需要将从 `db.json` 读取的 `Record<string, ResumeData>` 对象转换为 `ResumeData[]` 数组。",
+      "正确处理 `db.json` 文件不存在或为空的情况，`findAll` 应返回空数组 `[]`。"
     ],
-    "questionsList": [
-      "如何平衡安全性和性能？",
-      "是否需要支持多因素认证？"
-    ]
+    "questionsList": []
   },
   {
-    "stepDescription": "设计模块API接口",
+    "stepDescription": "步骤 7: 实现更新简历 (PUT /api/resumes/:id) 的逻辑。在 `ResumesService` 中实现 `update` 方法。该方法首先验证简历是否存在，若不存在则抛出 `NotFoundException`。然后，使用请求体中的数据完全替换原简历数据，但保留原有的 `id` 和 `createdAt`，并更新 `updatedAt` 字段。最后，调用 `JsonStorageService` 保存更改。",
     "techStackList": [
-      "NestJS",
-      "Swagger",
-      "RESTful"
+      "NestJS (@Put, @Param, @Body)"
     ],
     "challengesList": [
-      "设计清晰的API版本控制策略",
-      "处理高并发API请求",
-      "确保API文档的准确性"
+      "确保更新逻辑的正确性：必须保留原始的 `id` 和 `createdAt`，防止客户端篡改这些不可变数据。",
+      "更新操作也必须是原子的，依赖 `JsonStorageService` 的原子写入能力。"
     ],
-    "questionsList": [
-      "API响应格式如何标准化？",
-      "如何设计合理的限流策略？"
-    ]
+    "questionsList": []
   },
   {
-    "stepDescription": "实现性能监控和日志记录",
+    "stepDescription": "步骤 8: 实现删除简历 (DELETE /api/resumes/:id) 的逻辑。在 `ResumesService` 中实现 `remove` 方法。该方法先验证简历是否存在，不存在则抛出 `NotFoundException`。若存在，则从内存中的数据结构里删除该条目，并调用 `JsonStorageService` 将更新后的数据写回文件。控制器方法需配置为成功时返回 `204 No Content`。",
     "techStackList": [
-      "Winston",
-      "Prometheus",
-      "Grafana"
+      "NestJS (@Delete, @Param, @HttpCode(204))"
     ],
     "challengesList": [
-      "收集全面的性能指标",
-      "处理大量日志数据",
-      "设置合理的告警阈值"
+      "确保控制器在成功删除后返回正确的 HTTP 状态码 `204` 且响应体为空。"
     ],
-    "questionsList": [
-      "如何平衡监控粒度和系统开销？",
-      "日志保留策略如何设计？"
-    ]
+    "questionsList": []
   },
   {
-    "stepDescription": "编写单元测试和集成测试",
+    "stepDescription": "步骤 9: 全局配置和最终验证。在 `main.ts` 中，全局启用 `ValidationPipe`，并配置 `whitelist: true` 和 `forbidNonWhitelisted: true` 选项以增强安全性。设置全局 API 路由前缀为 `/api`。最后，通过 Postman 或类似的工具对所有 API 端点进行手动测试，确保其行为完全符合需求文档。",
     "techStackList": [
-      "Jest",
-      "Supertest",
-      "Mock Service Worker"
+      "NestJS (`app.useGlobalPipes`, `app.setGlobalPrefix`)",
+      "Postman/Insomnia"
     ],
     "challengesList": [
-      "模拟各种边界条件",
-      "测试大数据量场景",
-      "确保测试覆盖率"
+      "正确配置 `ValidationPipe` 以拒绝或剥离请求体中未在 DTO 中定义的额外字段。",
+      "全面测试所有成功和失败的场景，包括无效输入（400）、资源未找到（404）和服务器内部错误（500）。"
     ],
-    "questionsList": [
-      "如何设计有效的性能测试？",
-      "测试数据如何管理？"
-    ]
-  },
-  {
-    "stepDescription": "文档编写和API发布",
-    "techStackList": [
-      "Swagger UI",
-      "Markdown",
-      "Postman"
-    ],
-    "challengesList": [
-      "保持文档与代码同步",
-      "提供清晰的示例",
-      "说明使用限制和最佳实践"
-    ],
-    "questionsList": [
-      "如何组织文档结构？",
-      "是否需要提供多语言文档？"
-    ]
+    "questionsList": []
   }
 ]

@@ -4,22 +4,26 @@ import { RunnableSequence } from '@langchain/core/runnables';
 import { Injectable } from '@nestjs/common';
 import {
 	lookupResultSchema,
+	ProjecctLLM,
 	ProjectDto,
 	projectLookupedSchema,
 	projectMinedSchema,
 	projectPolishedSchema,
 	projectSchema,
 	skillsToMarkdown,
+	StreamingChunk,
 	UserFeedback,
 	UserInfoFromToken
 } from '@prism-ai/shared';
 import { z } from 'zod';
 import { ModelService } from '../model/model.service';
+import {
+	ThoughtModelService
+} from '../model/thought-model.service';
 import { KnowledgeVDBService } from '../prisma-agent/data_base/konwledge_vdb.service';
 import { ProjectCodeVDBService } from '../prisma-agent/data_base/project_code_vdb.service';
 import { ReflectAgentService } from '../prisma-agent/reflect_agent/reflect_agent.service';
 import { PromptService } from '../prompt/prompt.service';
-import { DeepSeekStreamChunk } from '../type/sse';
 import { RubustStructuredOutputParser } from '../utils/RubustStructuredOutputParser';
 import { ChainService } from './chain.service';
 
@@ -46,7 +50,8 @@ export class ProjectChainService {
 		public chainService: ChainService,
 		private readonly knowledgeVDBService: KnowledgeVDBService,
 		private readonly projectCodeVDBService: ProjectCodeVDBService,
-		private readonly reflectAgentService: ReflectAgentService
+		private readonly reflectAgentService: ReflectAgentService,
+		public thoughtModelService: ThoughtModelService
 	) {}
 
 	/**
@@ -61,10 +66,33 @@ export class ProjectChainService {
 		outputSchema: z.Schema,
 		inputSchema: z.Schema,
 		stream: boolean,
-		business: BusinessEnum
+		business: BusinessEnum,
+		model: ProjecctLLM
 	) {
-		const prompt = await promptGetter();
-		const llm = this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
+		const businessPrompt = await promptGetter();
+		let llm: any;
+		switch (model) {
+			case ProjecctLLM.gemini_2_5_pro:
+			case ProjecctLLM.gemini_2_5_pro_proxy:
+			case ProjecctLLM.gemini_2_5_flash:
+				llm = await this.thoughtModelService.getGeminiThinkingModelFlat(model);
+				break;
+			case ProjecctLLM.deepseek_reasoner:
+				llm = await this.thoughtModelService.getDeepSeekThinkingModleflat('deepseek-reasoner');
+				break;
+			default:
+				throw new Error(`_createProcessChain-不支持的模型:${model}`);
+		}
+
+		// 动态地将 "思考指令" 与 "业务指令" 组合在一起
+		// 实现功能prompt与业务prompt的关注点分离，业务组件直接当llm使用即可、
+		// 需要注意的是deepseek-r1不需要思考指令，所以不需要组合（组合也问题不大，只是其没有绑定对应工具可能会带来困惑）
+		const finalPrompt = ChatPromptTemplate.fromMessages([
+			// 思考/答案分离输出时才使用（还未稳定）
+			// ['system', THINKING_SYSTEM_PROMPT],
+			...businessPrompt.promptMessages
+		]);
+
 		const outputParser = RubustStructuredOutputParser.from(outputSchema, this.chainService);
 		const reflectChain = this.reflectAgentService.createReflectChain();
 
@@ -74,7 +102,7 @@ export class ProjectChainService {
 				input: (i: ProjectProcessingInput) => JSON.stringify(i.project),
 				chat_history: () => '', // 暂不处理多轮对话历史
 				instructions: () => outputParser.getFormatInstructions(),
-				instructions0: () => {
+				instructions_mid: () => {
 					const inputParser = inputSchema && StructuredOutputParser.fromZodSchema(inputSchema);
 					return inputParser ? inputParser.getFormatInstructions() : '';
 				},
@@ -132,7 +160,7 @@ export class ProjectChainService {
 
 				// 2. 反思逻辑：如果用户要求，则生成反思内容
 				reflection: async (i: ProjectProcessingInput) => {
-					// console.log('🚀 ~ reflection:', i);
+					// console.log('_createProcessChain ~ reflection:', i);
 					if (i.userFeedback.reflect && i.userFeedback.content) {
 						const reflectionResult = await reflectChain.invoke({
 							content: i.userFeedback.content,
@@ -148,7 +176,7 @@ export class ProjectChainService {
 					return '无'; // 如果不需要反思，则传入"无"
 				}
 			},
-			prompt,
+			finalPrompt,
 			llm
 		];
 		if (stream) {
@@ -161,10 +189,12 @@ export class ProjectChainService {
 	}
 
 	async lookupChain(
-		stream: true
-	): Promise<RunnableSequence<ProjectProcessingInput, DeepSeekStreamChunk>>; //流式返回时输出类型是指单个chunk的类型
+		stream: true,
+		model: ProjecctLLM
+	): Promise<RunnableSequence<ProjectProcessingInput, StreamingChunk>>; //流式返回时输出类型是指单个chunk的类型
 	async lookupChain(
-		stream: false
+		stream: false,
+		model: ProjecctLLM
 	): Promise<
 		RunnableSequence<
 			ProjectProcessingInput,
@@ -176,7 +206,7 @@ export class ProjectChainService {
 	 * @description 集成了知识库检索和用户反馈反思功能
 	 * @param stream - 是否以流式模式返回
 	 */
-	async lookupChain(stream = false) {
+	async lookupChain(stream = false, model: ProjecctLLM) {
 		const schema = lookupResultSchema;
 		const schema0 = projectLookupedSchema;
 
@@ -185,16 +215,19 @@ export class ProjectChainService {
 			schema,
 			schema0,
 			stream,
-			BusinessEnum.lookup
+			BusinessEnum.lookup,
+			model
 		);
 		return chain;
 	}
 
 	async polishChain(
-		stream: true
-	): Promise<RunnableSequence<ProjectProcessingInput, DeepSeekStreamChunk>>;
+		stream: true,
+		model: ProjecctLLM
+	): Promise<RunnableSequence<ProjectProcessingInput, StreamingChunk>>;
 	async polishChain(
-		stream: false
+		stream: false,
+		model: ProjecctLLM
 	): Promise<
 		RunnableSequence<
 			ProjectProcessingInput,
@@ -207,7 +240,7 @@ export class ProjectChainService {
 	 * @description 集成了知识库检索和用户反馈反思功能
 	 * @param stream - 是否以流式模式返回
 	 */
-	async polishChain(stream = false) {
+	async polishChain(stream = false, model: ProjecctLLM) {
 		const schema = projectPolishedSchema;
 		const schema0 = projectSchema;
 		const chain = await this._createProcessChain(
@@ -215,18 +248,21 @@ export class ProjectChainService {
 			schema,
 			schema0,
 			stream,
-			BusinessEnum.polish
+			BusinessEnum.polish,
+			model
 		);
 		return chain;
 	}
 
 	async mineChain(
 		stream: true,
+		model: ProjecctLLM,
 		userInfo: UserInfoFromToken,
 		skillService: any
-	): Promise<RunnableSequence<ProjectProcessingInput, DeepSeekStreamChunk>>;
+	): Promise<RunnableSequence<ProjectProcessingInput, StreamingChunk>>;
 	async mineChain(
 		stream: false,
+		model: ProjecctLLM,
 		userInfo: UserInfoFromToken,
 		skillService: any
 	): Promise<
@@ -241,21 +277,28 @@ export class ProjectChainService {
 	 * @description 集成了知识库检索和用户反馈反思功能
 	 * @param stream - 是否以流式模式返回
 	 */
-	async mineChain(stream = false, userInfo: UserInfoFromToken, skillService: any) {
+	async mineChain(stream = false, model: ProjecctLLM, userInfo: UserInfoFromToken, skillService: any) {
 		const schema = projectMinedSchema;
 		const schema0 = projectSchema;
 		//只取第一个用户技能
 		let userSkills = await skillService.findAll(userInfo);
 		const userSkillsMd = userSkills[0] ? skillsToMarkdown(userSkills[0]) : '';
-		const promptTemplate = (await this.promptService.minePrompt()).partial({
-			userSkills: userSkillsMd
-		});
+		const promptTemplate = await this.promptService.minePrompt({ userSkills: userSkillsMd });
+
+		// 小prompt测试用过，但大的就问题百出，gemini-2.5-pro的思考/答案分离输出
+		// const llm = await this.thoughtModelService.getGeminiThinkingModleflat('gemini-2.5-pro');
+		// const chainTest = ChatPromptTemplate.fromMessages([
+		// 	['system', THINKING_SYSTEM_PROMPT],
+		// 	['user', '请问x + 1 =3, x = ?']
+		// ]).pipe(llm);
+		// return chainTest;
 		const chain = await this._createProcessChain(
-			() => promptTemplate,
+			() => Promise.resolve(promptTemplate),
 			schema,
 			schema0,
 			stream,
-			BusinessEnum.mine
+			BusinessEnum.mine,
+			model
 		);
 
 		return chain;

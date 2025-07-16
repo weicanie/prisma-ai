@@ -1,6 +1,7 @@
 import { BaseLanguageModelInput } from '@langchain/core/language_models/base';
+import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { AIMessageChunk } from '@langchain/core/messages';
-import { ChatOpenAI, ChatOpenAICallOptions, ChatOpenAIFields } from '@langchain/openai';
+import { ChatOpenAICallOptions } from '@langchain/openai';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CircuitBreakerService } from './services/circuit-breaker.service';
@@ -9,8 +10,8 @@ import { RequestQueueService } from './services/request-queue.service';
 import { RetryService } from './services/retry.service';
 
 interface HAModelClientOptions {
-	//模型参数
-	modelConfig: ChatOpenAIFields;
+	//模型实例
+	model: BaseChatModel;
 	//熔断器配置
 	circuitBreakerConfig: {
 		failureThreshold: number;
@@ -38,13 +39,13 @@ type DeepPartial<T> = {
 };
 
 /**
- * @description 增强的ChatOpenAI, 继承自langchain的ChatOpenAI
- * @description 拦截invoke方法, 添加熔断器、限流器、指数退避重试、请求队列,实现模型服务的高可用
+ * @description 增强的ChatModel, 拦截invoke方法, 添加熔断器、限流器、指数退避重试、请求队列,实现模型服务的高可用
  */
-//TODO 改为组合ChatOpenAI、ChatDeepSeek,根据modelname区分,ChatDeepSeek需要打平config参数（和ChatOpenAI的差异性）
-export class HAModelClient extends ChatOpenAI {
+export class HAModelClient {
+	//模型实例
+	public model: BaseChatModel;
 	//模型参数
-	private modelConfig: ChatOpenAIFields;
+	// private modelConfig: ChatOpenAIFields;
 	//熔断器配置
 	public circuitBreakerConfig: {
 		failureThreshold: number;
@@ -74,9 +75,7 @@ export class HAModelClient extends ChatOpenAI {
 		private requestQueueService: RequestQueueService,
 		private rateLimiter: RateLimiterService
 	) {
-		super(config.modelConfig as ChatOpenAIFields);
-
-		this.modelConfig = config.modelConfig as ChatOpenAIFields;
+		this.model = config.model as BaseChatModel;
 		this.circuitBreakerConfig = config.circuitBreakerConfig as any;
 		this.rateLimiterConfig = config.rateLimiterConfig as any;
 		this.retryConfig = config.retryConfig as any;
@@ -108,8 +107,8 @@ export class HAModelClient extends ChatOpenAI {
 	private withBreaker(input: BaseLanguageModelInput, options?: ChatOpenAICallOptions) {
 		// 设置熔断器
 		const breaker = this.circuitBreakerService.createBreaker(
-			`${this.modelConfig?.model ?? '模型名称读取失败'}`,
-			async input => super.invoke(input, options), //*在这里调用父类的invoke方法
+			`${(this.model as any)?.model ?? '模型名称读取失败'}`,
+			async input => this.model.invoke(input, options), //*在这里调用模型的invoke方法
 			{
 				failureThreshold: 40,
 				resetTimeout: 20000
@@ -117,7 +116,7 @@ export class HAModelClient extends ChatOpenAI {
 		);
 		breaker.fallback(() => {
 			throw new HttpException(
-				`${this.modelConfig?.model}服务暂时不可用`,
+				`${(this.model as any)?.model}服务暂时不可用`,
 				HttpStatus.SERVICE_UNAVAILABLE
 			);
 		});
@@ -135,37 +134,38 @@ export class HAModelClientService {
 		private configService: ConfigService
 	) {}
 	createClient(
-		config: DeepPartial<HAModelClientOptions> = {
-			modelConfig: {
-				model: 'deepseek-reasoner',
-				configuration: {
-					apiKey: this.configService.get('API_KEY_DEEPSEEK'),
-					timeout: 6000,
-					baseURL: this.configService.get('BASE_URL_DEEPSEEK'),
-					maxRetries: 3
-				}
-			},
-			circuitBreakerConfig: {
-				failureThreshold: 40,
-				resetTimeout: 20000
-			},
-			rateLimiterConfig: {
-				maxRequestsPerMinute: 60
-			},
-			retryConfig: {
-				maxRetries: 4,
-				initialDelayMs: 1000,
-				maxDelayMs: 15000,
-				factor: 2,
-				retryableErrors: [
-					/429/, // 速率限制错误
-					/503/, // 服务不可用
-					/timeout/i, // 超时错误
-					/ECONNRESET/, // 连接重置
-					/ETIMEDOUT/ // 连接超时
-				]
-			}
-		}
+		config: DeepPartial<HAModelClientOptions>
+		// = {
+		// 	modelConfig: {
+		// 		model: 'deepseek-reasoner',
+		// 		configuration: {
+		// 			apiKey: this.configService.get('API_KEY_DEEPSEEK'),
+		// 			timeout: 6000,
+		// 			baseURL: this.configService.get('BASE_URL_DEEPSEEK'),
+		// 			maxRetries: 3
+		// 		}
+		// 	},
+		// 	circuitBreakerConfig: {
+		// 		failureThreshold: 40,
+		// 		resetTimeout: 20000
+		// 	},
+		// 	rateLimiterConfig: {
+		// 		maxRequestsPerMinute: 60
+		// 	},
+		// 	retryConfig: {
+		// 		maxRetries: 4,
+		// 		initialDelayMs: 1000,
+		// 		maxDelayMs: 15000,
+		// 		factor: 2,
+		// 		retryableErrors: [
+		// 			/429/, // 速率限制错误
+		// 			/503/, // 服务不可用
+		// 			/timeout/i, // 超时错误
+		// 			/ECONNRESET/, // 连接重置
+		// 			/ETIMEDOUT/ // 连接超时
+		// 		]
+		// 	}
+		// }
 	) {
 		return new HAModelClient(
 			config,

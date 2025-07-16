@@ -6,6 +6,7 @@ export function jsonMd_obj(content: string) {
 		JSON.parse(content);
 		return content;
 	} catch (err) {
+		console.log('jsonMd_obj 直接解析错误，尝试修复：',err)
 		const jsonMd = content.match(/(?<=```json)(.*)(?=```)/gs)?.[0]; //.默认不匹配\n,需要启用s
 
 		if (!jsonMd) {

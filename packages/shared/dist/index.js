@@ -26,6 +26,7 @@ __export(index_exports, {
   JobOpenStatus: () => JobOpenStatus,
   JobStatus: () => JobStatus,
   KnowledgeTypeEnum: () => KnowledgeTypeEnum,
+  ProjecctLLM: () => ProjecctLLM,
   ProjectStatus: () => ProjectStatus,
   RequestTargetMap: () => RequestTargetMap,
   ResumeStatus: () => ResumeStatus,
@@ -4384,6 +4385,13 @@ var ProjectStatus = /* @__PURE__ */ ((ProjectStatus2) => {
   ProjectStatus2["matched"] = "matched";
   return ProjectStatus2;
 })(ProjectStatus || {});
+var ProjecctLLM = /* @__PURE__ */ ((ProjecctLLM2) => {
+  ProjecctLLM2["gemini_2_5_pro"] = "gemini-2.5-pro";
+  ProjecctLLM2["gemini_2_5_pro_proxy"] = "gemini-2.5-pro-proxy";
+  ProjecctLLM2["deepseek_reasoner"] = "deepseek-reasoner";
+  ProjecctLLM2["gemini_2_5_flash"] = "gemini-2.5-flash";
+  return ProjecctLLM2;
+})(ProjecctLLM || {});
 
 // src/types/project.schema-form.ts
 var infoSchemaForm = z.object({
@@ -4442,6 +4450,7 @@ function jsonMd_obj(content) {
     JSON.parse(content);
     return content;
   } catch (err) {
+    console.log("jsonMd_obj \u76F4\u63A5\u89E3\u6790\u9519\u8BEF\uFF0C\u5C1D\u8BD5\u4FEE\u590D\uFF1A", err);
     const jsonMd = content.match(/(?<=```json)(.*)(?=```)/gs)?.[0];
     if (!jsonMd) {
       console.error(`jsonMd_obj\u6CA1\u627E\u5230json\u5185\u5BB9\u5757,\u8F93\u5165: ${content}`);
@@ -4633,6 +4642,7 @@ var markdownToSkills = (markdown) => {
   JobOpenStatus,
   JobStatus,
   KnowledgeTypeEnum,
+  ProjecctLLM,
   ProjectStatus,
   RequestTargetMap,
   ResumeStatus,

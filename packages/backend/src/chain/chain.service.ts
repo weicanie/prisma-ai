@@ -41,7 +41,7 @@ export class ChainService implements WithFormfixChain {
 		public promptService: PromptService,
 		private agentService: AgentService,
 		public clientService: MCPClientService,
-		public configService: ConfigService
+		public configService: ConfigService,
 	) {}
 
 	/**
@@ -81,7 +81,7 @@ export class ChainService implements WithFormfixChain {
 					return outputParser.getFormatInstructions();
 				},
 				/* 当输出包含输入格式的输出数据时,需要向模型指定 */
-				instructions0: async () => {
+				instructions_mid: async () => {
 					const outputParser = inputSchema && StructuredOutputParser.fromZodSchema(inputSchema);
 					return outputParser && outputParser.getFormatInstructions();
 				}
@@ -125,7 +125,7 @@ export class ChainService implements WithFormfixChain {
 					return outputParser.getFormatInstructions();
 				},
 				/* 当输出包含输入格式的输出数据时,需要向模型指定 */
-				instructions0: async () => {
+				instructions_mid: async () => {
 					const outputParser = inputSchema && StructuredOutputParser.fromZodSchema(inputSchema);
 					return outputParser && outputParser.getFormatInstructions();
 				}
@@ -278,7 +278,8 @@ export class ChainService implements WithFormfixChain {
 				根据以下格式说明和错误信息修复格式错误。
 				注意不要修改任何信息。
 				格式说明:{instructions}
-				错误信息:{errMsg}
+				错误信息:{errMsg}。
+				输出要求：仅输出修复后的JSON对象，不要输出任何其他内容。
 				`
 			],
 			[`${role.HUMAN}`, '{input}']

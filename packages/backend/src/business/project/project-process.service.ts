@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import {
 	jsonMd_obj,
 	lookupResultSchema,
+	ProjecctLLM,
 	ProjectDto,
 	projectLookupedDto,
 	projectMinedSchema,
@@ -15,13 +16,12 @@ import {
 	UserInfoFromToken
 } from '@prism-ai/shared';
 import { Model } from 'mongoose';
-import { from, mergeMap, Observable } from 'rxjs';
+import { from, Observable } from 'rxjs';
 import { ZodSchema } from 'zod';
 import { ChainService } from '../../chain/chain.service';
 import { ProjectChainService } from '../../chain/project-chain.service';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { RedisService } from '../../redis/redis.service';
-import { DeepSeekStreamChunk } from '../../type/sse';
 import { WithFuncPool } from '../../utils/abstract';
 import { SseFunc } from '../../utils/type';
 import { SkillService } from '../skill/skill.service';
@@ -55,7 +55,7 @@ export class ProjectProcessService implements WithFuncPool {
 		public projectChainService: ProjectChainService,
 		public eventBusService: EventBusService,
 		public redisService: RedisService,
-		public skillService: SkillService
+		public skillService: SkillService,
 	) {
 		this.funcPool = {
 			polishProject: this.polishProject.bind(this),
@@ -194,7 +194,8 @@ export class ProjectProcessService implements WithFuncPool {
 		project: ProjectDto,
 		userInfo: UserInfoFromToken,
 		taskId: string,
-		userFeedback: UserFeedback = { reflect: false, content: '' }
+		userFeedback: UserFeedback = { reflect: false, content: '' },
+		model: ProjecctLLM
 	): Promise<Observable<StreamingChunk>> {
 		const existingPolishingProject = await this.projectPolishedModel
 			.findOne({
@@ -233,27 +234,15 @@ export class ProjectProcessService implements WithFuncPool {
 				});
 		});
 
-		const chain = await this.projectChainService.lookupChain(true);
+		const chain = await this.projectChainService.lookupChain(true, model);
 		const lookupStream = await chain.stream({
 			project,
 			userInfo,
 			userFeedback
 		});
-
-		return from(lookupStream).pipe(
-			mergeMap(async (chunk: DeepSeekStreamChunk) => {
-				const done = !chunk.content && chunk.additional_kwargs.reasoning_content === null;
-				const isReasoning =
-					chunk.additional_kwargs.reasoning_content !== null &&
-					chunk.additional_kwargs.reasoning_content !== undefined;
-				return {
-					content: !isReasoning ? chunk.content : '',
-					reasonContent: isReasoning ? chunk.additional_kwargs?.reasoning_content! : '',
-					done,
-					isReasoning
-				};
-			})
-		);
+		
+		// 业务层不再关心模型细节，直接返回标准化的 StreamingChunk 流
+		return from(lookupStream) as Observable<StreamingChunk>;
 	}
 
 	/**
@@ -314,7 +303,8 @@ export class ProjectProcessService implements WithFuncPool {
 		project: projectLookupedDto,
 		userInfo: UserInfoFromToken,
 		taskId: string,
-		userFeedback: UserFeedback = { reflect: false, content: '' }
+		userFeedback: UserFeedback = { reflect: false, content: '' },
+		model: ProjecctLLM
 	): Promise<Observable<StreamingChunk>> {
 		const existingPolishingProject = await this.projectPolishedModel
 			.findOne({
@@ -380,24 +370,13 @@ export class ProjectProcessService implements WithFuncPool {
 				});
 		});
 
-		const chain = await this.projectChainService.polishChain(true);
+		const chain = await this.projectChainService.polishChain(true, model);
 		let projectPolished = await chain.stream({
 			project,
 			userInfo,
 			userFeedback
 		});
-		return from(projectPolished).pipe(
-			mergeMap(async (chunk: DeepSeekStreamChunk) => {
-				const done = !chunk.content && chunk.additional_kwargs.reasoning_content === null;
-				const isReasoning = chunk.additional_kwargs.reasoning_content !== null;
-				return {
-					content: !isReasoning ? chunk.content : '',
-					reasonContent: isReasoning ? chunk.additional_kwargs?.reasoning_content! : '',
-					done,
-					isReasoning
-				};
-			})
-		);
+		return from(projectPolished)  as Observable<StreamingChunk>
 	}
 
 	/**
@@ -410,7 +389,8 @@ export class ProjectProcessService implements WithFuncPool {
 		project: ProjectDto,
 		userInfo: UserInfoFromToken,
 		taskId: string,
-		userFeedback: UserFeedback = { reflect: false, content: '' }
+		userFeedback: UserFeedback = { reflect: false, content: '' },
+		model: ProjecctLLM
 	): Promise<Observable<StreamingChunk>> {
 		const existingMiningProject = await this.projectMinedModel
 			.findOne({
@@ -466,23 +446,12 @@ export class ProjectProcessService implements WithFuncPool {
 				});
 		});
 
-		const chain = await this.projectChainService.mineChain(true, userInfo, this.skillService);
+		const chain = await this.projectChainService.mineChain(true, model, userInfo, this.skillService);
 		let projectMined = await chain.stream({
 			project,
 			userInfo,
 			userFeedback
 		});
-		return from(projectMined).pipe(
-			mergeMap(async (chunk: DeepSeekStreamChunk) => {
-				const done = !chunk.content && chunk.additional_kwargs.reasoning_content === null;
-				const isReasoning = chunk.additional_kwargs.reasoning_content !== null;
-				return {
-					content: !isReasoning ? chunk.content : '',
-					reasonContent: isReasoning ? chunk.additional_kwargs?.reasoning_content! : '',
-					done,
-					isReasoning
-				};
-			})
-		);
+		return from(projectMined) as Observable<StreamingChunk>;
 	}
 }

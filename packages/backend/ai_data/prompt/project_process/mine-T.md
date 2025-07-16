@@ -94,7 +94,7 @@
 
 ### 亮点添加后的新项目经验
 
-{instructions0}
+{instructions_mid}
 
 ### 注意
 

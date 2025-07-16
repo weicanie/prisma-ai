@@ -1,6 +1,6 @@
 {
   "output": {
-    "userFeedback": "你的反馈内容(你来写)",
+    "userFeedback": "你的反馈(由你撰写)",
     "writtenCodeFiles": "cursor的修改总结清单(由cursor生成)",
     "summary": "cursor的最终总结(由cursor生成)"
   }

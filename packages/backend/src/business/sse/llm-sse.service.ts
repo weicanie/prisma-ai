@@ -3,6 +3,7 @@ import {
 	DataChunkErrVO,
 	DataChunkVO,
 	LLMSessionRequest,
+	ProjecctLLM,
 	UserInfoFromToken
 } from '@prism-ai/shared';
 import { catchError, mergeMap, Observable, timeout } from 'rxjs';
@@ -25,6 +26,7 @@ interface LLMSseTask extends PersistentTask {
 		 * 该函数即为流式数据源
 		 */
 		poolName: string;
+		model: ProjecctLLM;//使用的llm
 		cancelFn?: () => void;
 	};
 }
@@ -116,7 +118,8 @@ export class LLMSseService implements OnModuleInit {
 			context.input,
 			context.userInfo!,
 			taskId,
-			context.userFeedback ?? { reflect: false, content: '' }
+			context.userFeedback ?? { reflect: false, content: '' },
+			metadata.model
 		);
 		/* 返回一个Promise，该Promise在该Observable完成时才会解析 */
 		return new Promise<void>((resolve, reject) => {

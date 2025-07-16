@@ -10,6 +10,8 @@ import type {
 	UserFeedback
 } from '@prism-ai/shared';
 import { toast } from 'sonner';
+import store from '../../store';
+import { selectProjectLLM } from '../../store/projects';
 import { instance } from '../config';
 
 /**
@@ -191,12 +193,15 @@ function getSseData(
 	let url = '';
 	const baseUrl = import.meta.env.VITE_API_BASE_URL; //协议-主机-端口
 
+	//获取模型
+	const model = selectProjectLLM(store.getState());
+
 	if (status === 'backdone' || status === 'running') {
 		// 断点接传 - 从上次中断的地方继续
-		url = `${baseUrl}${path}?sessionId=${localStorage.getItem(llmSessionKey)}&token=${token}&recover=true`;
+		url = `${baseUrl}${path}?sessionId=${localStorage.getItem(llmSessionKey)}&token=${token}&recover=true&model=${model}`;
 	} else if (status === 'tasknotfound') {
 		// 创建新任务 - 开始新的生成
-		url = `${baseUrl}${path}?sessionId=${localStorage.getItem(llmSessionKey)}&token=${token}`;
+		url = `${baseUrl}${path}?sessionId=${localStorage.getItem(llmSessionKey)}&token=${token}&model=${model}`;
 	} else return cleanup;
 
 	try {
