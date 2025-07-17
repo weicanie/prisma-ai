@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 import { UserInfoFromToken } from '@prism-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
-import { CrawlQuestionService } from '../question/crawl-question.service';
 import { CrawlJobService } from './crawl-job.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { StartCrawlDto } from './dto/start-crawl.dto';
@@ -23,7 +22,6 @@ export class JobController {
 	constructor(
 		private readonly jobService: JobService,
 		private readonly crawlJobService: CrawlJobService,
-		private readonly crawlQuestionService: CrawlQuestionService
 	) {}
 
 	@RequireLogin()

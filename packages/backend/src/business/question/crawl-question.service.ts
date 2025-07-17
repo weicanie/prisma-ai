@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -66,13 +66,13 @@ const delayConfig = {
  * 3. 模拟真实用户行为(滚动、鼠标移动)
  */
 @Injectable()
-export class CrawlQuestionService {
+export class CrawlQuestionService implements OnModuleDestroy {
 	// 日志记录器
 	private readonly logger = new Logger(CrawlQuestionService.name);
 	taskType = 'crawl-question';
-	// 用于HTML转Markdown的浏览器页面
+	// 用于HTML转Markdown的浏览器实例和页面
+	private browser: puppeteer.Browser | null = null;
 	private converterPage: puppeteer.Page | null = null;
-	private converterBrowser: puppeteer.Browser | null = null;
 	// 本地缓存文件路径，用于中断恢复
 	private readonly cacheFilePath = path.join(process.cwd(), 'crawl_data/questions.json');
 
@@ -89,6 +89,16 @@ export class CrawlQuestionService {
 			throw error;
 		}
 		this.logger.log(`爬虫任务处理器已注册: ${this.taskType}`);
+	}
+
+	async onModuleDestroy() {
+		this.logger.log('正在关闭浏览器实例...');
+		if (this.browser) {
+			await this.browser.close();
+			this.browser = null;
+			this.converterPage = null;
+			this.logger.log('浏览器实例已关闭。');
+		}
 	}
 
 	private async _taskHandler(task: CrawlTask): Promise<void> {
@@ -119,10 +129,12 @@ export class CrawlQuestionService {
 		const domain = task.metadata.options.domain;
 
 		this.logger.log(`开始爬取目标URL: ${listPageUrl}`);
-		// 初始化用于HTML转Markdown的浏览器页面
-		this.converterBrowser = await puppeteer.launch({ headless: false });
-		this.converterPage = await this.converterBrowser.newPage();
-		const { browser, page } = await this._initializeBrowser();
+
+		// 统一初始化浏览器和页面
+		this.browser = await this._initializeBrowser();
+		const page = await this.browser.newPage();
+		this.converterPage = await this.browser.newPage();
+
 
 		try {
 			await this.converterPage.goto('https://htmlmarkdown.com/', { waitUntil: 'networkidle2' });
@@ -227,9 +239,12 @@ export class CrawlQuestionService {
 			this.logger.error('爬虫执行过程中发生错误:', error);
 			throw error;
 		} finally {
-			await browser.close();
-			await this.converterBrowser.close();
-			this.logger.log('浏览器已关闭');
+			// 在任务结束时不关闭浏览器，由 onModuleDestroy 管理
+			if (page && !page.isClosed()) await page.close();
+			if (this.converterPage && !this.converterPage.isClosed()) {
+				await this.converterPage.close();
+			}
+			this.logger.log('任务页面已关闭，但浏览器实例保持运行。');
 		}
 	}
 
@@ -257,7 +272,7 @@ export class CrawlQuestionService {
 			await page.goto(url, { waitUntil: 'networkidle2' });
 
 			// 等待页面完全加载并进行初始的用户行为模拟
-			await page.waitForSelector('.answerBtn___3rwds', { timeout: 10000 });
+			await page.waitForSelector('.answerBtn___3rwds', { timeout: 100000 });
 			await this._simulateUserInteraction(page);
 
 			// 更真实的点击模拟
@@ -268,7 +283,7 @@ export class CrawlQuestionService {
 			}
 
 			// 等待答案内容加载
-			await page.waitForSelector('.detailBox___3lvLy', { timeout: 10000 });
+			await page.waitForSelector('.detailBox___3lvLy', { timeout: 100000 });
 
 			// 再次模拟用户交互，确保页面内容完全加载
 			await this._simulateUserInteraction(page);
@@ -371,68 +386,59 @@ export class CrawlQuestionService {
 	}
 	/**
 	 * 初始化 Puppeteer 浏览器和页面实例
-	 * @returns 返回浏览器和页面实例
+	 * @returns 返回浏览器实例
 	 */
-	private async _initializeBrowser(): Promise<{
-		browser: puppeteer.Browser;
-		page: puppeteer.Page;
-	}> {
+	private async _initializeBrowser(): Promise<puppeteer.Browser> {
+		if (this.browser && this.browser.isConnected()) {
+			this.logger.log('浏览器实例已存在，将重用。');
+			return this.browser;
+		}
+
 		this.logger.log('正在初始化浏览器...');
-		const browser = await puppeteer.launch({
-			headless: false, // 设置为非无头模式，方便观察
-			defaultViewport: {
-				width: 1366,
-				height: 768
-			},
-			args: [
-				'--no-sandbox',
-				'--disable-setuid-sandbox',
-				'--disable-dev-shm-usage',
-				'--disable-web-security',
-				'--disable-features=VizDisplayCompositor',
-				'--disable-blink-features=AutomationControlled' // 禁用自动化控制标识
-			]
-		});
+		const browserWSEndpoint = process.env.PUPPETEER_BROWSER_WSE_ENDPOINT;
 
-		const page = await browser.newPage();
-
-		// 设置随机的用户代理
-		const userAgents = [
-			'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-			'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
-		];
-		await page.setUserAgent(userAgents[Math.floor(Math.random() * userAgents.length)]);
-
-		// 移除 webdriver 标识
-		await page.evaluateOnNewDocument(() => {
-			Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-		});
-
-		// 添加更多反检测措施
-		await page.evaluateOnNewDocument(() => {
-			// 隐藏自动化特征
-			Object.defineProperty(navigator, 'plugins', {
-				get: () => [1, 2, 3, 4, 5]
-			});
-			Object.defineProperty(navigator, 'languages', {
-				get: () => ['zh-CN', 'zh', 'en']
-			});
-
-			// 隐藏webdriver等自动化标识
+		if (browserWSEndpoint) {
+			this.logger.log(`正在连接到远程浏览器: ${browserWSEndpoint}`);
 			try {
-				// @ts-ignore
-				delete window.navigator.webdriver;
-				// @ts-ignore
-				delete window.chrome;
-				// @ts-ignore
-				window.navigator.webdriver = false;
-			} catch (e) {
-				// 忽略删除错误
+				this.browser = await puppeteer.connect({
+					browserWSEndpoint,
+					defaultViewport: {
+						width: 1366,
+						height: 768
+					}
+				});
+				this.logger.log('成功连接到远程浏览器。');
+			} catch (error) {
+				this.logger.error(`连接到远程浏览器失败: ${error.message}`, error.stack);
+				throw new Error('无法连接到远程浏览器服务');
 			}
+		} else {
+			this.logger.log('未检测到远程浏览器端点，将启动本地 Puppeteer 实例。');
+			this.browser = await puppeteer.launch({
+				headless: false,
+				defaultViewport: {
+					width: 1366,
+					height: 768
+				},
+				args: [
+					'--no-sandbox',
+					'--disable-setuid-sandbox',
+					'--disable-dev-shm-usage',
+					'--disable-web-security',
+					'--disable-features=VizDisplayCompositor',
+					'--disable-blink-features=AutomationControlled'
+				]
+			});
+			this.logger.log('本地 Puppeteer 实例启动成功。');
+		}
+
+		this.browser.on('disconnected', () => {
+			this.logger.warn('浏览器连接已断开。');
+			this.browser = null;
+			this.converterPage = null;
 		});
 
-		this.logger.log('浏览器初始化完成');
-		return { browser, page };
+		return this.browser;
 	}
 
 	/**
@@ -457,7 +463,7 @@ export class CrawlQuestionService {
 		this.logger.log('等待结束，继续执行爬虫任务。');
 
 		// 等待标签加载
-		await page.waitForSelector('.entryBox___1cUts span.ant-tag-checkable', { timeout: 10000 });
+		await page.waitForSelector('.entryBox___1cUts span.ant-tag-checkable', { timeout: 100000 });
 		const allCategories = await page.evaluate(() =>
 			Array.from(document.querySelectorAll('.entryBox___1cUts span.ant-tag-checkable'))
 				.map(tag => tag.textContent || '')
@@ -499,7 +505,7 @@ export class CrawlQuestionService {
 			}, category);
 
 			// 等待题目列表刷新
-			await page.waitForSelector('.ant-list-items', { timeout: 10000 });
+			await page.waitForSelector('.ant-list-items', { timeout: 100000 });
 			await this._simulateHumanBehavior('list');
 
 			let isLastPage = false;
@@ -524,7 +530,7 @@ export class CrawlQuestionService {
 					this.logger.log('点击下一页');
 					await nextButton.click();
 					await this._simulateHumanBehavior('list');
-					await page.waitForSelector('.ant-spin-spinning', { hidden: true, timeout: 10000 });
+					await page.waitForSelector('.ant-spin-spinning', { hidden: true, timeout: 100000 });
 				} else {
 					this.logger.log(`分类 "${category}" 已是最后一页`);
 					isLastPage = true;
@@ -662,7 +668,7 @@ export class CrawlQuestionService {
 					const outputArea = document.getElementById('output') as HTMLTextAreaElement;
 					return outputArea?.value;
 				},
-				{ timeout: 5000 }
+				{ timeout: 50000 }
 			);
 
 			const markdown = await this.converterPage.evaluate(() => {

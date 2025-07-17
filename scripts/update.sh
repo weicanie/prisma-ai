@@ -21,11 +21,15 @@ else
 
   COMPOSE_FILE="compose.yaml"
   if [ -f "$COMPOSE_FILE" ]; then
-    echo "ℹ️  正在更新 $COMPOSE_FILE 文件中的镜像版本为 $latest_tag..."
-    # 使用 sed 命令来查找所有 'onlyie/' 开头的镜像，并将它们的 tag 更新为 '$latest_tag'
+    # 从 tag 中移除 'v' 前缀，获取纯版本号
+    # 例如: v3.2.0 -> 3.2.0
+    version_number=$(echo "$latest_tag" | sed 's/^v//')
+    
+    echo "ℹ️  正在更新 $COMPOSE_FILE 文件中的镜像版本为 $version_number..."
+    # 使用 sed 命令来查找所有 'onlyie/' 开头的镜像，并将它们的 tag 更新为版本号（不带 v 前缀）
     # -i.bak 会创建一个备份文件 compose.yaml.bak
-    sed -i.bak "s|\(image:.*docker\.1ms\.run/onlyie/[^:]*\):.*|\1:$latest_tag|g" "$COMPOSE_FILE"
-    echo "✅  $COMPOSE_FILE 文件更新完毕。"
+    sed -i.bak "s|\(image:.*docker\.1ms\.run/onlyie/[^:]*\):.*|\1:$version_number|g" "$COMPOSE_FILE"
+    echo "✅  $COMPOSE_FILE 文件更新完毕。镜像版本已更新为: $version_number"
   else
     echo "⚠️  警告: $COMPOSE_FILE 未找到，跳过镜像版本更新。"
   fi

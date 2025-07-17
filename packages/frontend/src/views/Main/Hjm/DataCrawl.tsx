@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import type { PersistentTaskVo, StartCrawlDto } from '@prism-ai/shared';
+import { ExternalLink } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { getTaskResult, startCrawl, startSyncJobsToVectorDB } from '../../../services/hjm';
@@ -18,6 +19,8 @@ import { PageHeader } from '../components/PageHeader';
 
 // Define a specific type for the task data
 type PolledTask = PersistentTaskVo;
+
+export const browserlessUrl = 'http://localhost:3123';
 
 // Custom hook to poll task status
 function useTaskPolling(taskId: string | null) {
@@ -35,6 +38,7 @@ function useTaskPolling(taskId: string | null) {
 					if (task.status === 'completed' || task.status === 'failed') {
 						clearInterval(interval);
 						toast.success(`Task ${task.status}: ${task.error || 'Completed'}`);
+						setIsCrawlRunning(false);
 					}
 				} else {
 					clearInterval(interval);
@@ -50,6 +54,16 @@ function useTaskPolling(taskId: string | null) {
 	}, [taskId]);
 
 	return taskData;
+}
+/**
+ * 持久化爬虫状态
+ * @param isCrawlRunning 
+ */
+function setIsCrawlRunning(isCrawlRunning: boolean) {
+	localStorage.setItem('isJobCrawlRunning', isCrawlRunning.toString());
+}
+function getIsCrawlRunning() {
+	return localStorage.getItem('isJobCrawlRunning') === 'true';
 }
 
 export function DataCrawl() {
@@ -83,6 +97,11 @@ export function DataCrawl() {
 
 	// Handler to start crawling
 	const handleStartCrawl = async () => {
+		if (getIsCrawlRunning()) {
+			toast.warning('爬取任务正在运行，请稍后再试');
+			return;
+		}
+		setIsCrawlRunning(true);
 		try {
 			const response = await startCrawl(crawlInputs);
 			if (response.code === '0') {
@@ -189,6 +208,29 @@ export function DataCrawl() {
 				</Card>
 
 				<Separator />
+
+				{
+					getIsCrawlRunning()&&
+						<Card className="bg-background/50">
+							<CardHeader>
+							<CardTitle>爬虫正在运行</CardTitle>
+								<CardDescription>
+									爬虫任务正在后台执行。您可以点击下面的按钮在新标签页中打开监控面板，实时查看爬取过程。
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<Button 
+									variant="outline" 
+									onClick={() => window.open(browserlessUrl, '_blank')}
+								>
+									<ExternalLink className="mr-2 h-4 w-4" />
+									打开监控面板
+								</Button>
+							</CardContent>
+						</Card>
+				}
+
+			<Separator />
 
 				<Card className="bg-background/50">
 					<CardHeader>

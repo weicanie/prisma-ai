@@ -1,5 +1,15 @@
 # 本地构建镜像，用于开发环境
 services:
+  browserless-chrome:
+    image: docker.1ms.run/browserless/chrome:latest
+    restart: unless-stopped
+    container_name: browserless-chrome
+    environment:
+      # 允许跨域请求，这通常也会放宽一些嵌入策略
+      - ENABLE_CORS=true
+    # 如果需要在主机上进行调试，可以取消下面的端口注释
+    ports:
+      - "3123:3000"
   prisma-ai-backend:
     build:
       context: .
@@ -25,6 +35,10 @@ services:
       MONGO_HOST: mongo-container
       # 覆盖env_file中的同名环境变量
       DATABASE_URL: mysql://root:qwqw1314.@mysql-container:3306/prisma-ai
+      # 默认连接，用于生产和普通执行
+      PUPPETEER_BROWSER_WSE_ENDPOINT: ws://browserless-chrome:3000
+      # 专门用于调试的连接，它会显示在Dashboard上
+      PUPPETEER_DEBUG_WSE_ENDPOINT: ws://browserless-chrome:3000?--user-data-dir=/tmp/custom-profile
     ports:
       - '3003:3003'
     volumes:
@@ -51,7 +65,7 @@ services:
     restart: unless-stopped
     depends_on:
       - prisma-ai-backend
-      - minio-container  
+      - minio-container
   mysql-container:
     image: docker.1ms.run/library/mysql
     #占用的主机端口:网络内访问使用的端口
@@ -68,7 +82,7 @@ services:
       MYSQL_ROOT_HOST: '%'
     restart: unless-stopped
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      test: [ 'CMD', 'mysqladmin', 'ping', '-h', 'localhost' ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -80,7 +94,7 @@ services:
       - ./docker-data/redis:/data
     restart: unless-stopped
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: [ 'CMD', 'redis-cli', 'ping' ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -92,7 +106,7 @@ services:
       - ./docker-data/mongo:/data/db
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -106,7 +120,7 @@ services:
     restart: unless-stopped
     user: root
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -116,5 +130,4 @@ services:
       MINIO_DEFAULT_BUCKETS: prisma-ai
     command: server /bitnami/minio/data --console-address :9001
 
-    
 #使用默认桥接网络
