@@ -25,7 +25,9 @@
 
 apikey设置为[.env](packages\backend\.env)文件中的GOOGLEAI_API_KEY值即可。
 
-## 国内代理
+## 国内代理（可选）
+
+如果每天100次无法满足你，那么可以在google充值，也可以选择国内代理进行充值。
 
 前往[其github 仓库](https://github.com/chatanywhere/GPT_API_free)点击支持付费key，然后申请、充值一个付费key。
 <br>
