@@ -13,6 +13,9 @@ FROM node:${NODE_VERSION} AS builder
 # 安装 pnpm 
 RUN npm install -g pnpm@${PNPM_VERSION}
 
+# 设置环境变量，跳过 puppeteer 下载浏览器
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+
 # 设置工作目录（容器内部）
 WORKDIR /app
 

@@ -174,21 +174,46 @@ export class CrawlJobService {
 		page: puppeteer.Page;
 	}> {
 		this.logger.log('正在初始化浏览器...');
-		const browser = await puppeteer.launch({
-			headless: false,
-			defaultViewport: {
-				width: 1366, // 设置常见的屏幕分辨率
-				height: 768
-			},
-			args: [
-				'--no-sandbox',
-				'--disable-setuid-sandbox',
-				'--disable-dev-shm-usage',
-				'--disable-web-security',
-				'--disable-features=VizDisplayCompositor',
-				'--disable-blink-features=AutomationControlled' // 重要：禁用自动化控制标识
-			]
-		});
+		const browserWSEndpoint = process.env.PUPPETEER_BROWSER_WSE_ENDPOINT;
+		let browser;
+
+		if (browserWSEndpoint) {
+			// 如果配置了远程端点，则连接到远程浏览器
+			this.logger.log(`正在连接到远程浏览器: ${browserWSEndpoint}`);
+			try {
+				browser = await puppeteer.connect({
+					browserWSEndpoint,
+					// 传递一些与本地启动时相同的参数，以确保行为一致
+					defaultViewport: {
+						width: 1366,
+						height: 768
+					}
+				});
+				this.logger.log('成功连接到远程浏览器。');
+			} catch (error) {
+				this.logger.error(`连接到远程浏览器失败: ${error.message}`, error.stack);
+				throw new Error('无法连接到远程浏览器服务');
+			}
+		} else {
+			// 否则，启动本地 Puppeteer 实例
+			this.logger.log('未检测到远程浏览器端点，将启动本地 Puppeteer 实例。');
+			browser = await puppeteer.launch({
+				headless: false, // 在本地可以设置为 'new' 或 false 进行调试
+				defaultViewport: {
+					width: 1366, // 设置常见的屏幕分辨率
+					height: 768
+				},
+				args: [
+					'--no-sandbox',
+					'--disable-setuid-sandbox',
+					'--disable-dev-shm-usage',
+					'--disable-web-security',
+					'--disable-features=VizDisplayCompositor',
+					'--disable-blink-features=AutomationControlled' // 重要：禁用自动化控制标识
+				]
+			});
+			this.logger.log('本地 Puppeteer 实例启动成功。');
+		}
 
 		const page = await browser.newPage();
 
@@ -279,12 +304,12 @@ export class CrawlJobService {
 
 		// 确认页面是否正常加载了内容
 		try {
-			await page.waitForSelector('.job-list-new .item', { timeout: 10000 });
+			await page.waitForSelector('.job-list-new .item', { timeout: 100000 });
 		} catch (e) {
 			this.logger.warn('在10秒内未找到 .job-list-new .item 元素，可能页面没有职位或结构已改变。');
 			// 尝试刷新页面
 			await page.reload({ waitUntil: 'networkidle2' });
-			await page.waitForSelector('.job-list-new .item', { timeout: 10000 });
+			await page.waitForSelector('.job-list-new .item', { timeout: 100000 });
 		}
 
 		await this._scrollAndLoadJobs(page, totalCount);
@@ -339,7 +364,7 @@ export class CrawlJobService {
 						const currentCount = document.querySelectorAll(selector).length;
 						return currentCount > prevCount;
 					},
-					{ timeout: 10000 },
+					{ timeout: 100000 },
 					'.job-list-new .item',
 					currentJobCount
 				);
@@ -375,7 +400,7 @@ export class CrawlJobService {
 			await this._simulateHumanBehavior('detail');
 
 			await page.goto(jobLink, { waitUntil: 'networkidle2' });
-			await page.waitForSelector('.job-sec', { timeout: 10000 });
+			await page.waitForSelector('.job-sec', { timeout: 100000 });
 
 			// 添加用户交互模拟
 			await this._simulateUserInteraction(page);

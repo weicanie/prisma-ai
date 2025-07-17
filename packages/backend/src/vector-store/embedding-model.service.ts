@@ -121,30 +121,34 @@ class EmbeddingPipeline {
    */
   static async getInstance(modelName: string) {
     if (!this.instance) {
-      // 动态导入 transformers 库，以支持 CommonJS 环境
-      const { pipeline, env: transformerEnv } = await import(
-        '@xenova/transformers'
-      );
+      try {
+        // 使用更兼容的方式处理动态导入，确保 SWC 能正确处理
+        const transformersModule = await Function('return import("@xenova/transformers")')();
+        const { pipeline, env: transformerEnv } = transformersModule;
 
-      // 计算 'models' 文件夹的绝对路径
-      let modelsPath = path.join(__dirname, '..', '..', '..', '..', 'models');
+        // 计算 'models' 文件夹的绝对路径
+        let modelsPath = path.join(__dirname, '..', '..', '..', '..', 'models');
 
-      // 适配库内部env路径：将反斜杠（\）替换为正斜杠（/）
-      if (process.platform === 'win32') {
-        modelsPath = modelsPath.replace(/\\/g, '/');
+        // 适配库内部env路径：将反斜杠（\）替换为正斜杠（/）
+        if (process.platform === 'win32') {
+          modelsPath = modelsPath.replace(/\\/g, '/');
+        }
+        //环境配置
+        transformerEnv.localModelPath = modelsPath; // 指定本地模型的根目录
+        transformerEnv.allowRemoteModels = false; // 禁止从远程下载模型
+        transformerEnv.allowLocalModels = true; // 允许加载本地模型
+
+        this.logger.log(`[EmbeddingPipeline] 已设置本地模型路径: ${modelsPath}`);
+
+        // 创建管道实例
+        // `quantized: false` 确保它加载我们转换的 `model.onnx` 而不是 `model_quantized.onnx`
+        this.instance = await pipeline(this.task, modelName, {
+          quantized: false,
+        });
+      } catch (error) {
+        this.logger.error(`[EmbeddingPipeline] 加载模型失败: ${error.message}`);
+        throw error;
       }
-      //环境配置
-      transformerEnv.localModelPath = modelsPath; // 指定本地模型的根目录
-      transformerEnv.allowRemoteModels = false; // 禁止从远程下载模型
-      transformerEnv.allowLocalModels = true; // 允许加载本地模型
-
-      this.logger.log(`[EmbeddingPipeline] 已设置本地模型路径: ${modelsPath}`);
-
-      // 创建管道实例
-      // `quantized: false` 确保它加载我们转换的 `model.onnx` 而不是 `model_quantized.onnx`
-      this.instance = await pipeline(this.task, modelName, {
-        quantized: false,
-      });
     }
     return this.instance;
   }

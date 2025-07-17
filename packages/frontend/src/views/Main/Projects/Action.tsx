@@ -39,6 +39,7 @@ const Action: React.FC<ActionProps> = () => {
 	const navigate = useNavigate();
 
 	const [input, setInput] = useState<contextInput | object>({});
+	console.log('input:', input);
 	//目标接口的URL path
 	const [urlPath, setUrlPath] = useState('');
 	/**
@@ -65,6 +66,7 @@ const Action: React.FC<ActionProps> = () => {
 
 	useEffect(() => {
 		if (done) {
+			setInput({}); // 清空输入防止sse重复请求
 			const result = jsonMd_obj(content);
 			if (Array.isArray(result)) {
 				const [resultData, mergedData] = result;
@@ -78,7 +80,6 @@ const Action: React.FC<ActionProps> = () => {
 				setResultData(result);
 			}
 
-			setInput({}); // 清空输入防止sse重复请求
 			//setState异步, 需要等待setState执行完再执行navigate
 			setTimeout(() => {
 				navigate('#result');

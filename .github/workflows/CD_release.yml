@@ -40,3 +40,19 @@ jobs:
           # 自动生成 Release 的说明内容
           # 这个功能会汇总从上一个 tag 到当前 tag 之间的所有 commit 信息作为 Release note
           generate_release_notes: true
+
+  # 新增一个 job，用于在创建 release 后调用测试构建工作流
+  trigger-test-build:
+    # 指定此 job 依赖于 create-release job 的成功完成
+    needs: create-release
+    # 指定任务运行的操作系统环境
+    runs-on: ubuntu-latest
+    # 为此任务授予权限
+    permissions:
+      # 需要 actions:read 权限来调用其他工作流
+      actions: read
+      # 需要 contents:read 权限来检出代码
+      contents: read
+    steps:
+      - name: 调用测试构建工作流
+        uses: ./.github/workflows/CI_test_docker_build.yml

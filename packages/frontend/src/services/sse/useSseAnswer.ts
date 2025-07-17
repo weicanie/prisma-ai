@@ -30,7 +30,7 @@ export function useSseAnswer(input: contextInput | object, path: string) {
 	/* EventSource清理函数 */
 	const cleanupRef = useRef<() => void>(() => {});
 	/* 上传prompt建立会话, 开始接收llm流式返回 */
-	function useCeateSession() {
+	function useCreateSession() {
 		return useCustomMutation<string, contextInput>(getSessionStatusAndDecide, {
 			onSuccess() {
 				cleanupRef.current = getSseData(
@@ -48,7 +48,7 @@ export function useSseAnswer(input: contextInput | object, path: string) {
 		});
 	}
 
-	const mutation = useCeateSession();
+	const mutation = useCreateSession();
 	if (!doNotStart && !answering) {
 		mutation.mutate(input as contextInput);
 		setAnswering(true);
@@ -64,10 +64,11 @@ export function useSseAnswer(input: contextInput | object, path: string) {
     不进行任何操作
     */
 		const getSessionStatusOnly = getSessionStatusAndDecide;
-		getSessionStatusOnly('').then(() => {
+		getSessionStatusOnly('').then(async () => {
 			const status = localStorage.getItem(sessionStatusKey);
 			//不影响正常的sse
 			if (status === 'backdone' || status === 'running') {
+				console.log('触发断点接传,status:', status);
 				const curPath = localStorage.getItem(pathKey);
 				if (curPath === null) console.error('path不存在,断点接传失败');
 

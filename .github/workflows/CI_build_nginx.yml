@@ -1,4 +1,4 @@
-name: Publish Docker Image # 工作流名称：发布 Docker 镜像
+name: 发布前端服务镜像 
 
 on:
   # 触发器1：手动触发 (workflow_dispatch)
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       image_name:
-        description: '要构建的镜像名称 (例如 prisma-ai-backend 或 prisma-ai-frontend)'
+        description: '要构建的镜像名称 (例如 prisma-ai-nginx)'
         required: true
         type: string
         default: 'prisma-ai-nginx'
@@ -20,10 +20,14 @@ on:
         required: true
         type: string
 
-  # 触发器2：发布 Release (release)
-  # 当在 GitHub 上创建新的 Release 时，自动触发此工作流。
-  release:
-    types: [published]
+  # 触发器2：工作流运行完成 (workflow_run)
+  # 当 '发布 Release' 工作流在主分支上成功完成时，触发此工作流。
+  workflow_run:
+    workflows: ["发布 Release"]
+    types:
+      - completed
+    branches:
+      - 'main'
 
 jobs:
   docker-publish:
@@ -41,6 +45,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 新增步骤：获取触发工作流的 tag
+      - name: Get the version from the triggering workflow
+        if: github.event_name == 'workflow_run'
+        run: echo "VERSION=$(echo $GITHUB_REF | sed -e 's,.*/\(.*\),\1,')" >> $GITHUB_ENV
+
       # 步骤2：为 Docker 提取元数据 (如标签和注释)
       # 使用 docker/metadata-action 自动生成一系列有意义的 Docker 标签。
       - name: Extract metadata for Docker
@@ -48,31 +57,22 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           # 定义镜像的完整名称，格式为 '用户名/镜像名'
-          # 如果是手动触发，使用输入的 image_name；否则，默认使用 'prisma-ai-backend'
-          images: onlyie/${{ github.event.inputs.image_name || 'prisma-ai-backend' }}
+          # 如果是手动触发，使用输入的 image_name；否则，默认使用 'prisma-ai-nginx'
+          images: onlyie/${{ github.event.inputs.image_name || 'prisma-ai-nginx' }}
           # 定义标签的生成规则，可以同时生成多个标签
           tags: |
-            # type=schedule: 如果由定时任务触发，则生成 'nightly' 标签
-            type=schedule
-            # type=ref,event=branch: 如果是分支推送，则使用分支名作为标签 (例如 'feature-xyz')
-            type=ref,event=branch
-            # type=ref,event=pr: 如果是 PR 事件，则使用 'pr-123' 作为标签
-            type=ref,event=pr
-            # type=semver,pattern={{version}}: 如果 git 标签是语义化版本 (如 v1.2.3)，则生成 'v1.2.3'
+            # type=semver,pattern={{version}}: 使用语义化版本标签, 例如 v1.2.3 -> 1.2.3
             type=semver,pattern={{version}}
-            # type=semver,pattern={{major}}.{{minor}}: 同时生成主版本号和次版本号的标签 (如 'v1.2')
             type=semver,pattern={{major}}.{{minor}}
-            # type=semver,pattern={{major}}: 同时生成主版本号的标签 (如 'v1')
             type=semver,pattern={{major}}
-            # type=sha: 使用 git commit 的短哈希值作为标签 (如 'sha-a1b2c3d')
-            type=sha
+
             # type=raw,value=...: 使用一个原始值作为标签。
             # enable=...: 这个规则只在满足条件时生效。
             # 此处表示，只有当工作流是手动触发时，才使用输入的 'version_tag' 作为标签。
             type=raw,value=${{ github.event.inputs.version_tag }},enable=${{ github.event_name == 'workflow_dispatch' }}
-            # type=edge,branch=main: 如果是推送到 main 分支，则生成 'edge' 标签，代表最前沿的版本。
-            type=edge,branch=main
-
+            # 如果是由 workflow_run 触发，则使用从上一步获取的 VERSION 环境变量
+            type=raw,value=${{ env.VERSION }},enable=${{ github.event_name == 'workflow_run' }}
+            
       # 步骤3：设置 QEMU
       # QEMU 是一个模拟器，用于在 Actions 的 x86 环境中模拟 ARM 等其他架构，是多平台构建的基础。
       - name: Set up QEMU

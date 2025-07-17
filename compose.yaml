@@ -1,7 +1,15 @@
 # 从hub拉取镜像，用于用户部署
 services:
+  browserless-chrome:
+    image: browserless/chrome:latest
+    restart: unless-stopped
+    container_name: browserless-chrome
+    # 如果需要在主机上进行调试，可以取消下面的端口注释
+    ports:
+      - "3123:3000"
+
   prisma-ai-backend:
-    image:  docker.1ms.run/onlyie/prisma-ai-backend:3.1.4
+    image: docker.1ms.run/onlyie/prisma-ai-backend:3.2.0
     depends_on:
       # mysql经常需要启动好几次才能成功,得在它启动成功后再启动服务
       mysql-container:
@@ -12,6 +20,9 @@ services:
         condition: service_healthy
       minio-container:
         condition: service_healthy
+      # 添加对 browserless-chrome 服务的依赖
+      browserless-chrome:
+        condition: service_started
     restart: unless-stopped
     container_name: backend
     # 将指定的文件的环境变量加载到容器中
@@ -23,6 +34,8 @@ services:
       MONGO_HOST: mongo-container
       # 覆盖env_file中的同名环境变量
       DATABASE_URL: mysql://root:qwqw1314.@mysql-container:3306/prisma-ai
+      # 新增环境变量，指向 browserless 服务
+      PUPPETEER_BROWSER_WSE_ENDPOINT: ws://browserless-chrome:3000
     ports:
       - '3003:3003'
     volumes:
@@ -33,7 +46,7 @@ services:
       - ./models:/app/models
 
   nginx-container:
-    image: docker.1ms.run/onlyie/prisma-ai-nginx:3.1.4
+    image: docker.1ms.run/onlyie/prisma-ai-nginx:3.2.0
     ports:
       - '80:80' # HTTP
       # HTTPS (如需启用)
@@ -45,7 +58,7 @@ services:
     restart: unless-stopped
     depends_on:
       - prisma-ai-backend
-      - minio-container  
+      - minio-container
   mysql-container:
     image: docker.1ms.run/library/mysql
     #占用的主机端口:网络内访问使用的端口
@@ -62,7 +75,7 @@ services:
       MYSQL_ROOT_HOST: '%'
     restart: unless-stopped
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      test: [ 'CMD', 'mysqladmin', 'ping', '-h', 'localhost' ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -74,7 +87,7 @@ services:
       - ./docker-data/redis:/data
     restart: unless-stopped
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: [ 'CMD', 'redis-cli', 'ping' ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -86,7 +99,7 @@ services:
       - ./docker-data/mongo:/data/db
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -100,7 +113,7 @@ services:
     restart: unless-stopped
     user: root
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -110,5 +123,4 @@ services:
       MINIO_DEFAULT_BUCKETS: prisma-ai
     command: server /bitnami/minio/data --console-address :9001
 
-    
 #使用默认桥接网络
