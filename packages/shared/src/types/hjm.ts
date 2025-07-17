@@ -1,5 +1,4 @@
 import { JobVo } from "./job";
-
 /**
  * 人岗匹配前端上传的 DTO
  */
