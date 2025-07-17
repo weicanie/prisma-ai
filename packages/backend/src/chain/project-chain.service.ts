@@ -107,8 +107,9 @@ export class ProjectChainService {
 					return inputParser ? inputParser.getFormatInstructions() : '';
 				},
 
-				//TODO 多轮检索(不使用CRAG), 比如每个亮点分别检索并标注其属于哪个亮点
+				//TODO 多轮检索, 比如每个亮点分别检索并标注其属于哪个亮点
 				//TODO 使用SRAG降低幻觉,提高相关性
+				//TODO 使用CRAG进行精炼、网络搜索（使用google的api：https://js.langchain.com/docs/integrations/chat/google_generativeai/#built-in-google-search-retrieval、serpapi）
 				// 知识库集成：检索相关代码和文档
 				retrievedProjectCodes: async (i: ProjectProcessingInput) => {
 					try {
