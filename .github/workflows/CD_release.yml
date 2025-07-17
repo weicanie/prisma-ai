@@ -45,14 +45,10 @@ jobs:
   trigger-test-build:
     # 指定此 job 依赖于 create-release job 的成功完成
     needs: create-release
-    # 指定任务运行的操作系统环境
-    runs-on: ubuntu-latest
-    # 为此任务授予权限
-    permissions:
-      # 需要 actions:read 权限来调用其他工作流
-      actions: read
-      # 需要 contents:read 权限来检出代码
-      contents: read
-    steps:
-      - name: 调用测试构建工作流
-        uses: ./.github/workflows/CI_test_docker_build.yml
+    # 使用 'uses' 来调用一个可复用的工作流
+    uses: ./.github/workflows/CI_test_docker_build.yml
+    # 如果被调用的工作流需要输入参数，可以在这里提供
+    # with:
+    #   some-input: 'value'
+    # 如果需要传递 secrets，可以在这里指定
+    # secrets: inherit
