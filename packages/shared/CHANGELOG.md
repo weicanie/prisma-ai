@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.3.4](https://github.com/weicanie/prisma-ai/compare/v3.3.3...v3.3.4) (2025-07-18)
+
+**Note:** Version bump only for package @prism-ai/shared
+
 ## [3.3.3](https://github.com/weicanie/prisma-ai/compare/v3.3.2...v3.3.3) (2025-07-18)
 
 **Note:** Version bump only for package @prism-ai/shared
