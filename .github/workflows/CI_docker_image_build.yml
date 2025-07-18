@@ -20,6 +20,7 @@ on:
         required: true
         type: string
 
+  workflow_call: # 允许此工作流被其他工作流调用
 jobs:
   docker-publish:
     name: Build and Push Docker Image # 任务名称
