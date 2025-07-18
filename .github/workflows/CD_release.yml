@@ -47,8 +47,17 @@ jobs:
     needs: create-release
     # 使用 'uses' 来调用一个可复用的工作流
     uses: ./.github/workflows/CI_test_docker_build.yml
-    # 如果被调用的工作流需要输入参数，可以在这里提供
-    # with:
-    #   some-input: 'value'
-    # 如果需要传递 secrets，可以在这里指定
-    # secrets: inherit
+
+  release-backend-image:
+    needs: trigger-test-build
+    uses: ./.github/workflows/CI_docker_image_build.yml
+    with:
+      image_name: prisma-ai-backend
+      dockerfile_path: ./docker/backend/Dockerfile.CI
+
+  release-frontend-image:
+    needs: trigger-test-build
+    uses: ./.github/workflows/CI_build_nginx.yml
+    with:
+      image_name: prisma-ai-nginx
+      dockerfile_path: ./docker/frontend/Dockerfile.CI
