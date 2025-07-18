@@ -50,8 +50,16 @@ jobs:
 
   release-backend-image:
     needs: trigger-test-build
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     uses: ./.github/workflows/CI_docker_image_build.yml
 
   release-frontend-image:
     needs: trigger-test-build
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     uses: ./.github/workflows/CI_build_nginx.yml

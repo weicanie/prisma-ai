@@ -1,5 +1,5 @@
 # push和PR合并前检查docker能否成功构建
-name: 测试docker镜像构建
+name: '测试docker镜像构建'
 
 on:
   push:
