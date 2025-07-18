@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.3.2](https://github.com/weicanie/prisma-ai/compare/v3.3.1...v3.3.2) (2025-07-18)
+
+### Bug Fixes
+
+- 修复人岗匹配服务的一些错误 ([b358e59](https://github.com/weicanie/prisma-ai/commit/b358e598c63ad3d6a0986770f0a60f3a7460d9a2))
+
 # [3.1.0](https://github.com/weicanie/prisma-ai/compare/v3.0.1...v3.1.0) (2025-07-13)
 
 **Note:** Version bump only for package mcp-server

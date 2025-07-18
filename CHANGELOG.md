@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.3.2](https://github.com/weicanie/prisma-ai/compare/v3.3.1...v3.3.2) (2025-07-18)
+
+### Bug Fixes
+
+- 修复人岗匹配服务的一些错误 ([b358e59](https://github.com/weicanie/prisma-ai/commit/b358e598c63ad3d6a0986770f0a60f3a7460d9a2))
+
+### Features
+
+- 完善CI流程 ([e7ebab8](https://github.com/weicanie/prisma-ai/commit/e7ebab8780b4f3ebd07b8c288b0cb60825dabf99))
+
 ## [3.3.1](https://github.com/weicanie/prisma-ai/compare/v3.3.0...v3.3.1) (2025-07-17)
 
 ### Bug Fixes
