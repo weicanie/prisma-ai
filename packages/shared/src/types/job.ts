@@ -1,5 +1,7 @@
 // 定义招聘信息相关的 DTO 和 VO
 
+import { UserInfoFromToken } from './loginVerify';
+
 export enum JobOpenStatus {
 	OPEN = 'open', //招聘中
 	CLOSED = 'closed' //已停止招聘
@@ -45,6 +47,7 @@ export interface JobVo {
 	link?: string;
 	job_status?: JobOpenStatus; // 职位状态， "open", "closed"
 	status?: JobStatus; // 职位内部状态，"committed", "embedded", "matched" 未处理、已embedding、已被用户简历追踪
+	userInfo: UserInfoFromToken; // 用户信息，用于判断是否是爬虫抓取的岗位
 	createdAt: string;
 	updatedAt: string;
 }

@@ -20,7 +20,6 @@ interface AnkiUploadTask extends PersistentTask {
 		};
 	};
 }
-
 interface AnkiNote {
 	deckName: string;
 	modelName: string;
@@ -136,9 +135,7 @@ export class AnkiUploadService implements OnModuleInit {
 
 						const deckNames = new Set<string>();
 						articleChunk.forEach(q => {
-							const deckName = q.link.startsWith('https://fe.ecool.fun')
-								? `前端::${q.content_type}`
-								: `后端::${q.content_type}`;
+							const deckName = q.job_type??'未知'
 							deckNames.add(deckName);
 						});
 

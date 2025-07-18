@@ -202,9 +202,20 @@ export class HjmService implements OnModuleInit {
 		let done = false;
 		let doneCount = 0;
 		while (!done) {
-			// 2. 从数据库获取未处理的岗位数据
-			const allJobsResult = await this.jobService.findAll(userInfo, 1, 100, JobStatus.COMMITTED);
-			const allJobs = allJobsResult.data;
+			// 2. 从数据库获取未处理的岗位数据（爬取到的岗位数据、用户上传的岗位数据）
+			const allJobsResultSpider = await this.jobService.findAll(
+				this.userInfoSpider,
+				1,
+				100,
+				JobStatus.COMMITTED
+			);
+			const allJobsResultUser = await this.jobService.findAll(
+				userInfo,
+				1,
+				100,
+				JobStatus.COMMITTED
+			);
+			const allJobs = [...allJobsResultSpider.data, ...allJobsResultUser.data];
 			if (allJobs.length === 0) {
 				done = true;
 			} else {
@@ -241,8 +252,13 @@ export class HjmService implements OnModuleInit {
 					throw error;
 				}
 				/* 5. 更新刚刚处理的岗位数据的状态为EMBEDDED */
+
 				const allJobUpdate = allJobs.map(job =>
-					this.jobService.update(job.id, { status: JobStatus.EMBEDDED }, userInfo)
+					this.jobService.update(
+						job.id,
+						{ status: JobStatus.EMBEDDED },
+						job.userInfo.userId === this.userInfoSpider.userId ? this.userInfoSpider : userInfo
+					)
 				);
 				const promiseAll = Promise.allSettled(allJobUpdate);
 				const result = await promiseAll;
@@ -304,16 +320,17 @@ export class HjmService implements OnModuleInit {
 				return;
 			}
 		} catch (error) {
-			const errorMessage = (error as Error).message;
-			if (errorMessage.includes('网络连接失败') || errorMessage.includes('连接超时')) {
-				throw new Error(`简历向量化失败: ${errorMessage}`);
-			}
-			throw new Error(`简历向量化失败: ${errorMessage}`);
+			throw new Error(`简历向量化失败: ${(error as Error).message}`);
 		}
 
 		// 5. 使用平均后的单一向量，在向量数据库中查找最相似的 topK 个岗位块
 		const candidateJobChunks = await this.findSimilarJobs(userInfo, resumeVector, topK);
+		this.logger.log(`向量数据库查询返回 ${candidateJobChunks.length} 个候选岗位块`);
+
 		if (candidateJobChunks.length === 0) {
+			this.logger.warn(
+				`用户 ${userInfo.userId} 的简历 ${resumeId} 未找到任何匹配的岗位。可能原因：1. 该用户尚未进行岗位向量化 2. 向量数据库中没有相关数据 3. 网络连接问题`
+			);
 			return;
 		}
 
@@ -404,16 +421,23 @@ export class HjmService implements OnModuleInit {
 		resumeVector: number[],
 		k: number
 	): Promise<Document[]> {
+		console.log('🚀  ~ findSimilarJobs:', resumeVector);
 		try {
 			const indexName = JobIndex.JOBS;
 			const index = this.vectorStoreService.pinecone.Index(indexName);
 			const namespace = this._getUserNamespace(JobIndexNamespace.JOBS, userInfo);
+
+			this.logger.log(
+				`开始向量查询 - 索引: ${indexName}, 命名空间: ${namespace}, topK: ${k}, 向量维度: ${resumeVector.length}`
+			);
 
 			const queryResult = await index.namespace(namespace).query({
 				vector: resumeVector,
 				topK: k,
 				includeMetadata: true // 确保返回元数据，其中包含岗位信息
 			});
+
+			this.logger.log(`Pinecone 查询完成 - 返回匹配数: ${queryResult.matches?.length || 0}`);
 
 			// 将查询结果转换为 LangChain 的 Document 格式
 			const documents =
@@ -425,6 +449,7 @@ export class HjmService implements OnModuleInit {
 						})
 				) || [];
 
+			this.logger.log(`转换为 Document 格式完成 - 文档数: ${documents.length}`);
 			return documents;
 		} catch (error) {
 			const errorMessage = (error as Error).message;

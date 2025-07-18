@@ -89,10 +89,5 @@
 **前同事的反思和建议:**
 无
 
-**项目相关代码:**
-{retrievedProjectCodes}
-
-**相关领域知识:**
-{retrievedDomainDocs}
 </knowledge>
 </prompt>

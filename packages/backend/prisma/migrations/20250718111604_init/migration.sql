@@ -39,13 +39,39 @@ CREATE TABLE `article` (
     `user_note` LONGTEXT NULL,
     `gist` LONGTEXT NOT NULL,
     `content_type` VARCHAR(255) NOT NULL,
+    `job_type` VARCHAR(255) NULL,
     `hard` VARCHAR(255) NOT NULL,
     `anki_note_id` BIGINT NULL,
     `time_create` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
     `time_update` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
+    `interview_summary_id` INTEGER NULL,
 
     UNIQUE INDEX `article_link_key`(`link`),
     INDEX `user_id`(`user_id`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `interview_summary` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `post_link` VARCHAR(500) NULL,
+    `content_hash` VARCHAR(32) NOT NULL,
+    `turn` VARCHAR(100) NULL,
+    `company_name` VARCHAR(255) NULL,
+    `company_scale` VARCHAR(100) NULL,
+    `job_type` VARCHAR(255) NOT NULL,
+    `job_name` VARCHAR(255) NULL,
+    `job_link` VARCHAR(500) NULL,
+    `content` LONGTEXT NOT NULL,
+    `user_id` INTEGER NOT NULL,
+    `create_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
+    `update_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
+
+    UNIQUE INDEX `interview_summary_post_link_key`(`post_link`),
+    UNIQUE INDEX `interview_summary_content_hash_key`(`content_hash`),
+    INDEX `user_id`(`user_id`),
+    INDEX `company_name`(`company_name`),
+    INDEX `job_type`(`job_type`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -86,6 +112,9 @@ ALTER TABLE `ai_conversation` ADD CONSTRAINT `ai_conversation_user_id_fkey` FORE
 
 -- AddForeignKey
 ALTER TABLE `article` ADD CONSTRAINT `article_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `interview_summary` ADD CONSTRAINT `interview_summary_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `user_project` ADD CONSTRAINT `user_project_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

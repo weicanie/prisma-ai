@@ -40,7 +40,6 @@ class JSONChatHistory extends BaseListChatMessageHistory {
 
 			const data = fs.readFileSync(filePath, { encoding: 'utf-8' });
 			const storedMessages = JSON.parse(data) as StoredMessage[];
-			console.log('🚀  ~ getMessages:', storedMessages);
 			//反序列化
 			return mapStoredMessagesToChatMessages(storedMessages);
 		} catch (error) {

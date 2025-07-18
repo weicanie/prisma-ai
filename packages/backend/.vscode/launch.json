@@ -1,14 +1,13 @@
 {
-
     "configurations": [
         {
-            "name": "Launch via NPM",
+            "name": "Launch via PNPM",
             "request": "launch",
             "runtimeArgs": [
                 "run",
-                "start"
+                "dev"
             ],
-            "runtimeExecutable": "npm",
+            "runtimeExecutable": "pnpm",
             "skipFiles": [
                 "<node_internals>/**"
             ],

@@ -27,8 +27,7 @@ export class JobController {
 	@RequireLogin()
 	@Post('crawl')
 	startCrawl(@Body(new ValidationPipe()) startCrawlDto: StartCrawlDto) {
-		this.crawlJobService.startCrawlTask(startCrawlDto);
-		return { message: '职位爬虫任务已启动，请稍后查看结果。' };
+		return this.crawlJobService.startCrawlTask(startCrawlDto);
 	}
 
 	@RequireLogin()

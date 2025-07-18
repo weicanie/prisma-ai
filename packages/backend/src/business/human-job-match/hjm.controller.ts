@@ -29,7 +29,7 @@ export class HjmController {
 		默认爬取到的岗位都属于系统爬虫;
 		目前用于匹配的岗位向量数据库是用户间共享的——都在job-index索引中 */
     return this.hjmService.startJobEmbeddingTask(
-      this.hjmService.userInfoSpider,
+      userInfo,
       sessionId,
     );
   }
