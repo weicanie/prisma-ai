@@ -20,7 +20,9 @@ interface SkillRoadItem {
 		desc: string;
 	}[];
 }
-
+/**
+ * 对比得到的技能和项目学习路线
+ */
 interface RoadFromDiff {
 	skill: SkillRoadItem;
 	project: ProjectRoadItem[];

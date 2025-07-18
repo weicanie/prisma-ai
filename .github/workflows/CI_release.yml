@@ -51,13 +51,7 @@ jobs:
   release-backend-image:
     needs: trigger-test-build
     uses: ./.github/workflows/CI_docker_image_build.yml
-    with:
-      image_name: prisma-ai-backend
-      dockerfile_path: ./docker/backend/Dockerfile.CI
 
   release-frontend-image:
     needs: trigger-test-build
     uses: ./.github/workflows/CI_build_nginx.yml
-    with:
-      image_name: prisma-ai-nginx
-      dockerfile_path: ./docker/frontend/Dockerfile.CI
