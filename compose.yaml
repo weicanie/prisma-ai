@@ -1,7 +1,7 @@
 # 从hub拉取镜像，用于用户部署
 services:
   browserless-chrome:
-    image: browserless/chrome:latest
+    image: docker.1ms.run/browserless/chrome:latest
     restart: unless-stopped
     container_name: browserless-chrome
     # 如果需要在主机上进行调试，可以取消下面的端口注释
