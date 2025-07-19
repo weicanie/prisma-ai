@@ -13,10 +13,8 @@ import { MinedPolishedLightspotSection } from './MinedLightspotSection';
 import { PolishedLightspotSection } from './PolishedLightspotSection';
 type ProejctPMResultCardProps = Pick<
 	ProjectResultProps,
-	'actionType' | 'resultData' | 'mergedData' | 'handleMerge'
-> & {
-	handleFeedback: (content: string) => void;
-};
+	'actionType' | 'resultData' | 'mergedData' | 'handleMerge' | 'handleFeedback'
+>;
 /**
  * 用于展示项目经验polish或者mine的结果
  */

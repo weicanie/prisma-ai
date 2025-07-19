@@ -4,7 +4,7 @@ import { RunnableSequence } from '@langchain/core/runnables';
 import { Injectable } from '@nestjs/common';
 import {
 	lookupResultSchema,
-	ProjecctLLM,
+	SelectedLLM,
 	ProjectDto,
 	projectLookupedSchema,
 	projectMinedSchema,
@@ -17,9 +17,7 @@ import {
 } from '@prism-ai/shared';
 import { z } from 'zod';
 import { ModelService } from '../model/model.service';
-import {
-	ThoughtModelService
-} from '../model/thought-model.service';
+import { ThoughtModelService } from '../model/thought-model.service';
 import { KnowledgeVDBService } from '../prisma-agent/data_base/konwledge_vdb.service';
 import { ProjectCodeVDBService } from '../prisma-agent/data_base/project_code_vdb.service';
 import { ReflectAgentService } from '../prisma-agent/reflect_agent/reflect_agent.service';
@@ -61,23 +59,23 @@ export class ProjectChainService {
 	 * @param inputSchema - (可选) 当输出包含输入格式时，用于生成格式说明的 Zod schema。
 	 * @param stream - (可选) 是否以流式模式返回，默认为 false。
 	 */
-	private async _createProcessChain(
+	async _createProcessChain(
 		promptGetter: () => Promise<ChatPromptTemplate>,
 		outputSchema: z.Schema,
 		inputSchema: z.Schema,
 		stream: boolean,
 		business: BusinessEnum,
-		model: ProjecctLLM
+		model: SelectedLLM
 	) {
 		const businessPrompt = await promptGetter();
 		let llm: any;
 		switch (model) {
-			case ProjecctLLM.gemini_2_5_pro:
-			case ProjecctLLM.gemini_2_5_pro_proxy:
-			case ProjecctLLM.gemini_2_5_flash:
+			case SelectedLLM.gemini_2_5_pro:
+			case SelectedLLM.gemini_2_5_pro_proxy:
+			case SelectedLLM.gemini_2_5_flash:
 				llm = await this.thoughtModelService.getGeminiThinkingModelFlat(model);
 				break;
-			case ProjecctLLM.deepseek_reasoner:
+			case SelectedLLM.deepseek_reasoner:
 				llm = await this.thoughtModelService.getDeepSeekThinkingModleflat('deepseek-reasoner');
 				break;
 			default:
@@ -191,11 +189,11 @@ export class ProjectChainService {
 
 	async lookupChain(
 		stream: true,
-		model: ProjecctLLM
+		model: SelectedLLM
 	): Promise<RunnableSequence<ProjectProcessingInput, StreamingChunk>>; //流式返回时输出类型是指单个chunk的类型
 	async lookupChain(
 		stream: false,
-		model: ProjecctLLM
+		model: SelectedLLM
 	): Promise<
 		RunnableSequence<
 			ProjectProcessingInput,
@@ -207,14 +205,14 @@ export class ProjectChainService {
 	 * @description 集成了知识库检索和用户反馈反思功能
 	 * @param stream - 是否以流式模式返回
 	 */
-	async lookupChain(stream = false, model: ProjecctLLM) {
+	async lookupChain(stream = false, model: SelectedLLM) {
 		const schema = lookupResultSchema;
-		const schema0 = projectLookupedSchema;
+		const schema_mid = projectLookupedSchema;
 
 		const chain = await this._createProcessChain(
 			() => this.promptService.lookupPrompt(),
 			schema,
-			schema0,
+			schema_mid,
 			stream,
 			BusinessEnum.lookup,
 			model
@@ -224,11 +222,11 @@ export class ProjectChainService {
 
 	async polishChain(
 		stream: true,
-		model: ProjecctLLM
+		model: SelectedLLM
 	): Promise<RunnableSequence<ProjectProcessingInput, StreamingChunk>>;
 	async polishChain(
 		stream: false,
-		model: ProjecctLLM
+		model: SelectedLLM
 	): Promise<
 		RunnableSequence<
 			ProjectProcessingInput,
@@ -241,13 +239,13 @@ export class ProjectChainService {
 	 * @description 集成了知识库检索和用户反馈反思功能
 	 * @param stream - 是否以流式模式返回
 	 */
-	async polishChain(stream = false, model: ProjecctLLM) {
+	async polishChain(stream = false, model: SelectedLLM) {
 		const schema = projectPolishedSchema;
-		const schema0 = projectSchema;
+		const schema_mid = projectSchema;
 		const chain = await this._createProcessChain(
 			() => this.promptService.polishPrompt(),
 			schema,
-			schema0,
+			schema_mid,
 			stream,
 			BusinessEnum.polish,
 			model
@@ -257,13 +255,13 @@ export class ProjectChainService {
 
 	async mineChain(
 		stream: true,
-		model: ProjecctLLM,
+		model: SelectedLLM,
 		userInfo: UserInfoFromToken,
 		skillService: any
 	): Promise<RunnableSequence<ProjectProcessingInput, StreamingChunk>>;
 	async mineChain(
 		stream: false,
-		model: ProjecctLLM,
+		model: SelectedLLM,
 		userInfo: UserInfoFromToken,
 		skillService: any
 	): Promise<
@@ -278,9 +276,14 @@ export class ProjectChainService {
 	 * @description 集成了知识库检索和用户反馈反思功能
 	 * @param stream - 是否以流式模式返回
 	 */
-	async mineChain(stream = false, model: ProjecctLLM, userInfo: UserInfoFromToken, skillService: any) {
+	async mineChain(
+		stream = false,
+		model: SelectedLLM,
+		userInfo: UserInfoFromToken,
+		skillService: any
+	) {
 		const schema = projectMinedSchema;
-		const schema0 = projectSchema;
+		const schema_mid = projectSchema;
 		//只取第一个用户技能
 		let userSkills = await skillService.findAll(userInfo);
 		const userSkillsMd = userSkills[0] ? skillsToMarkdown(userSkills[0]) : '';
@@ -296,7 +299,7 @@ export class ProjectChainService {
 		const chain = await this._createProcessChain(
 			() => Promise.resolve(promptTemplate),
 			schema,
-			schema0,
+			schema_mid,
 			stream,
 			BusinessEnum.mine,
 			model

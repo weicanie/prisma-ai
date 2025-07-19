@@ -1,13 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTheme } from '@/utils/theme';
 
-import type { ResumeMatchedDto, ResumeVo } from '@prism-ai/shared';
+import { type ResumeMatchedDto, type ResumeVo, SelectedLLM } from '@prism-ai/shared';
 import { Brain, Pyramid, Rocket, Sparkles } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import Tabs from '../../components/Tabs';
 import PreflightBtns from './preflightBtns';
 import { ResumeMatchResultCard } from './ResumeMatchResultCard';
-
+import { useSelector } from 'react-redux';
+import { selectJobModel } from '../../../../store/jobs';
 export interface ResumeResultProps {
 	resultData: ResumeMatchedDto | null;
 	mergedData: null;
@@ -15,8 +16,8 @@ export interface ResumeResultProps {
 	actionType: keyof typeof headerMap | null;
 	availableActions: readonly string[];
 	handleMatch: () => void;
-	handleMerge?: () => void;
-
+	handleMerge?: () => void; //完成优化
+	handleFeedback: (content: string) => void; //用户反馈,反思并重新优化
 	content: string;
 	reasonContent?: string;
 	isReasoning?: boolean;
@@ -44,6 +45,8 @@ export const ResumeResult: React.FC<ResumeResultProps> = ({
 	actionType,
 	availableActions,
 	handleMatch,
+	handleMerge,
+	handleFeedback,
 	content,
 	reasonContent,
 	isReasoning = false,
@@ -103,6 +106,8 @@ export const ResumeResult: React.FC<ResumeResultProps> = ({
 		}
 	}, [isReasoning, done, content]);
 
+	const selectedllm = useSelector(selectJobModel);
+
 	/* 思维链sse展示卡片 */
 	const reasonContentSection = () => (
 		<>
@@ -121,7 +126,10 @@ export const ResumeResult: React.FC<ResumeResultProps> = ({
 					}`}
 					style={{ scrollBehavior: 'smooth' }}
 				>
-					{reasonContent || 'doro 在等待你的指示送达...'}
+					{reasonContent ||
+						(selectedllm === SelectedLLM.deepseek_reasoner
+							? 'doro 在等待你的指示送达...'
+							: 'doro 正在后台动态思考...')}
 					<span className="animate-pulse text-blue-400">▋</span>
 				</div>
 			</CardContent>
@@ -154,13 +162,19 @@ export const ResumeResult: React.FC<ResumeResultProps> = ({
 			</CardContent>
 		</>
 	);
-	console.log('🚀 ~ resultCardSection ~ actionType:', actionType);
 
 	const resultCardSection = () => {
 		if (!resultData || !actionType)
 			return <div className="text-center text-gray-500">暂无结果</div>;
 		if (actionType === 'match') {
-			return <ResumeMatchResultCard resultData={resultData} resumeData={resumeData} />;
+			return (
+				<ResumeMatchResultCard
+					resultData={resultData}
+					resumeData={resumeData}
+					handleMerge={handleMerge}
+					handleFeedback={handleFeedback}
+				/>
+			);
 		}
 		return null;
 	};

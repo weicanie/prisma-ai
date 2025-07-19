@@ -7,14 +7,14 @@ import {
 	sessionStatusKey,
 	type contextInput
 } from './sse';
-
+import { SelectedLLM } from '@prism-ai/shared';
 /**
  * 传入的的input非{}时创建sse会话并开启sse响应
  * @param input 后端方法的输入
  * @param path 请求的URL路径,如 '/project/lookup'
  * @returns
  */
-export function useSseAnswer(input: contextInput | object, path: string) {
+export function useSseAnswer(input: contextInput | object, path: string, model: SelectedLLM) {
 	const doNotStart = typeof input === 'object' && Object.getOwnPropertyNames(input).length === 0;
 
 	const [content, setContent] = useState('');
@@ -35,6 +35,7 @@ export function useSseAnswer(input: contextInput | object, path: string) {
 			onSuccess() {
 				cleanupRef.current = getSseData(
 					path,
+					model,
 					setContent,
 					setReasonContent,
 					setDone,
@@ -75,6 +76,7 @@ export function useSseAnswer(input: contextInput | object, path: string) {
 				//进行断点接传
 				cleanupRef.current = getSseData(
 					curPath!,
+					model,
 					setContent,
 					setReasonContent,
 					setDone,

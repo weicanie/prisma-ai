@@ -1,6 +1,6 @@
 import {
 	markdownToProjectSchema,
-	ProjecctLLM,
+	SelectedLLM,
 	projectSchemaToMarkdown,
 	type ProjectDto
 } from '@prism-ai/shared';
@@ -9,6 +9,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 interface ProjectState {
 	data: ProjectDto;
 	dataMd: string;
+	model: SelectedLLM;
 }
 
 const initialMd = `### 1、项目信息
@@ -45,7 +46,7 @@ const initialMd = `### 1、项目信息
 #### 2.3 用户体验/业务价值
   * `;
 
-const initialState: ProjectState & { model: ProjecctLLM } = {
+const initialState: ProjectState = {
 	data: {
 		info: {
 			name: '',
@@ -63,7 +64,7 @@ const initialState: ProjectState & { model: ProjecctLLM } = {
 		}
 	},
 	dataMd: initialMd,
-	model: ProjecctLLM.gemini_2_5_pro
+	model: SelectedLLM.gemini_2_5_pro
 };
 
 const projectSlice = createSlice({
@@ -80,7 +81,7 @@ const projectSlice = createSlice({
 			state.dataMd = dataMd;
 			state.data = markdownToProjectSchema(dataMd);
 		},
-		setLLM: (state, { payload }: PayloadAction<ProjecctLLM>) => {
+		setLLM: (state, { payload }: PayloadAction<SelectedLLM>) => {
 			state.model = payload;
 		},
 		resetProjectData: () => {
@@ -101,6 +102,6 @@ export const { setDataFromDto, setDataFromMd, setLLM, resetProjectData } = proje
 // Selectors
 export const selectProjectData = (state: { project: ProjectState }) => state.project.data;
 export const selectProjectMd = (state: { project: ProjectState }) => state.project.dataMd;
-export const selectProjectLLM = (state: { project: ProjectState & { model: ProjecctLLM } }) => state.project.model;
+export const selectProjectLLM = (state: { project: ProjectState }) => state.project.model;
 // Reducer
 export const projectReducer = projectSlice.reducer;

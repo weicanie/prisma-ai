@@ -3,7 +3,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTheme } from '@/utils/theme';
 import type { JobVo } from '@prism-ai/shared';
-import { Briefcase, Building, Calendar, DollarSign, ExternalLink, MapPin, Plus } from 'lucide-react';
+import {
+	Briefcase,
+	Building,
+	Calendar,
+	DollarSign,
+	ExternalLink,
+	MapPin,
+	Plus
+} from 'lucide-react';
 import React from 'react';
 import { toast } from 'sonner';
 import { useCustomMutation } from '../../../query/config';
@@ -12,20 +20,20 @@ import ClickCollapsible from '../components/ClickCollapsible';
 
 interface JobCardProps {
 	jobData: JobVo;
-	addBtn?: boolean;//是否显示“添加到我的岗位”按钮
+	addBtn?: boolean; //是否显示“添加到我的岗位”按钮
 }
 
-const JobCard: React.FC<JobCardProps> = ({ jobData,addBtn=false }) => {
+const JobCard: React.FC<JobCardProps> = ({ jobData, addBtn = false }) => {
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
-	const becomeMutation = useCustomMutation(becomeUserJob,{
+	const becomeMutation = useCustomMutation(becomeUserJob, {
 		onSuccess: () => {
 			toast.success('添加成功');
 		}
-	})
+	});
 
 	return (
-		<div className={`min-h-screen transition-colors duration-200 bg-global`}>
+		<div className={`transition-colors duration-200 bg-global`}>
 			<div className="container mx-auto  pb-8">
 				{/* 岗位基本信息 */}
 				<Card
@@ -92,9 +100,13 @@ const JobCard: React.FC<JobCardProps> = ({ jobData,addBtn=false }) => {
 								</a>
 							</Button>
 							{addBtn && (
-								<Button variant="outline" className="flex items-center gap-2 bg-primary text-white" onClick={() => becomeMutation.mutate(jobData.id)}>
-										<Plus className="w-4 h-4" />
-										添加到我的岗位
+								<Button
+									variant="default"
+									className="flex items-center gap-2 bg-primary text-white"
+									onClick={() => becomeMutation.mutate(jobData.id)}
+								>
+									<Plus className="w-4 h-4" />
+									添加到我的岗位
 								</Button>
 							)}
 						</CardContent>

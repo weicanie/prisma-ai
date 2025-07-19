@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Sse } from '@nestjs/common';
-import { ImplementDto, ProjecctLLM, ProjectStatus, UserInfoFromToken } from '@prism-ai/shared';
+import { ImplementDto, SelectedLLM, ProjectStatus, UserInfoFromToken } from '@prism-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { LLMSseService } from '../sse/llm-sse.service';
 import { ProjectDto } from './dto/project.dto';
@@ -28,7 +28,7 @@ export class ProjectController {
 	async lookupProject(
 		@Query('sessionId') sessionId: string,
 		@Query('recover') recover: boolean,
-		@Query('model') model: ProjecctLLM,
+		@Query('model') model: SelectedLLM,
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
 		const metadata = {
@@ -53,7 +53,7 @@ export class ProjectController {
 	async polishProject(
 		@Query('sessionId') sessionId: string,
 		@Query('recover') recover: boolean,
-		@Query('model') model: ProjecctLLM,
+		@Query('model') model: SelectedLLM,
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
 		const metadata = {
@@ -78,7 +78,7 @@ export class ProjectController {
 	async mineProject(
 		@Query('sessionId') sessionId: string,
 		@Query('recover') recover: boolean,
-		@Query('model') model: ProjecctLLM,
+		@Query('model') model: SelectedLLM,
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
 		const metadata = {

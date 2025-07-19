@@ -8,6 +8,7 @@ import { useCustomQuery } from '../../../query/config';
 import { ResumeQueryKey } from '../../../query/keys';
 import { findAllResumeMatched } from '../../../services/resume';
 import { OriginalProject } from '../Projects/cpns/OriginalProject';
+import JobCard from './JobCard';
 
 interface ResumeMatchedReadProps {
 	_?: string;
@@ -15,8 +16,8 @@ interface ResumeMatchedReadProps {
 
 const ResumeMatchedRead: React.FC<ResumeMatchedReadProps> = () => {
 	const { resumeMatchedId } = useParams();
-	const { data, status } = useCustomQuery([ResumeQueryKey.ResumeMatched, 1, 10], () =>
-		findAllResumeMatched(1, 10)
+	const { data, status } = useCustomQuery([ResumeQueryKey.ResumeMatched, 1, 1000], () =>
+		findAllResumeMatched(1, 1000)
 	);
 
 	const { resolvedTheme } = useTheme();
@@ -29,7 +30,10 @@ const ResumeMatchedRead: React.FC<ResumeMatchedReadProps> = () => {
 		return <div>错误:{data?.message}</div>;
 	}
 	const resumeDatas = data.data.data;
+	console.log('🚀 ~ resumeDatas:', resumeDatas);
+
 	const resumeData = resumeDatas?.find(resume => resume.id === resumeMatchedId);
+	const jobData = resumeData?.job;
 
 	if (!resumeData || resumeMatchedId === undefined) {
 		return <div className="text-center text-gray-500">没有找到简历数据</div>;
@@ -60,6 +64,8 @@ const ResumeMatchedRead: React.FC<ResumeMatchedReadProps> = () => {
 						</CardDescription>
 					</CardHeader>
 				</Card>
+
+				{jobData && <JobCard jobData={jobData} />}
 
 				{/* 职业技能信息 */}
 				{resumeData.skill && resumeData.skill.content && (

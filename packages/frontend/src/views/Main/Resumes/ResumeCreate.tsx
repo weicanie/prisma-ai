@@ -15,7 +15,7 @@ const ResumeCreate: React.FC<ResumeCreateProps> = () => {
 	//TODO 分页参数不写死
 	const createResumeMutation = useCustomMutation(createResume, {
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: [ResumeQueryKey.Resumes, 1, 10] });
+			queryClient.invalidateQueries({ queryKey: [ResumeQueryKey.Resumes, 1, 1000] });
 		}
 	});
 

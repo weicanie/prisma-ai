@@ -3,7 +3,7 @@ import {
 	DataChunkErrVO,
 	DataChunkVO,
 	LLMSessionRequest,
-	ProjecctLLM,
+	SelectedLLM,
 	UserInfoFromToken
 } from '@prism-ai/shared';
 import { catchError, mergeMap, Observable, timeout } from 'rxjs';
@@ -26,7 +26,7 @@ interface LLMSseTask extends PersistentTask {
 		 * 该函数即为流式数据源
 		 */
 		poolName: string;
-		model: ProjecctLLM;//使用的llm
+		model: SelectedLLM; //使用的llm
 		cancelFn?: () => void;
 	};
 }
@@ -128,6 +128,7 @@ export class LLMSseService implements OnModuleInit {
 				.pipe(
 					mergeMap(async (chunk: LLMStreamingChunk) => {
 						if (chunk) {
+							console.log('🚀 ~ LLMSseService ~ mergeMap ~ chunk:', chunk);
 							/* 储存到redis、发送chunk抵达事件 */
 							await this.saveSseEventData(taskId, chunk);
 						}

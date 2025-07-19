@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useTheme } from '@/utils/theme';
 import { FileSearch, Zap } from 'lucide-react';
 import React from 'react';
-
+import { ChangeLLMJob } from './ChangeLLMJob';
 interface PreflightBtnsProps {
 	availableActions: readonly string[];
 	handleMatch: () => void;
@@ -23,6 +23,7 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({ availableActions, handleM
 				<CardTitle className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
 					<Zap className="w-5 h-5" />
 					doro 定制岗位专用简历
+					<ChangeLLMJob />
 				</CardTitle>
 				<CardDescription className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
 					doro 将会分析目标岗位和您的简历，让您的简历契合、匹配目标岗位

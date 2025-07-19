@@ -33,7 +33,7 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 		const navigate = useNavigate();
 		const dispatch = useDispatch();
 
-		const { data, status } = useCustomQuery([JobQueryKey.Jobs], () => findAllUserJobs(1, 100));
+		const { data, status } = useCustomQuery([JobQueryKey.Jobs], () => findAllUserJobs(1, 1000));
 
 		const { data: resumeMatchedData, status: resumeMatchedStatus } = useCustomQuery(
 			[ResumeQueryKey.ResumeMatched, 1, 1000],

@@ -26,10 +26,10 @@ __export(index_exports, {
   JobOpenStatus: () => JobOpenStatus,
   JobStatus: () => JobStatus,
   KnowledgeTypeEnum: () => KnowledgeTypeEnum,
-  ProjecctLLM: () => ProjecctLLM,
   ProjectStatus: () => ProjectStatus,
   RequestTargetMap: () => RequestTargetMap,
   ResumeStatus: () => ResumeStatus,
+  SelectedLLM: () => SelectedLLM,
   autoflowSchema: () => autoflowSchema,
   errorMessage: () => errorMessage,
   getLightspotSchema: () => getLightspotSchema,
@@ -4385,13 +4385,13 @@ var ProjectStatus = /* @__PURE__ */ ((ProjectStatus2) => {
   ProjectStatus2["matched"] = "matched";
   return ProjectStatus2;
 })(ProjectStatus || {});
-var ProjecctLLM = /* @__PURE__ */ ((ProjecctLLM2) => {
-  ProjecctLLM2["gemini_2_5_pro"] = "gemini-2.5-pro";
-  ProjecctLLM2["gemini_2_5_pro_proxy"] = "gemini-2.5-pro-proxy";
-  ProjecctLLM2["deepseek_reasoner"] = "deepseek-reasoner";
-  ProjecctLLM2["gemini_2_5_flash"] = "gemini-2.5-flash";
-  return ProjecctLLM2;
-})(ProjecctLLM || {});
+var SelectedLLM = /* @__PURE__ */ ((SelectedLLM2) => {
+  SelectedLLM2["gemini_2_5_pro"] = "gemini-2.5-pro";
+  SelectedLLM2["gemini_2_5_pro_proxy"] = "gemini-2.5-pro-proxy";
+  SelectedLLM2["deepseek_reasoner"] = "deepseek-reasoner";
+  SelectedLLM2["gemini_2_5_flash"] = "gemini-2.5-flash";
+  return SelectedLLM2;
+})(SelectedLLM || {});
 
 // src/types/project.schema-form.ts
 var infoSchemaForm = z.object({
@@ -4459,6 +4459,7 @@ function jsonMd_obj(content) {
     let obj;
     try {
       obj = JSON.parse(jsonMd);
+      console.log("\u4FEE\u590D\u6210\u529F");
     } catch (error) {
       console.error("jsonMd_obj JSON parsing error:", error);
       console.error("jsonMd_obj when parsing:", jsonMd);
@@ -4642,10 +4643,10 @@ var markdownToSkills = (markdown) => {
   JobOpenStatus,
   JobStatus,
   KnowledgeTypeEnum,
-  ProjecctLLM,
   ProjectStatus,
   RequestTargetMap,
   ResumeStatus,
+  SelectedLLM,
   autoflowSchema,
   errorMessage,
   getLightspotSchema,

@@ -12,15 +12,18 @@ import {
 	ResumeMatchedVo,
 	ResumeStatus,
 	ResumeVo,
+	SelectedLLM,
 	SkillVo,
+	StreamingChunk,
+	UserFeedback,
 	UserInfoFromToken
 } from '@prism-ai/shared';
 import { Model, Types } from 'mongoose';
-import { from, mergeMap } from 'rxjs';
+import { from, Observable } from 'rxjs';
 import { ChainService } from '../../chain/chain.service';
+import { HjmChainService } from '../../chain/hjm-chain.service';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { RedisService } from '../../redis/redis.service';
-import { DeepSeekStreamChunk } from '../../type/sse';
 import { WithFuncPool } from '../../utils/abstract';
 import { PopulateFields, SseFunc } from '../../utils/type';
 import { Job, JobDocument } from '../job/entities/job.entity';
@@ -33,7 +36,6 @@ import { UpdateResumeDto } from './dto/update-resume.dto';
 import { Resume, ResumeDocument } from './entities/resume.entity';
 import { ResumeMatched, ResumeMatchedDocument } from './entities/resumeMatched.entity';
 //TODO 学习路线CRUD
-//* 简历版本控制,数组 {版本号, changelog},仿git即可
 @Injectable()
 export class ResumeService implements WithFuncPool {
 	@InjectModel(Resume.name)
@@ -55,20 +57,27 @@ export class ResumeService implements WithFuncPool {
 
 	poolName = 'ResumeService';
 
-	logger: Logger;
+	logger = new Logger(ResumeService.name);
 
 	constructor(
 		public chainService: ChainService,
 		public eventBusService: EventBusService,
 		public redisService: RedisService,
-		private readonly jobService: JobService
+		private readonly jobService: JobService,
+		private readonly hjmChainService: HjmChainService
 	) {
 		this.funcPool = {
 			resumeMatchJob: this.resumeMatchJob.bind(this)
 		};
 	}
 
-	async resumeMatchJob(input: MatchJobDto, userInfo: UserInfoFromToken, taskId: string) {
+	async resumeMatchJob(
+		input: MatchJobDto,
+		userInfo: UserInfoFromToken,
+		taskId: string,
+		userFeedback: UserFeedback = { reflect: false, content: '' },
+		model: SelectedLLM
+	) {
 		const resumeVo = await this.findOne(input.resume, userInfo);
 		const jobVo = await this.jobService.findOne(input.job, userInfo);
 		//储存：新建或更新
@@ -113,24 +122,14 @@ export class ResumeService implements WithFuncPool {
 
 		const chainInput = {
 			resume,
-			job
+			job,
+			userFeedback,
+			userInfo
 		};
 
-		const chain = await this.chainService.matchChain(true);
-		const chainInputStr = JSON.stringify(chainInput);
-		const resumeMatched = await chain.stream(chainInputStr);
-		return from(resumeMatched).pipe(
-			mergeMap(async (chunk: DeepSeekStreamChunk) => {
-				const done = !chunk.content && chunk.additional_kwargs.reasoning_content === null;
-				const isReasoning = chunk.additional_kwargs.reasoning_content !== null;
-				return {
-					content: !isReasoning ? chunk.content : '',
-					reasonContent: isReasoning ? chunk.additional_kwargs?.reasoning_content! : '',
-					done,
-					isReasoning
-				};
-			})
-		);
+		const chain = await this.hjmChainService.matchChain(true, model);
+		const resumeMatched = await chain.stream(chainInput);
+		return from(resumeMatched) as Observable<StreamingChunk>;
 	}
 
 	/**
@@ -163,7 +162,6 @@ export class ResumeService implements WithFuncPool {
 			// 调用链来修复格式
 			matchedResume = await fomartFixChain.invoke({ input: contentStr });
 		}
-
 		// 4. 准备要存入数据库的数据
 		const dataToSave = {
 			name: matchedResume.name,
@@ -191,9 +189,27 @@ export class ResumeService implements WithFuncPool {
 			status: ResumeStatus.matched,
 			jobId: new Types.ObjectId(job.id)
 		};
+		// 用户该简历已存在则更新
+		const existingResume = await this.resumeMatchedModel.findOne({
+			'userInfo.userId': userInfo.userId,
+			name: resume.name
+		});
 
-		const newMatchedResume = new this.resumeMatchedModel(dataToSave);
-		await newMatchedResume.save();
+		let newMatchedResume: ResumeMatchedDocument;
+		if (existingResume) {
+			// 更新现有记录
+			//@ts-expect-error 类型推导错误
+			newMatchedResume = await this.resumeMatchedModel.findByIdAndUpdate(
+				existingResume._id,
+				dataToSave,
+				{ new: true }
+			);
+		} else {
+			// 创建新记录
+			newMatchedResume = new this.resumeMatchedModel(dataToSave);
+			await newMatchedResume.save();
+		}
+
 		/* 更新关联数据*/
 		await this.resumeModel.updateOne(
 			{ _id: new Types.ObjectId(resume.id) },
@@ -288,7 +304,13 @@ export class ResumeService implements WithFuncPool {
 		const query = { 'userInfo.userId': userInfo.userId };
 
 		const [result, total] = await Promise.all([
-			this.resumeMatchedModel.find(query).skip(skip).limit(limit).sort({ createdAt: -1 }).exec(),
+			this.resumeMatchedModel
+				.find(query)
+				.skip(skip)
+				.limit(limit)
+				.sort({ createdAt: -1 })
+				.populate('jobId')
+				.exec(),
 			this.resumeMatchedModel.countDocuments(query).exec()
 		]);
 
@@ -300,7 +322,8 @@ export class ResumeService implements WithFuncPool {
 				status: resumeMatchedObj.status,
 				skill: resumeMatchedObj.skill as unknown as SkillVo,
 				projects: resumeMatchedObj.projects as unknown as ProjectVo[],
-				jobId: resumeMatchedObj.jobId.toString(),
+				job: resumeMatchedObj.jobId,
+				jobId: resumeMatchedObj.jobId.id.toString(),
 				createdAt: resumeMatchedObj.createdAt,
 				updatedAt: resumeMatchedObj.updatedAt
 			};

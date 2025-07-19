@@ -11,7 +11,7 @@ interface JobReadProps {
 
 const JobRead: React.FC<JobReadProps> = () => {
 	const { jobId } = useParams();
-	const { data, status } = useCustomQuery([JobQueryKey.Jobs], () => findAllUserJobs(1, 100));
+	const { data, status } = useCustomQuery([JobQueryKey.Jobs], () => findAllUserJobs(1, 1000));
 
 	if (status === 'pending') {
 		return <div>Loading...</div>;

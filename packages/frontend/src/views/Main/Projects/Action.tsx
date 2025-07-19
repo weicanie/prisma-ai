@@ -18,6 +18,8 @@ import type { contextInput } from '../../../services/sse/sse';
 import { useSseAnswer } from '../../../services/sse/useSseAnswer';
 import { OriginalProject } from './cpns/OriginalProject';
 import { ProjectResult } from './cpns/ProjectResult';
+import { selectProjectLLM } from '../../../store/projects';
+import { useSelector } from 'react-redux';
 //TODO 将调用llm、获取sse返回过程封装成一个统一的组件
 interface ActionProps {
 	_?: string;
@@ -55,8 +57,10 @@ const Action: React.FC<ActionProps> = () => {
 
 	const queryClient = useQueryClient();
 
+	const model = useSelector(selectProjectLLM);
+
 	/* 使用SSE获取AI生成结果 */
-	const { content, reasonContent, done, isReasoning } = useSseAnswer(input, urlPath);
+	const { content, reasonContent, done, isReasoning } = useSseAnswer(input, urlPath, model);
 	/* 自动切换tab */
 	useEffect(() => {
 		if (content) {

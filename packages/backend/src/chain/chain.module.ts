@@ -7,6 +7,7 @@ import { PromptModule } from '../prompt/prompt.module';
 import { WithFormfixChain } from '../utils/abstract';
 import { AichatChainService } from './aichat-chain.service';
 import { ChainService } from './chain.service';
+import { HjmChainService } from './hjm-chain.service';
 import { ProjectChainService } from './project-chain.service';
 
 @Module({
@@ -15,6 +16,7 @@ import { ProjectChainService } from './project-chain.service';
 		ChainService,
 		AichatChainService,
 		ProjectChainService,
+		HjmChainService,
 		{
 			provide: WithFormfixChain,
 			useExisting: ChainService
@@ -27,6 +29,12 @@ import { ProjectChainService } from './project-chain.service';
 		ClientModule,
 		forwardRef(() => PrismaAgentModule)
 	],
-	exports: [ChainService, AichatChainService, ProjectChainService, WithFormfixChain]
+	exports: [
+		ChainService,
+		AichatChainService,
+		ProjectChainService,
+		WithFormfixChain,
+		HjmChainService
+	]
 })
 export class ChainModule {}

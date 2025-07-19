@@ -1,4 +1,4 @@
-import { ProjecctLLM, StreamingChunk, UserFeedback, UserInfoFromToken } from '@prism-ai/shared';
+import { SelectedLLM, StreamingChunk, UserFeedback, UserInfoFromToken } from '@prism-ai/shared';
 import { Types } from 'mongoose';
 import { Observable } from 'rxjs';
 /**
@@ -30,5 +30,5 @@ export type SseFunc = (
 	userInfo: UserInfoFromToken,
 	taskId: string,
 	userFeedback: UserFeedback,
-	model: ProjecctLLM//使用的llm
+	model: SelectedLLM //使用的llm
 ) => Promise<Observable<LLMStreamingChunk>>;

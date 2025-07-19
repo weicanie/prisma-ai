@@ -55,6 +55,9 @@ jobs:
       packages: write
       id-token: write
     uses: ./.github/workflows/CI_docker_image_build.yml
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
   release-frontend-image:
     needs: trigger-test-build
@@ -63,3 +66,6 @@ jobs:
       packages: write
       id-token: write
     uses: ./.github/workflows/CI_build_nginx.yml
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

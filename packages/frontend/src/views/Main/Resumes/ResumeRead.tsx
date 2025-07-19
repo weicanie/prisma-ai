@@ -15,7 +15,7 @@ interface ResumeReadProps {
 
 const ResumeRead: React.FC<ResumeReadProps> = () => {
 	const { resumeId } = useParams();
-	const { data, status } = useCustomQuery([ResumeQueryKey.Resumes, 1, 10], ({ queryKey }) => {
+	const { data, status } = useCustomQuery([ResumeQueryKey.Resumes, 1, 1000], ({ queryKey }) => {
 		const [, page, limit] = queryKey; // 从 queryKey 中解构分页参数
 		return findAllUserResumes(page as number, limit as number);
 	});

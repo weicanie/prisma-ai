@@ -10,7 +10,7 @@ import {
 	Sse,
 	ValidationPipe
 } from '@nestjs/common';
-import { UserInfoFromToken } from '@prism-ai/shared';
+import { UserInfoFromToken, SelectedLLM } from '@prism-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { LLMSseService } from '../sse/llm-sse.service';
 import { CreateResumeDto } from './dto/create-resume.dto';
@@ -29,11 +29,13 @@ export class ResumeController {
 	async resumeMatchJob(
 		@Query('sessionId') sessionId: string,
 		@Query('recover') recover: boolean,
+		@Query('model') model: SelectedLLM,
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
 		const metadata = {
 			funcKey: this.resumeService.funcKeys.resumeMatchJob,
-			poolName: this.resumeService.poolName
+			poolName: this.resumeService.poolName,
+			model
 		};
 		if (recover) {
 			return this.llmSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);

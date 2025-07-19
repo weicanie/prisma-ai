@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTheme } from '@/utils/theme';
 import {
-	ProjecctLLM,
+	SelectedLLM,
 	type lookupResultDto,
 	type ProjectDto,
 	type projectLookupedDto,
@@ -165,7 +165,10 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 						scrollBehavior: 'smooth'
 					}}
 				>
-					{reasonContent || (selectedllm === ProjecctLLM.deepseek_reasoner ? 'doro 在等待你的指示送达...' : 'doro 正在后台动态思考...')}
+					{reasonContent ||
+						(selectedllm === SelectedLLM.deepseek_reasoner
+							? 'doro 在等待你的指示送达...'
+							: 'doro 正在后台动态思考...')}
 					{/* 添加一个闪烁的光标效果 */}
 					<span className="animate-pulse text-blue-400">▋</span>
 				</div>

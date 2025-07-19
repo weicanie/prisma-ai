@@ -1,8 +1,9 @@
-import { JobOpenStatus, type CreateJobDto } from '@prism-ai/shared';
+import { JobOpenStatus, SelectedLLM, type CreateJobDto } from '@prism-ai/shared';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 interface JobState {
 	data: CreateJobDto;
+	model: SelectedLLM;
 }
 
 const initialState: JobState = {
@@ -14,7 +15,8 @@ const initialState: JobState = {
 		salary: '',
 		link: '',
 		job_status: JobOpenStatus.OPEN // 默认状态为 "open"
-	}
+	},
+	model: SelectedLLM.gemini_2_5_pro
 };
 
 const JobSlice = createSlice({
@@ -26,14 +28,18 @@ const JobSlice = createSlice({
 		},
 		reset: state => {
 			Object.assign(state, initialState);
+		},
+		setJobModel: (state, action: PayloadAction<SelectedLLM>) => {
+			state.model = action.payload;
 		}
 	}
 });
 
 // Actions
-export const { setData, reset } = JobSlice.actions;
+export const { setData, reset, setJobModel } = JobSlice.actions;
 
 // Selectors
 export const selectJobData = (state: { job: JobState }) => state.job.data;
+export const selectJobModel = (state: { job: JobState }) => state.job.model;
 // Reducer
 export const JobReducer = JobSlice.reducer;

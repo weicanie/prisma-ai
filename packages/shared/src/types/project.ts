@@ -64,7 +64,7 @@ export interface ImplementDto {
 /**
  * 可用的用于处理项目经验的模型
  */
-export enum ProjecctLLM {
+export enum SelectedLLM {
 	gemini_2_5_pro = 'gemini-2.5-pro', //google原厂
 	gemini_2_5_pro_proxy = 'gemini-2.5-pro-proxy', //国内代理
 	deepseek_reasoner = 'deepseek-reasoner',

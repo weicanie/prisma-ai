@@ -18,6 +18,9 @@ import { useSseAnswer } from '../../../services/sse/useSseAnswer';
 import JobCard from '../Jobs/JobCard';
 import { OriginalResume } from './Action-Result/OriginalResume';
 import { ResumeResult } from './Action-Result/ResumeResult';
+import { useQueryClient } from '@tanstack/react-query';
+import { selectJobModel } from '../../../store/jobs';
+import { useSelector } from 'react-redux';
 
 //llm返回的json
 type MatchResultDto = ResumeMatchedDto;
@@ -25,20 +28,22 @@ type MatchResultDto = ResumeMatchedDto;
 interface ResumeActionsProps {
 	_?: string;
 }
-//TODO 将专用简历与岗位一对一,然后query、出结果后主动失效以展示
+
 /**
  * 简历操作页面
  * @description 包含简历详情展示和AI操作（如岗位匹配）
  */
 const ResumeActions: React.FC<ResumeActionsProps> = () => {
 	const { resumeId, jobId } = useParams();
-	const { data, status } = useCustomQuery([ResumeQueryKey.Resumes, 1, 10], ({ queryKey }) => {
+	const { data, status } = useCustomQuery([ResumeQueryKey.Resumes, 1, 1000], ({ queryKey }) => {
 		const [, page, limit] = queryKey;
 		return findAllUserResumes(page as number, limit as number);
 	});
 	const { data: jobDataResult, status: jobStatus } = useCustomQuery([JobQueryKey.Jobs], () =>
-		findAllUserJobs(1, 100)
+		findAllUserJobs(1, 1000)
 	);
+	const model = useSelector(selectJobModel);
+	const queryClient = useQueryClient();
 	// const { data: resumeMatchedData, status: resumeMatchedStatus } = useCustomQuery(
 	// 	[ResumeQueryKey.ResumeMatched, jobId],
 	// 	() => findResumeMatchedByJobId(jobId as string)
@@ -53,7 +58,7 @@ const ResumeActions: React.FC<ResumeActionsProps> = () => {
 	const [resultData, setResultData] = useState<MatchResultDto | null>(null);
 
 	/* 使用SSE获取AI生成结果 */
-	const { content, reasonContent, done, isReasoning } = useSseAnswer(input, urlPath);
+	const { content, reasonContent, done, isReasoning } = useSseAnswer(input, urlPath, model);
 
 	/* 自动切换tab */
 	useEffect(() => {
@@ -64,14 +69,14 @@ const ResumeActions: React.FC<ResumeActionsProps> = () => {
 
 	useEffect(() => {
 		if (done) {
+			setInput({}); // 清空输入防止sse重复请求
 			const result = jsonMd_obj(content);
 			console.log('🚀 ~ sse最终结果', result);
 			setResultData(result);
-			setInput({}); // 清空输入防止sse重复请求
 			//setState异步, 需要等待setState执行完再执行navigate
 			setTimeout(() => navigate('#result'), 0);
 		}
-	}, [done, content, navigate]);
+	}, [done]);
 
 	if (status === 'pending' || jobStatus === 'pending') {
 		return <div className="flex justify-center items-center h-64">Loading...</div>;
@@ -101,9 +106,9 @@ const ResumeActions: React.FC<ResumeActionsProps> = () => {
 			case ResumeStatus.committed:
 				return ['match'];
 			case ResumeStatus.matched:
-				return ['collaborate'];
+				return ['match'];
 			default:
-				return [];
+				return ['match'];
 		}
 	};
 
@@ -128,8 +133,45 @@ const ResumeActions: React.FC<ResumeActionsProps> = () => {
 			resume: resumeId,
 			job: jobId
 		};
-		setInput(matchJobDto);
+		setInput({ input: matchJobDto });
 		setUrlPath('/resume/match');
+		navigate('#reasoning');
+	};
+
+	/**
+	 * 用户点击接受结果,并更新所有状态
+	 */
+	const handleMerge = () => {
+		queryClient.invalidateQueries({ queryKey: [ResumeQueryKey.Resumes] });
+		setInput({});
+		setUrlPath('/resume/match');
+		navigate('#next-action');
+	};
+
+	/**
+	 * 用户点击不满意后重新调用llm
+	 * @param content 反馈内容
+	 */
+	const handleFeedback = (content: string) => {
+		const matchJobDto: MatchJobDto = {
+			resume: resumeId,
+			job: jobId
+		};
+		switch (actionType) {
+			case 'match':
+				if (!resumeId || !jobId) {
+					toast.error('请选择简历和岗位');
+					setTimeout(() => {
+						navigate('/job');
+					}, 1000);
+					return;
+				}
+				setInput({ input: matchJobDto, userFeedback: { reflect: true, content } });
+				break;
+			default:
+				break;
+		}
+		setUrlPath(urlPath);
 		navigate('#reasoning');
 	};
 
@@ -140,6 +182,8 @@ const ResumeActions: React.FC<ResumeActionsProps> = () => {
 		actionType,
 		availableActions,
 		handleMatch,
+		handleMerge,
+		handleFeedback,
 		content,
 		reasonContent,
 		done,

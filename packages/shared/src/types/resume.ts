@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { ProjectVo } from './project';
 import { resumeMatchedSchema } from './resume.schema';
 import { SkillVo } from './skill';
-
+import { JobVo } from './job';
 export enum ResumeStatus {
 	committed = 'committed', //初提交
 	matched = 'matched' //用户已合并匹配
@@ -54,6 +54,7 @@ export interface ResumeVo {
 
 export type ResumeMatchedVo = Omit<ResumeVo, 'resumeMatcheds'> & {
 	jobId: string;
+	job: JobVo;
 };
 
 /**

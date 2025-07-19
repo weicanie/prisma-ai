@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { selectProjectLLM, setLLM } from '@/store/projects';
+import { selectJobModel, setJobModel } from '@/store/jobs';
 import { useTheme } from '@/utils/theme';
 import { SelectedLLM } from '@prism-ai/shared';
 import { Check, ChevronDown } from 'lucide-react';
@@ -35,15 +35,15 @@ const modelConfigs = {
 	}
 };
 
-export function ChangeLLM() {
+export function ChangeLLMJob() {
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
 	const dispatch = useDispatch();
-	const currentModel = useSelector(selectProjectLLM);
+	const currentModel = useSelector(selectJobModel);
 	const [open, setOpen] = useState(false);
 
 	const handleModelChange = (model: SelectedLLM) => {
-		dispatch(setLLM(model));
+		dispatch(setJobModel(model));
 		setOpen(false);
 	};
 

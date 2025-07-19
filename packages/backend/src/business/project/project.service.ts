@@ -1,6 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { lookupResultSchema, ProjectStatus, ProjectVo, UserInfoFromToken } from '@prism-ai/shared';
+import {
+	lookupResultSchema,
+	SelectedLLM,
+	ProjectStatus,
+	ProjectVo,
+	UserInfoFromToken
+} from '@prism-ai/shared';
 import { Model } from 'mongoose';
 import { ChainService } from '../../chain/chain.service';
 import { ProjectChainService } from '../../chain/project-chain.service';
@@ -99,7 +105,7 @@ export class ProjectService {
 	 * 非流式分析项目
 	 */
 	private async lookupProjectUnStream(project: ProjectDocument, userInfo: UserInfoFromToken) {
-		const chain = await this.projectChainService.lookupChain(false);
+		const chain = await this.projectChainService.lookupChain(false, SelectedLLM.deepseek_reasoner);
 		let [result] = await chain.invoke({
 			project: project.toObject() as ProjectDto,
 			userFeedback: { reflect: false, content: '' },

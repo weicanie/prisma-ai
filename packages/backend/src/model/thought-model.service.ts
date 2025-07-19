@@ -5,7 +5,7 @@ import { IterableReadableStream } from '@langchain/core/utils/stream';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatOpenAI, ChatOpenAIFields } from '@langchain/openai';
 import { Injectable, Logger } from '@nestjs/common';
-import { ProjecctLLM, StreamingChunk } from '@prism-ai/shared';
+import { SelectedLLM, StreamingChunk } from '@prism-ai/shared';
 import { z } from 'zod';
 import { DeepSeekStreamChunk } from '../type/sse';
 import { ModelService } from './model.service';
@@ -25,8 +25,14 @@ export const THINKING_SYSTEM_PROMPT = `你有一个用于回答问题的工具�
  * LangChain 会将此 Zod Schema 转换为模型可以理解的工具调用指令。
  */
 export const ThoughtAndAnswerSchema = z.object({
-	thought: z.string().describe('详细思考过程和推理步骤。直接输出可直接反序列化的json格式,禁止使用markdown格式！'),
-	answer: z.string().describe('根据思考过程得出的最终、完整的答案。直接输出可直接反序列化的json格式,禁止使用markdown格式！')
+	thought: z
+		.string()
+		.describe('详细思考过程和推理步骤。直接输出可直接反序列化的json格式,禁止使用markdown格式！'),
+	answer: z
+		.string()
+		.describe(
+			'根据思考过程得出的最终、完整的答案。直接输出可直接反序列化的json格式,禁止使用markdown格式！'
+		)
 });
 
 /**
@@ -44,15 +50,15 @@ export class ThoughtModelService {
 	constructor(private readonly modelService: ModelService) {}
 
 	/**
- * 获取一个即用型的、模拟 deepseek-r1 "思考/答案" 分离输出功能的 Runnable (Gemini版本)。
- * 这个返回的 Runnable 接收一个 PromptValue (通常由 ChatPromptTemplate 生成)
- * 并流式输出 `StreamingChunk` 对象。
- * @warning 复杂prompt+结构化输出下，gemini-2.5-pro的思考/答案分离输出会出错！
- * @param config - 模型配置或预设名称 'gemini-2.5-pro'
- * @returns 一个配置好的、可以直接调用的 Runnable 实例，它扮演一个 "思考型LLM" 的角色。
- */
+	 * 获取一个即用型的、模拟 deepseek-r1 "思考/答案" 分离输出功能的 Runnable (Gemini版本)。
+	 * 这个返回的 Runnable 接收一个 PromptValue (通常由 ChatPromptTemplate 生成)
+	 * 并流式输出 `StreamingChunk` 对象。
+	 * @warning 复杂prompt+结构化输出下，gemini-2.5-pro的思考/答案分离输出会出错！
+	 * @param config - 模型配置或预设名称 'gemini-2.5-pro'
+	 * @returns 一个配置好的、可以直接调用的 Runnable 实例，它扮演一个 "思考型LLM" 的角色。
+	 */
 	async getGeminiThinkingModelDivided(
-		config: ChatOpenAIFields | ChatGoogleGenerativeAI | ProjecctLLM
+		config: ChatOpenAIFields | ChatGoogleGenerativeAI | SelectedLLM
 	): Promise<Runnable<any, StreamingChunk>> {
 		const thoughtAnswerLLM = await this._getGeminiThinkingCore(config);
 
@@ -68,22 +74,22 @@ export class ThoughtModelService {
 	}
 
 	/**
- * 进行默认输出的gemini-2.5-pro模型，不进行思考与答案分离，和r1一样流式输出StreamingChunk（兼容原接口）
- * @param config 
- * @returns 
- */
+	 * 进行默认输出的gemini-2.5-pro模型，不进行思考与答案分离，和r1一样流式输出StreamingChunk（兼容原接口）
+	 * @param config
+	 * @returns
+	 */
 	async getGeminiThinkingModelFlat(
-		config: ChatOpenAIFields |ChatGoogleGenerativeAI| ProjecctLLM
-	){
+		config: ChatOpenAIFields | ChatGoogleGenerativeAI | SelectedLLM
+	) {
 		let llm: ChatOpenAI | ChatGoogleGenerativeAI;
-		switch(config){
-			case ProjecctLLM.gemini_2_5_pro_proxy:
+		switch (config) {
+			case SelectedLLM.gemini_2_5_pro_proxy:
 				llm = this.modelService.getLLMGeminiRaw('gemini-2.5-pro');
 				break;
-			case ProjecctLLM.gemini_2_5_pro:
+			case SelectedLLM.gemini_2_5_pro:
 				llm = this.modelService.getLLMGeminiPlusRaw('gemini-2.5-pro');
 				break;
-			case ProjecctLLM.gemini_2_5_flash:
+			case SelectedLLM.gemini_2_5_flash:
 				llm = this.modelService.getLLMGeminiPlusRaw('gemini-2.5-flash');
 				break;
 			default:
@@ -151,14 +157,14 @@ export class ThoughtModelService {
 			this.logger.debug('chunk', chunk);
 			// 直接将 chunk 的内容作为答案返回，不进行思考与答案分离
 			let content = '';
-			
+
 			// 处理不同类型的 content
 			if (typeof chunk.content === 'string') {
 				content = chunk.content;
 			} else if (chunk.text) {
 				content = chunk.text;
 			}
-			
+
 			if (content) {
 				yield {
 					content: content,
@@ -234,17 +240,17 @@ export class ThoughtModelService {
 	 * @returns 一个 Runnable 实例，其输出是 {thought: string, answer: string} 对象。
 	 */
 	async _getGeminiThinkingCore(
-		config: ChatOpenAIFields | ChatGoogleGenerativeAI | ProjecctLLM
+		config: ChatOpenAIFields | ChatGoogleGenerativeAI | SelectedLLM
 	): Promise<Runnable<any, ThoughtAndAnswer>> {
 		let llm: ChatOpenAI | ChatGoogleGenerativeAI;
-		switch(config){
-			case ProjecctLLM.gemini_2_5_pro_proxy:
+		switch (config) {
+			case SelectedLLM.gemini_2_5_pro_proxy:
 				llm = this.modelService.getLLMGeminiRaw('gemini-2.5-pro');
 				break;
-			case ProjecctLLM.gemini_2_5_pro:
+			case SelectedLLM.gemini_2_5_pro:
 				llm = this.modelService.getLLMGeminiPlusRaw('gemini-2.5-pro');
 				break;
-			case ProjecctLLM.gemini_2_5_flash:
+			case SelectedLLM.gemini_2_5_flash:
 				llm = this.modelService.getLLMGeminiPlusRaw('gemini-2.5-flash');
 				break;
 			default:
@@ -252,9 +258,10 @@ export class ThoughtModelService {
 		}
 
 		try {
-		const thoughtAndAnswerLLM = (llm as ChatGoogleGenerativeAI).withStructuredOutput(ThoughtAndAnswerSchema);
-		return thoughtAndAnswerLLM as Runnable<any, ThoughtAndAnswer>;
-			
+			const thoughtAndAnswerLLM = (llm as ChatGoogleGenerativeAI).withStructuredOutput(
+				ThoughtAndAnswerSchema
+			);
+			return thoughtAndAnswerLLM as Runnable<any, ThoughtAndAnswer>;
 		} catch (error) {
 			this.logger.error('getGeminiThinkingCore-error', error);
 			throw error;
@@ -284,7 +291,7 @@ export class ThoughtModelService {
 
 			yield {
 				content: !isReasoning ? chunk.content : '',
-				reasonContent: isReasoning ? chunk.additional_kwargs?.reasoning_content ?? '' : '',
+				reasonContent: isReasoning ? (chunk.additional_kwargs?.reasoning_content ?? '') : '',
 				done: false,
 				isReasoning
 			};
@@ -292,5 +299,4 @@ export class ThoughtModelService {
 		// 以防万一，如果流意外结束，也发送一个done信号
 		yield { content: '', reasonContent: '', isReasoning: false, done: true };
 	}
-
 }

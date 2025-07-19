@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import {
 	jsonMd_obj,
 	lookupResultSchema,
-	ProjecctLLM,
+	SelectedLLM,
 	ProjectDto,
 	projectLookupedDto,
 	projectMinedSchema,
@@ -55,7 +55,7 @@ export class ProjectProcessService implements WithFuncPool {
 		public projectChainService: ProjectChainService,
 		public eventBusService: EventBusService,
 		public redisService: RedisService,
-		public skillService: SkillService,
+		public skillService: SkillService
 	) {
 		this.funcPool = {
 			polishProject: this.polishProject.bind(this),
@@ -195,7 +195,7 @@ export class ProjectProcessService implements WithFuncPool {
 		userInfo: UserInfoFromToken,
 		taskId: string,
 		userFeedback: UserFeedback = { reflect: false, content: '' },
-		model: ProjecctLLM
+		model: SelectedLLM
 	): Promise<Observable<StreamingChunk>> {
 		const existingPolishingProject = await this.projectPolishedModel
 			.findOne({
@@ -240,7 +240,7 @@ export class ProjectProcessService implements WithFuncPool {
 			userInfo,
 			userFeedback
 		});
-		
+
 		// 业务层不再关心模型细节，直接返回标准化的 StreamingChunk 流
 		return from(lookupStream) as Observable<StreamingChunk>;
 	}
@@ -304,7 +304,7 @@ export class ProjectProcessService implements WithFuncPool {
 		userInfo: UserInfoFromToken,
 		taskId: string,
 		userFeedback: UserFeedback = { reflect: false, content: '' },
-		model: ProjecctLLM
+		model: SelectedLLM
 	): Promise<Observable<StreamingChunk>> {
 		const existingPolishingProject = await this.projectPolishedModel
 			.findOne({
@@ -376,7 +376,7 @@ export class ProjectProcessService implements WithFuncPool {
 			userInfo,
 			userFeedback
 		});
-		return from(projectPolished)  as Observable<StreamingChunk>
+		return from(projectPolished) as Observable<StreamingChunk>;
 	}
 
 	/**
@@ -390,7 +390,7 @@ export class ProjectProcessService implements WithFuncPool {
 		userInfo: UserInfoFromToken,
 		taskId: string,
 		userFeedback: UserFeedback = { reflect: false, content: '' },
-		model: ProjecctLLM
+		model: SelectedLLM
 	): Promise<Observable<StreamingChunk>> {
 		const existingMiningProject = await this.projectMinedModel
 			.findOne({
@@ -446,7 +446,12 @@ export class ProjectProcessService implements WithFuncPool {
 				});
 		});
 
-		const chain = await this.projectChainService.mineChain(true, model, userInfo, this.skillService);
+		const chain = await this.projectChainService.mineChain(
+			true,
+			model,
+			userInfo,
+			this.skillService
+		);
 		let projectMined = await chain.stream({
 			project,
 			userInfo,

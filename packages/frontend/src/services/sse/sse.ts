@@ -9,9 +9,8 @@ import type {
 	ServerDataFormat as SDF,
 	UserFeedback
 } from '@prism-ai/shared';
+import { SelectedLLM } from '@prism-ai/shared';
 import { toast } from 'sonner';
-import store from '../../store';
-import { selectProjectLLM } from '../../store/projects';
 import { instance } from '../config';
 
 /**
@@ -125,6 +124,7 @@ async function getSessionStatusAndDecide(input: contextInput | ''): Promise<SDF<
  */
 function getSseData(
 	path: string,
+	model: SelectedLLM,
 	setData: (data: string | ((prevData: string) => string)) => void,
 	setReasonContent: (data: string | ((prevData: string) => string)) => void,
 	setDone: (done: boolean) => void,
@@ -162,7 +162,10 @@ function getSseData(
 			eventSource.close();
 			eventSource = null;
 			if (setAnswering) {
-				setAnswering(false);
+				//让answering的更新在input之后（setState是微任务）
+				setTimeout(() => {
+					setAnswering(false);
+				});
 			}
 			/* 
 			 让外部组件处理useSseAnswer状态的重置
@@ -196,9 +199,6 @@ function getSseData(
 	// 根据会话状态确定要请求的接口
 	let url = '';
 	const baseUrl = import.meta.env.VITE_API_BASE_URL; //协议-主机-端口
-
-	//获取模型
-	const model = selectProjectLLM(store.getState());
 
 	if (status === 'backdone' || status === 'running') {
 		// 断点接传 - 从上次中断的地方继续

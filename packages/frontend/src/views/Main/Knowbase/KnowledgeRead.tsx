@@ -15,7 +15,7 @@ interface KnowledgeReadProps {
 
 const KnowledgeRead: React.FC<KnowledgeReadProps> = () => {
 	const { knowledgeId } = useParams();
-	const { data, status } = useCustomQuery([KnowledgeQueryKey.Knowledges, 1, 10], ({ queryKey }) =>
+	const { data, status } = useCustomQuery([KnowledgeQueryKey.Knowledges, 1, 1000], ({ queryKey }) =>
 		findAllUserKnowledge({ page: queryKey[1] as number, limit: queryKey[2] as number })
 	);
 	const { resolvedTheme } = useTheme();

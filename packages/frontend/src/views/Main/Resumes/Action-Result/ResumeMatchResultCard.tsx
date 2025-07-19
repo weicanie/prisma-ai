@@ -1,12 +1,16 @@
 import { useTheme } from '@/utils/theme';
 import { type ResumeMatchedDto, type ResumeVo } from '@prism-ai/shared';
-import React from 'react';
+import React, { useState } from 'react';
 import { OriginalResume } from './OriginalResume';
+import type { ResumeResultProps } from './ResumeResult';
 
-interface ResumeMatchResultCardProps {
-	resultData: ResumeMatchedDto | null;
-	resumeData: ResumeVo;
-}
+import { Button } from '@/components/ui/button';
+import { Pyramid } from 'lucide-react';
+import FeedBack from '../../Projects/cpns/FeedBack';
+type ResumeMatchResultCardProps = Pick<
+	ResumeResultProps,
+	'resultData' | 'resumeData' | 'handleMerge' | 'handleFeedback'
+>;
 
 /**
  * 简历-岗位匹配结果卡片
@@ -14,12 +18,14 @@ interface ResumeMatchResultCardProps {
  */
 export const ResumeMatchResultCard: React.FC<ResumeMatchResultCardProps> = ({
 	resultData,
-	resumeData
+	resumeData,
+	handleMerge,
+	handleFeedback
 }) => {
-	console.log('🚀 ~ resumeData~ResumeMatchResultCard卡片:', resumeData);
-
+	console.log('🚀 ~ resultData:', resultData);
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
+	const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
 	const isDataValid = (data: unknown): data is ResumeMatchedDto => {
 		if (data === null || typeof data !== 'object') {
@@ -41,14 +47,31 @@ export const ResumeMatchResultCard: React.FC<ResumeMatchResultCardProps> = ({
 		skill: { ...resumeData.skill, content: resultData.skill.content },
 		projects: resumeData.projects.map((project, index) => ({
 			...project,
-			info: resultData.projects[index].info,
-			lightspot: resultData.projects[index].lightspot
+			info: resultData?.projects?.[index]?.info ?? resumeData.projects[index].info,
+			lightspot: resultData?.projects?.[index]?.lightspot ?? resumeData.projects[index].lightspot
 		}))
 	};
-	console.log('🚀 ~ resultDataVo~ResumeMatchResultCard卡片:', resultDataVo);
 	return (
 		<>
 			<OriginalResume resumeData={resultDataVo} isDark={isDark} />
+			{resultData && (
+				<div className="flex justify-center items-center gap-4 fixed bottom-5 right-1/2 translate-x-1/2">
+					<Button onClick={handleMerge} variant="default" className="w-40" size="lg">
+						<Pyramid className="w-4 h-4 mr-2" />
+						满意,完成优化
+					</Button>
+					<Button
+						onClick={() => setIsFeedbackOpen(true)}
+						variant="outline"
+						className="w-40"
+						size="lg"
+					>
+						<Pyramid className="w-4 h-4 mr-2" />
+						不满意,重新优化
+					</Button>
+				</div>
+			)}
+			<FeedBack open={isFeedbackOpen} onOpenChange={setIsFeedbackOpen} onSubmit={handleFeedback} />
 		</>
 	);
 };

@@ -14,6 +14,7 @@ const Projects = lazy(() => import('../views/Main/Projects'));
 const Resumes = lazy(() => import('../views/Main/Resumes'));
 const ResumeActions = lazy(() => import('../views/Main/Resumes/Action'));
 const ResumeRead = lazy(() => import('../views/Main/Resumes/ResumeRead'));
+const ResumeMatchedRead = lazy(() => import('../views/Main/Jobs/ResumeMatchedRead'));
 
 const Action = lazy(() => import('../views/Main/Projects/Action'));
 const Skills = lazy(() => import('../views/Main/Skills'));
@@ -201,7 +202,7 @@ export const routes = [
 						path: '/main/job/resumeMatched/:resumeMatchedId',
 						element: (
 							<UpdateBreadRouter>
-								<ResumeRead></ResumeRead>
+								<ResumeMatchedRead></ResumeMatchedRead>
 							</UpdateBreadRouter>
 						)
 					}

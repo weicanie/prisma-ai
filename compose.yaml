@@ -9,7 +9,7 @@ services:
       - "3123:3000"
 
   prisma-ai-backend:
-    image: docker.1ms.run/onlyie/prisma-ai-backend:3.3.1
+    image: docker.1ms.run/onlyie/prisma-ai-backend:3.3.5
     depends_on:
       # mysql经常需要启动好几次才能成功,得在它启动成功后再启动服务
       mysql-container:
@@ -46,7 +46,7 @@ services:
       - ./models:/app/models
 
   nginx-container:
-    image: docker.1ms.run/onlyie/prisma-ai-nginx:3.3.1
+    image: docker.1ms.run/onlyie/prisma-ai-nginx:3.3.5
     ports:
       - '80:80' # HTTP
       # HTTPS (如需启用)

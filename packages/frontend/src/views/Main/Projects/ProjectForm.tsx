@@ -58,7 +58,6 @@ const ProjectForm: React.FC<PropsType> = ({ setIsUseMdEditor }) => {
 		if (currentStep !== totalSteps) {
 			return;
 		}
-		console.log('提交的项目数据:', values);
 		uploadProjectMutation.mutate(values);
 	}
 

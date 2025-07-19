@@ -1,4 +1,14 @@
 {
-  "extends": "./tsconfig.json",
-  "exclude": ["node_modules", "test", "dist", "**/*spec.ts","agent_output","**/*.md","ai_data"]
+	"extends": "./tsconfig.json",
+	"exclude": [
+		"node_modules",
+		"test",
+		"dist",
+		"**/*spec.ts",
+		"agent_output",
+		"**/*.md",
+		"ai_data",
+		"crawl_data",
+		"logs"
+	]
 }
