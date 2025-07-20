@@ -11,9 +11,6 @@
 </div>
 
 <p align="center">
-  <a href="https://github.com/weicanie/prisma-ai/blob/main/LICENSE">
-    <img src="https://img.shields.io/badge/License" alt="License">
-  </a>
   <a href="https://github.com/weicanie/prisma-ai/issues">
     <img src="https://img.shields.io/github/issues/weicanie/prisma-ai.svg" alt="Issues">
   </a>
