@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Inject, Injectable } from '@nestjs/commo
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { ErrorCode, UserInfoFromToken, VerifyMetaData } from '@prism-ai/shared';
+import { ErrorCode, UserInfoFromToken, VerifyMetaData } from '@prisma-ai/shared';
 import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
 

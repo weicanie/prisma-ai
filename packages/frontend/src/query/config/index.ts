@@ -1,4 +1,4 @@
-import { DEFAULT_MESSAGE, type ServerDataFormat as SDF } from '@prism-ai/shared';
+import { DEFAULT_MESSAGE, type ServerDataFormat as SDF } from '@prisma-ai/shared';
 import {
 	type MutationFunction,
 	type QueryFunction,

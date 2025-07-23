@@ -12,7 +12,7 @@ import {
 	FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import type { RegistResponse } from '@prism-ai/shared';
+import type { RegistResponse } from '@prisma-ai/shared';
 import type { Dispatch, PropsWithChildren, SetStateAction } from 'react';
 import { toast } from 'sonner';
 import {

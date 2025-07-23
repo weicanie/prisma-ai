@@ -14,7 +14,7 @@ import {
 	FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import type { CreateResumeDto, ProjectVo, SkillItem } from '@prism-ai/shared';
+import type { CreateResumeDto, ProjectVo, SkillItem } from '@prisma-ai/shared';
 import { Code, FileText, Sparkles } from 'lucide-react';
 import React, { memo } from 'react';
 import { useSelector } from 'react-redux';

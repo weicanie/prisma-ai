@@ -1,7 +1,7 @@
 import { Document } from '@langchain/core/documents';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { JobStatus, JobVo, LLMJobDto, ResumeVo, UserInfoFromToken } from '@prism-ai/shared';
+import { JobStatus, JobVo, LLMJobDto, ResumeVo, UserInfoFromToken } from '@prisma-ai/shared';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { Model } from 'mongoose';
 import { ChainService } from '../../chain/chain.service';

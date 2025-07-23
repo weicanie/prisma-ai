@@ -1,4 +1,4 @@
-import { markdownToSkills } from '@prism-ai/shared';
+import { markdownToSkills } from '@prisma-ai/shared';
 import React from 'react';
 import { useCustomMutation } from '../../../query/config';
 import { createSkill } from '../../../services/skill';

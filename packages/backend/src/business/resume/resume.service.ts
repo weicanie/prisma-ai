@@ -17,7 +17,7 @@ import {
 	StreamingChunk,
 	UserFeedback,
 	UserInfoFromToken
-} from '@prism-ai/shared';
+} from '@prisma-ai/shared';
 import { Model, Types } from 'mongoose';
 import { from, Observable } from 'rxjs';
 import { ChainService } from '../../chain/chain.service';
@@ -35,7 +35,7 @@ import { CreateResumeDto } from './dto/create-resume.dto';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import { Resume, ResumeDocument } from './entities/resume.entity';
 import { ResumeMatched, ResumeMatchedDocument } from './entities/resumeMatched.entity';
-//TODO 学习路线CRUD
+
 @Injectable()
 export class ResumeService implements WithFuncPool {
 	@InjectModel(Resume.name)
@@ -322,7 +322,7 @@ export class ResumeService implements WithFuncPool {
 				status: resumeMatchedObj.status,
 				skill: resumeMatchedObj.skill as unknown as SkillVo,
 				projects: resumeMatchedObj.projects as unknown as ProjectVo[],
-				job: resumeMatchedObj.jobId,
+				job: resumeMatchedObj.jobId as unknown as JobVo,
 				jobId: resumeMatchedObj.jobId.id.toString(),
 				createdAt: resumeMatchedObj.createdAt,
 				updatedAt: resumeMatchedObj.updatedAt

@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { DataChunkVO } from '@prism-ai/shared';
+import type { DataChunkVO } from '@prisma-ai/shared';
 import { createHash } from 'crypto';
 import { Document } from 'langchain/document';
 import { Observable } from 'rxjs';

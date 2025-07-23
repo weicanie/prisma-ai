@@ -22,7 +22,7 @@ import {
 	SelectValue
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { KnowledgeTypeEnum, type_content_Map, type CreateKnowledgeDto } from '@prism-ai/shared';
+import { KnowledgeTypeEnum, type_content_Map, type CreateKnowledgeDto } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { throttle } from 'lodash';
 import { X } from 'lucide-react';

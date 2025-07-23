@@ -20,7 +20,7 @@ import {
 	SelectValue
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { JobOpenStatus, type CreateJobDto } from '@prism-ai/shared';
+import { JobOpenStatus, type CreateJobDto } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { throttle } from 'lodash';
 import { memo } from 'react';

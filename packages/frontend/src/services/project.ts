@@ -5,7 +5,7 @@ import {
 	type ProjectDto,
 	type ProjectVo,
 	type ServerDataFormat as SDF
-} from '@prism-ai/shared';
+} from '@prisma-ai/shared';
 import { ZodError } from 'zod';
 import { instance } from './config';
 /**

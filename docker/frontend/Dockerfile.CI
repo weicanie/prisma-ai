@@ -23,7 +23,7 @@ RUN pnpm install --frozen-lockfile
 COPY ./packages/shared ./packages/shared
 COPY ./packages/frontend ./packages/frontend
 
-RUN pnpm --filter @prism-ai/shared build
+RUN pnpm --filter @prisma-ai/shared build
 
 RUN pnpm --filter frontend build
 

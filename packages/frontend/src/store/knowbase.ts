@@ -1,4 +1,4 @@
-import { KnowledgeTypeEnum, type CreateKnowledgeDto } from '@prism-ai/shared';
+import { KnowledgeTypeEnum, type CreateKnowledgeDto } from '@prisma-ai/shared';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 interface KnowledgeState {

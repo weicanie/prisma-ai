@@ -1,4 +1,4 @@
-import { CreateKnowledgeDto, FileTypeEnum, KnowledgeTypeEnum } from '@prism-ai/shared';
+import { CreateKnowledgeDto, FileTypeEnum, KnowledgeTypeEnum } from '@prisma-ai/shared';
 
 export class CreateKnowledgebaseDto implements CreateKnowledgeDto {
 	name: string;

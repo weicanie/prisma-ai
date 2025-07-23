@@ -4,7 +4,7 @@ import type {
 	RegistFormType,
 	RegistResponse,
 	ServerDataFormat as SDF
-} from '@prism-ai/shared';
+} from '@prisma-ai/shared';
 import { instance } from './config';
 
 //注册

@@ -2,7 +2,7 @@ import type {
 	PersistentTaskVo,
 	ServerDataFormat as SDF,
 	StartCrawlQuestionDto
-} from '@prism-ai/shared';
+} from '@prisma-ai/shared';
 import { instance } from './config';
 
 export async function startCrawlQuestions(crawlData: StartCrawlQuestionDto) {

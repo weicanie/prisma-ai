@@ -135,7 +135,6 @@ export class CrawlQuestionService implements OnModuleDestroy {
 		const page = await this.browser.newPage();
 		this.converterPage = await this.browser.newPage();
 
-
 		try {
 			await this.converterPage.goto('https://htmlmarkdown.com/', { waitUntil: 'networkidle2' });
 		} catch (e) {
@@ -538,7 +537,7 @@ export class CrawlQuestionService implements OnModuleDestroy {
 			}
 		}
 
-		//去掉数据库中已有的链接
+		//去掉数据库中已有的题目
 		const existingArticles = await this.dbService.article.findMany({
 			where: { link: { in: Array.from(urlToCategoryMap.keys()) } },
 			select: { link: true }
@@ -808,12 +807,8 @@ export class CrawlQuestionService implements OnModuleDestroy {
 
 		// 3. 插入新的题目信息
 		if (newArticles.length > 0) {
-			const articlesToCreate: Prisma.articleCreateManyInput[] = newArticles.map(a => ({
-				...a,
-				user_id: +task.metadata.options.userId
-			}));
 			await this.dbService.article.createMany({
-				data: articlesToCreate
+				data: newArticles
 			});
 			this.logger.log('新的题目信息已成功存入数据库。');
 		}

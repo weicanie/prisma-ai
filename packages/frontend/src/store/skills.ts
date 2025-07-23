@@ -1,4 +1,4 @@
-import { markdownToSkills, skillsToMarkdown, type CreateSkillDto } from '@prism-ai/shared';
+import { markdownToSkills, skillsToMarkdown, type CreateSkillDto } from '@prisma-ai/shared';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 interface SkillState {

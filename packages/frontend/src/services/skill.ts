@@ -3,7 +3,7 @@ import type {
 	ServerDataFormat as SDF,
 	SkillVo,
 	UpdateSkillDto
-} from '@prism-ai/shared';
+} from '@prisma-ai/shared';
 import { instance } from './config';
 
 /**

@@ -1,4 +1,4 @@
-import type { CreateResumeDto } from '@prism-ai/shared';
+import type { CreateResumeDto } from '@prisma-ai/shared';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 interface Resume {
@@ -14,9 +14,9 @@ const initialState: Resume = {
 		name: '',
 		skill: '', //当前选中的职业技能
 		projects: [], //当前选中的项目经验
-		resumeId: '',//当前选中的简历ID(简历定制)
-		jobId: '',//当前选中的岗位ID(简历定制)
-		resuemIdToMatch: '',//当前选中的简历ID(简历匹配岗位)
+		resumeId: '', //当前选中的简历ID(简历定制)
+		jobId: '', //当前选中的岗位ID(简历定制)
+		resuemIdToMatch: '' //当前选中的简历ID(简历匹配岗位)
 	}
 };
 

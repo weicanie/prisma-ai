@@ -1,4 +1,4 @@
-import { markdownToProjectSchema } from '@prism-ai/shared';
+import { markdownToProjectSchema } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import React from 'react';
 import { useDispatch } from 'react-redux';

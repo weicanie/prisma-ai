@@ -1,7 +1,7 @@
 //统一的异常处理
 //throw new Error('1001' + '错误信息') 1001为错误码，后面为错误信息
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
-import { ErrorCode, errorMessage, ServerDataFormat } from '@prism-ai/shared';
+import { ErrorCode, errorMessage, ServerDataFormat } from '@prisma-ai/shared';
 import { Response } from 'express';
 
 @Catch()

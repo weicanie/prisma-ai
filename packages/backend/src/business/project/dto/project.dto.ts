@@ -1,4 +1,4 @@
-import { projectSchema } from '@prism-ai/shared';
+import { projectSchema } from '@prisma-ai/shared';
 import { createZodDto } from 'nestjs-zod';
 /* 两种数据验证方式
 1、 createZodDto(zodSchema) + ZodValidationPipe

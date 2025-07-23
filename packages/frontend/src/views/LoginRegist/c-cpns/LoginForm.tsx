@@ -12,7 +12,7 @@ import {
 	FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import type { LoginFormType, LoginResponse } from '@prism-ai/shared';
+import type { LoginFormType, LoginResponse } from '@prisma-ai/shared';
 import type { Dispatch, PropsWithChildren, SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';

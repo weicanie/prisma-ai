@@ -5,10 +5,8 @@ import type {
 	PaginatedJobsResult,
 	ServerDataFormat as SDF,
 	UpdateJobDto
-} from '@prism-ai/shared'; // 假设shared包中已定义这些类型
+} from '@prisma-ai/shared'; // 假设shared包中已定义这些类型
 import { instance } from './config';
-
-
 
 /**
  * 创建新的招聘信息

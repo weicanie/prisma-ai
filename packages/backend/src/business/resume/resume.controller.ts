@@ -10,7 +10,7 @@ import {
 	Sse,
 	ValidationPipe
 } from '@nestjs/common';
-import { UserInfoFromToken, SelectedLLM } from '@prism-ai/shared';
+import { UserInfoFromToken, SelectedLLM } from '@prisma-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { LLMSseService } from '../sse/llm-sse.service';
 import { CreateResumeDto } from './dto/create-resume.dto';

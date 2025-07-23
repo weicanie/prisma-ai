@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import type { ProjectVo } from '@prism-ai/shared';
+import type { ProjectVo } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Row, Table } from '@tanstack/react-table';
 import React from 'react';

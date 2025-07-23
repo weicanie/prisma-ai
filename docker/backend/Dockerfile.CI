@@ -39,7 +39,7 @@ COPY ./packages/shared ./packages/shared
 
 
 # 首先构建共享包
-RUN pnpm --filter @prism-ai/shared build
+RUN pnpm --filter @prisma-ai/shared build
 
 # 生成 Prisma 客户端（为了成功build）
 RUN pnpm --filter backend exec prisma generate --no-engine

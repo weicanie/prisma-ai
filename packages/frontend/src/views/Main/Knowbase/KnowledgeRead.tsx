@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTheme } from '@/utils/theme';
-import { type_content_Map } from '@prism-ai/shared';
+import { type_content_Map } from '@prisma-ai/shared';
 import { BookOpen, Calendar, Edit, ExternalLink } from 'lucide-react';
 import React from 'react';
 import { useParams } from 'react-router-dom';

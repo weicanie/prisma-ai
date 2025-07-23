@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Sse } from '@nestjs/common';
-import { ImplementDto, SelectedLLM, ProjectStatus, UserInfoFromToken } from '@prism-ai/shared';
+import { ImplementDto, SelectedLLM, ProjectStatus, UserInfoFromToken } from '@prisma-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { LLMSseService } from '../sse/llm-sse.service';
 import { ProjectDto } from './dto/project.dto';

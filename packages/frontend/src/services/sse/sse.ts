@@ -8,8 +8,8 @@ import type {
 	ProjectDto,
 	ServerDataFormat as SDF,
 	UserFeedback
-} from '@prism-ai/shared';
-import { SelectedLLM } from '@prism-ai/shared';
+} from '@prisma-ai/shared';
+import { SelectedLLM } from '@prisma-ai/shared';
 import { toast } from 'sonner';
 import { instance } from '../config';
 

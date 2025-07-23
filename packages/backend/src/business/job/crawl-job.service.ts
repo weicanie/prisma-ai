@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { CreateJobDto } from '@prism-ai/shared';
+import { CreateJobDto } from '@prisma-ai/shared';
 import { Model } from 'mongoose';
 import * as puppeteer from 'puppeteer';
 import { ChainService } from '../../chain/chain.service';

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { JobStatus, JobVo, MatchedJobVo, UserInfoFromToken } from '@prism-ai/shared';
+import { JobStatus, JobVo, MatchedJobVo, UserInfoFromToken } from '@prisma-ai/shared';
 import { Model } from 'mongoose';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';

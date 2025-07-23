@@ -8,7 +8,7 @@ import {
 	PaginatedKnsResult,
 	UpdateKnowledgeDto,
 	UserInfoFromToken
-} from '@prism-ai/shared';
+} from '@prisma-ai/shared';
 import { Model, Types } from 'mongoose';
 import * as path from 'path';
 import { OssService } from '../../oss/oss.service';

@@ -4,7 +4,7 @@ import type {
 	ConversationSendDto,
 	MessageSendDto,
 	ServerDataFormat
-} from '@prism-ai/shared';
+} from '@prisma-ai/shared';
 import { instance } from './config';
 
 /**

@@ -4,7 +4,7 @@ import type {
 	PaginatedKnsResult,
 	ServerDataFormat as SDF, // Added ServerDataFormat
 	UpdateKnowledgeDto
-} from '@prism-ai/shared';
+} from '@prisma-ai/shared';
 import { instance } from './config';
 
 const BASE_URL = '/knowledge-base';

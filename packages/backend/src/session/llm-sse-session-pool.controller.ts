@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
-import { LLMSessionRequest, UserInfoFromToken } from '@prism-ai/shared';
+import { LLMSessionRequest, UserInfoFromToken } from '@prisma-ai/shared';
 import * as crypto from 'crypto';
 import { RequireLogin, UserInfo } from '../decorator';
 import { TaskQueueService } from '../task-queue/task-queue.service';

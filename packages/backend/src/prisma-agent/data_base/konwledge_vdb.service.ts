@@ -3,7 +3,7 @@ import { CheerioWebBaseLoader } from '@langchain/community/document_loaders/web/
 import { GithubRepoLoader } from '@langchain/community/document_loaders/web/github';
 import { Document } from '@langchain/core/documents';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { FileTypeEnum, KnowledgeTypeEnum, KnowledgeVo, UserInfoFromToken } from '@prism-ai/shared';
+import { FileTypeEnum, KnowledgeTypeEnum, KnowledgeVo, UserInfoFromToken } from '@prisma-ai/shared';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { ModelService } from '../../model/model.service';
 import { OssService } from '../../oss/oss.service';

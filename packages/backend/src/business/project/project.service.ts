@@ -6,7 +6,7 @@ import {
 	ProjectStatus,
 	ProjectVo,
 	UserInfoFromToken
-} from '@prism-ai/shared';
+} from '@prisma-ai/shared';
 import { Model } from 'mongoose';
 import { ChainService } from '../../chain/chain.service';
 import { ProjectChainService } from '../../chain/project-chain.service';

@@ -22,7 +22,10 @@ export class PromptService implements OnModuleInit {
 	private textToJsonT: string;
 	private resultsToTextT: string;
 	private mineT: string;
-
+	private interviewSummaryGenerateT: string;
+	private interviewSummaryTransformT: string;
+	private generateMindmapP: string;
+	private generateMindmapT: string;
 	private readonly fewShotMap: Record<string, string> = {};
 
 	constructor() {}
@@ -45,7 +48,19 @@ export class PromptService implements OnModuleInit {
 				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/hjm/hjm_transform-T.md')),
 				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/learn/diff_learn-T.md')),
 				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/unuse/text_to_json.md')),
-				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/unuse/results_to_text.md'))
+				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/unuse/results_to_text.md')),
+				this._readPromptFile(
+					path.join(process.cwd(), 'ai_data/prompt/interview-summary/generate.md')
+				),
+				this._readPromptFile(
+					path.join(process.cwd(), 'ai_data/prompt/interview-summary/transform.md')
+				),
+				this._readPromptFile(
+					path.join(process.cwd(), 'ai_data/prompt/interview-summary/generate_mindmap.md')
+				),
+				this._readPromptFile(
+					path.join(process.cwd(), 'ai_data/prompt/question/generate_mindmap.md')
+				)
 			];
 			const [
 				polishT,
@@ -57,7 +72,11 @@ export class PromptService implements OnModuleInit {
 				hjmTransformT,
 				diffLearnT,
 				textToJsonT,
-				resultsToTextT
+				resultsToTextT,
+				interviewSummaryGenerateT,
+				interviewSummaryTransformT,
+				generateMindmapP,
+				generateMindmapT
 			] = await Promise.all(promises);
 			this.polishT = polishT as string;
 			this.mineT = mineT as string;
@@ -68,7 +87,10 @@ export class PromptService implements OnModuleInit {
 			this.diffLearnT = diffLearnT as string;
 			this.textToJsonT = textToJsonT as string;
 			this.resultsToTextT = resultsToTextT as string;
-
+			this.interviewSummaryGenerateT = interviewSummaryGenerateT as string;
+			this.interviewSummaryTransformT = interviewSummaryTransformT as string;
+			this.generateMindmapT = generateMindmapT as string;
+			this.generateMindmapP = generateMindmapP as string;
 			this.fewShotMap['mine'] = mineFewShot as string;
 		} catch (error) {
 			console.error('Failed to read prompt files', error);
@@ -102,7 +124,6 @@ export class PromptService implements OnModuleInit {
 	}
 	/**
 	 * 对项目经验进行亮点挖掘的prompt
-	 * 返回的prompt待填充的插槽：{instructions}、{instructions_mid}、{chat_history}、{input}、{reflection}、{retrievedProjectCodes}、{retrievedDomainDocs}、{userSkills}
 	 *
 	 */
 	async minePrompt(partial: { userSkills: string }) {
@@ -122,7 +143,6 @@ export class PromptService implements OnModuleInit {
 
 	/**
 	 * 在项目经验的分析结果的基础上对项目经验进行优化的prompt
-	 * @return prompt：{instructions}、{instructions_mid}、{chat_history}、{input}、{reflection}、{retrievedProjectCodes}、{retrievedDomainDocs}
 	 *
 	 */
 	async polishPrompt() {
@@ -135,7 +155,6 @@ export class PromptService implements OnModuleInit {
 	}
 	/**
 	 * 对项目经验进行分析的prompt
-	 * @return prompt：{instructions}、{instructions_mid}、{chat_history}、{input}、{reflection}、{retrievedProjectCodes}、{retrievedDomainDocs}
 	 *
 	 */
 	async lookupPrompt() {
@@ -148,7 +167,6 @@ export class PromptService implements OnModuleInit {
 	}
 	/**
 	 * 将简历转化为岗位定制简历的prompt
-	 * @return prompt：{instructions}、{input}、{chat_history}、{reflection}、{retrievedProjectCodes}、{retrievedDomainDocs}
 	 */
 	async matchPrompt() {
 		const prompt = ChatPromptTemplate.fromMessages([
@@ -160,8 +178,6 @@ export class PromptService implements OnModuleInit {
 	}
 	/**
 	 * 对召回的岗位信息进行重排、分析的prompt
-	 * @return prompt：{instructions}、{top_n }、{input}、{chat_history}、{reflection}、{retrievedProjectCodes}、{retrievedDomainDocs}
-	 *
 	 */
 	async hjmRerankPrompt() {
 		const prompt = ChatPromptTemplate.fromMessages([
@@ -173,7 +189,6 @@ export class PromptService implements OnModuleInit {
 	}
 	/**
 	 * 将简历转化为岗位描述的prompt
-	 * @return prompt：{instructions}、{input}、{chat_history}、{reflection}、{retrievedProjectCodes}、{retrievedDomainDocs}
 	 */
 	async hjmTransformPrompt() {
 		const prompt = ChatPromptTemplate.fromMessages([
@@ -186,8 +201,6 @@ export class PromptService implements OnModuleInit {
 
 	/**
 	 * 对简历原始版本、当前版本进行diff分析出学习路线的prompt
-	 * @return prompt：{instructions}、{input}、{chat_history}、{reflection}、{retrievedProjectCodes}、{retrievedDomainDocs}
-	 *
 	 */
 	async diffLearnPrompt() {
 		const prompt = ChatPromptTemplate.fromMessages([
@@ -200,7 +213,6 @@ export class PromptService implements OnModuleInit {
 
 	/**
 	 * 将文本转换为JSON的prompt
-	 * @returns prompt：{instructions}、{input}
 	 */
 	async textToJsonPrompt() {
 		const prompt = ChatPromptTemplate.fromMessages([
@@ -212,12 +224,56 @@ export class PromptService implements OnModuleInit {
 
 	/**
 	 * 将所有分析结果整合为一份报告的prompt
-	 * @returns prompt：{input}
 	 */
 	async resultsToTextPrompt() {
 		const prompt = ChatPromptTemplate.fromMessages([
 			[`${role.SYSTEM}`, this.resultsToTextT],
 			[`${role.HUMAN}`, '{input}']
+		]);
+		return prompt;
+	}
+
+	/**
+	 * 从面经中生成问题清单的prompt
+	 */
+	async interviewSummaryGeneratePrompt() {
+		const prompt = ChatPromptTemplate.fromMessages([
+			[`${role.SYSTEM}`, this.interviewSummaryGenerateT],
+			[`${role.HUMAN}`, '面经：{input}']
+		]);
+		return prompt;
+	}
+
+	/**
+	 * 将问题清单中的问题转换为结构化面试题的prompt
+	 */
+	async interviewSummaryTransformPrompt() {
+		const prompt = ChatPromptTemplate.fromMessages([
+			[
+				`${role.SYSTEM}`,
+				this.partialT(this.interviewSummaryTransformT, [
+					'{generate_mindmap}',
+					this.generateMindmapP
+				])
+			],
+			[`${role.HUMAN}`, '问题清单：{input}']
+		]);
+		return prompt;
+	}
+
+	/**
+	 * 生成思维导图md的prompt
+	 */
+	async generateMindmapPrompt() {
+		const prompt = ChatPromptTemplate.fromMessages([
+			[`${role.SYSTEM}`, this.generateMindmapT],
+			[
+				`${role.HUMAN}`,
+				`请为以下面试题数据生成思维导图的Markdown文本。
+\`\`\`json
+{questions}
+\`\`\``
+			]
 		]);
 		return prompt;
 	}

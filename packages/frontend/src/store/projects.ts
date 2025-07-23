@@ -3,7 +3,7 @@ import {
 	SelectedLLM,
 	projectSchemaToMarkdown,
 	type ProjectDto
-} from '@prism-ai/shared';
+} from '@prisma-ai/shared';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 interface ProjectState {

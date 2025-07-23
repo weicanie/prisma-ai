@@ -1,5 +1,5 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { LLMSessionRequest } from '@prism-ai/shared';
+import { LLMSessionRequest } from '@prisma-ai/shared';
 import { RedisService } from '../redis/redis.service';
 
 interface SseSessionData {

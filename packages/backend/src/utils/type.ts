@@ -1,4 +1,4 @@
-import { SelectedLLM, StreamingChunk, UserFeedback, UserInfoFromToken } from '@prism-ai/shared';
+import { SelectedLLM, StreamingChunk, UserFeedback, UserInfoFromToken } from '@prisma-ai/shared';
 import { Types } from 'mongoose';
 import { Observable } from 'rxjs';
 /**

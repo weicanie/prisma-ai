@@ -5,7 +5,7 @@ import { IterableReadableStream } from '@langchain/core/utils/stream';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatOpenAI, ChatOpenAIFields } from '@langchain/openai';
 import { Injectable, Logger } from '@nestjs/common';
-import { SelectedLLM, StreamingChunk } from '@prism-ai/shared';
+import { SelectedLLM, StreamingChunk } from '@prisma-ai/shared';
 import { z } from 'zod';
 import { DeepSeekStreamChunk } from '../type/sse';
 import { ModelService } from './model.service';

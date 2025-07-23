@@ -1,4 +1,4 @@
-import type { ServerDataFormat } from '@prism-ai/shared';
+import type { ServerDataFormat } from '@prisma-ai/shared';
 import { type RequestConfig, Requester } from './requester';
 
 const config: RequestConfig<unknown, ServerDataFormat> = {

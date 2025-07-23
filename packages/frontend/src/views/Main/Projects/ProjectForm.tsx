@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { projectSchemaForm, type ProjectDto } from '@prism-ai/shared';
+import { projectSchemaForm, type ProjectDto } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { throttle } from 'lodash';
 import { CheckIcon, ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';

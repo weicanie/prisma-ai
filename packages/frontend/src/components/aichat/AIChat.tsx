@@ -11,7 +11,7 @@ import {
 	ReloadOutlined
 } from '@ant-design/icons';
 import { Attachments, Bubble, Conversations, Prompts, Sender } from '@ant-design/x';
-import type { ChatMessage, ConversationDto } from '@prism-ai/shared';
+import type { ChatMessage, ConversationDto } from '@prisma-ai/shared';
 import type { GetProp } from 'antd';
 import { Avatar, Button, Flex, Space, Spin, message } from 'antd';
 import dayjs from 'dayjs';

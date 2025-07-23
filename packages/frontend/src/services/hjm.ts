@@ -5,7 +5,7 @@ import type {
 	PersistentTaskVo,
 	ServerDataFormat as SDF,
 	StartCrawlDto
-} from '@prism-ai/shared';
+} from '@prisma-ai/shared';
 import { instance } from './config';
 
 /**

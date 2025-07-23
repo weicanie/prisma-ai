@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { StreamingChunk } from '@prism-ai/shared';
+import { StreamingChunk } from '@prisma-ai/shared';
 import { PersistentTask } from '../type/taskqueue';
 import { EventBus } from './EventBus';
 /* 事件名列表 */

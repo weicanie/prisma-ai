@@ -1,5 +1,5 @@
 import { Annotation, MessagesAnnotation } from '@langchain/langgraph';
-import { ProjectDto } from '@prism-ai/shared';
+import { ProjectDto } from '@prisma-ai/shared';
 import {
 	HumanInput,
 	HumanOutput,

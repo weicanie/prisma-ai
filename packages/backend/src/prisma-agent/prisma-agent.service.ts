@@ -1,6 +1,6 @@
 import { Command, END, interrupt, MemorySaver, START, StateGraph } from '@langchain/langgraph';
 import { Injectable, Logger } from '@nestjs/common';
-import { ProjectDto } from '@prism-ai/shared';
+import { ProjectDto } from '@prisma-ai/shared';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as readline from 'readline';
@@ -242,17 +242,17 @@ export class PrismaAgentService {
 					const feedbackContent = await fs.readFile(humanFeedbackPath, 'utf-8');
 					const feedbackJson = JSON.parse(feedbackContent);
 					// 使用 Zod schema 对用户在文件中输入的内容进行严格的格式校验。
-					switch(interruptData.type) {
+					switch (interruptData.type) {
 						case InterruptType.ExecuteStep:
-						// 校验 Result_step
-						validatedInput = resultStepSchema.parse(feedbackJson);
+							// 校验 Result_step
+							validatedInput = resultStepSchema.parse(feedbackJson);
 							break;
 						case InterruptType.HumanReview:
-						// 校验 HumanInput
-						validatedInput = humanInputSchema.parse(feedbackJson);
+							// 校验 HumanInput
+							validatedInput = humanInputSchema.parse(feedbackJson);
 							break;
 						default:
-							throw new Error('未知的 InterruptType')
+							throw new Error('未知的 InterruptType');
 					}
 
 					this.logger.log('反馈校验成功。');

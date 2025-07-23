@@ -10,7 +10,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import type { PersistentTaskVo, StartCrawlQuestionDto } from '@prism-ai/shared';
+import type { PersistentTaskVo, StartCrawlQuestionDto } from '@prisma-ai/shared';
 import { ExternalLink } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -58,15 +58,14 @@ function useTaskPolling(taskId: string | null) {
 
 /**
  * 持久化爬虫状态
- * @param isCrawlRunning 
+ * @param isCrawlRunning
  */
 function setIsCrawlRunning(isCrawlRunning: boolean) {
 	localStorage.setItem('isQuestionCrawlRunning', isCrawlRunning.toString());
 }
 function getIsCrawlRunning() {
 	return localStorage.getItem('isQuestionCrawlRunning') === 'true';
-}	
-
+}
 
 export function Anki() {
 	// State for crawl inputs and task ID
@@ -217,28 +216,24 @@ export function Anki() {
 
 				<Separator />
 
-{
-	getIsCrawlRunning()&&
-		<Card className="bg-background/50">
-			<CardHeader>
-			<CardTitle>爬虫正在运行</CardTitle>
-				<CardDescription>
-					爬虫任务正在后台执行。您可以点击下面的按钮在新标签页中打开监控面板，实时查看爬取过程。
-				</CardDescription>
-			</CardHeader>
-			<CardContent>
-				<Button 
-					variant="outline" 
-					onClick={() => window.open(browserlessUrl, '_blank')}
-				>
-					<ExternalLink className="mr-2 h-4 w-4" />
-					打开监控面板
-				</Button>
-			</CardContent>
-		</Card>
-}
+				{getIsCrawlRunning() && (
+					<Card className="bg-background/50">
+						<CardHeader>
+							<CardTitle>爬虫正在运行</CardTitle>
+							<CardDescription>
+								爬虫任务正在后台执行。您可以点击下面的按钮在新标签页中打开监控面板，实时查看爬取过程。
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<Button variant="outline" onClick={() => window.open(browserlessUrl, '_blank')}>
+								<ExternalLink className="mr-2 h-4 w-4" />
+								打开监控面板
+							</Button>
+						</CardContent>
+					</Card>
+				)}
 
-<Separator />
+				<Separator />
 
 				<Card className="bg-background/50">
 					<CardHeader>

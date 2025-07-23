@@ -34,6 +34,7 @@ __export(index_exports, {
   errorMessage: () => errorMessage,
   getLightspotSchema: () => getLightspotSchema,
   hjmRerankSchema: () => hjmRerankSchema,
+  interviewSummaryArticleSchema: () => interviewSummaryArticleSchema,
   jsonMd_obj: () => jsonMd_obj,
   llmJobSchema: () => llmJobSchema,
   loginformSchema: () => loginformSchema,
@@ -4635,6 +4636,17 @@ var markdownToSkills = (markdown) => {
   }
   return { name: "", content };
 };
+
+// src/types/interview-summary.schema.ts
+var interviewSummaryArticleSchema = z.object({
+  title: z.string().describe("\u95EE\u9898"),
+  content: z.string().describe("\u95EE\u9898\u7B54\u6848"),
+  gist: z.string().describe("\u6458\u8981"),
+  content_mindmap: z.string().describe("\u601D\u7EF4\u5BFC\u56FE\u6458\u8981"),
+  hard: z.string().describe("\u96BE\u5EA6\u8BC4\u7EA7,\u4ECE\u6613\u5230\u96BE1~5"),
+  quiz_type: z.string().describe("\u9898\u76EE\u8003\u5BDF\u65B9\u5F0F,\u4E3A\u5176\u4E2D\u4E4B\u4E00\uFF1A\u9009\u62E9\u9898\u3001\u95EE\u7B54\u9898\u3001\u529B\u6263\u7B97\u6CD5\u9898\u3001\u5176\u5B83"),
+  content_type: z.string().describe("\u9898\u76EE\u5185\u5BB9\u7C7B\u578B,\u5982\uFF1Ajavascript\u3001typescript")
+});
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   DEFAULT_MESSAGE,
@@ -4651,6 +4663,7 @@ var markdownToSkills = (markdown) => {
   errorMessage,
   getLightspotSchema,
   hjmRerankSchema,
+  interviewSummaryArticleSchema,
   jsonMd_obj,
   llmJobSchema,
   loginformSchema,

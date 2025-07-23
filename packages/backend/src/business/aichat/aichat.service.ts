@@ -5,7 +5,7 @@ import {
 	ConversationDto,
 	ConversationSendDto,
 	UserInfoFromToken
-} from '@prism-ai/shared';
+} from '@prisma-ai/shared';
 import { AichatChainService } from '../../chain/aichat-chain.service';
 import { ChainService } from '../../chain/chain.service';
 import { DbService } from '../../DB/db.service';

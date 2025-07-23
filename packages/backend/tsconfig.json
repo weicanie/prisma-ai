@@ -16,7 +16,17 @@
 		"forceConsistentCasingInFileNames": true,
 		"noImplicitAny": false,
 		"strictBindCallApply": true,
-		"noFallthroughCasesInSwitch": false
+		"noFallthroughCasesInSwitch": false,
+		"isolatedModules": true,
+		"paths": {
+			"@/*": ["src/*"],
+			"@app/*": ["src/app/*"],
+			"@business/*": ["src/business/*"],
+			"@agent/*": ["src/agent/*"],
+			"@utils/*": ["src/utils/*"],
+			"@types/*": ["src/type/*"],
+			"@prisma/*": ["./prisma/generated/*"]
+		}
 	},
 	"include": ["src"]
 }

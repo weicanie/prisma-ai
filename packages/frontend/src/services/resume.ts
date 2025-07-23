@@ -5,7 +5,7 @@ import type {
 	ResumeVo,
 	ServerDataFormat as SDF,
 	UpdateResumeDto
-} from '@prism-ai/shared';
+} from '@prisma-ai/shared';
 import { instance } from './config';
 
 /**

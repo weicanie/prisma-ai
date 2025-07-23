@@ -72,8 +72,14 @@ export class QuestionService implements OnModuleInit {
 		this.logger.log(`开始处理任务 ${task.id}，为用户 ${userId} 生成思维导图...`);
 
 		try {
-			const totalCount = await this.db.article.count({
-				where: { user_id: userId, OR: [{ content_mindmap: null }, { content_mindmap: '无' }] }
+			// 统计用户未生成思维导图的题目数量（多对多改造）
+			const totalCount = await this.db.user_article.count({
+				where: {
+					user_id: userId,
+					article: {
+						OR: [{ content_mindmap: null }, { content_mindmap: '无' }]
+					}
+				}
 			});
 
 			await this._updateTaskProgress(task, { totalCount, completedCount: 0 });
@@ -87,21 +93,30 @@ export class QuestionService implements OnModuleInit {
 			let hasMore = true;
 			let completedCount = 0;
 
-			// 处理用户的所有未处理题目
+			// 处理用户的所有未处理题目（多对多改造）
 			while (hasMore) {
-				const articles = await this.db.article.findMany({
-					where: { user_id: userId, OR: [{ content_mindmap: null }, { content_mindmap: '无' }] },
-					select: { id: true, title: true, content: true, gist: true },
+				const userArticles = await this.db.user_article.findMany({
+					where: {
+						user_id: userId,
+						article: {
+							OR: [{ content_mindmap: null }, { content_mindmap: '无' }]
+						}
+					},
+					include: {
+						article: {
+							select: { id: true, title: true, content: true, gist: true }
+						}
+					},
 					take: this.PAGE_SIZE
 				});
 
-				if (articles.length === 0) {
+				if (userArticles.length === 0) {
 					hasMore = false;
 					continue;
 				}
 
 				// 将查询到的题目分批（每批5个），用于LLM处理
-				const articleBatches = chunk(articles, this.BATCH_SIZE);
+				const articleBatches = chunk(userArticles, this.BATCH_SIZE);
 
 				// 以50个并发为一组来处理所有批次
 				const concurrencyBatches = chunk(articleBatches, this.CONCURRENCY);
@@ -117,19 +132,19 @@ export class QuestionService implements OnModuleInit {
 
 							try {
 								// 准备LLM的输入数据，并替换使用的anki markdown插件无法渲染的特殊字符
-								const input = batch.map(article => ({
-									title: article.title.replace(/\*   /g, '- '),
-									content: article.content.replace(/\*   /g, '- '),
-									gist: (article.gist || '').replace(/\*   /g, '- ')
+								const input = batch.map(userArticle => ({
+									title: userArticle.article.title.replace(/\*   /g, '- '),
+									content: userArticle.article.content.replace(/\*   /g, '- '),
+									gist: (userArticle.article.gist || '').replace(/\*   /g, '- ')
 								}));
 
 								// 调用LLM Chain
 								const response = await mindmapChain.invoke({ questions: input });
 
 								// 准备数据库更新操作
-								const updatePromises = batch.map((article, index) =>
+								const updatePromises = batch.map((userArticle, index) =>
 									this.db.article.update({
-										where: { id: article.id },
+										where: { id: userArticle.article.id },
 										data: {
 											content_mindmap: response.results[index],
 											content: input[index].content,

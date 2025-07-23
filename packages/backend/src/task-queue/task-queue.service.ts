@@ -29,7 +29,7 @@ export class TaskQueueService {
 	/* 当前执行数 */
 	private activeCount = 0;
 	/* 最大并发数 */
-	private readonly maxConcurrent = 5;
+	private readonly maxConcurrent = 500;
 
 	// redis键前缀
 	public readonly PREFIX = {

@@ -7,7 +7,7 @@ import {
 	sessionStatusKey,
 	type contextInput
 } from './sse';
-import { SelectedLLM } from '@prism-ai/shared';
+import { SelectedLLM } from '@prisma-ai/shared';
 /**
  * 传入的的input非{}时创建sse会话并开启sse响应
  * @param input 后端方法的输入

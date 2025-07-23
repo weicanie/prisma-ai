@@ -7,7 +7,7 @@ import {
 	type projectLookupedDto,
 	type ProjectMinedDto,
 	ProjectStatus
-} from '@prism-ai/shared';
+} from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -16,8 +16,8 @@ import { ProjectQueryKey } from '../../../query/keys';
 import { findAllProjects, implementProject } from '../../../services/project';
 import type { contextInput } from '../../../services/sse/sse';
 import { useSseAnswer } from '../../../services/sse/useSseAnswer';
-import { OriginalProject } from './cpns/OriginalProject';
-import { ProjectResult } from './cpns/ProjectResult';
+import { OriginalProject } from './components/OriginalProject';
+import { ProjectResult } from './components/ProjectResult';
 import { selectProjectLLM } from '../../../store/projects';
 import { useSelector } from 'react-redux';
 //TODO 将调用llm、获取sse返回过程封装成一个统一的组件

@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { JobOpenStatus, JobStatus } from '@prism-ai/shared';
+import { JobOpenStatus, JobStatus } from '@prisma-ai/shared';
 import { HydratedDocument, Types } from 'mongoose';
 import { UserInfo } from '../../project/entities/project.entity';
 

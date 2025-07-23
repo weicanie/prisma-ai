@@ -1,4 +1,3 @@
-import { StructuredOutputParser } from '@langchain/core/output_parsers';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { RunnableSequence } from '@langchain/core/runnables';
 import { Injectable } from '@nestjs/common';
@@ -14,7 +13,7 @@ import {
 	StreamingChunk,
 	UserFeedback,
 	UserInfoFromToken
-} from '@prism-ai/shared';
+} from '@prisma-ai/shared';
 import { z } from 'zod';
 import { ModelService } from '../model/model.service';
 import { ThoughtModelService } from '../model/thought-model.service';
@@ -101,7 +100,8 @@ export class ProjectChainService {
 				chat_history: () => '', // 暂不处理多轮对话历史
 				instructions: () => outputParser.getFormatInstructions(),
 				instructions_mid: () => {
-					const inputParser = inputSchema && StructuredOutputParser.fromZodSchema(inputSchema);
+					const inputParser =
+						inputSchema && RubustStructuredOutputParser.fromZodSchema(inputSchema);
 					return inputParser ? inputParser.getFormatInstructions() : '';
 				},
 

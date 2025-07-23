@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { ErrorCode, RegistResponse } from '@prism-ai/shared';
+import { ErrorCode, RegistResponse } from '@prisma-ai/shared';
 import { DbService } from '../DB/db.service';
 import { RedisService } from '../redis/redis.service';
 import { addLogs, logType } from '../utils/log.utils';

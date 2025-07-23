@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { ConversationSendDto, MessageSendDto, UserInfoFromToken } from '@prism-ai/shared';
+import { ConversationSendDto, MessageSendDto, UserInfoFromToken } from '@prisma-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { AichatService } from './aichat.service';
 

@@ -4,7 +4,7 @@ import { ChatDeepSeek } from '@langchain/deepseek';
 import { MemorySaver } from '@langchain/langgraph';
 import { ChatOpenAI } from '@langchain/openai';
 import { Inject, Injectable } from '@nestjs/common';
-import { ProjectDto } from '@prism-ai/shared';
+import { ProjectDto } from '@prisma-ai/shared';
 import { z } from 'zod';
 import { ModelService } from '../../model/model.service';
 import { WithFormfixChain } from '../../utils/abstract';

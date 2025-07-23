@@ -11,15 +11,15 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [3.3.5](https://github.com/weicanie/prisma-ai/compare/v3.3.4...v3.3.5) (2025-07-18)
 
-**Note:** Version bump only for package @prism-ai/shared
+**Note:** Version bump only for package @prisma-ai/shared
 
 ## [3.3.4](https://github.com/weicanie/prisma-ai/compare/v3.3.3...v3.3.4) (2025-07-18)
 
-**Note:** Version bump only for package @prism-ai/shared
+**Note:** Version bump only for package @prisma-ai/shared
 
 ## [3.3.3](https://github.com/weicanie/prisma-ai/compare/v3.3.2...v3.3.3) (2025-07-18)
 
-**Note:** Version bump only for package @prism-ai/shared
+**Note:** Version bump only for package @prisma-ai/shared
 
 ## [3.3.2](https://github.com/weicanie/prisma-ai/compare/v3.3.1...v3.3.2) (2025-07-18)
 
@@ -29,7 +29,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [3.3.1](https://github.com/weicanie/prisma-ai/compare/v3.3.0...v3.3.1) (2025-07-17)
 
-**Note:** Version bump only for package @prism-ai/shared
+**Note:** Version bump only for package @prisma-ai/shared
 
 # [3.2.0](https://github.com/weicanie/prisma-ai/compare/v3.1.6...v3.2.0) (2025-07-16)
 
@@ -39,9 +39,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [3.0.1](https://github.com/weicanie/prisma-ai/compare/v3.0.0...v3.0.1) (2025-07-13)
 
-**Note:** Version bump only for package @prism-ai/shared
+**Note:** Version bump only for package @prisma-ai/shared
 
-**Note:** Version bump only for package @prism-ai/shared
+**Note:** Version bump only for package @prisma-ai/shared
 
 # [3.0.0](https://github.com/weicanie/prisma-ai/compare/v2.1.0...v3.0.0) (2025-07-11)
 

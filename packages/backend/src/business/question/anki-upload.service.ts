@@ -93,8 +93,14 @@ export class AnkiUploadService implements OnModuleInit {
 		this.logger.log(`开始处理任务 ${task.id}，为用户 ${userId} 上传题目到Anki...`);
 
 		try {
-			const totalCount = await this.db.article.count({
-				where: { user_id: userId, anki_note_id: null }
+			// 统计用户未上传到anki的题目数量（多对多改造）
+			const totalCount = await this.db.user_article.count({
+				where: {
+					user_id: userId,
+					article: {
+						anki_note_id: null
+					}
+				}
 			});
 
 			await this._updateTaskProgress(task, { totalCount, completedCount: 0 });
@@ -107,45 +113,65 @@ export class AnkiUploadService implements OnModuleInit {
 			let hasMore = true;
 
 			while (hasMore) {
-				const articles = await this.db.article.findMany({
-					where: { user_id: userId, anki_note_id: null }, // 只查询尚未上传的题目
+				const userArticles = await this.db.user_article.findMany({
+					where: {
+						user_id: userId,
+						article: {
+							anki_note_id: null
+						}
+					},
+					include: { article: true },
 					take: this.PAGE_SIZE
 					//分页是错的,因为未上传题目每轮都减少,直接读取即可
 					// skip: page * this.PAGE_SIZE
 				});
 
-				if (articles.length === 0) {
+				if (userArticles.length === 0) {
 					hasMore = false;
 					this.logger.log(`用户 ${userId} 没有更多未上传的题目了。`);
 					continue;
 				}
 
 				this.logger.log(
-					`任务 ${task.id}: 从数据库获取了 ${articles.length} 条题目，准备分批上传...`
+					`任务 ${task.id}: 从数据库获取了 ${userArticles.length} 条题目，准备分批上传...`
 				);
 
 				// 将从数据库获取的大批次数据，切分为适合API调用的小批次
-				const articleChunks = chunk(articles, this.ANKI_API_BATCH_SIZE);
+				const articleChunks = chunk(userArticles, this.ANKI_API_BATCH_SIZE);
 
-				for (const [index, articleChunk] of articleChunks.entries()) {
+				for (const [index, userArticleChunk] of articleChunks.entries()) {
 					try {
 						this.logger.log(
-							`任务 ${task.id}: 正在处理微批次 ${index + 1}/${articleChunks.length}，包含 ${articleChunk.length} 条笔记...`
+							`任务 ${task.id}: 正在处理微批次 ${index + 1}/${articleChunks.length}，包含 ${userArticleChunk.length} 条笔记...`
 						);
 
 						const deckNames = new Set<string>();
-						articleChunk.forEach(q => {
-							const deckName = q.job_type??'未知'
+						userArticleChunk.forEach(ua => {
+							const deckName = ua.article.job_type ?? '未知';
 							deckNames.add(deckName);
 						});
-
+						// 创建各个题目类别的卡组（::是归类，只有叶节点是真正的卡组）
 						for (const deck of deckNames) {
 							await this.createDeck(deck);
 						}
 
-						const notesToCheck = articleChunk.map(q => ({
-							articleId: q.id,
-							note: this.buildAnkiNote(q)
+						// 查询各个题目关联的面经
+						const interviewSummarys = await Promise.allSettled(
+							userArticleChunk.map(ua => {
+								// 题库中的题目没有关联的面经
+								if (!ua.article.interview_summary_id) return null;
+								const interviewSummary = this.db.interview_summary.findFirst({
+									where: {
+										id: ua.article.interview_summary_id!
+									}
+								});
+								return interviewSummary;
+							})
+						);
+
+						const notesToCheck = userArticleChunk.map((ua, i) => ({
+							articleId: ua.article.id,
+							note: this.buildAnkiNote(ua.article, interviewSummarys.values[i])
 						}));
 
 						const checkResults = await this.canAddNotes(notesToCheck.map(n => n.note));
@@ -157,18 +183,18 @@ export class AnkiUploadService implements OnModuleInit {
 							if (result.canAdd) {
 								notesToAdd.push(notesToCheck[i]);
 							} else if (result.error === DUMPLICATE_ERROR_MESSAGE) {
-								const originalArticle = articleChunk[i];
+								const originalArticle = userArticleChunk[i].article;
 								this.logger.warn(
-									`任务 ${task.id}: 笔记 "${originalArticle.title}" (id: ${originalArticle.id}) 是重复的。将修改标题以便下次重试。`
+									`任务 ${task.id}: 笔记 "${originalArticle.title}" (id: ${originalArticle.id}) 是重复的。将唯一化标题以便下次重试。`
 								);
 								duplicateUpdatePromises.push(
 									this.db.article.update({
 										where: { id: originalArticle.id },
-										data: { title: `${originalArticle.title} [id:${originalArticle.id}]` }
+										data: { title: `${originalArticle.title} 【${originalArticle.id}】` }
 									})
 								);
 							} else {
-								const originalArticle = articleChunk[i];
+								const originalArticle = userArticleChunk[i].article;
 								this.logger.error(
 									`任务 ${task.id}: 添加笔记 "${originalArticle.title}" (id: ${originalArticle.id}) 时遇到非重复性错误: ${result.error}`
 								);
@@ -228,10 +254,28 @@ export class AnkiUploadService implements OnModuleInit {
 	/**
 	 * @description 构建单条Anki笔记的数据结构
 	 */
-	private buildAnkiNote(qdata: article): AnkiNote {
+	private buildAnkiNote(qdata: article, interviewSummary: null | { own: boolean }): AnkiNote {
+		/*
+		查询关联的面经，然后划分到对应的大卡组
+		1、没有关联的面经：题库
+		2、关联的面经own为false：公共面经
+		3、关联的面经own为true：我的面经
+		*/
+		let interviewSummaryType = '';
+		switch (interviewSummary?.own) {
+			case true:
+				interviewSummaryType = '我的面经';
+				break;
+			case false:
+				interviewSummaryType = '公共面经';
+				break;
+			default:
+				interviewSummaryType = '题库';
+		}
+
 		const deckName = qdata.link.startsWith('https://fe.ecool.fun')
-			? `前端::${qdata.content_type}`
-			: `后端::${qdata.content_type}`;
+			? `${interviewSummaryType ?? '题库'}::前端::${qdata.content_type}`
+			: `${interviewSummaryType ?? '题库'}::Java 后端::${qdata.content_type}`;
 
 		return {
 			deckName,

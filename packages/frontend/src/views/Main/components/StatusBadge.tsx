@@ -1,5 +1,5 @@
 import { Badge } from '@/components/ui/badge';
-import { ProjectStatus, ResumeStatus } from '@prism-ai/shared';
+import { ProjectStatus, ResumeStatus } from '@prisma-ai/shared';
 import React from 'react';
 
 const project = {

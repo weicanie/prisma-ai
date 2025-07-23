@@ -1,5 +1,5 @@
 import { Checkbox } from '@/components/ui/checkbox';
-import { type_content_Map, type KnowledgeVo } from '@prism-ai/shared';
+import { type_content_Map, type KnowledgeVo } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Row, Table } from '@tanstack/react-table';
 import { AlignLeft, Link } from 'lucide-react';

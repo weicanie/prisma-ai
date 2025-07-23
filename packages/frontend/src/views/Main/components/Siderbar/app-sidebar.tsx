@@ -1,5 +1,6 @@
 import {
 	Briefcase,
+	Book,
 	FileText,
 	House,
 	LibraryBig,
@@ -87,6 +88,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				title: '知识库',
 				icon: LibraryBig,
 				url: '/main/knowledge'
+			},
+			{
+				title: '面经',
+				icon: Book,
+				url: '/main/interview_summary',
+				items: [
+					{ title: '我的面经', url: '/main/interview_summary/mine' },
+					{ title: '面经市场', url: '/main/interview_summary/market' }
+				]
 			},
 			{
 				title: '面向offer学习',

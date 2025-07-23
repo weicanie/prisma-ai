@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTheme } from '@/utils/theme';
-import type { JobVo } from '@prism-ai/shared';
+import type { JobVo } from '@prisma-ai/shared';
 import {
 	Briefcase,
 	Building,

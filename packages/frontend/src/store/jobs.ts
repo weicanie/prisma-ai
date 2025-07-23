@@ -1,4 +1,4 @@
-import { JobOpenStatus, SelectedLLM, type CreateJobDto } from '@prism-ai/shared';
+import { JobOpenStatus, SelectedLLM, type CreateJobDto } from '@prisma-ai/shared';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 interface JobState {

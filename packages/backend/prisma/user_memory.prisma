@@ -1,0 +1,369 @@
+// 用户画像数据库模型 - 技术求职服务应用
+// 支持简历分析、面试经历提取、Agent Memory存储等功能
+
+// 用户基础信息表
+model User {
+  id        BigInt   @id @default(autoincrement())
+  email     String   @unique @db.VarChar(255)
+  name      String?  @db.VarChar(100)
+  phone     String?  @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  profile          UserProfile?
+  techStacks       UserTechStack[]
+  projects         UserProject[]
+  interviewRecords InterviewRecord[]
+  agentMemories    AgentMemory[]
+  learningPaths    LearningPath[]
+  recommendations  Recommendation[]
+  mockInterviews   MockInterview[]
+
+  @@index([email])
+  @@map("users")
+}
+
+// 用户画像主表
+model UserProfile {
+  id     BigInt @id @default(autoincrement())
+  userId BigInt @map("user_id")
+
+  // 基础信息
+  currentLevel      String? @map("current_level") // 当前技术水平: 初级, 中级, 高级, 专家, 架构师
+  yearsOfExperience Int?    @map("years_of_experience") // 工作年限
+  targetPosition    String? @map("target_position") @db.VarChar(100) // 目标职位
+  targetSalaryRange String? @map("target_salary_range") @db.VarChar(50) // 期望薪资范围
+
+  // 技术能力评估
+  technicalScore  Json? @map("technical_score") // 技术能力评分 {"frontend": 85, "backend": 70, "algorithm": 60}
+  softSkillsScore Json? @map("soft_skills_score") // 软技能评分 {"communication": 75, "leadership": 60, "problem_solving": 80}
+
+  // 学习偏好
+  learningStyle       String? @map("learning_style") // 学习风格: 视觉型, 听觉型, 实践型, 混合型
+  preferredDifficulty String? @map("preferred_difficulty") // 偏好难度: 基础, 进阶, 高级, 混合
+
+  // 面试表现
+  interviewPerformance Json? @map("interview_performance") // 面试表现统计
+  weakAreas            Json? @map("weak_areas") // 薄弱环节 ["算法", "系统设计", "沟通表达"]
+  strongAreas          Json? @map("strong_areas") // 优势领域
+
+  // Agent Memory相关
+  personalityTraits  Json? @map("personality_traits") // 性格特征分析
+  communicationStyle Json? @map("communication_style") // 沟通风格分析
+  stressIndicators   Json? @map("stress_indicators") // 压力反应指标
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([targetPosition])
+  @@map("user_profiles")
+}
+
+// 技术栈主表
+model TechStack {
+  id              BigInt   @id @default(autoincrement())
+  name            String   @unique @db.VarChar(100) // 技术名称
+  category        String   @db.VarChar(50) // 技术分类
+  difficultyLevel Int      @default(1) @map("difficulty_level") // 难度等级 1-5
+  marketDemand    Int      @default(1) @map("market_demand") // 市场需求度 1-5
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // 关联关系
+  userTechStacks UserTechStack[]
+
+  @@index([category])
+  @@map("tech_stacks")
+}
+
+// 用户技术栈掌握情况
+model UserTechStack {
+  id               BigInt    @id @default(autoincrement())
+  userId           BigInt    @map("user_id")
+  techStackId      BigInt    @map("tech_stack_id")
+  proficiencyLevel Int       @map("proficiency_level") // 熟练度 1-5
+  experienceMonths Int       @default(0) @map("experience_months") // 使用经验(月)
+  lastUsedAt       DateTime? @map("last_used_at") // 最后使用时间
+  learningSource   String?   @map("learning_source") // 学习来源: 工作项目, 个人项目, 培训课程, 自学, 其他
+  confidenceScore  Int       @default(1) @map("confidence_score") // 自信程度 1-5
+
+  // 从简历和面试中提取的信息
+  mentionedInResume         Boolean @default(false) @map("mentioned_in_resume")
+  mentionedInInterview      Boolean @default(false) @map("mentioned_in_interview")
+  interviewPerformanceScore Int?    @map("interview_performance_score") // 面试中该技术的表现分数
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  techStack TechStack @relation(fields: [techStackId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, techStackId])
+  @@index([userId])
+  @@index([proficiencyLevel])
+  @@map("user_tech_stacks")
+}
+
+// 项目经验表
+model UserProject {
+  id             BigInt  @id @default(autoincrement())
+  userId         BigInt  @map("user_id")
+  projectName    String  @map("project_name") @db.VarChar(200)
+  description    String? // 项目描述
+  role           String? @db.VarChar(100) // 担任角色
+  teamSize       Int?    @map("team_size") // 团队规模
+  durationMonths Int?    @map("duration_months") // 项目周期(月)
+
+  // 技术相关
+  techStacks          Json? @map("tech_stacks") // 使用的技术栈
+  technicalHighlights Json? @map("technical_highlights") // 技术亮点
+  challengesFaced     Json? @map("challenges_faced") // 面临的挑战
+  solutionsProvided   Json? @map("solutions_provided") // 提供的解决方案
+
+  // 业务影响
+  businessImpact     String? @map("business_impact") // 业务影响
+  performanceMetrics Json?   @map("performance_metrics") // 性能指标
+
+  // 软技能体现
+  leadershipExamples    Json? @map("leadership_examples") // 领导力体现
+  collaborationExamples Json? @map("collaboration_examples") // 协作能力体现
+  innovationExamples    Json? @map("innovation_examples") // 创新能力体现
+
+  // 学习成长
+  skillsLearned Json? @map("skills_learned") // 学到的技能
+  growthAreas   Json? @map("growth_areas") // 成长领域
+
+  projectStatus String    @default("已完成") @map("project_status") // 项目状态: 已完成, 进行中, 已暂停
+  startDate     DateTime? @map("start_date")
+  endDate       DateTime? @map("end_date")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([projectStatus])
+  @@map("user_projects")
+}
+
+// 面试记录表
+model InterviewRecord {
+  id              BigInt    @id @default(autoincrement())
+  userId          BigInt    @map("user_id")
+  companyName     String?   @map("company_name") @db.VarChar(200)
+  position        String?   @db.VarChar(100)
+  interviewType   String?   @map("interview_type") // 面试类型: 电话面试, 视频面试, 现场面试, 技术笔试, 其他
+  interviewRound  String?   @map("interview_round") // 面试轮次: 一面, 二面, 三面, 终面, HR面, 其他
+  interviewDate   DateTime? @map("interview_date")
+  durationMinutes Int?      @map("duration_minutes") // 面试时长(分钟)
+
+  // 面试结果
+  result   String? @default("待定") // 面试结果: 通过, 未通过, 待定, 取消
+  feedback String? // 面试反馈
+
+  // 录音转文本内容
+  transcriptContent String? @map("transcript_content") // 面试录音转文本
+  audioFilePath     String? @map("audio_file_path") @db.VarChar(500) // 音频文件路径
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  user       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  qaAnalysis InterviewQAAnalysis[]
+
+  @@index([userId])
+  @@index([companyName])
+  @@index([interviewDate])
+  @@map("interview_records")
+}
+
+// 面试问题和回答分析
+model InterviewQAAnalysis {
+  id                BigInt @id @default(autoincrement())
+  interviewRecordId BigInt @map("interview_record_id")
+  userId            BigInt @map("user_id")
+
+  // 问题信息
+  questionText       String  @map("question_text") // 问题内容
+  questionCategory   String? @map("question_category") @db.VarChar(100) // 问题分类
+  questionDifficulty Int?    @map("question_difficulty") // 问题难度 1-5
+  questionType       String? @map("question_type") // 问题类型: 技术问题, 项目经验, 算法题, 系统设计, 行为面试, 其他
+
+  // 回答分析
+  answerText         String? @map("answer_text") // 用户回答
+  answerQualityScore Int?    @map("answer_quality_score") // 回答质量评分 1-5
+  answerCompleteness Int?    @map("answer_completeness") // 回答完整度 1-5
+  answerAccuracy     Int?    @map("answer_accuracy") // 回答准确度 1-5
+  technicalDepth     Int?    @map("technical_depth") // 技术深度 1-5
+
+  // 软技能表现
+  communicationClarity   Int?    @map("communication_clarity") // 表达清晰度 1-5
+  confidenceLevel        Int?    @map("confidence_level") // 自信程度 1-5
+  problemSolvingApproach String? @map("problem_solving_approach") // 解题思路
+
+  // 情感和压力分析
+  stressLevel         Int?    @map("stress_level") // 紧张程度 1-5
+  emotionalState      String? @map("emotional_state") @db.VarChar(50) // 情绪状态
+  responseTimeSeconds Int?    @map("response_time_seconds") // 回答用时(秒)
+
+  // 改进建议
+  improvementSuggestions Json? @map("improvement_suggestions") // 改进建议
+  knowledgeGaps          Json? @map("knowledge_gaps") // 知识盲点
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // 关联关系
+  interviewRecord InterviewRecord @relation(fields: [interviewRecordId], references: [id], onDelete: Cascade)
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([interviewRecordId])
+  @@index([userId])
+  @@index([questionCategory])
+  @@map("interview_qa_analysis")
+}
+
+// Agent记忆存储表
+model AgentMemory {
+  id              BigInt  @id @default(autoincrement())
+  userId          BigInt  @map("user_id")
+  memoryType      String  @map("memory_type") // 记忆类型: 个性特征, 学习偏好, 技能评估, 面试表现, 成长轨迹, 目标规划
+  memoryKey       String  @map("memory_key") @db.VarChar(200) // 记忆键
+  memoryValue     Json    @map("memory_value") // 记忆内容
+  confidenceScore Decimal @default(0.5) @map("confidence_score") @db.Decimal(3, 2) // 可信度 0-1
+  sourceType      String  @map("source_type") // 来源类型: 简历分析, 面试分析, 用户输入, 系统推断, 第三方数据
+  sourceId        BigInt? @map("source_id") // 来源数据ID
+
+  // 时间衰减和更新
+  importanceScore Decimal  @default(0.5) @map("importance_score") @db.Decimal(3, 2) // 重要性评分 0-1
+  lastAccessedAt  DateTime @default(now()) @map("last_accessed_at")
+  accessCount     Int      @default(0) @map("access_count") // 访问次数
+  decayRate       Decimal  @default(0.001) @map("decay_rate") @db.Decimal(4, 3) // 遗忘衰减率
+
+  // 记忆关联
+  relatedMemories Json? @map("related_memories") // 关联记忆ID列表
+  tags            Json? // 标签
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, memoryType])
+  @@index([memoryKey])
+  @@index([importanceScore])
+  @@index([lastAccessedAt])
+  @@map("agent_memories")
+}
+
+// 学习路线表
+model LearningPath {
+  id             BigInt  @id @default(autoincrement())
+  userId         BigInt  @map("user_id")
+  targetPosition String  @map("target_position") @db.VarChar(100)
+  currentLevel   String? @map("current_level") @db.VarChar(50)
+  targetLevel    String? @map("target_level") @db.VarChar(50)
+
+  // 路线内容
+  pathContent           Json @map("path_content") // 学习路线内容
+  estimatedDurationDays Int? @map("estimated_duration_days") // 预估学习时长(天)
+  difficultyLevel       Int? @map("difficulty_level") // 整体难度 1-5
+
+  // 个性化因素
+  basedOnWeaknesses      Json?   @map("based_on_weaknesses") // 基于薄弱环节
+  learningStyleAdapted   Boolean @default(false) @map("learning_style_adapted") // 是否适配学习风格
+  personalizationFactors Json?   @map("personalization_factors") // 个性化因素
+
+  // 进度跟踪
+  completionPercentage Decimal @default(0.00) @map("completion_percentage") @db.Decimal(5, 2)
+  currentStep          Int     @default(1) @map("current_step")
+  status               String  @default("未开始") // 状态: 未开始, 进行中, 已完成, 已暂停
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([targetPosition])
+  @@index([status])
+  @@map("learning_paths")
+}
+
+// 推荐记录表
+model Recommendation {
+  id                 BigInt  @id @default(autoincrement())
+  userId             BigInt  @map("user_id")
+  recommendationType String  @map("recommendation_type") // 推荐类型: 技能学习, 项目建议, 面试准备, 简历优化, 职位推荐
+  content            Json // 推荐内容
+  reasoning          Json? // 推荐理由
+  priorityScore      Decimal @default(0.5) @map("priority_score") @db.Decimal(3, 2) // 优先级评分
+
+  // 用户反馈
+  userFeedback String  @default("未评价") @map("user_feedback") // 用户反馈: 有用, 一般, 无用, 未评价
+  isActedUpon  Boolean @default(false) @map("is_acted_upon") // 是否采纳
+
+  // 推荐效果
+  effectivenessScore Decimal? @map("effectiveness_score") @db.Decimal(3, 2) // 效果评分
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, recommendationType])
+  @@index([priorityScore])
+  @@index([userFeedback])
+  @@map("recommendations")
+}
+
+// 模拟面试记录
+model MockInterview {
+  id              BigInt  @id @default(autoincrement())
+  userId          BigInt  @map("user_id")
+  sessionName     String? @map("session_name") @db.VarChar(200)
+  targetPosition  String? @map("target_position") @db.VarChar(100)
+  difficultyLevel Int?    @map("difficulty_level") // 难度等级 1-5
+  focusAreas      Json?   @map("focus_areas") // 重点考察领域
+
+  // 面试配置
+  questionCount    Int     @default(10) @map("question_count")
+  timeLimitMinutes Int     @default(60) @map("time_limit_minutes")
+  interviewStyle   String? @map("interview_style") // 面试风格: 传统面试, 压力面试, 技术深挖, 项目讨论, 综合评估
+
+  // 面试结果
+  overallScore        Decimal? @map("overall_score") @db.Decimal(4, 2) // 总体评分
+  technicalScore      Decimal? @map("technical_score") @db.Decimal(4, 2) // 技术评分
+  communicationScore  Decimal? @map("communication_score") @db.Decimal(4, 2) // 沟通评分
+  problemSolvingScore Decimal? @map("problem_solving_score") @db.Decimal(4, 2) // 解决问题评分
+
+  // 详细反馈
+  strengths              Json? // 优势领域
+  weaknesses             Json? // 薄弱环节
+  improvementSuggestions Json? @map("improvement_suggestions") // 改进建议
+
+  sessionStatus String    @default("未开始") @map("session_status") // 会话状态: 未开始, 进行中, 已完成, 已中断
+  startedAt     DateTime? @map("started_at")
+  completedAt   DateTime? @map("completed_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([targetPosition])
+  @@index([sessionStatus])
+  @@map("mock_interviews")
+}

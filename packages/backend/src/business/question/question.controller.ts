@@ -1,5 +1,5 @@
 import { Body, Controller, Get, NotFoundException, Param, Post } from '@nestjs/common';
-import { UserInfoFromToken } from '@prism-ai/shared';
+import { type UserInfoFromToken } from '@prisma-ai/shared';
 import * as crypto from 'crypto';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { TaskQueueService } from '../../task-queue/task-queue.service';

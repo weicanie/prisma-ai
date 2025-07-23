@@ -1,4 +1,4 @@
-import { startCrawlQuestionSchema } from '@prism-ai/shared';
+import { startCrawlQuestionSchema } from '@prisma-ai/shared';
 import { createZodDto } from 'nestjs-zod';
 
 /**

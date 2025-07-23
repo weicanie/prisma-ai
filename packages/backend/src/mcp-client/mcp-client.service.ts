@@ -2,7 +2,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js'; //得手动�
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { Injectable } from '@nestjs/common';
-import { ErrorCode } from '@prism-ai/shared';
+import { ErrorCode } from '@prisma-ai/shared';
 import { addLogs } from '../utils/log.utils';
 import { logType, OpenAITool } from './mcp.type';
 import { patchSchemaArrays } from './schemaPatch.util';

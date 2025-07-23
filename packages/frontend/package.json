@@ -28,7 +28,7 @@
 		"@milkdown/react": "^7.10.3",
 		"@milkdown/theme-nord": "^7.10.3",
 		"@milkdown/utils": "^7.10.3",
-		"@prism-ai/shared": "workspace:*",
+		"@prisma-ai/shared": "workspace:*",
 		"@radix-ui/react-avatar": "^1.1.10",
 		"@radix-ui/react-checkbox": "^1.3.2",
 		"@radix-ui/react-collapsible": "^1.1.10",

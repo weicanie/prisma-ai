@@ -48,6 +48,8 @@ function fixJsonString(jsonString: string): string {
 	}
 }
 
+//! langchain的 StructuredOutputParser 提供的prompt 要求llm的json输出通过```json ```包裹，而它却不能解析这种格式，sb
+
 /**
  * 一个更健壮的结构化输出解析器，用于解析LLM的输出。尤其是deepseek模型的输出,它极其执着于返回markdown格式的json块。
  * @description 如果解析失败，则先尝试使用jsonMd_obj进行修复。

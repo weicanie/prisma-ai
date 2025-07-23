@@ -13,7 +13,7 @@ import {
 	FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import type { CreateSkillDto, SkillItem } from '@prism-ai/shared';
+import type { CreateSkillDto, SkillItem } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, X } from 'lucide-react';
 import { memo, useReducer } from 'react';

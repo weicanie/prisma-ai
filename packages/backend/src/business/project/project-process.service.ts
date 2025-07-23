@@ -14,7 +14,7 @@ import {
 	StreamingChunk,
 	UserFeedback,
 	UserInfoFromToken
-} from '@prism-ai/shared';
+} from '@prisma-ai/shared';
 import { Model } from 'mongoose';
 import { from, Observable } from 'rxjs';
 import { ZodSchema } from 'zod';

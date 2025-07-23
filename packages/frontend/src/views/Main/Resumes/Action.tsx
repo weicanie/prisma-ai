@@ -6,7 +6,7 @@ import {
 	type MatchJobDto,
 	type ResumeMatchedDto,
 	type ResumeVo
-} from '@prism-ai/shared';
+} from '@prisma-ai/shared';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -16,8 +16,8 @@ import { findAllUserJobs } from '../../../services/job';
 import { findAllUserResumes } from '../../../services/resume';
 import { useSseAnswer } from '../../../services/sse/useSseAnswer';
 import JobCard from '../Jobs/JobCard';
-import { OriginalResume } from './Action-Result/OriginalResume';
-import { ResumeResult } from './Action-Result/ResumeResult';
+import { OriginalResume } from './components/OriginalResume';
+import { ResumeResult } from './components/ResumeResult';
 import { useQueryClient } from '@tanstack/react-query';
 import { selectJobModel } from '../../../store/jobs';
 import { useSelector } from 'react-redux';

@@ -5,7 +5,7 @@ import {
 	LLMSessionRequest,
 	SelectedLLM,
 	UserInfoFromToken
-} from '@prism-ai/shared';
+} from '@prisma-ai/shared';
 import { catchError, mergeMap, Observable, timeout } from 'rxjs';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { RedisService } from '../../redis/redis.service';
