@@ -11,18 +11,19 @@ import { DataTableViewOptions } from './view-options';
 interface DataTableToolbarProps<TData> {
 	table: Table<TData>;
 	filterDataCols?: DataColWithFilter<TData>[];
-	searchColId?: string; // 用于搜索的列ID
 	createBtn?: React.ReactNode; //带创建弹窗的创建按钮
-	actionBtn?: React.ReactNode; //点击后跳转到操作页面或者弹出操作弹窗的按钮
+	actionBtns?: {
+		label: string;
+		onClick: (row: TData, rowSelected: TData[]) => void; // 点击按钮时，传入当前行和选中的行
+	}[];
 	mainTable?: boolean; //是否为主表格,非主表格不展示新建按钮
 }
 
 export function DataTableToolbar<TData>({
 	table,
 	filterDataCols,
-	searchColId,
 	createBtn,
-	actionBtn,
+	actionBtns = [],
 	mainTable = true
 }: DataTableToolbarProps<TData>) {
 	const isFiltered = table.getState().columnFilters.length > 0;
@@ -32,8 +33,7 @@ export function DataTableToolbar<TData>({
 				{/* 搜索栏 */}
 				<Input
 					placeholder="搜索..."
-					value={(table.getColumn(searchColId!)?.getFilterValue() as string) ?? ''}
-					onChange={event => table.getColumn(searchColId!)?.setFilterValue(event.target.value)}
+					onChange={event => table.setGlobalFilter(event.target.value)}
 					className="h-8 w-[150px] lg:w-[250px]"
 				/>
 				{/* 按列值筛选 */}
@@ -59,11 +59,25 @@ export function DataTableToolbar<TData>({
 				)}
 			</div>
 			{/* 操作按钮 */}
-			{actionBtn && actionBtn}
+			{actionBtns.map(btn => (
+				<Button
+					key={btn.label}
+					onClick={e => {
+						e.stopPropagation();
+						btn.onClick(
+							table.getSelectedRowModel().rows[0].original,
+							table.getSelectedRowModel().rows.map(row => row.original)
+						);
+					}}
+					className="block rounded-md bg-secondary px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 min-w-25 transition-colors duration-200"
+				>
+					{btn.label}
+				</Button>
+			))}
 			{/* 创建按钮 */}
 			{mainTable && createBtn && createBtn}
-			{/* 不传入按钮时显示视图选项 */}
-			{mainTable && !createBtn && !actionBtn && <DataTableViewOptions table={table} />}
+			{/* 不传入按钮且为主表格时显示视图选项 */}
+			{mainTable && !createBtn && actionBtns.length === 0 && <DataTableViewOptions table={table} />}
 		</div>
 	);
 }

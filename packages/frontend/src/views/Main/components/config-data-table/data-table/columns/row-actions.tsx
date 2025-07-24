@@ -11,10 +11,14 @@ import {
 
 interface DataTableRowActionsProps<TData> {
 	row: Row<TData>;
-	onDelete?: (row: TData) => void;
+	//自定义的行操作
+	actions?: {
+		label: string;
+		onClick: (row: TData) => void;
+	}[];
 }
 /* 数据行的操作选项,单独作为一列 */
-export function DataTableRowActions<TData>({ row, onDelete }: DataTableRowActionsProps<TData>) {
+export function DataTableRowActions<TData>({ row, actions }: DataTableRowActionsProps<TData>) {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -37,14 +41,18 @@ export function DataTableRowActions<TData>({ row, onDelete }: DataTableRowAction
 						</DropdownMenuRadioGroup>
 					</DropdownMenuSubContent>
 				</DropdownMenuSub> */}
-				<DropdownMenuItem
-					onClick={e => {
-						e.stopPropagation();
-						onDelete?.(row.original);
-					}}
-				>
-					删除
-				</DropdownMenuItem>
+				{actions?.map(action => (
+					<DropdownMenuItem
+						key={action.label}
+						onClick={e => {
+							//防止触发跳转详情页
+							e.stopPropagation();
+							action.onClick(row.original);
+						}}
+					>
+						{action.label}
+					</DropdownMenuItem>
+				))}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

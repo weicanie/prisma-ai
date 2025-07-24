@@ -39,7 +39,7 @@ export function DataTable<TData, TValue = unknown>({
 	options,
 	onRowClick,
 	createBtn,
-	actionBtn,
+	actionBtns = [],
 	selectionHandler,
 	mainTable = true
 }: DataTableProps<TData, TValue>) {
@@ -75,6 +75,15 @@ export function DataTable<TData, TValue = unknown>({
 		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
 		onColumnVisibilityChange: setColumnVisibility,
+		globalFilterFn: (row, columnId, filterValue) => {
+			const searchColIds = options.toolbar.searchColIds;
+
+			// 全局过滤函数, 用于搜索多列（searchColIds中任意列含有搜索值就显示）
+			return searchColIds.some(colId => {
+				const value = row.getValue(colId);
+				return String(value?.toString().toLowerCase() ?? '').includes(filterValue.toLowerCase());
+			});
+		},
 		getCoreRowModel: getCoreRowModel(), // 核心行模型 - 基础表格功能
 		getFilteredRowModel: getFilteredRowModel(), // 过滤行模型 - 处理数据过滤
 		getPaginationRowModel: getPaginationRowModel(), // 分页行模型 - 处理分页逻辑
@@ -90,9 +99,8 @@ export function DataTable<TData, TValue = unknown>({
 				<DataTableToolbar
 					table={table}
 					filterDataCols={filterDataCols}
-					searchColId={options.toolbar.searchColId}
 					createBtn={createBtn}
-					actionBtn={actionBtn}
+					actionBtns={actionBtns}
 					mainTable={mainTable}
 				/>
 			)}
