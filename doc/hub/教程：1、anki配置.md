@@ -6,7 +6,7 @@
 
 然后在面试题2.0卡片模板中新增这两个字段：
 
-![image-20250801081551946](C:\Users\user\Desktop\项目：简历到offer\prisma-ai\doc\hub\assets\image-20250801081551946.png)
+![image-20250801081551946](./assets/image-20250801081551946.png)
 
 
 
@@ -14,7 +14,7 @@
 
 点击工具，点击插件。选中AnkiConnect，再点击右下角的插件设置。
 
-![image-20250801081637276](C:\Users\user\Desktop\项目：简历到offer\prisma-ai\doc\hub\assets\image-20250801081637276.png)
+![image-20250801081637276](./assets/image-20250801081637276.png)
 
 
 
