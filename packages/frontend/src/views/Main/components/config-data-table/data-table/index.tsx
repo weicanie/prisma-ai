@@ -75,7 +75,7 @@ export function DataTable<TData, TValue = unknown>({
 		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
 		onColumnVisibilityChange: setColumnVisibility,
-		globalFilterFn: (row, columnId, filterValue) => {
+		globalFilterFn: (row, _, filterValue) => {
 			const searchColIds = options.toolbar.searchColIds;
 
 			// 全局过滤函数, 用于搜索多列（searchColIds中任意列含有搜索值就显示）

@@ -165,9 +165,14 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 						cell: ({ row }) => (
 							<DataTableRowActions
 								row={row}
-								onDelete={() => {
-									removeMutation.mutate(row.original.id);
-								}}
+								actions={[
+									{
+										label: '删除',
+										onClick: () => {
+											removeMutation.mutate(row.original.id);
+										}
+									}
+								]}
 							/>
 						)
 					}
@@ -177,7 +182,7 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 			options: {
 				toolbar: {
 					enable: true,
-					searchColId: 'jobName'
+					searchColIds: ['jobName']
 				},
 				pagination: true
 			},
@@ -189,17 +194,12 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 				};
 			},
 			createBtn: <JobCreate />,
-			actionBtn: (
-				<div className="sm:ml-16 sm:flex-none">
-					<button
-						type="button"
-						className="block rounded-md bg-secondary px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 min-w-25 transition-colors duration-200"
-						onClick={handleMatchClick}
-					>
-						定制岗位专用简历
-					</button>
-				</div>
-			),
+			actionBtns: [
+				{
+					label: '定制岗位专用简历',
+					onClick: handleMatchClick
+				}
+			],
 			selectionHandler
 		};
 
@@ -310,7 +310,7 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 			options: {
 				toolbar: {
 					enable: true,
-					searchColId: 'name'
+					searchColIds: ['name']
 				},
 				pagination: true
 			},

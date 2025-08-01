@@ -149,9 +149,14 @@ const Skills: React.FC<SkillsProps<SkillVo>> = ({
 					cell: ({ row }) => (
 						<DataTableRowActions
 							row={row}
-							onDelete={() => {
-								removeMutation.mutate(row.original.id);
-							}}
+							actions={[
+								{
+									label: '删除',
+									onClick: () => {
+										removeMutation.mutate(row.original.id);
+									}
+								}
+							]}
 						/>
 					)
 				}
@@ -161,7 +166,7 @@ const Skills: React.FC<SkillsProps<SkillVo>> = ({
 		options: {
 			toolbar: {
 				enable: true,
-				searchColId: 'type'
+				searchColIds: ['type']
 			},
 			pagination: true
 		},

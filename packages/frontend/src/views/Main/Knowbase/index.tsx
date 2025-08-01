@@ -149,9 +149,14 @@ const Knowledges: React.FC<KnowledgesProps<KnowledgeVo>> = ({
 					cell: ({ row }) => (
 						<DataTableRowActions
 							row={row}
-							onDelete={() => {
-								removeMutation.mutate(row.original.id);
-							}}
+							actions={[
+								{
+									label: '删除',
+									onClick: () => {
+										removeMutation.mutate(row.original.id);
+									}
+								}
+							]}
 						/>
 					)
 				}
@@ -161,7 +166,7 @@ const Knowledges: React.FC<KnowledgesProps<KnowledgeVo>> = ({
 		options: {
 			toolbar: {
 				enable: true,
-				searchColId: 'name'
+				searchColIds: ['name']
 			},
 			pagination: true
 		},

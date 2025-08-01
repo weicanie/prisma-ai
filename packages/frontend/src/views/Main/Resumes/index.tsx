@@ -182,9 +182,14 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 					cell: ({ row }) => (
 						<DataTableRowActions
 							row={row}
-							onDelete={() => {
-								removeMutation.mutate(row.original.id);
-							}}
+							actions={[
+								{
+									label: '删除',
+									onClick: () => {
+										removeMutation.mutate(row.original.id);
+									}
+								}
+							]}
 						/>
 					)
 				}
@@ -194,7 +199,7 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 		options: {
 			toolbar: {
 				enable: true,
-				searchColId: 'name'
+				searchColIds: ['name']
 			},
 			pagination: true
 		},
