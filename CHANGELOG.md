@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.5.1](https://github.com/weicanie/prisma-ai/compare/v3.5.0...v3.5.1) (2025-08-01)
+
+### Bug Fixes
+
+- 修复了后端服务日志目录的权限问题 ([184356b](https://github.com/weicanie/prisma-ai/commit/184356b64f77a716010e6e0b59648747b0909f1d))
+
+### Features
+
+- 简化了Anki集成 ([5cb1633](https://github.com/weicanie/prisma-ai/commit/5cb1633a2000eebb3801a9d37da3ef96676f2d60))
+
 # [3.5.0](https://github.com/weicanie/prisma-ai/compare/v3.4.0...v3.5.0) (2025-08-01)
 
 ### Bug Fixes
