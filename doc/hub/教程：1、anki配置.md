@@ -8,7 +8,7 @@
 
 点击工具，点击插件。选中AnkiConnect，再点击右下角的插件设置。
 
-![image-20250801081637276](C:\Users\user\Desktop\项目：简历到offer\prisma-ai\doc\hub\assets\image-20250801081637276.png)
+![image-20250801081637276](./assets/image-20250801081637276.png)
 
 用以下内容替换掉原内容：
 
