@@ -21,8 +21,6 @@ import { IsLoginGuard } from './isLogin.guard';
 import { PrismaAgentModule } from './prisma-agent/prisma-agent.module';
 import { SessionPoolModule } from './session/session-pool.module';
 import { UserModule } from './user/user.module';
-import { InterviewSummaryModule } from './business/interview-summary/interview-summary.module';
-
 @Module({
 	imports: [
 		UserModule,
@@ -52,8 +50,7 @@ import { InterviewSummaryModule } from './business/interview-summary/interview-s
 		KnowledgebaseModule,
 		HjmModule,
 		PrismaAgentModule,
-		QuestionModule,
-		InterviewSummaryModule
+		QuestionModule
 	],
 	providers: [
 		{
