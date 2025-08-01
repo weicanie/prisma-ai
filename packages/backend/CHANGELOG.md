@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.5.0](https://github.com/weicanie/prisma-ai/compare/v3.4.0...v3.5.0) (2025-08-01)
+
+### Features
+
+- 面经的上传、处理 ([8e765e7](https://github.com/weicanie/prisma-ai/commit/8e765e796667d434b435d71cf99808a387f02788))
+
 # [3.4.0](https://github.com/weicanie/prisma-ai/compare/v3.3.5...v3.4.0) (2025-07-19)
 
 ### Features

@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.5.0](https://github.com/weicanie/prisma-ai/compare/v3.4.0...v3.5.0) (2025-08-01)
+
+### Bug Fixes
+
+- add mirror to chrome image ([6ab2f26](https://github.com/weicanie/prisma-ai/commit/6ab2f26b59cf4504bc000bf05963e8e3adcf178d))
+- 修复表格 ([854b0a8](https://github.com/weicanie/prisma-ai/commit/854b0a896c5ca2d70384eb093327f9bfd2276077))
+
+### Features
+
+- 面经的上传、处理 ([8e765e7](https://github.com/weicanie/prisma-ai/commit/8e765e796667d434b435d71cf99808a387f02788))
+- 完善数据表格组件 ([e5c9c64](https://github.com/weicanie/prisma-ai/commit/e5c9c6461c073f4a2d90ad56ed3eaa688258621f))
+- 完善hub文档 ([76a0d5d](https://github.com/weicanie/prisma-ai/commit/76a0d5dc7e3b23c867059cac12685e7364e94c1b))
+
 # [3.4.0](https://github.com/weicanie/prisma-ai/compare/v3.3.5...v3.4.0) (2025-07-19)
 
 ### Features
