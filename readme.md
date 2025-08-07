@@ -17,9 +17,6 @@
   <a href="https://github.com/weicanie/prisma-ai/stargazers">
     <img src="https://img.shields.io/github/stars/weicanie/prisma-ai.svg" alt="Stars">
   </a>
-  <a href="#">
-    <img src="https://img.shields.io/badge/QQ%20Group-930291816-green.svg" alt="QQ Group">
-  </a>
 </p>
 
 <p align="center">
@@ -188,16 +185,6 @@ Prisma-AI 旨在解决您求职时最头疼的**3个问题**：
 
 ---
 
-## 💬 加入社区
-
-欢迎加入我们的QQ群，一起交流、讨论和进步！
-
-**群号：930291816**
-
-<img src="./images/readme/qq.jpg" alt="QQ交流群：930291816" style="width:200px;" />
-
----
-
 ## ⚖️ 声明
 
 1.  运行本项目产出的所有数据都应只作为参考和学习使用。
@@ -208,3 +195,4 @@ Prisma-AI 旨在解决您求职时最头疼的**3个问题**：
 - (2) 商业竞争、数据转售等牟利行为；
 - (3) 高频访问干扰网站正常运行。
 - (4) 任何违反中华人民共和国相关法律法规的行为，包括但不限于违反《中华人民共和国刑法》、《民法总则》、《反不正当竞争法》、《网络安全法》的任何行为。
+
