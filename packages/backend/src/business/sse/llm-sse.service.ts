@@ -154,7 +154,9 @@ export class LLMSseService implements OnModuleInit {
           */
 					timeout(5 * 60 * 1000), // 5分钟超时
 					catchError(async error => {
+						this.logger.error('SSE任务执行错误:', error);
 						await this.sessionPool.setBackendDone(sessionId);
+						await this.sessionPool.setFrontendDone(sessionId);
 						await this.sessionPool.delUserSessionId(userId);
 
 						// 拒绝Promise
