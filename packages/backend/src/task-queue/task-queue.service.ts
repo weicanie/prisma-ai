@@ -1,8 +1,9 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { EventBusService, EventList } from '../EventBus/event-bus.service';
 import { RedisService } from '../redis/redis.service';
 import { PersistentTask, TaskStatus } from '../type/taskqueue';
+import { DbService } from './../DB/db.service';
 
 /**
  * 请求队列，支持Redis持久化、恢复
@@ -17,9 +18,6 @@ import { PersistentTask, TaskStatus } from '../type/taskqueue';
  */
 @Injectable()
 export class TaskQueueService {
-	@Inject(EventBusService)
-	EventBusService: EventBusService;
-
 	private readonly logger = new Logger(TaskQueueService.name);
 
 	/* 任务队列（内存中）：储存任务id */
@@ -50,7 +48,11 @@ export class TaskQueueService {
 	// 任务过期时间（24小时）
 	public readonly TASK_TTL = 24 * 60 * 60;
 
-	constructor(private readonly redisService: RedisService) {
+	constructor(
+		private readonly redisService: RedisService,
+		public EventBusService: EventBusService,
+		private readonly dbService: DbService
+	) {
 		// 注册默认任务处理器
 		this.registerTaskHandler('default', async task => {
 			this.logger.log(`对${task.type}任务${task.id}执行默认任务处理器`);
@@ -81,7 +83,7 @@ export class TaskQueueService {
 			// 开始处理队列
 			this.processQueue();
 		} catch (error) {
-			this.logger.error('初始化队列服务失败:', error);
+			this.logger.error('初始化队列服务失败:', error.stack);
 			throw error;
 		}
 	}
@@ -130,7 +132,7 @@ export class TaskQueueService {
 									updatedTask.status = TaskStatus.COMPLETED;
 									updatedTask.finishedAt = Date.now();
 									await this.saveTask(updatedTask);
-									console.log('任务完成:', updatedTask);
+									this.logger.log('任务完成:', updatedTask);
 									// 发出任务完成事件
 									this.EventBusService.emit(EventList.taskCompleted, {
 										task: updatedTask
@@ -139,7 +141,7 @@ export class TaskQueueService {
 							})
 							.catch(async error => {
 								// 任务执行失败
-								this.logger.error(`任务执行失败: ${taskId}`, error);
+								this.logger.error(`任务执行失败: ${taskId}`, error.stack);
 
 								const updatedTask = await this.getTask(taskId);
 								if (updatedTask) {
@@ -154,11 +156,10 @@ export class TaskQueueService {
 										error
 									});
 								}
-								throw error;
 							});
 					})
 					.catch(error => {
-						this.logger.error(`更新任务状态失败: ${taskId}`, error);
+						this.logger.error(`更新任务状态失败: ${taskId}`, error.stack);
 						throw error;
 					})
 					.finally(() => {
@@ -167,7 +168,7 @@ export class TaskQueueService {
 					});
 			})
 			.catch(error => {
-				this.logger.error(`获取任务失败: ${taskId}`, error);
+				this.logger.error(`获取任务失败: ${taskId}`, error.stack);
 				this.activeCount--;
 				this.processQueue();
 			});
@@ -197,6 +198,12 @@ export class TaskQueueService {
 		taskType: string,
 		metadata?: any
 	): Promise<PersistentTask> {
+		//检查服务器是否在维护状态
+		// const websiteStatus = await this.dbService.websiteStatus.findFirst();
+		// if (websiteStatus?.status === WebsiteStatus.MAINTENANCE) {
+		// 	throw new Error('服务器正在维护中，请稍后再试');
+		// }
+
 		// 检查会话是否已有关联任务
 		const existingTaskId = await this.getSessionTaskId(sessionId);
 		if (existingTaskId) {
@@ -272,7 +279,7 @@ export class TaskQueueService {
 		try {
 			return JSON.parse(data);
 		} catch (error) {
-			this.logger.error(`解析任务数据失败: ${taskId}`, error);
+			this.logger.error(`解析任务数据失败: ${taskId}`, error.stack);
 			return null;
 		}
 	}
@@ -324,7 +331,6 @@ export class TaskQueueService {
 	 */
 	private async findTasksByStatus(status: TaskStatus): Promise<PersistentTask[]> {
 		// 注意：这是一个简化实现，真实场景中应该使用Redis的搜索功能或建立索引
-		// 这里使用scan遍历所有任务，在实际应用中可能效率较低
 
 		const tasks: PersistentTask[] = [];
 		let curCursor = '0';
@@ -346,7 +352,7 @@ export class TaskQueueService {
 								tasks.push(task);
 							}
 						} catch (error) {
-							this.logger.error(`解析任务数据失败: ${key}`, error);
+							this.logger.error(`解析任务数据失败: ${key}`, error.stack);
 						}
 					}
 				}
@@ -382,14 +388,14 @@ export class TaskQueueService {
 	}
 
 	/**
-	 * 获取队列长度
+	 * 获取队列长度（当前pending的任务数）
 	 */
 	getQueueLength(): number {
 		return this.queue.length;
 	}
 
 	/**
-	 * 获取当前活跃任务数
+	 * 获取当前活跃任务数（当前running的任务数）
 	 */
 	getActiveCount(): number {
 		return this.activeCount;
