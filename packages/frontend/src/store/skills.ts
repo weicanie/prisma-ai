@@ -6,19 +6,19 @@ interface SkillState {
 	dataMd: string;
 }
 
-// const initialMdWithComment = `## 职业技能
-
-// <br />
-
-// > 在上方写下某一类别的以逗号或顿号分隔的技能列表
-// > 例如：* 前端基础: HTML、CSS、JavaScript
-// `;
-const initialMd = `## 职业技能
+const initialMdWithComment = `## 职业技能
 
 <br />
 
-
+> 在上方写下某一类别的以逗号或顿号分隔的技能列表.
+> 例如:\`- 前端基础: HTML、CSS、JavaScript\`.
+> 表达技能的组合使用+或者和.
 `;
+// const initialMd = `## 职业技能
+
+// <br />
+
+// `;
 // 生成默认简历名称
 const generateDefaultSkillName = () => {
 	const now = new Date();
@@ -34,7 +34,7 @@ const initialState: SkillState = {
 		name: generateDefaultSkillName(),
 		content: []
 	},
-	dataMd: initialMd
+	dataMd: initialMdWithComment
 };
 
 const skillSlice = createSlice({

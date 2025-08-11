@@ -1,7 +1,9 @@
-import { markdownToProjectSchema } from '@prisma-ai/shared';
+import { markdownToProjectSchema, projectSchema } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import React from 'react';
 import { useDispatch } from 'react-redux';
+import { toast } from 'sonner';
+import { z } from 'zod';
 import { useCustomMutation } from '../../../query/config';
 import { ProjectQueryKey } from '../../../query/keys';
 import { createProject } from '../../../services/project';
@@ -31,7 +33,18 @@ const CreateProject: React.FC<CreateProjectProps> = () => {
 	const editorProps = {
 		submitHandler: (md: string) => () => {
 			const project = markdownToProjectSchema(md);
-			console.log('提交的项目经验:', project);
+			try {
+				projectSchema.parse(project);
+			} catch (error) {
+				if (error instanceof z.ZodError) {
+					toast.error('请检查项目经验语法是否有误');
+					error.issues.forEach(issue => {
+						toast.error(issue.message);
+					});
+				}
+				return;
+			}
+			console.log('通过md编辑器提交的项目经验:', project);
 			uploadProjectMutation.mutate(project);
 		},
 		updateAction: setDataFromMd,

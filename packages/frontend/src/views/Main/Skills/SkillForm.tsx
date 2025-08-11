@@ -13,9 +13,9 @@ import {
 	FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import type { CreateSkillDto, SkillItem } from '@prisma-ai/shared';
+import { type CreateSkillDto, type SkillItem } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, X } from 'lucide-react';
+import { ChevronRight, Plus, Trash2, X } from 'lucide-react';
 import { memo, useReducer } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
@@ -108,7 +108,14 @@ const convertToOriginalFormat = (formData: SkillFormData) => {
 	return { name: formData.name, content };
 };
 
-export const SkillForm = memo(() => {
+interface SkillFormProps {
+	setIsUseMdEditor: React.Dispatch<React.SetStateAction<boolean>>;
+	isUseMdEditor: boolean;
+}
+
+export const SkillForm = memo((props: SkillFormProps) => {
+	const { setIsUseMdEditor } = props;
+
 	const values = useSelector(selectSkillData);
 
 	const form = useForm<SkillFormData>({
@@ -365,9 +372,18 @@ export const SkillForm = memo(() => {
 						</div>
 
 						{/* 提交按钮 */}
-						<div className="flex justify-end pt-8 border-t">
+						<div className="flex justify-between pt-8 border-t">
 							<Button type="submit" className="flex items-center">
 								保存技能
+							</Button>
+							<Button
+								type="button"
+								variant="outline"
+								onClick={() => setIsUseMdEditor(true)}
+								className="group flex items-center"
+							>
+								使用md编辑器
+								<ChevronRight className="h-4 w-4 ml-2  transition-transform duration-300 group-hover:translate-x-1" />
 							</Button>
 						</div>
 					</form>

@@ -123,7 +123,7 @@ export const Editor: FC<EditorProps> = ({
 					</Button>
 					<Button className="fixed bottom-3 right-33" onClick={submitHandler && submitHandler(md)}>
 						<CheckIcon className="h-4 w-4 mr-2" />
-						提交项目
+						提交
 					</Button>
 				</>
 			)}

@@ -1,7 +1,7 @@
 import {
 	markdownToProjectSchema,
-	SelectedLLM,
 	projectSchemaToMarkdown,
+	SelectedLLM,
 	type ProjectDto
 } from '@prisma-ai/shared';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
@@ -36,6 +36,10 @@ const initialMd = `### 1、项目信息
 #### 1.3 项目技术栈
 
 <br />
+
+> 在上方写下以逗号或顿号分隔的技术列表。
+> 例如：\`HTML、CSS、JavaScript\`。
+
 
 ### 2、项目亮点
 

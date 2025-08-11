@@ -175,8 +175,11 @@ export const skillsToMarkdown = (data: CreateSkillDto): string => {
 export const markdownToSkills = (markdown: string): CreateSkillDto => {
 	const content: SkillItem[] = [];
 
-	// 使用正则表达式匹配所有技能块，从 * 开始到下一个 * 或字符串结尾
-	const skillBlockRegex = /\*\s*([^*]+?)(?=\*|$)/gs;
+	//移除所有注释和空行
+	markdown = markdown.replace('<br />', '').replace(/^\s*>\s*(.+?)$/gm, '');
+
+	// 使用正则表达式匹配所有技能块，从 *或者- 开始到下一个 *或者- 或字符串结尾
+	const skillBlockRegex = /[*-]\s*([^-*]+?)(?=\*|$)/gs;
 	const matches = markdown.matchAll(skillBlockRegex);
 
 	for (const match of matches) {

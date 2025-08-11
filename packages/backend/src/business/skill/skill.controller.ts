@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { UserInfoFromToken } from '@prisma-ai/shared';
+import { type UserInfoFromToken } from '@prisma-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';

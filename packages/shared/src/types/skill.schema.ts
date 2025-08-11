@@ -8,3 +8,7 @@ export const skillItemSchema = z.object({
 export const skillSchema = z.object({
 	content: z.array(skillItemSchema)
 });
+
+export const skillDtoSchema = skillSchema.extend({
+	name: z.string().min(1, '请输入技能清单名称')
+});
