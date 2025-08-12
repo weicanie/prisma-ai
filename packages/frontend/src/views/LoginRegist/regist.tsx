@@ -215,7 +215,7 @@ export default function Register() {
 							<DialogTitle>{dialogContent.title}</DialogTitle>
 						</DialogHeader>
 						<div className="overflow-y-auto scb-thin">
-							<MilkdownEditor text={dialogContent.content} isShwoMode={true} />
+							<MilkdownEditor mdSelector={() => dialogContent.content} type="show" />
 						</div>
 					</DialogContent>
 				</Dialog>
