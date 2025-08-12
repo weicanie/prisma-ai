@@ -9,10 +9,9 @@ import { VectorStoreModule } from '../../vector-store/vector-store.module';
 import { ProjectModule } from '../project/project.module';
 import { ResumeModule } from '../resume/resume.module';
 import { LLMSseService } from './llm-sse.service';
-import { LLMCacheService } from './LLMCache.service';
 @Module({
 	controllers: [LLMSessionPoolController],
-	providers: [LLMCacheService, LLMSseService],
+	providers: [LLMSseService],
 	imports: [
 		RedisModule,
 		ModelModule,

@@ -2,13 +2,14 @@ import classNames from 'classnames';
 import React from 'react';
 
 interface WallAProps {
+	className?: string;
 	play: boolean;
 	duration?: number; // duration in milliseconds
 	delay?: number;
 	width?: number;
 	height?: number;
 }
-const Wall: React.FC<WallAProps> = ({ play, duration = 1500, delay = 1000 }) => {
+const Wall: React.FC<WallAProps> = ({ play, duration = 1500, delay = 1000, className }) => {
 	const rows = 30;
 	const cols = 24;
 	/*开销太大
@@ -65,7 +66,7 @@ const Wall: React.FC<WallAProps> = ({ play, duration = 1500, delay = 1000 }) => 
 		</svg>
 	);
 	return (
-		<div>
+		<div className={className}>
 			<SvgFilter />
 			<div
 				className={classNames(

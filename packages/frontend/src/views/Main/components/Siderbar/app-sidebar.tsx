@@ -1,6 +1,6 @@
 import {
-	Briefcase,
 	Book,
+	Briefcase,
 	FileText,
 	House,
 	LibraryBig,
@@ -38,7 +38,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 		},
 		teams: [
 			{
-				name: 'doro',
+				name: 'Prisma',
 				logo: Pyramid,
 				plan: '从简历到offer'
 			}
@@ -50,65 +50,50 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				icon: House
 			},
 			{
-				title: '职业技能',
-				url: '/main/skills',
-				isOpen: true,
-				icon: ListChecks
-			},
-			{
-				title: '项目经验',
-				url: '/main/projects',
-				icon: Sparkles,
-				isOpen: true
-			},
-			{
-				title: '简历',
-				icon: FileText,
-				url: '/main/resumes'
-			},
-			{
-				title: '匹配',
-				icon: Target,
-				url: '/main/hjm',
-				items: [
-					{ title: '岗位数据获取', url: '/main/hjm/get-jobs' },
-					{ title: '简历匹配岗位', url: '/main/hjm/match-jobs' }
-				]
-			},
-			{
-				title: '岗位',
-				icon: Briefcase,
-				url: '/main/job'
-				// items: [
-				// 	{ title: '简历匹配', url: '/main/job/match' },
-				// 	{ title: '我的岗位专用简历', url: '/main/job/list' }
-				// ]
-			},
-			{
 				title: '知识库',
 				icon: LibraryBig,
 				url: '/main/knowledge'
 			},
 			{
-				title: '面经',
-				icon: Book,
-				url: '/main/interview_summary',
+				title: '简历优化',
+				url: '/main/job',
+				isOpen: true,
+				icon: Sparkles,
 				items: [
-					{ title: '我的面经', url: '/main/interview_summary/mine' },
-					{ title: '面经市场', url: '/main/interview_summary/market' }
+					{ title: '职业技能', icon: ListChecks, url: '/main/skills' },
+					{ title: '项目经验', icon: Sparkles, url: '/main/projects' },
+					{ title: '简历组装', icon: FileText, url: '/main/resumes' }
 				]
 			},
+			{
+				title: '人岗匹配',
+				icon: Target,
+				url: '/main/hjm',
+				isOpen: true,
+				items: [
+					{ title: '岗位数据获取', icon: Briefcase, url: '/main/hjm/get-jobs' },
+					{ title: '简历匹配岗位', icon: Target, url: '/main/hjm/match-jobs' },
+					{
+						title: '岗位定制简历',
+						icon: FileText,
+						url: '/main/job'
+					}
+				]
+			},
+
 			{
 				title: '面向offer学习',
 				icon: Rocket,
 				url: '/main/offer',
+				isOpen: true,
 				items: [
 					{
 						title: '集成面试题库和 anki',
+						icon: Book,
 						url: '/main/offer/anki'
-					},
-					{ title: '简历延申八股', url: '/main/offer/questions' },
-					{ title: '学习路线', url: '/main/offer/road' }
+					}
+					// { title: '简历延申八股', url: '/main/offer/questions' },
+					// { title: '学习路线', url: '/main/offer/road' }
 				]
 			}
 		]

@@ -15,16 +15,15 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
+import { SelectedLLM } from '@prisma-ai/shared';
 import { Observable, of } from 'rxjs';
-import { LLMSseService } from './llm-sse.service';
-import { TaskQueueService } from '../../task-queue/task-queue.service';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { RedisService } from '../../redis/redis.service';
 import { LLMSseSessionPoolService } from '../../session/llm-sse-session-pool.service';
-import { LLMCacheService } from './LLMCache.service';
+import { TaskQueueService } from '../../task-queue/task-queue.service';
 import { TaskStatus } from '../../type/taskqueue';
 import { LLMStreamingChunk } from '../../utils/type';
-import { SelectedLLM } from '@prisma-ai/shared';
+import { LLMSseService } from './llm-sse.service';
 describe('LLMSseService', () => {
 	let service: LLMSseService;
 	let taskQueueService: any;
@@ -90,7 +89,6 @@ describe('LLMSseService', () => {
 				{ provide: EventBusService, useValue: eventBusService },
 				{ provide: RedisService, useValue: redisService },
 				{ provide: LLMSseSessionPoolService, useValue: sessionPool },
-				{ provide: LLMCacheService, useValue: llmCache },
 				{ provide: 'WithFuncPoolProjectProcess', useValue: withFuncPoolProjectProcess },
 				{ provide: 'WithFuncPoolResumeService', useValue: withFuncPoolResumeService }
 			]

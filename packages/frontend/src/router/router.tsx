@@ -3,7 +3,10 @@ import { Navigate, Outlet } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
 import UpdateBreadRouter from './UpdateBreadRouter';
 const AIChat = lazy(() => import('../components/aichat/AIChat'));
-const LoginRegist = lazy(() => import('../views/LoginRegist/LoginRegist'));
+const LandingPage = lazy(() => import('../views/Saas/LandingPage'));
+const LoginPage = lazy(() => import('../views/LoginRegist/login'));
+const RegisterPage = lazy(() => import('../views/LoginRegist/regist'));
+const NotFoundPage = lazy(() => import('../views/Saas/NotFound'));
 const Main = lazy(() => import('../views/Main'));
 const Home = lazy(() => import('../views/Main/Home'));
 const Jobs = lazy(() => import('../views/Main/Jobs'));
@@ -26,11 +29,23 @@ const Anki = lazy(() => import('../views/Main/Anki/Anki'));
 export const routes = [
 	{
 		path: '',
-		element: <Navigate to="/main/home" />
+		element: <Navigate to="/saas" />
+	},
+	{
+		path: '*',
+		element: <NotFoundPage />
+	},
+	{
+		path: '/saas',
+		element: <LandingPage />
 	},
 	{
 		path: '/login',
-		element: <LoginRegist />
+		element: <LoginPage />
+	},
+	{
+		path: '/register',
+		element: <RegisterPage />
 	},
 	{
 		path: '/aichat',

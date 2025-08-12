@@ -1,6 +1,5 @@
 import { spawn } from 'child_process';
 import * as path from 'path';
-//TODO 用户项目代码自动上传（需要等更新逻辑完成,或者通过mcp依赖第三方工具的话则压根不需要上传）
 /**
  * 执行一个 shell 脚本文件。
  * @param scriptPath - .sh 脚本的绝对路径。

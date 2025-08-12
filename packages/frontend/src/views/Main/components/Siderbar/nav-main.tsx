@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight, type LucideIcon } from 'lucide-react';
+import { type LucideIcon } from 'lucide-react';
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
@@ -25,6 +25,7 @@ type NavMainProps = {
 		items?: {
 			title: string;
 			url: string;
+			icon?: LucideIcon;
 		}[];
 	}[];
 	selectedGroupIndex: number; // 当前选中的组索引
@@ -86,7 +87,7 @@ export function NavMain({
 										>
 											{item.icon && <item.icon />}
 											<span>{item.title}</span>
-											<ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+											{/* <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" /> */}
 										</SidebarMenuButton>
 									</CollapsibleTrigger>
 									<CollapsibleContent>
@@ -94,13 +95,13 @@ export function NavMain({
 											{item.items?.map((subItem, subIdx) => (
 												<SidebarMenuSubItem key={subItem.title}>
 													<SidebarMenuSubButton
-														asChild
 														isActive={
 															selectedGroupIndex === groupIdx && selectedItemIndex === subIdx
 														}
 														onClick={() => onItemClick(groupIdx, subIdx, subItem.url)}
 														className="cursor-pointer"
 													>
+														{subItem.icon && <subItem.icon />}
 														<span>{subItem.title}</span>
 													</SidebarMenuSubButton>
 												</SidebarMenuSubItem>

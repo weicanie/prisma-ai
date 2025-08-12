@@ -4,11 +4,11 @@ import { useTheme } from '@/utils/theme';
 import { type ResumeMatchedDto, type ResumeVo, SelectedLLM } from '@prisma-ai/shared';
 import { Brain, Pyramid, Rocket, Sparkles } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { selectJobModel } from '../../../../store/jobs';
 import Tabs from '../../components/Tabs';
 import PreflightBtns from './preflightBtns';
 import { ResumeMatchResultCard } from './ResumeMatchResultCard';
-import { useSelector } from 'react-redux';
-import { selectJobModel } from '../../../../store/jobs';
 export interface ResumeResultProps {
 	resultData: ResumeMatchedDto | null;
 	mergedData: null;

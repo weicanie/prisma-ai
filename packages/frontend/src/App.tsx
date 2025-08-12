@@ -39,11 +39,11 @@ function APP() {
 						'You are assisting the user as best as you can. Answer in the best way possible given the data you have.'
 					}
 					labels={{
-						title: 'doro',
-						initial: 'doro 为你效劳!'
+						title: '小棱镜',
+						initial: '小棱镜为你效劳!'
 					}}
 				>
-					<div className="flex max-[900px]:flex-col">{useRoutes(routes)}</div>
+					{useRoutes(routes)}
 				</CopilotSidebar>
 			</CopilotKit>
 		</QueryClientProvider>

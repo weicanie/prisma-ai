@@ -1,11 +1,5 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import {
-	DataChunkErrVO,
-	DataChunkVO,
-	LLMSessionRequest,
-	SelectedLLM,
-	UserInfoFromToken
-} from '@prisma-ai/shared';
+import { DataChunkErrVO, DataChunkVO, SelectedLLM, UserInfoFromToken } from '@prisma-ai/shared';
 import { catchError, mergeMap, Observable, timeout } from 'rxjs';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { RedisService } from '../../redis/redis.service';
@@ -14,7 +8,6 @@ import { TaskQueueService } from '../../task-queue/task-queue.service';
 import { PersistentTask, TaskStatus } from '../../type/taskqueue';
 import { WithFuncPool } from '../../utils/abstract';
 import { LLMStreamingChunk, SseFunc } from '../../utils/type';
-import { LLMCacheService } from './LLMCache.service';
 /**
  * sse返回LLM生成内容的任务
  */
@@ -78,7 +71,6 @@ export class LLMSseService implements OnModuleInit {
 		private eventBusService: EventBusService,
 		private redisService: RedisService,
 		private readonly sessionPool: LLMSseSessionPoolService,
-		private readonly llmCache: LLMCacheService,
 		@Inject('WithFuncPoolProjectProcess') private readonly withFuncPoolProjectProcess: WithFuncPool,
 		@Inject('WithFuncPoolResumeService') private readonly withFuncPoolResumeService: WithFuncPool
 	) {
@@ -182,28 +174,6 @@ export class LLMSseService implements OnModuleInit {
 				reject(new Error('任务被中止'));
 			};
 		});
-	}
-	//* 调试llm缓存功能
-	/* 请求先过llm缓存 
-      对于相同的prompt, 直接返回
-      对于高度相似的prompt, 使用其回答作为上下文二次生成（prompt设计：问ai、上hub）
-      不仅可以节省token, 同时前端重复请求就算导致会话多次创建、也不会导致llm多次生成
-   */
-	private async throughLLMCache(context: LLMSessionRequest) {
-		// step1: 检查完全匹配的缓存
-		const exactCacheResult = await this.llmCache.checkExactCache(context);
-		if (exactCacheResult) {
-			// 模拟流式传输缓存结果
-			return this.llmCache.createCachedResponse(exactCacheResult);
-		}
-		// step2: 检查高度相似的缓存
-		const similarCacheResult = await this.llmCache.getSimilarCacheResult(context);
-		if (similarCacheResult) {
-			// 如果相似度非常高(>0.95)，直接返回缓存结果
-			if (similarCacheResult.similarity > 0.95) {
-				return this.llmCache.createCachedResponse(similarCacheResult.result, true);
-			}
-		}
 	}
 
 	/** 工具-将当前生成的chunk储存到redis中-专门用于处理llm(deepseek)生成

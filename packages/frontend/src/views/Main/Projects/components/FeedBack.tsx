@@ -30,7 +30,7 @@ const FeedBack: React.FC<FeedBackProps> = ({ open, onOpenChange, onSubmit }) => 
 				<DialogHeader>
 					<DialogTitle>提供反馈</DialogTitle>
 					<DialogDescription>
-						您的反馈将帮助doro改进其优化结果。请输入您不满意的地方或改进建议。
+						您的反馈将帮助棱镜改进其优化结果。请输入您不满意的地方或改进建议。
 					</DialogDescription>
 				</DialogHeader>
 				<Textarea

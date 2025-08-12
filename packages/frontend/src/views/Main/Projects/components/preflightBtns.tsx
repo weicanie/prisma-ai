@@ -31,8 +31,7 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({
 				<CardTitle className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
 					<Zap className="w-5 h-5" />
 					doro 简历优化
-				<ChangeLLM />
-
+					<ChangeLLM />
 				</CardTitle>
 				<CardDescription className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
 					doro 将逐步深度优化你的项目经验
