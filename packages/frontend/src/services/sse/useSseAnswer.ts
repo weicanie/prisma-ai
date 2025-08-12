@@ -1,22 +1,26 @@
-import { useEffect, useRef, useState } from 'react';
-import { useCustomMutation } from '../../query/config';
+import { SelectedLLM } from '@prisma-ai/shared';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
 	getSessionStatusAndDecide,
 	getSseData,
+	modelKey,
 	pathKey,
 	sessionStatusKey,
 	type contextInput
 } from './sse';
-import { SelectedLLM } from '@prisma-ai/shared';
-/**
- * 传入的的input非{}时创建sse会话并开启sse响应
- * @param input 后端方法的输入
- * @param path 请求的URL路径,如 '/project/lookup'
- * @returns
- */
-export function useSseAnswer(input: contextInput | object, path: string, model: SelectedLLM) {
-	const doNotStart = typeof input === 'object' && Object.getOwnPropertyNames(input).length === 0;
 
+/**
+ * 控制式 Hook：通过 start/cancel 明确触发/终止一次 LLM(Natrual Language Process) 流式会话
+ * - 不再依赖 props 改变自动启动，避免渲染阶段副作用触发
+ */
+type StartParams = {
+	path: string; // 请求的URL路径，如 '/project/lookup'
+	input: contextInput; // 后端方法的输入
+	model: SelectedLLM; // 选择的模型
+};
+
+export function useSseAnswer() {
+	// 流式内容与状态
 	const [content, setContent] = useState('');
 	const [reasonContent, setReasonContent] = useState('');
 	const [done, setDone] = useState(false);
@@ -25,15 +29,21 @@ export function useSseAnswer(input: contextInput | object, path: string, model: 
 	const [error, setError] = useState(false);
 	const [errorCode, setErrorCode] = useState('');
 	const [errorMsg, setErrorMsg] = useState('');
-	/* 控制同一时间只有一个对话,避免反复执行mutate */
+
+	// 控制同一时间只有一个对话
 	const [answering, setAnswering] = useState(false);
-	/* EventSource清理函数 */
+	// EventSource 清理函数
 	const cleanupRef = useRef<() => void>(() => {});
-	/* 上传prompt建立会话, 开始接收llm流式返回 */
-	function useCreateSession() {
-		return useCustomMutation<string, contextInput>(getSessionStatusAndDecide, {
-			onSuccess() {
-				cleanupRef.current = getSseData(
+
+	// 启动一次会话：创建/检查会话 -> 建立 SSE 连接
+	const start = useCallback(
+		async ({ path, input, model }: StartParams) => {
+			if (answering) return; // 避免并发开启
+			setAnswering(true);
+			try {
+				await getSessionStatusAndDecide(input);
+				// 建立 SSE 连接并保存清理函数
+				const cleanup = getSseData(
 					path,
 					model,
 					setContent,
@@ -42,55 +52,94 @@ export function useSseAnswer(input: contextInput | object, path: string, model: 
 					setIsReasoning,
 					setError,
 					setErrorCode,
-					setErrorMsg,
-					setAnswering
+					setErrorMsg
 				);
-			}
-		});
-	}
 
-	const mutation = useCreateSession();
-	if (!doNotStart && !answering) {
-		mutation.mutate(input as contextInput);
-		setAnswering(true);
-	}
-	/* 
-  用于页面刷新、重新打开后执行 getSessionStatusAndDecide
-  以支持断点接传 
-  */
+				// 包装 cleanup：确保释放 answering
+				cleanupRef.current = () => {
+					try {
+						cleanup?.();
+					} finally {
+						setAnswering(false);
+					}
+				};
+			} catch (e) {
+				setError(true);
+				setErrorCode('9999');
+				setErrorMsg('创建会话失败，请稍后重试');
+				// 控制台输出错误便于排查
+				console.error('useSseAnswer.start error:', e);
+				setAnswering(false);
+			}
+		},
+		[answering]
+	);
+
+	// 主动取消当前会话
+	const cancel = useCallback(() => {
+		if (cleanupRef.current) {
+			cleanupRef.current();
+		} else {
+			setAnswering(false);
+		}
+	}, []);
+
+	/**
+	 * 断点接传：页面刷新/重新打开后尝试恢复
+	 * - 不影响正常的 start 调用
+	 */
 	useEffect(() => {
-		/* 
+		(async () => {
+			/* 
     getSessionStatusAndDecide设计为input传入''时
     只会查询并持久化当前持有的会话的状态
-    不进行任何操作
+    不进行任何其它操作
     */
-		const getSessionStatusOnly = getSessionStatusAndDecide;
-		getSessionStatusOnly('').then(async () => {
+			await getSessionStatusAndDecide('');
 			const status = localStorage.getItem(sessionStatusKey);
-			//不影响正常的sse
 			if (status === 'backdone' || status === 'running') {
-				console.log('触发断点接传,status:', status);
 				const curPath = localStorage.getItem(pathKey);
-				if (curPath === null) console.error('path不存在,断点接传失败');
-
-				//进行断点接传
-				cleanupRef.current = getSseData(
-					curPath!,
-					model,
+				if (!curPath) {
+					console.error('path不存在,断点接传失败');
+					return;
+				}
+				const modelStr = localStorage.getItem(modelKey) || undefined;
+				setAnswering(true);
+				const cleanup = getSseData(
+					curPath,
+					modelStr as unknown as SelectedLLM | undefined,
 					setContent,
 					setReasonContent,
 					setDone,
 					setIsReasoning,
 					setError,
 					setErrorCode,
-					setErrorMsg,
-					setAnswering
+					setErrorMsg
 				);
+				cleanupRef.current = () => {
+					try {
+						cleanup?.();
+					} finally {
+						setAnswering(false);
+					}
+				};
 			}
-		});
+		})();
 		return () => {
 			cleanupRef.current?.();
 		};
 	}, []);
-	return { content, reasonContent, done, isReasoning, error, errorCode, errorMsg };
+
+	return {
+		content,
+		reasonContent,
+		done,
+		isReasoning,
+		error,
+		errorCode,
+		errorMsg,
+		answering,
+		start,
+		cancel
+	};
 }

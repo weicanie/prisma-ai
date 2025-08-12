@@ -31,6 +31,7 @@ type SessionStatus<T> = T extends { status: infer R } ? R : unknown;
 export const llmSessionKey = 'llmSessionId'; //会话id储存的key
 export const sessionStatusKey = 'llmSessionStatus'; //当前会话状态key（注意是当前会话的状态,新建的会话则需要新置状态）
 export const pathKey = 'llmSessionPath'; //当前会话对应的URL的path（用于断点接传）
+export const modelKey = 'llmSessionModel'; // 当前会话使用的模型（用于断点接传）
 /**
  *
  * @param input 创建sse请求的上下文中的输入
@@ -124,15 +125,14 @@ async function getSessionStatusAndDecide(input: contextInput | ''): Promise<SDF<
  */
 function getSseData(
 	path: string,
-	model: SelectedLLM,
+	model: SelectedLLM | undefined,
 	setData: (data: string | ((prevData: string) => string)) => void,
 	setReasonContent: (data: string | ((prevData: string) => string)) => void,
 	setDone: (done: boolean) => void,
 	setIsReasoning: (isReasoning: boolean) => void,
 	setError: (error: boolean) => void,
 	setErrorCode: (code: string) => void,
-	setErrorMsg: (msg: string) => void,
-	setAnswering?: (answering: boolean) => void
+	setErrorMsg: (msg: string) => void
 ) {
 	console.log('getSseData', {
 		path,
@@ -161,12 +161,6 @@ function getSseData(
 		if (eventSource) {
 			eventSource.close();
 			eventSource = null;
-			if (setAnswering) {
-				//让answering的更新在input之后（setState是微任务）
-				setTimeout(() => {
-					setAnswering(false);
-				});
-			}
 			/* 
 			 让外部组件处理useSseAnswer状态的重置
 			 因为外部组件会依赖useSseAnswer状态控制流程
@@ -202,17 +196,27 @@ function getSseData(
 
 	if (status === 'backdone' || status === 'running') {
 		// 断点接传 - 从上次中断的地方继续
-		url = `${baseUrl}${path}?sessionId=${localStorage.getItem(llmSessionKey)}&token=${token}&recover=true&model=${model}`;
+		// 当前只会使用sessionId,model可选
+		const sessionParam = `sessionId=${localStorage.getItem(llmSessionKey)}`;
+		const tokenParam = `token=${token}`;
+		const modelParam = model ? `&model=${model}` : '';
+		url = `${baseUrl}${path}?${sessionParam}&${tokenParam}&recover=true${modelParam}`;
 	} else if (status === 'tasknotfound') {
 		// 创建新任务 - 开始新的生成
-		url = `${baseUrl}${path}?sessionId=${localStorage.getItem(llmSessionKey)}&token=${token}&model=${model}`;
+		const sessionParam = `sessionId=${localStorage.getItem(llmSessionKey)}`;
+		const tokenParam = `token=${token}`;
+		const modelParam = model ? `&model=${model}` : '';
+		url = `${baseUrl}${path}?${sessionParam}&${tokenParam}${modelParam}`;
 	} else return cleanup;
 
 	try {
 		// 创建连接
 		eventSource = new EventSource(url);
-		// 记录当前path,用于断点接传
+		// 记录当前path和model,用于断点接传
 		localStorage.setItem(pathKey, path);
+		if (model !== undefined) {
+			localStorage.setItem(modelKey, String(model));
+		}
 
 		// 处理服务器推送的消息
 		eventSource.onmessage = event => {

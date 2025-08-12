@@ -7,7 +7,9 @@ import {
 	type ResumeMatchedDto,
 	type ResumeVo
 } from '@prisma-ai/shared';
+import { useQueryClient } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useCustomQuery } from '../../../query/config';
@@ -15,12 +17,10 @@ import { JobQueryKey, ResumeQueryKey } from '../../../query/keys';
 import { findAllUserJobs } from '../../../services/job';
 import { findAllUserResumes } from '../../../services/resume';
 import { useSseAnswer } from '../../../services/sse/useSseAnswer';
+import { selectJobModel } from '../../../store/jobs';
 import JobCard from '../Jobs/JobCard';
 import { OriginalResume } from './components/OriginalResume';
 import { ResumeResult } from './components/ResumeResult';
-import { useQueryClient } from '@tanstack/react-query';
-import { selectJobModel } from '../../../store/jobs';
-import { useSelector } from 'react-redux';
 
 //llm返回的json
 type MatchResultDto = ResumeMatchedDto;
@@ -53,12 +53,11 @@ const ResumeActions: React.FC<ResumeActionsProps> = () => {
 	const isDark = resolvedTheme === 'dark';
 	const navigate = useNavigate();
 
-	const [input, setInput] = useState<MatchJobDto | Record<string, unknown>>({});
-	const [urlPath, setUrlPath] = useState('');
+	// 控制式 Hook：显式触发
+	const { content, reasonContent, done, isReasoning, start } = useSseAnswer();
 	const [resultData, setResultData] = useState<MatchResultDto | null>(null);
 
-	/* 使用SSE获取AI生成结果 */
-	const { content, reasonContent, done, isReasoning } = useSseAnswer(input, urlPath, model);
+	/* 使用SSE获取AI生成结果（显式触发） */
 
 	/* 自动切换tab */
 	useEffect(() => {
@@ -69,7 +68,6 @@ const ResumeActions: React.FC<ResumeActionsProps> = () => {
 
 	useEffect(() => {
 		if (done) {
-			setInput({}); // 清空输入防止sse重复请求
 			const result = jsonMd_obj(content);
 			console.log('🚀 ~ sse最终结果', result);
 			setResultData(result);
@@ -133,8 +131,7 @@ const ResumeActions: React.FC<ResumeActionsProps> = () => {
 			resume: resumeId,
 			job: jobId
 		};
-		setInput({ input: matchJobDto });
-		setUrlPath('/resume/match');
+		start({ path: '/resume/match', input: { input: matchJobDto }, model });
 		navigate('#reasoning');
 	};
 
@@ -143,8 +140,6 @@ const ResumeActions: React.FC<ResumeActionsProps> = () => {
 	 */
 	const handleMerge = () => {
 		queryClient.invalidateQueries({ queryKey: [ResumeQueryKey.Resumes] });
-		setInput({});
-		setUrlPath('/resume/match');
 		navigate('#next-action');
 	};
 
@@ -166,12 +161,15 @@ const ResumeActions: React.FC<ResumeActionsProps> = () => {
 					}, 1000);
 					return;
 				}
-				setInput({ input: matchJobDto, userFeedback: { reflect: true, content } });
+				start({
+					path: '/resume/match',
+					input: { input: matchJobDto, userFeedback: { reflect: true, content } },
+					model
+				});
 				break;
 			default:
 				break;
 		}
-		setUrlPath(urlPath);
 		navigate('#reasoning');
 	};
 

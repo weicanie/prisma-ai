@@ -10,16 +10,15 @@ import {
 } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCustomMutation, useCustomQuery } from '../../../query/config';
 import { ProjectQueryKey } from '../../../query/keys';
 import { findAllProjects, implementProject } from '../../../services/project';
-import type { contextInput } from '../../../services/sse/sse';
 import { useSseAnswer } from '../../../services/sse/useSseAnswer';
+import { selectProjectLLM } from '../../../store/projects';
 import { OriginalProject } from './components/OriginalProject';
 import { ProjectResult } from './components/ProjectResult';
-import { selectProjectLLM } from '../../../store/projects';
-import { useSelector } from 'react-redux';
 //TODO 将调用llm、获取sse返回过程封装成一个统一的组件
 interface ActionProps {
 	_?: string;
@@ -40,10 +39,8 @@ const Action: React.FC<ActionProps> = () => {
 
 	const navigate = useNavigate();
 
-	const [input, setInput] = useState<contextInput | object>({});
-	console.log('input:', input);
-	//目标接口的URL path
-	const [urlPath, setUrlPath] = useState('');
+	// 控制式 Hook：显式触发
+	const { content, reasonContent, done, isReasoning, start } = useSseAnswer();
 	/**
 	 * 流式传输结束时string转为的JSON格式对象数据-原结果
 	 */
@@ -59,8 +56,6 @@ const Action: React.FC<ActionProps> = () => {
 
 	const model = useSelector(selectProjectLLM);
 
-	/* 使用SSE获取AI生成结果 */
-	const { content, reasonContent, done, isReasoning } = useSseAnswer(input, urlPath, model);
 	/* 自动切换tab */
 	useEffect(() => {
 		if (content) {
@@ -70,7 +65,6 @@ const Action: React.FC<ActionProps> = () => {
 
 	useEffect(() => {
 		if (done) {
-			setInput({}); // 清空输入防止sse重复请求
 			const result = jsonMd_obj(content);
 			if (Array.isArray(result)) {
 				const [resultData, mergedData] = result;
@@ -135,8 +129,7 @@ const Action: React.FC<ActionProps> = () => {
 			info: projectData.info,
 			lightspot: projectData.lightspot
 		};
-		setInput({ input: projectDto });
-		setUrlPath('/project/lookup');
+		start({ path: '/project/lookup', input: { input: projectDto }, model });
 		setActionType(ActionType.lookup);
 		navigate('#reasoning');
 	};
@@ -148,8 +141,7 @@ const Action: React.FC<ActionProps> = () => {
 			lightspot: projectData.lightspot,
 			lookupResult: projectData.lookupResult!
 		};
-		setInput({ input: projectLookupedDto });
-		setUrlPath('/project/polish');
+		start({ path: '/project/polish', input: { input: projectLookupedDto }, model });
 		setActionType(ActionType.polish);
 		navigate('#reasoning');
 	};
@@ -160,8 +152,7 @@ const Action: React.FC<ActionProps> = () => {
 			info: projectData.info,
 			lightspot: projectData.lightspot
 		};
-		setInput({ input: projectDto });
-		setUrlPath('/project/mine');
+		start({ path: '/project/mine', input: { input: projectDto }, model });
 		setActionType(ActionType.mine);
 		navigate('#reasoning');
 	};
@@ -184,8 +175,6 @@ const Action: React.FC<ActionProps> = () => {
 	/* 用户点击完成优化后更新左侧的项目经验,并更新所有状态 */
 	const handleMerge = () => {
 		queryClient.invalidateQueries({ queryKey: [ProjectQueryKey.Projects] });
-		setInput({});
-		setUrlPath('polish');
 		navigate('#next-action');
 	};
 
@@ -196,12 +185,13 @@ const Action: React.FC<ActionProps> = () => {
 	const handleFeedback = (content: string) => {
 		switch (actionType) {
 			case 'lookup':
-				setInput({
-					input: projectData,
-					userFeedback: {
-						reflect: true,
-						content
-					}
+				start({
+					path: '/project/lookup',
+					input: {
+						input: projectData,
+						userFeedback: { reflect: true, content }
+					},
+					model
 				});
 				break;
 			case 'polish': {
@@ -210,28 +200,29 @@ const Action: React.FC<ActionProps> = () => {
 					lightspot: projectData.lightspot,
 					lookupResult: projectData.lookupResult!
 				};
-				setInput({
-					input: projectLookupedDto,
-					userFeedback: {
-						reflect: true,
-						content
-					}
+				start({
+					path: '/project/polish',
+					input: {
+						input: projectLookupedDto,
+						userFeedback: { reflect: true, content }
+					},
+					model
 				});
 				break;
 			}
 			case 'mine':
-				setInput({
-					input: projectData,
-					userFeedback: {
-						reflect: true,
-						content
-					}
+				start({
+					path: '/project/mine',
+					input: {
+						input: projectData,
+						userFeedback: { reflect: true, content }
+					},
+					model
 				});
 				break;
 			default:
 				break;
 		}
-		setUrlPath(urlPath);
 		navigate('#reasoning');
 	};
 
