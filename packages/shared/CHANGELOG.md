@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.6.0](https://github.com/weicanie/prisma-ai/compare/v3.5.1...v3.6.0) (2025-08-12)
+
+### Features
+
+- 职业技能表单支持md编辑器 ([0792ab0](https://github.com/weicanie/prisma-ai/commit/0792ab0296ea6740a323a57c71e35e1e3064ff13))
+
 # [3.5.0](https://github.com/weicanie/prisma-ai/compare/v3.4.0...v3.5.0) (2025-08-01)
 
 ### Features

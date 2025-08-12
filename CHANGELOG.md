@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.6.0](https://github.com/weicanie/prisma-ai/compare/v3.5.1...v3.6.0) (2025-08-12)
+
+### Bug Fixes
+
+- 登出时的react-query缓存遗留 ([4eb3faf](https://github.com/weicanie/prisma-ai/commit/4eb3faf0e75e2b2e6c16039b1bf64336c028bafd))
+- 前端会话锁的释放 ([8336a0a](https://github.com/weicanie/prisma-ai/commit/8336a0a30e8f77fa284222f4845937bd95206630))
+- 任务错误终止时前端阻塞 ([4fc8afe](https://github.com/weicanie/prisma-ai/commit/4fc8afef1e1d129acf348cc5eb79bc3bb32c39c9))
+- 任务失败杀死线程 ([9e5f4af](https://github.com/weicanie/prisma-ai/commit/9e5f4aff4308d6f7af95f545cd3da3b0df28c6b0))
+
+### Features
+
+- 更新文本 ([324f75c](https://github.com/weicanie/prisma-ai/commit/324f75caa15505ceb26befc385c490860b11ebf5))
+- 职业技能表单支持md编辑器 ([0792ab0](https://github.com/weicanie/prisma-ai/commit/0792ab0296ea6740a323a57c71e35e1e3064ff13))
+- saas落地页与配套登录注册页 ([e7b1ed4](https://github.com/weicanie/prisma-ai/commit/e7b1ed4d952d23f354e48e4bb4aeed8e7976e630))
+
 ## [3.5.1](https://github.com/weicanie/prisma-ai/compare/v3.5.0...v3.5.1) (2025-08-01)
 
 ### Bug Fixes
