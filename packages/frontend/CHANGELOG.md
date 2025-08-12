@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.6.1](https://github.com/weicanie/prisma-ai/compare/v3.6.0...v3.6.1) (2025-08-12)
+
+### Bug Fixes
+
+- frontend build ([2f793a4](https://github.com/weicanie/prisma-ai/commit/2f793a4478b854f12e425b086137b293c48297f3))
+
 # [3.6.0](https://github.com/weicanie/prisma-ai/compare/v3.5.1...v3.6.0) (2025-08-12)
 
 ### Bug Fixes
