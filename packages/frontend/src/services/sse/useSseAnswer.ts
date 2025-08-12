@@ -52,17 +52,12 @@ export function useSseAnswer() {
 					setIsReasoning,
 					setError,
 					setErrorCode,
-					setErrorMsg
+					setErrorMsg,
+					setAnswering
 				);
 
-				// 包装 cleanup：确保释放 answering
-				cleanupRef.current = () => {
-					try {
-						cleanup?.();
-					} finally {
-						setAnswering(false);
-					}
-				};
+				// 直接保留 cleanup（释放锁由 getSseData 的 cleanup 负责）
+				cleanupRef.current = cleanup;
 			} catch (e) {
 				setError(true);
 				setErrorCode('9999');
@@ -114,15 +109,10 @@ export function useSseAnswer() {
 					setIsReasoning,
 					setError,
 					setErrorCode,
-					setErrorMsg
+					setErrorMsg,
+					setAnswering
 				);
-				cleanupRef.current = () => {
-					try {
-						cleanup?.();
-					} finally {
-						setAnswering(false);
-					}
-				};
+				cleanupRef.current = cleanup;
 			}
 		})();
 		return () => {

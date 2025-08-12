@@ -132,7 +132,8 @@ function getSseData(
 	setIsReasoning: (isReasoning: boolean) => void,
 	setError: (error: boolean) => void,
 	setErrorCode: (code: string) => void,
-	setErrorMsg: (msg: string) => void
+	setErrorMsg: (msg: string) => void,
+	setAnswering?: (answering: boolean) => void
 ) {
 	console.log('getSseData', {
 		path,
@@ -161,6 +162,7 @@ function getSseData(
 		if (eventSource) {
 			eventSource.close();
 			eventSource = null;
+			setAnswering?.(false);
 			/* 
 			 让外部组件处理useSseAnswer状态的重置
 			 因为外部组件会依赖useSseAnswer状态控制流程

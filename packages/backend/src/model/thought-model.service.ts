@@ -154,7 +154,6 @@ export class ThoughtModelService {
 		};
 
 		for await (const chunk of stream) {
-			this.logger.debug('chunk', chunk);
 			// 直接将 chunk 的内容作为答案返回，不进行思考与答案分离
 			let content = '';
 
