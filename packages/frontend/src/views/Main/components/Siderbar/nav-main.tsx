@@ -41,7 +41,7 @@ export function NavMain({
 }: NavMainProps) {
 	return (
 		<SidebarGroup>
-			<SidebarGroupLabel>导航</SidebarGroupLabel> {}
+			<SidebarGroupLabel>导航</SidebarGroupLabel>
 			<SidebarMenu>
 				{items.map((item, groupIdx) => {
 					//主项是否被选中：当没有子项时,选中的组选中主项

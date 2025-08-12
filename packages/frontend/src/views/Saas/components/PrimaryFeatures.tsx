@@ -11,24 +11,24 @@ import { Container } from './c-cpns/Container';
 
 const features = [
 	{
-		title: '项目经验优化',
-		description: 'AI 深度分析您的项目经验，挖掘独特亮点，让平平无奇的项目描述脱胎换骨，突出技术深度和业务价值。',
+		title: '项目亮点一键挖掘',
+		description:
+			'不再堆名词，AI 深挖你的经历，自动产出能打动面试官的“团队贡献 + 技术亮点 + 业务价值”。',
 		image: screenshot1
 	},
 	{
-		title: '精准岗位匹配',
-		description: '内置爬虫实时获取海量岗位数据，AI 智能分析匹配度，为您推荐最合适的职位机会。',
+		title: '精准岗位一键匹配',
+		description: '实时抓岗位 + 本地向量匹配与重排，只推真正适合你的职位，不再盲投。',
 		image: screenshot2
 	},
 	{
-		title: '定制化简历生成',
-		description:
-			'根据目标岗位要求，AI 自动调整简历内容和重点，让每份简历都精准命中招聘需求，告别海投石沉大海。',
+		title: '简历对岗定制',
+		description: '针对目标 JD(Job Description)，自动改写简历重点与表述，命中筛选关键词。',
 		image: screenshot3
 	},
 	{
-		title: '面试题库 + Anki集成',
-		description: '专业前后端题库，配合思维导图和Anki记忆法，让面试准备更高效，八股文不再是负担。',
+		title: '高效备战：题库 + 思维导图 + Anki',
+		description: '理解 + 记忆双引擎，准备更系统，八股不焦虑。',
 		image: screenshot4
 	}
 ];
@@ -67,10 +67,10 @@ export function PrimaryFeatures() {
 			<Container className="relative">
 				<div className="max-w-2xl md:mx-auto md:text-center xl:max-w-none">
 					<h2 className="font-display text-3xl tracking-tight text-white sm:text-4xl md:text-5xl">
-						我们如何帮助您赢得 Offer
+						让面试官更快看到你的价值
 					</h2>
 					<p className="mt-6 text-lg tracking-tight text-blue-100">
-						通过 AI 赋能的面试经验数据库，为您提供最真实、最系统的面试准备方案。
+						从亮点挖掘到对岗改写，从岗位匹配到备战训练，闭环搞定求职关键路径。
 					</p>
 				</div>
 				<TabGroup

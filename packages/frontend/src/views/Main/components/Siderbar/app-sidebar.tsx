@@ -2,7 +2,6 @@ import {
 	Book,
 	Briefcase,
 	FileText,
-	House,
 	LibraryBig,
 	ListChecks,
 	Pyramid,
@@ -44,11 +43,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			}
 		],
 		navMain: [
-			{
-				title: '首页',
-				url: '/main/home',
-				icon: House
-			},
 			{
 				title: '知识库',
 				icon: LibraryBig,

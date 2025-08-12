@@ -19,10 +19,9 @@ interface Feature {
 
 const features: Array<Feature> = [
 	{
-		name: '上传与导入资料',
-		summary: '上传您的项目经历、简历草稿或目标岗位JD(Job Description)，一站式开始求职优化。',
-		description:
-			'支持从本地或第三方平台导入资料，便捷接入您的真实项目与求职目标，作为AI优化与匹配的依据。',
+		name: '上传资料，立刻开工',
+		summary: '把项目经历、简历草稿或目标 JD(Job Description) 扔进来，马上开始优化。',
+		description: '真实经历直连 AI，输出可落地的亮点与对岗方案。',
 		image: screenshot1,
 		icon: function ReportingIcon() {
 			const id = useId();
@@ -53,10 +52,10 @@ const features: Array<Feature> = [
 		}
 	},
 	{
-		name: 'AI 优化与简历定制',
-		summary: 'AI 深度分析您的项目，挖掘亮点并生成面向目标岗位的定制简历。',
+		name: 'AI 打磨与对岗改写',
+		summary: '自动挖亮点、给建议、写文案，对着 JD 改到位。',
 		description:
-			'基于Planer-Executor(计划-执行)与CRAG(检索增强与生成)架构，自动完成项目亮点规划与实现建议，并输出与JD(Job Description)高度契合的简历版本。',
+			'基于 Planer‑Executor(计划‑执行) + CRAG(检索增强生成) 的智能流程，既懂技术也懂业务表达。',
 		image: screenshot2,
 		icon: function InventoryIcon() {
 			return (
@@ -80,10 +79,9 @@ const features: Array<Feature> = [
 		}
 	},
 	{
-		name: '岗位推荐与学习备战',
-		summary: '基于匹配度的岗位推荐 + 题库与Anki联动，极速提升上岸率。',
-		description:
-			'实时岗位数据检索与重排，推荐高匹配岗位；结合前后端题库、思维导图与Anki导出，构建高效备战闭环。',
+		name: '岗位推荐 + 高效备战',
+		summary: '匹配更准、准备更快，上岸更稳。',
+		description: '实时抓取岗位并重排推荐；题库 + 思维导图 + Anki 打通，理解到记忆一条龙。',
 		image: screenshot3,
 		icon: function ContactsIcon() {
 			return (
@@ -208,10 +206,10 @@ export function SecondaryFeatures() {
 			<Container>
 				<div className="mx-auto max-w-2xl md:text-center">
 					<h2 className="font-display text-3xl tracking-tight text-slate-900 sm:text-4xl">
-						简单三步，打破
+						简单三步，简历
 						<span className="relative whitespace-nowrap">
 							<SwirlyDoodle className="absolute top-1/2 left-0 h-[1em] w-full fill-blue-400" />
-							<span className="relative">面试信息壁垒</span>
+							<span className="relative">脱胎换骨</span>
 						</span>
 					</h2>
 					<p className="mt-4 text-lg tracking-tight text-slate-700">

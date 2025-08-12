@@ -7,7 +7,7 @@ export function Hero() {
 	return (
 		<Container className="pt-20 pb-56 text-center lg:pt-32">
 			<h1 className="mx-auto max-w-4xl font-display text-5xl font-medium tracking-tight text-slate-900 sm:text-7xl">
-				您的求职{' '}
+				你的求职{' '}
 				<span className="relative whitespace-nowrap text-blue-600">
 					<svg
 						aria-hidden="true"
@@ -21,12 +21,12 @@ export function Hero() {
 				</span>
 			</h1>
 			<p className="mx-auto mt-6 max-w-2xl text-lg tracking-tight text-slate-700">
-				开源免费的求职AI助手，从项目优化到简历定制，从岗位匹配到面试准备，全程助力您斩获心仪Offer。
-				让平平无奇的项目脱胎换骨，让海投简历精准命中。
+				开源免费。3 分钟把项目写出亮点，1 次点击匹配合适岗位，AI Agent
+				还能帮你把“想实现的亮点”变成“真的做到”。
 			</p>
 			<div className="mt-10 flex justify-center gap-x-6">
 				{isLogin ? (
-					<Button to="/main">开始使用</Button>
+					<Button to="/main">进入工作台</Button>
 				) : (
 					<Button to="/register">免费开始使用</Button>
 				)}

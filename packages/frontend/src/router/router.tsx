@@ -8,7 +8,6 @@ const LoginPage = lazy(() => import('../views/LoginRegist/login'));
 const RegisterPage = lazy(() => import('../views/LoginRegist/regist'));
 const NotFoundPage = lazy(() => import('../views/Saas/NotFound'));
 const Main = lazy(() => import('../views/Main'));
-const Home = lazy(() => import('../views/Main/Home'));
 const Jobs = lazy(() => import('../views/Main/Jobs'));
 const JobRead = lazy(() => import('../views/Main/Jobs/JobRead'));
 const Knowledges = lazy(() => import('../views/Main/Knowbase'));
@@ -61,16 +60,7 @@ export const routes = [
 		children: [
 			{
 				path: '',
-				element: <Navigate to="/main/home" />
-			},
-			// 首页
-			{
-				path: '/main/home',
-				element: (
-					<UpdateBreadRouter>
-						<Home />
-					</UpdateBreadRouter>
-				)
+				element: <Navigate to="/main/projects" />
 			},
 			// 职业技能
 			{
