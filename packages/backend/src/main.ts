@@ -5,6 +5,8 @@ import { AppModule } from './app.module';
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
 	app.useGlobalPipes(new ZodValidationPipe());
+	// 使用docker compose时会传入NODE_ENV=production,关闭跨域
+	// 本地开发时NODE_ENV为undefined,开启跨域
 	if (process.env.NODE_ENV !== 'production') {
 		app.enableCors();
 	}
