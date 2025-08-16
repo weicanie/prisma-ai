@@ -19,8 +19,9 @@
 	"ignoreOriginList": [],
 	"webBindAddress": "127.0.0.1",
 	"webBindPort": 8765,
-	"webCorsOriginList": ["http://localhost", "http://localhost:5173", "https://pinkprisma.com"]
+	"webCorsOriginList": ["http://localhost", "http://localhost:5173", "https://pinkprisma.com","https://www.pinkprisma.com"]
 }
 ```
 
 这是为了让prisma-ai hub的浏览器网页可以将你的面试题导入到你本地的Anki。
+
