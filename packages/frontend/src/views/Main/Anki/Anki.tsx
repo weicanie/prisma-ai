@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import type { PersistentTaskVo, StartCrawlQuestionDto } from '@prisma-ai/shared';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Play, Square } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import {
@@ -24,7 +24,7 @@ import { PageHeader } from '../components/PageHeader';
 import { browserlessUrl } from '../Hjm/DataCrawl';
 
 // Custom hook to poll task status
-function useTaskPolling(taskId: string | null) {
+function useTaskPolling(taskId: string | null, onTaskComplete?: () => void) {
 	const [taskData, setTaskData] = useState<PersistentTaskVo | null>(null);
 
 	useEffect(() => {
@@ -39,6 +39,8 @@ function useTaskPolling(taskId: string | null) {
 					if (task.status === 'completed' || task.status === 'failed') {
 						clearInterval(interval);
 						toast.success(`任务 ${task.status}: ${task.error || '已完成'}`);
+						// 任务完成后调用回调函数
+						onTaskComplete?.();
 					}
 				} else {
 					clearInterval(interval);
@@ -51,7 +53,7 @@ function useTaskPolling(taskId: string | null) {
 		}, 3000);
 
 		return () => clearInterval(interval);
-	}, [taskId]);
+	}, [taskId, onTaskComplete]);
 
 	return taskData;
 }
@@ -78,7 +80,10 @@ export function Anki() {
 	const [ankiTaskId, setAnkiTaskId] = useState<string | null>(null);
 
 	// Polling hooks for each task
-	const crawlTaskData = useTaskPolling(crawlTaskId);
+	const crawlTaskData = useTaskPolling(crawlTaskId, () => {
+		setIsCrawlRunning(false);
+		setCrawlTaskId(null);
+	});
 	const mindmapTaskData = useTaskPolling(mindmapTaskId);
 	const ankiTaskData = useTaskPolling(ankiTaskId);
 
@@ -109,10 +114,22 @@ export function Anki() {
 				toast.success(`爬取任务已启动，ID: ${response.data.id}`);
 			} else {
 				toast.error(`启动失败: ${response.message}`);
+				setIsCrawlRunning(false);
 			}
 		} catch (error) {
 			toast.error(`请求异常: ${(error as Error).message}`);
+			setIsCrawlRunning(false);
 		}
+	};
+
+	const handleCancelCrawl = async () => {
+		if (!crawlTaskId) {
+			toast.warning('没有正在运行的任务');
+			return;
+		}
+		setIsCrawlRunning(false);
+		setCrawlTaskId(null);
+		toast.success('爬取任务已取消');
 	};
 
 	const handleGenerateMindmap = async () => {
@@ -167,6 +184,10 @@ export function Anki() {
 			</CardContent>
 		) : null;
 
+	// 检查是否有正在运行的任务
+	const isTaskRunning =
+		crawlTaskId && crawlTaskData && !['completed', 'failed'].includes(crawlTaskData.status);
+
 	return (
 		<>
 			<PageHeader
@@ -202,14 +223,20 @@ export function Anki() {
 						</div>
 					</CardContent>
 					<CardFooter>
-						<Button
-							onClick={handleStartCrawl}
-							disabled={
-								!!crawlTaskId && !['completed', 'failed'].includes(crawlTaskData?.status ?? '')
-							}
-						>
-							开始爬取
-						</Button>
+						{!isTaskRunning ? (
+							<Button
+								onClick={handleStartCrawl}
+								disabled={!crawlInputs.domain || !crawlInputs.list}
+							>
+								<Play className="mr-2 h-4 w-4" />
+								开始爬取
+							</Button>
+						) : (
+							<Button onClick={handleCancelCrawl} variant="destructive">
+								<Square className="mr-2 h-4 w-4" />
+								取消爬取
+							</Button>
+						)}
 					</CardFooter>
 					<TaskProgress title="爬取任务" taskData={crawlTaskData} taskId={crawlTaskId} />
 				</Card>

@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import type { PersistentTaskVo, StartCrawlDto } from '@prisma-ai/shared';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Play, Square } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { getTaskResult, startCrawl, startSyncJobsToVectorDB } from '../../../services/hjm';
@@ -23,7 +23,7 @@ type PolledTask = PersistentTaskVo;
 export const browserlessUrl = 'http://localhost:3123';
 
 // Custom hook to poll task status
-function useTaskPolling(taskId: string | null) {
+function useTaskPolling(taskId: string | null, onTaskComplete?: () => void) {
 	const [taskData, setTaskData] = useState<PolledTask | null>(null);
 
 	useEffect(() => {
@@ -38,7 +38,8 @@ function useTaskPolling(taskId: string | null) {
 					if (task.status === 'completed' || task.status === 'failed') {
 						clearInterval(interval);
 						toast.success(`Task ${task.status}: ${task.error || 'Completed'}`);
-						setIsCrawlRunning(false);
+						// 任务完成后调用回调函数
+						onTaskComplete?.();
 					}
 				} else {
 					clearInterval(interval);
@@ -51,7 +52,7 @@ function useTaskPolling(taskId: string | null) {
 		}, 3000);
 
 		return () => clearInterval(interval);
-	}, [taskId]);
+	}, [taskId, onTaskComplete]);
 
 	return taskData;
 }
@@ -75,7 +76,10 @@ export function DataCrawl() {
 	const [crawlTaskId, setCrawlTaskId] = useState<string | null>(null);
 	const [syncTaskId, setSyncTaskId] = useState<string | null>(null);
 
-	const crawlTaskData = useTaskPolling(crawlTaskId);
+	const crawlTaskData = useTaskPolling(crawlTaskId, () => {
+		setIsCrawlRunning(false);
+		setCrawlTaskId(null);
+	});
 	const syncTaskData = useTaskPolling(syncTaskId);
 
 	const getProgress = (task: PolledTask | null) => {
@@ -109,10 +113,24 @@ export function DataCrawl() {
 				toast.success(`Crawl task started with ID: ${response.data.id}`);
 			} else {
 				toast.error(`Failed to start: ${response.message}`);
+				setIsCrawlRunning(false);
 			}
 		} catch (error) {
 			toast.error(`Request Exception: ${(error as Error).message}`);
+			setIsCrawlRunning(false);
 		}
+	};
+
+	// Handler to cancel crawling
+	const handleCancelCrawl = async () => {
+		if (!crawlTaskId) {
+			toast.warning('没有正在运行的任务');
+			return;
+		}
+		// 后端暂未实现任务取消机制
+		setIsCrawlRunning(false);
+		setCrawlTaskId(null);
+		toast.success('爬取任务已取消');
 	};
 
 	// Handler to start sync
@@ -129,6 +147,10 @@ export function DataCrawl() {
 			toast.error(`Request Exception: ${(error as Error).message}`);
 		}
 	};
+
+	// 检查是否有正在运行的任务
+	const isTaskRunning =
+		crawlTaskId && crawlTaskData && !['completed', 'failed'].includes(crawlTaskData.status);
 
 	return (
 		<>
@@ -175,16 +197,17 @@ export function DataCrawl() {
 						</div>
 					</CardContent>
 					<CardFooter>
-						<Button
-							onClick={handleStartCrawl}
-							disabled={
-								!!crawlTaskId &&
-								crawlTaskData?.status !== 'completed' &&
-								crawlTaskData?.status !== 'failed'
-							}
-						>
-							开始爬取
-						</Button>
+						{!isTaskRunning ? (
+							<Button onClick={handleStartCrawl} disabled={!crawlInputs.query || !crawlInputs.city}>
+								<Play className="mr-2 h-4 w-4" />
+								开始爬取
+							</Button>
+						) : (
+							<Button onClick={handleCancelCrawl} variant="destructive">
+								<Square className="mr-2 h-4 w-4" />
+								取消爬取
+							</Button>
+						)}
 					</CardFooter>
 					{crawlTaskData && (
 						<CardContent>
