@@ -123,10 +123,6 @@ export function Anki() {
 	};
 
 	const handleCancelCrawl = async () => {
-		if (!crawlTaskId) {
-			toast.warning('没有正在运行的任务');
-			return;
-		}
 		setIsCrawlRunning(false);
 		setCrawlTaskId(null);
 		toast.success('爬取任务已取消');

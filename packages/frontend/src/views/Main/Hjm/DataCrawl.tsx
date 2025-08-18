@@ -123,10 +123,6 @@ export function DataCrawl() {
 
 	// Handler to cancel crawling
 	const handleCancelCrawl = async () => {
-		if (!crawlTaskId) {
-			toast.warning('没有正在运行的任务');
-			return;
-		}
 		// 后端暂未实现任务取消机制
 		setIsCrawlRunning(false);
 		setCrawlTaskId(null);
