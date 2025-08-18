@@ -150,7 +150,8 @@ export function DataCrawl() {
 
 	// 检查是否有正在运行的任务
 	const isTaskRunning =
-		crawlTaskId && crawlTaskData && !['completed', 'failed'].includes(crawlTaskData.status);
+		(crawlTaskId && crawlTaskData && !['completed', 'failed'].includes(crawlTaskData.status)) ||
+		getIsCrawlRunning();
 
 	return (
 		<>
