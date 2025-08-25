@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+**Note:** Version bump only for package mcp-server
+
 ## [3.3.2](https://github.com/weicanie/prisma-ai/compare/v3.3.1...v3.3.2) (2025-07-18)
 
 ### Bug Fixes
