@@ -20,8 +20,6 @@ export interface MessageSendDto {
 
 export interface ConversationSendDto {
 	key: string;
-
 	label: string;
-
 	content: ChatMessage[];
 }
