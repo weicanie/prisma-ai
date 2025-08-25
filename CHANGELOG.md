@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0](https://github.com/weicanie/prisma-ai/compare/v3.6.3...v4.0.0) (2025-08-25)
+
+### Features
+
+- 为hub更新anki配置文件 ([610a05b](https://github.com/weicanie/prisma-ai/commit/610a05bbfe395a2e08db3b2f3d5493540cd691c0))
+
 **Note:** Version bump only for package root
 
 ## [3.6.3](https://github.com/weicanie/prisma-ai/compare/v3.6.2...v3.6.3) (2025-08-18)
