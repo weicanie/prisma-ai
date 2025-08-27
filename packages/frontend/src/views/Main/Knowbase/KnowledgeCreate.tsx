@@ -9,7 +9,7 @@ interface KnowledgeCreateProps {
 const KnowledgeCreate: React.FC<KnowledgeCreateProps> = () => {
 	const dialogContent = (
 		<>
-			<div className="w-full p-7 ">
+			<div className="w-full p-7  overflow-y-auto max-h-[min(80vh,800px)] scb-thin">
 				<KnowledgeForm></KnowledgeForm>
 			</div>
 		</>
