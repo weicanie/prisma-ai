@@ -300,7 +300,7 @@ export const KnowledgeForm = memo(() => {
 						}}
 					/>
 
-					<div className="flex justify-end gap-2">
+					<div className="fixed right-16 bottom-2 flex justify-end gap-2 ">
 						<Button type="button" variant="outline">
 							取消
 						</Button>
