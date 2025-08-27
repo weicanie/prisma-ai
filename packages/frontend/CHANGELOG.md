@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.1](https://github.com/weicanie/prisma-ai/compare/v4.0.0...v4.0.1) (2025-08-27)
+
+### Bug Fixes
+
+- 知识添加表单内容过高时无法滚动 ([ae90cf2](https://github.com/weicanie/prisma-ai/commit/ae90cf276896fc0b36fd53db2264ae51c4868bc9))
+
+### Features
+
+- 知识添加表单按钮fixed定位 ([bfb6cdc](https://github.com/weicanie/prisma-ai/commit/bfb6cdcd5472d2fdae08208beba1c004461b94a4))
+
 # [4.0.0](https://github.com/weicanie/prisma-ai/compare/v3.6.3...v4.0.0) (2025-08-25)
 
 **Note:** Version bump only for package frontend
