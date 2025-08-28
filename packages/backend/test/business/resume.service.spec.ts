@@ -14,21 +14,21 @@
  * - 测试用户权限验证
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Types } from 'mongoose';
 import { Observable, of } from 'rxjs';
-import { ResumeService } from './resume.service';
-import { ChainService } from '../../chain/chain.service';
-import { HjmChainService } from '../../chain/hjm-chain.service';
-import { EventBusService, EventList } from '../../EventBus/event-bus.service';
-import { RedisService } from '../../redis/redis.service';
-import { JobService } from '../job/job.service';
-import { Resume, ResumeDocument } from './entities/resume.entity';
-import { Project, ProjectDocument } from '../project/entities/project.entity';
-import { Job, JobDocument } from '../job/entities/job.entity';
-import { Skill, SkillDocument } from '../skill/entities/skill.entity';
-import { ResumeMatched, ResumeMatchedDocument } from './entities/resumeMatched.entity';
+import { Job } from '../../src/business/job/entities/job.entity';
+import { JobService } from '../../src/business/job/job.service';
+import { Project } from '../../src/business/project/entities/project.entity';
+import { Resume } from '../../src/business/resume/entities/resume.entity';
+import { ResumeMatched } from '../../src/business/resume/entities/resumeMatched.entity';
+import { ResumeService } from '../../src/business/resume/resume.service';
+import { Skill } from '../../src/business/skill/entities/skill.entity';
+import { ChainService } from '../../src/chain/chain.service';
+import { HjmChainService } from '../../src/chain/hjm-chain.service';
+import { EventBusService } from '../../src/EventBus/event-bus.service';
+import { RedisService } from '../../src/redis/redis.service';
 
 describe('ResumeService', () => {
 	let service: ResumeService;

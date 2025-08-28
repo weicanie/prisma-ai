@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TaskQueueService } from './task-queue.service';
-import { RedisService } from '../redis/redis.service';
-import { EventBusService, EventList } from '../EventBus/event-bus.service';
-import { PersistentTask, TaskStatus } from '../type/taskqueue';
+import { EventBusService, EventList } from '../src/EventBus/event-bus.service';
+import { RedisService } from '../src/redis/redis.service';
+import { TaskQueueService } from '../src/task-queue/task-queue.service';
+import { PersistentTask, TaskStatus } from '../src/type/taskqueue';
 
 describe('TaskQueueService', () => {
 	let service: TaskQueueService;

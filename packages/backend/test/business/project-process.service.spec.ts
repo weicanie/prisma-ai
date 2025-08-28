@@ -15,19 +15,18 @@
  * - 测试任务执行和事件处理
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Observable, of } from 'rxjs';
-import { ProjectProcessService } from './project-process.service';
-import { ChainService } from '../../chain/chain.service';
-import { ProjectChainService } from '../../chain/project-chain.service';
-import { EventBusService, EventList } from '../../EventBus/event-bus.service';
-import { RedisService } from '../../redis/redis.service';
-import { SkillService } from '../skill/skill.service';
-import { Project, ProjectDocument } from './entities/project.entity';
-import { ProjectMined, ProjectMinedDocument } from './entities/projectMined.entity';
-import { ProjectPolished, ProjectPolishedDocument } from './entities/projectPolished.entity';
+import { Project } from '../../src/business/project/entities/project.entity';
+import { ProjectMined } from '../../src/business/project/entities/projectMined.entity';
+import { ProjectPolished } from '../../src/business/project/entities/projectPolished.entity';
+import { ProjectProcessService } from '../../src/business/project/project-process.service';
+import { SkillService } from '../../src/business/skill/skill.service';
+import { ChainService } from '../../src/chain/chain.service';
+import { ProjectChainService } from '../../src/chain/project-chain.service';
+import { EventBusService } from '../../src/EventBus/event-bus.service';
+import { RedisService } from '../../src/redis/redis.service';
 
 describe('ProjectProcessService', () => {
 	let service: ProjectProcessService;

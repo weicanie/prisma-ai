@@ -28,5 +28,9 @@
 			"@prisma/*": ["./prisma/generated/*"]
 		}
 	},
-	"include": ["src"]
+	"include": [
+		"src",
+		"test/manager/sse-session-manager/llm-sse.service.spec.ts",
+		"test/task-queue.service.spec.ts"
+	]
 }
