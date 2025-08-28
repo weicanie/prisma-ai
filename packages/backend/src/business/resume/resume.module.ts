@@ -1,13 +1,14 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ChainModule } from '../../chain/chain.module';
 import { EventBusModule } from '../../EventBus/event-bus.module';
+import { SseSessionManagerModule } from '../../manager/sse-session-manager/sse-session-manager.module';
+import { TaskManagerModule } from '../../manager/task-manager/task-manager.module';
 import { RedisModule } from '../../redis/redis.module';
 import { Job, JobSchema } from '../job/entities/job.entity';
 import { JobModule } from '../job/job.module';
 import { Project, ProjectSchema } from '../project/entities/project.entity';
 import { Skill, SkillSchema } from '../skill/entities/skill.entity';
-import { SseModule } from '../sse/sse.module';
 import { Resume, ResumeSchema } from './entities/resume.entity';
 import { ResumeMatched, ResumeMatchedSchema } from './entities/resumeMatched.entity';
 import { ResumeController } from './resume.controller';
@@ -26,7 +27,8 @@ import { ResumeService } from './resume.service';
 		ChainModule,
 		EventBusModule,
 		RedisModule,
-		forwardRef(() => SseModule)
+		TaskManagerModule,
+		SseSessionManagerModule
 	],
 	controllers: [ResumeController],
 	providers: [

@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
 	JobVo,
@@ -23,6 +23,7 @@ import { from, Observable } from 'rxjs';
 import { ChainService } from '../../chain/chain.service';
 import { HjmChainService } from '../../chain/hjm-chain.service';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
+import { TaskManagerService } from '../../manager/task-manager/task-manager.service';
 import { RedisService } from '../../redis/redis.service';
 import { WithFuncPool } from '../../utils/abstract';
 import { PopulateFields, SseFunc } from '../../utils/type';
@@ -37,7 +38,7 @@ import { Resume, ResumeDocument } from './entities/resume.entity';
 import { ResumeMatched, ResumeMatchedDocument } from './entities/resumeMatched.entity';
 
 @Injectable()
-export class ResumeService implements WithFuncPool {
+export class ResumeService implements WithFuncPool, OnModuleInit {
 	@InjectModel(Resume.name)
 	private resumeModel: Model<ResumeDocument>;
 	@InjectModel(Project.name)
@@ -64,11 +65,16 @@ export class ResumeService implements WithFuncPool {
 		public eventBusService: EventBusService,
 		public redisService: RedisService,
 		private readonly jobService: JobService,
-		private readonly hjmChainService: HjmChainService
+		private readonly hjmChainService: HjmChainService,
+		private readonly taskManager: TaskManagerService
 	) {
 		this.funcPool = {
 			resumeMatchJob: this.resumeMatchJob.bind(this)
 		};
+	}
+
+	onModuleInit() {
+		this.taskManager.registerFuncPool(this);
 	}
 
 	async resumeMatchJob(

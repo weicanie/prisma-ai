@@ -1,9 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
 	jsonMd_obj,
 	lookupResultSchema,
-	SelectedLLM,
 	ProjectDto,
 	projectLookupedDto,
 	projectMinedSchema,
@@ -11,6 +10,7 @@ import {
 	projectSchema,
 	ProjectStatus,
 	ProjectVo,
+	SelectedLLM,
 	StreamingChunk,
 	UserFeedback,
 	UserInfoFromToken
@@ -21,6 +21,7 @@ import { ZodSchema } from 'zod';
 import { ChainService } from '../../chain/chain.service';
 import { ProjectChainService } from '../../chain/project-chain.service';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
+import { TaskManagerService } from '../../manager/task-manager/task-manager.service';
 import { RedisService } from '../../redis/redis.service';
 import { WithFuncPool } from '../../utils/abstract';
 import { SseFunc } from '../../utils/type';
@@ -31,7 +32,7 @@ import { ProjectMined, ProjectMinedDocument } from './entities/projectMined.enti
 import { ProjectPolished, ProjectPolishedDocument } from './entities/projectPolished.entity';
 
 @Injectable()
-export class ProjectProcessService implements WithFuncPool {
+export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 	@InjectModel(Project.name)
 	private projectModel: Model<ProjectDocument>;
 
@@ -55,13 +56,17 @@ export class ProjectProcessService implements WithFuncPool {
 		public projectChainService: ProjectChainService,
 		public eventBusService: EventBusService,
 		public redisService: RedisService,
-		public skillService: SkillService
+		public skillService: SkillService,
+		private readonly taskManager: TaskManagerService
 	) {
 		this.funcPool = {
 			polishProject: this.polishProject.bind(this),
 			mineProject: this.mineProject.bind(this),
 			lookupProject: this.lookupProject.bind(this)
 		};
+	}
+	onModuleInit() {
+		this.taskManager.registerFuncPool(this);
 	}
 
 	/**

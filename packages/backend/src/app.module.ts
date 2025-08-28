@@ -10,7 +10,6 @@ import { ProjectModule } from './business/project/project.module';
 import { QuestionModule } from './business/question/question.module';
 import { ResumeModule } from './business/resume/resume.module';
 import { SkillModule } from './business/skill/skill.module';
-import { SseModule } from './business/sse/sse.module';
 import { ChainModule } from './chain/chain.module';
 import { CopilotModule } from './copilot/copilot.module';
 import { GlobalInterceptor } from './dataFormat.interceptor';
@@ -18,8 +17,9 @@ import { DbModule } from './DB/db.module';
 import { GlobalFilter } from './errorHandle.filter';
 import { EventBusModule } from './EventBus/event-bus.module';
 import { IsLoginGuard } from './isLogin.guard';
+import { SseSessionManagerModule } from './manager/sse-session-manager/sse-session-manager.module';
+import { TaskManagerModule } from './manager/task-manager/task-manager.module';
 import { PrismaAgentModule } from './prisma-agent/prisma-agent.module';
-import { SessionPoolModule } from './session/session-pool.module';
 import { UserModule } from './user/user.module';
 @Module({
 	imports: [
@@ -40,8 +40,6 @@ import { UserModule } from './user/user.module';
 		MongooseModule.forRoot(
 			`mongodb://${process.env.MONGO_HOST ?? 'localhost'}:${process.env.MONGO_PORT ?? '27017'}/prisma-ai`
 		),
-		SseModule,
-		SessionPoolModule,
 		EventBusModule,
 		SkillModule,
 		ResumeModule,
@@ -50,7 +48,9 @@ import { UserModule } from './user/user.module';
 		KnowledgebaseModule,
 		HjmModule,
 		PrismaAgentModule,
-		QuestionModule
+		QuestionModule,
+		SseSessionManagerModule,
+		TaskManagerModule
 	],
 	providers: [
 		{

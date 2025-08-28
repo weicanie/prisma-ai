@@ -1,7 +1,13 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Sse } from '@nestjs/common';
-import { ImplementDto, SelectedLLM, ProjectStatus, UserInfoFromToken } from '@prisma-ai/shared';
+import {
+	type ImplementDto,
+	ProjectStatus,
+	type SelectedLLM,
+	type UserInfoFromToken
+} from '@prisma-ai/shared';
+import * as crypto from 'crypto';
 import { RequireLogin, UserInfo } from '../../decorator';
-import { LLMSseService } from '../sse/llm-sse.service';
+import { SseManagerService } from '../../manager/sse-session-manager/sse-manager.service';
 import { ProjectDto } from './dto/project.dto';
 import { ProjectImplementService } from './project-implement.service';
 import { ProjectProcessService } from './project-process.service';
@@ -13,7 +19,7 @@ export class ProjectController {
 		private readonly projectService: ProjectService,
 		private readonly projectImplementService: ProjectImplementService,
 		private readonly projectProcessService: ProjectProcessService,
-		private readonly llmSseService: LLMSseService
+		private readonly sseManagerService: SseManagerService
 	) {}
 
 	/**
@@ -37,9 +43,9 @@ export class ProjectController {
 			model: model
 		};
 		if (recover) {
-			return this.llmSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);
+			return this.sseManagerService.handleSseRequestAndResponseRecover(sessionId, userInfo);
 		}
-		return this.llmSseService.handleSseRequestAndResponse(sessionId, userInfo, metadata);
+		return this.sseManagerService.handleSseRequestAndResponse(sessionId, userInfo, metadata);
 	}
 
 	/**
@@ -62,9 +68,9 @@ export class ProjectController {
 			model: model
 		};
 		if (recover) {
-			return this.llmSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);
+			return this.sseManagerService.handleSseRequestAndResponseRecover(sessionId, userInfo);
 		}
-		return this.llmSseService.handleSseRequestAndResponse(sessionId, userInfo, metadata);
+		return this.sseManagerService.handleSseRequestAndResponse(sessionId, userInfo, metadata);
 	}
 
 	/**
@@ -87,9 +93,9 @@ export class ProjectController {
 			model: model
 		};
 		if (recover) {
-			return this.llmSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);
+			return this.sseManagerService.handleSseRequestAndResponseRecover(sessionId, userInfo);
 		}
-		return this.llmSseService.handleSseRequestAndResponse(sessionId, userInfo, metadata);
+		return this.sseManagerService.handleSseRequestAndResponse(sessionId, userInfo, metadata);
 	}
 
 	/**

@@ -1,13 +1,14 @@
-import { forwardRef, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as bodyParser from 'body-parser';
 import { ChainModule } from '../../chain/chain.module';
 import { EventBusModule } from '../../EventBus/event-bus.module';
+import { SseSessionManagerModule } from '../../manager/sse-session-manager/sse-session-manager.module';
+import { TaskManagerModule } from '../../manager/task-manager/task-manager.module';
 import { PrismaAgentModule } from '../../prisma-agent/prisma-agent.module';
 import { RedisModule } from '../../redis/redis.module';
 import { TaskQueueModule } from '../../task-queue/task-queue.module';
 import { SkillModule } from '../skill/skill.module';
-import { SseModule } from '../sse/sse.module';
 import { Project, ProjectSchema } from './entities/project.entity';
 import { ProjectMined, ProjectMinedSchema } from './entities/projectMined.entity';
 import { ProjectPolished, ProjectPolishedSchema } from './entities/projectPolished.entity';
@@ -40,12 +41,13 @@ import { ProjectService } from './project.service';
 		TaskQueueModule,
 		SkillModule,
 		PrismaAgentModule,
+		TaskManagerModule,
+		SseSessionManagerModule,
 		MongooseModule.forFeature([
 			{ name: Project.name, schema: ProjectSchema },
 			{ name: ProjectPolished.name, schema: ProjectPolishedSchema },
 			{ name: ProjectMined.name, schema: ProjectMinedSchema }
-		]),
-		forwardRef(() => SseModule)
+		])
 	] //forFeature指定模块可用的集合（表）
 })
 export class ProjectModule implements NestModule {

@@ -10,9 +10,9 @@ import {
 	Sse,
 	ValidationPipe
 } from '@nestjs/common';
-import { UserInfoFromToken, SelectedLLM } from '@prisma-ai/shared';
+import { type UserInfoFromToken, SelectedLLM } from '@prisma-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
-import { LLMSseService } from '../sse/llm-sse.service';
+import { SseManagerService } from '../../manager/sse-session-manager/sse-manager.service';
 import { CreateResumeDto } from './dto/create-resume.dto';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import { ResumeService } from './resume.service';
@@ -21,7 +21,7 @@ import { ResumeService } from './resume.service';
 export class ResumeController {
 	constructor(
 		private readonly resumeService: ResumeService,
-		private readonly llmSseService: LLMSseService
+		private readonly sseManagerService: SseManagerService
 	) {}
 
 	@RequireLogin()
@@ -38,9 +38,9 @@ export class ResumeController {
 			model
 		};
 		if (recover) {
-			return this.llmSseService.handleSseRequestAndResponseRecover(sessionId, userInfo);
+			return this.sseManagerService.handleSseRequestAndResponseRecover(sessionId, userInfo);
 		}
-		return this.llmSseService.handleSseRequestAndResponse(sessionId, userInfo, metadata);
+		return this.sseManagerService.handleSseRequestAndResponse(sessionId, userInfo, metadata);
 	}
 
 	@RequireLogin()
