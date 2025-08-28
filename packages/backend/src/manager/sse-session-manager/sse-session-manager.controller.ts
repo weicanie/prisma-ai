@@ -101,6 +101,22 @@ export class SseSessionManagerController {
 		return '成功设置';
 	}
 
+	/* 释放用户当前会话 */
+	@RequireLogin()
+	@Get('free-session')
+	async freeSession(
+		@Query('sessionId') sessionId: string,
+		@UserInfo() userInfo: UserInfoFromToken
+	) {
+		await this.sessionPool.setFrontendDone(sessionId);
+		await this.sessionPool.setBackendDone(sessionId);
+		/* 
+      释放用户当前会话：删除userId ->sessionId的映射
+    */
+		await this.sessionPool.delUserSessionId(userInfo.userId);
+		return '成功设置';
+	}
+
 	/* 用户主动中断 */
 	@RequireLogin()
 	@Get('abort')

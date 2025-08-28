@@ -1,5 +1,6 @@
 import { SelectedLLM } from '@prisma-ai/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { eventBusService, EventList } from '../../utils/EventBus/event-bus.service';
 import {
 	getSessionStatusAndDecide,
 	getSseData,
@@ -74,9 +75,8 @@ export function useSseAnswer() {
 	const cancel = useCallback(() => {
 		if (cleanupRef.current) {
 			cleanupRef.current();
-		} else {
-			setAnswering(false);
 		}
+		setAnswering(false);
 	}, []);
 
 	/**
@@ -119,6 +119,12 @@ export function useSseAnswer() {
 			cleanupRef.current?.();
 		};
 	}, []);
+	//监听用户释放会话事件
+	useEffect(() => {
+		eventBusService.on(EventList.sessionFree, () => {
+			cancel();
+		});
+	}, [cancel]);
 
 	return {
 		content,

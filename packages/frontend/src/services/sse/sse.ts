@@ -115,15 +115,6 @@ async function getSessionStatusAndDecide(input: contextInput | ''): Promise<SDF<
 		} else return forReturn;
 	}
 }
-/**
- * 清除失效的会话状态，避免影响新会话的建立
- */
-function resetStatus() {
-	localStorage.removeItem(sessionStatusKey);
-	localStorage.removeItem(llmSessionKey);
-	localStorage.removeItem(pathKey);
-	localStorage.removeItem(modelKey);
-}
 
 /**
  * 通过EventSource请求特定接口获取SSE数据
@@ -264,7 +255,6 @@ function getSseData(
 
 		// 数据推送阶段的错误处理
 		eventSource.onerror = event => {
-			resetStatus();
 			setDone(true);
 			cleanup();
 			toast.error('连接错误,请稍后重试');
@@ -273,7 +263,6 @@ function getSseData(
 		};
 	} catch (error) {
 		// 连接创建阶段的错误处理
-		resetStatus();
 		setTupError('9999', `连接服务器失败，请稍后重试`);
 		console.error('创建EventSource失败:', error);
 		cleanup();
@@ -290,4 +279,10 @@ async function frontendOver(sessionId: string) {
 	const res = await instance.get<SDF<string>>(`llm-session/frontend-over?sessionId=${sessionId}`);
 	return res;
 }
-export { frontendOver, getSessionStatusAndDecide, getSseData };
+
+async function freeSession(sessionId: string) {
+	const res = await instance.get<SDF<string>>(`llm-session/free-session?sessionId=${sessionId}`);
+	return res;
+}
+
+export { freeSession, frontendOver, getSessionStatusAndDecide, getSseData };
