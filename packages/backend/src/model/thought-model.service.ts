@@ -79,7 +79,8 @@ export class ThoughtModelService {
 	 * @returns
 	 */
 	async getGeminiThinkingModelFlat(
-		config: ChatOpenAIFields | ChatGoogleGenerativeAI | SelectedLLM
+		config: ChatOpenAIFields | ChatGoogleGenerativeAI | SelectedLLM,
+		schema?: z.Schema
 	) {
 		let llm: ChatOpenAI | ChatGoogleGenerativeAI;
 		switch (config) {
@@ -88,9 +89,15 @@ export class ThoughtModelService {
 				break;
 			case SelectedLLM.gemini_2_5_pro:
 				llm = this.modelService.getLLMGeminiPlusRaw('gemini-2.5-pro');
+				if (schema) {
+					llm = llm.withStructuredOutput(schema);
+				}
 				break;
 			case SelectedLLM.gemini_2_5_flash:
 				llm = this.modelService.getLLMGeminiPlusRaw('gemini-2.5-flash');
+				if (schema) {
+					llm = llm.withStructuredOutput(schema);
+				}
 				break;
 			default:
 				throw new Error(`getGeminiThinkingModelFlat-不支持的gemini模型:${config}`);

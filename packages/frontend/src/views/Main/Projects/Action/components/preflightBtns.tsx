@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useTheme } from '@/utils/theme';
 import { MessageSquare, Sparkles, Target, Wand2, Zap } from 'lucide-react';
 import React, { useState } from 'react';
-import { FreeSession } from '../../components/FlushSession';
+import { FreeSession } from '../../../components/FlushSession';
 import { ChangeLLM } from './ChangeLLM';
 import ImplementRequest from './ImplementRequest';
 

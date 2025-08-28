@@ -1,3 +1,8 @@
+import { useCustomMutation, useCustomQuery } from '@/query/config';
+import { ProjectQueryKey } from '@/query/keys';
+import { findAllProjects, implementProject } from '@/services/project';
+import { useSseAnswer } from '@/services/sse/useSseAnswer';
+import { selectProjectLLM } from '@/store/projects';
 import { useTheme } from '@/utils/theme';
 import {
 	type ImplementDto,
@@ -6,20 +11,22 @@ import {
 	type ProjectDto,
 	type projectLookupedDto,
 	type ProjectMinedDto,
+	projectMinedSchema,
+	type ProjectPolishedDto,
+	projectPolishedSchema,
+	projectSchema,
 	ProjectStatus
 } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useCustomMutation, useCustomQuery } from '../../../query/config';
-import { ProjectQueryKey } from '../../../query/keys';
-import { findAllProjects, implementProject } from '../../../services/project';
-import { useSseAnswer } from '../../../services/sse/useSseAnswer';
-import { selectProjectLLM } from '../../../store/projects';
-import { OriginalProject } from './components/OriginalProject';
+import { toast } from 'sonner';
+import type { z } from 'zod';
+import { OriginalProject } from '../components/OriginalProject';
 import { ProjectResult } from './components/ProjectResult';
 //TODO 将调用llm、获取sse返回过程封装成一个统一的组件
+
 interface ActionProps {
 	_?: string;
 }
@@ -45,7 +52,7 @@ const Action: React.FC<ActionProps> = () => {
 	 * 流式传输结束时string转为的JSON格式对象数据-原结果
 	 */
 	const [resultData, setResultData] = useState<
-		lookupResultDto | ProjectMinedDto | ProjectMinedDto | null
+		lookupResultDto | ProjectMinedDto | ProjectPolishedDto | null
 	>(null);
 	/**
 	 * 流式传输结束时string转为的JSON格式对象数据-合并后的结果
@@ -65,19 +72,18 @@ const Action: React.FC<ActionProps> = () => {
 
 	useEffect(() => {
 		if (done) {
-			const result = jsonMd_obj(content);
-			if (Array.isArray(result)) {
-				const [resultData, mergedData] = result;
-				console.log('sse最终结果:', result);
-
-				setResultData(resultData);
-				if (mergedData) {
-					setMergedData(mergedData); //[结果]支持
-				}
-			} else {
-				setResultData(result);
+			try {
+				const result: {
+					after: z.infer<typeof projectSchema>;
+					before: z.infer<typeof projectPolishedSchema> | z.infer<typeof projectMinedSchema>;
+				} = jsonMd_obj(content);
+				setResultData(result.before);
+				setMergedData(result.after);
+				console.log('sse 最终结果：', result);
+			} catch (error) {
+				toast.error('结果解析错误，请稍后重试生成');
+				console.error('jsonMd_obj error', error);
 			}
-
 			//setState异步, 需要等待setState执行完再执行navigate
 			setTimeout(() => {
 				navigate('#result');

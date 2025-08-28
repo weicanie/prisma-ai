@@ -11,15 +11,15 @@ import {
 import { Brain, Pyramid, Rocket, Sparkles } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { selectProjectLLM } from '../../../../store/projects';
-import Tabs from '../../components/Tabs';
+import { selectProjectLLM } from '../../../../../../store/projects';
+import Tabs from '../../../../components/Tabs';
+import PreflightBtns from '../preflightBtns';
 import { ProejctPMResultCard } from './ProejctPMResultCard';
-import { ProjectAnalysisResultCard } from './ProjectAnalysisResultCard';
-import PreflightBtns from './preflightBtns';
+import { ProjectAnalysisResultCard } from './ProjectLResultCard';
 
 export interface ProjectResultProps {
-	resultData: ProjectPolishedDto | ProjectMinedDto | null; //行动结果
-	mergedData: lookupResultDto | projectLookupedDto | ProjectDto | null; //正式合并后的数据
+	resultData: lookupResultDto | ProjectPolishedDto | ProjectMinedDto | null; //行动结果
+	mergedData: projectLookupedDto | ProjectDto | null; //正式合并后的数据
 	actionType: keyof typeof headerMap | null;
 	availableActions: string[];
 	handleLookup: () => void;
@@ -211,6 +211,7 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 		handleFeedback,
 		done
 	};
+	console.log('resultCardProps', resultCardProps);
 	const proejctResultCard = <ProejctPMResultCard {...resultCardProps} />;
 	const contentMap = {
 		lookup: <ProjectAnalysisResultCard {...resultCardProps} isDark={isDark} />,

@@ -3,12 +3,11 @@ import { RunnableSequence } from '@langchain/core/runnables';
 import { Injectable } from '@nestjs/common';
 import {
 	lookupResultSchema,
-	SelectedLLM,
 	ProjectDto,
-	projectLookupedSchema,
-	projectMinedSchema,
-	projectPolishedSchema,
-	projectSchema,
+	projectLookupResultSchema,
+	projectMinResultSchma,
+	projectPolishResultSchma,
+	SelectedLLM,
 	skillsToMarkdown,
 	StreamingChunk,
 	UserFeedback,
@@ -61,7 +60,6 @@ export class ProjectChainService {
 	async _createProcessChain(
 		promptGetter: () => Promise<ChatPromptTemplate>,
 		outputSchema: z.Schema,
-		inputSchema: z.Schema,
 		stream: boolean,
 		business: BusinessEnum,
 		model: SelectedLLM
@@ -99,11 +97,6 @@ export class ProjectChainService {
 				input: (i: ProjectProcessingInput) => JSON.stringify(i.project),
 				chat_history: () => '', // 暂不处理多轮对话历史
 				instructions: () => outputParser.getFormatInstructions(),
-				instructions_mid: () => {
-					const inputParser =
-						inputSchema && RubustStructuredOutputParser.fromZodSchema(inputSchema);
-					return inputParser ? inputParser.getFormatInstructions() : '';
-				},
 
 				//TODO 多轮检索, 比如每个亮点分别检索并标注其属于哪个亮点
 				//TODO 使用SRAG降低幻觉,提高相关性
@@ -194,25 +187,18 @@ export class ProjectChainService {
 	async lookupChain(
 		stream: false,
 		model: SelectedLLM
-	): Promise<
-		RunnableSequence<
-			ProjectProcessingInput,
-			[z.infer<typeof lookupResultSchema>, z.infer<typeof projectLookupedSchema>]
-		>
-	>;
+	): Promise<RunnableSequence<ProjectProcessingInput, z.infer<typeof lookupResultSchema>>>;
 	/**
 	 * 分析项目经验的问题和解决方案(升级版)
 	 * @description 集成了知识库检索和用户反馈反思功能
 	 * @param stream - 是否以流式模式返回
 	 */
 	async lookupChain(stream = false, model: SelectedLLM) {
-		const schema = lookupResultSchema;
-		const schema_mid = projectLookupedSchema;
+		const schema = projectLookupResultSchema;
 
 		const chain = await this._createProcessChain(
 			() => this.promptService.lookupPrompt(),
 			schema,
-			schema_mid,
 			stream,
 			BusinessEnum.lookup,
 			model
@@ -227,12 +213,7 @@ export class ProjectChainService {
 	async polishChain(
 		stream: false,
 		model: SelectedLLM
-	): Promise<
-		RunnableSequence<
-			ProjectProcessingInput,
-			[z.infer<typeof projectPolishedSchema>, z.infer<typeof projectSchema>]
-		>
-	>;
+	): Promise<RunnableSequence<ProjectProcessingInput, z.infer<typeof projectPolishResultSchma>>>;
 
 	/**
 	 * 优化项目经验的亮点(升级版)
@@ -240,12 +221,10 @@ export class ProjectChainService {
 	 * @param stream - 是否以流式模式返回
 	 */
 	async polishChain(stream = false, model: SelectedLLM) {
-		const schema = projectPolishedSchema;
-		const schema_mid = projectSchema;
+		const schema = projectPolishResultSchma;
 		const chain = await this._createProcessChain(
 			() => this.promptService.polishPrompt(),
 			schema,
-			schema_mid,
 			stream,
 			BusinessEnum.polish,
 			model
@@ -264,12 +243,7 @@ export class ProjectChainService {
 		model: SelectedLLM,
 		userInfo: UserInfoFromToken,
 		skillService: any
-	): Promise<
-		RunnableSequence<
-			ProjectProcessingInput,
-			[z.infer<typeof projectMinedSchema>, z.infer<typeof projectSchema>]
-		>
-	>;
+	): Promise<RunnableSequence<ProjectProcessingInput, z.infer<typeof projectMinResultSchma>>>;
 
 	/**
 	 * 挖掘项目经验的亮点(升级版)
@@ -282,8 +256,7 @@ export class ProjectChainService {
 		userInfo: UserInfoFromToken,
 		skillService: any
 	) {
-		const schema = projectMinedSchema;
-		const schema_mid = projectSchema;
+		const schema = projectMinResultSchma;
 		//只取第一个用户技能
 		let userSkills = await skillService.findAll(userInfo);
 		const userSkillsMd = userSkills[0] ? skillsToMarkdown(userSkills[0]) : '';
@@ -299,7 +272,6 @@ export class ProjectChainService {
 		const chain = await this._createProcessChain(
 			() => Promise.resolve(promptTemplate),
 			schema,
-			schema_mid,
 			stream,
 			BusinessEnum.mine,
 			model

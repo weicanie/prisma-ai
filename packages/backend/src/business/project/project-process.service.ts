@@ -5,6 +5,7 @@ import {
 	lookupResultSchema,
 	ProjectDto,
 	projectLookupedDto,
+	projectLookupResultSchema,
 	projectMinedSchema,
 	projectPolishedSchema,
 	projectSchema,
@@ -17,16 +18,16 @@ import {
 } from '@prisma-ai/shared';
 import { Model } from 'mongoose';
 import { from, Observable } from 'rxjs';
-import { ZodSchema } from 'zod';
+import { z, ZodSchema } from 'zod';
 import { ChainService } from '../../chain/chain.service';
 import { ProjectChainService } from '../../chain/project-chain.service';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
+import { redisStoreResult } from '../../manager/sse-session-manager/sse-manager.service';
 import { TaskManagerService } from '../../manager/task-manager/task-manager.service';
 import { RedisService } from '../../redis/redis.service';
 import { WithFuncPool } from '../../utils/abstract';
 import { SseFunc } from '../../utils/type';
 import { SkillService } from '../skill/skill.service';
-import { redisStoreResult } from '../sse/llm-sse.service';
 import { Project, ProjectDocument } from './entities/project.entity';
 import { ProjectMined, ProjectMinedDocument } from './entities/projectMined.entity';
 import { ProjectPolished, ProjectPolishedDocument } from './entities/projectPolished.entity';
@@ -69,6 +70,20 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 		this.taskManager.registerFuncPool(this);
 	}
 
+	private observableWrapper(observable: Observable<StreamingChunk>): Observable<StreamingChunk> {
+		return new Observable<StreamingChunk>(subscriber => {
+			const subscription = observable.subscribe({
+				next: value => subscriber.next(value),
+				error: err => subscriber.error(err),
+				complete: () => {
+					subscriber.next({ content: 'mine', done: true, isReasoning: false });
+					subscriber.complete();
+				}
+			});
+			return () => subscription.unsubscribe();
+		});
+	}
+
 	/**
 	 * 在生成任务结束时检查、储存结果到数据库
 	 * @param schema 验证用的 zod schema
@@ -91,9 +106,12 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 	) => {
 		//格式验证及修复、数据库存储
 		return async (resultRedis: redisStoreResult) => {
-			let results = jsonMd_obj(resultRedis.content); //[合并前,合并后]
+			let results: {
+				after: z.infer<typeof projectSchema>;
+				before: z.infer<typeof schema>;
+			} = jsonMd_obj(resultRedis.content); //[合并前,合并后]
 
-			let result = results[0];
+			let result: z.infer<typeof schema> = results?.before || {};
 			const validationResult = schema.safeParse(result);
 			if (!validationResult.success) {
 				const errorMessage = JSON.stringify(validationResult.error.format());
@@ -105,20 +123,20 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 			const resultSave = { ...result, status, userInfo };
 			const resultSave_model = new model(resultSave);
 
-			let resultAfterMerge: ProjectDto = results[1];
-			const inputValidationResult = inputSchema.safeParse(resultAfterMerge);
+			let resultAfter: z.infer<typeof schema> = results?.after || {};
+			const inputValidationResult = inputSchema.safeParse(resultAfter);
 			if (!inputValidationResult.success) {
 				const errorMessage = JSON.stringify(inputValidationResult.error.format());
-				const fomartFixChain = await this.chainService.fomartFixChain(inputSchema, errorMessage);
-				const projectPolishedStr = JSON.stringify(resultAfterMerge);
-				resultAfterMerge = await fomartFixChain.invoke({
+				const fomartFixChain = await this.chainService.fomartFixChain(projectSchema, errorMessage);
+				const projectPolishedStr = JSON.stringify(resultAfter);
+				resultAfter = await fomartFixChain.invoke({
 					input: projectPolishedStr
 				});
 			}
 			/* 更新项目（暂时不再自动更新评分,因为用户可能需要反馈、重做） */
 			//先删除原评分然后保存、返回, 异步更新评分-这样可以大大减少用户等待时间-但分析结果无法保证能用于下一次优化,比如mine
-			// const resultSaveAfterMerge = {
-			// 	...resultAfterMerge,
+			// const resultSaveAfter = {
+			// 	...resultAfter,
 			// 	status: statusMerged
 			// };
 			await this.projectModel.updateOne(
@@ -126,8 +144,8 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 				{
 					$set: {
 						status: statusMerged,
-						info: resultAfterMerge.info,
-						lightspot: resultAfterMerge.lightspot,
+						info: resultAfter.info,
+						lightspot: resultAfter.lightspot,
 						lookupResult: null
 					}
 				}
@@ -261,7 +279,11 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 		project: ProjectDto
 	) => {
 		// 1. 从Redis结果中解析出LLM的输出内容
-		let lookupResult = jsonMd_obj(resultRedis.content); // 从markdown代码块中提取json
+		let lookupResultData: z.infer<typeof projectLookupResultSchema> = jsonMd_obj(
+			resultRedis.content
+		); // 从markdown代码块中提取json
+
+		let lookupResult = lookupResultData?.after || {};
 
 		// 2. 使用Zod Schema验证解析出的JSON对象格式
 		const validationResult = lookupResultSchema.safeParse(lookupResult);
@@ -286,7 +308,7 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 			projectName: project.info.name
 		};
 
-		// 5. 根据是否存在旧记录，执行更新或新建操作
+		// 5. 更新项目经验
 		const updateOperation = {
 			$set: { status: ProjectStatus.lookuped, lookupResult: lookupResultSave }
 		};

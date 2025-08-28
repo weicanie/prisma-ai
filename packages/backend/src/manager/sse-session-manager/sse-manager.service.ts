@@ -111,6 +111,7 @@ export class SseManagerService implements OnModuleInit {
 				.pipe(
 					mergeMap(async (chunk: LLMStreamingChunk) => {
 						if (chunk) {
+							this.logger.log(`SSE任务${taskId}生成chunk: ${chunk.content}`);
 							/* 储存到redis、发送chunk抵达事件 */
 							await this.saveSseEventData(taskId, chunk);
 						}

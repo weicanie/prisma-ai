@@ -114,10 +114,33 @@ const projectLookupedSchema = z.object({
 	lookupResult: lookupResultSchema
 });
 
+const projectLookupResultSchema = z
+	.object({
+		before: lookupResultSchema
+	})
+	.describe('before字段:项目经验的分析结果。');
+
+const projectPolishResultSchma = z
+	.object({
+		after: projectSchema,
+		before: projectPolishedSchema
+	})
+	.describe('after字段:优化后的项目经验。before字段:优化前的项目经验。');
+
+const projectMinResultSchma = z
+	.object({
+		after: projectSchema,
+		before: projectMinedSchema
+	})
+	.describe('after字段:新增亮点的项目经验。before字段:新增亮点前的项目经验。');
+
 export {
 	lookupResultSchema,
 	projectLookupedSchema,
+	projectLookupResultSchema,
 	projectMinedSchema,
+	projectMinResultSchma,
 	projectPolishedSchema,
+	projectPolishResultSchma,
 	projectSchema
 };
