@@ -14,7 +14,9 @@
 		"dev": "tsup src/index.ts --dts --watch"
 	},
 	"devDependencies": {
-		"tsup": "^8.5.0"
+		"tsup": "^8.5.0",
+		"typescript": "^5.8.2",
+		"@types/node": "^20.3.1"
 	},
 	"exports": {
 		".": {
