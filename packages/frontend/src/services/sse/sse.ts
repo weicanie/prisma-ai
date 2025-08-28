@@ -31,7 +31,7 @@ type SessionStatus<T> = T extends { status: infer R } ? R : unknown;
 export const llmSessionKey = 'llmSessionId'; //会话id储存的key
 export const sessionStatusKey = 'llmSessionStatus'; //当前会话状态key（注意是当前会话的状态,新建的会话则需要新置状态）
 export const pathKey = 'llmSessionPath'; //当前会话对应的URL的path（用于断点接传）
-export const modelKey = 'llmSessionModel'; // 当前会话使用的模型（用于断点接传）
+export const modelKey = 'llmSessionModel'; // 当前会话使用的模型（断点接传时不会使用，直接从redis拿数据）
 /**
  *
  * @param input 创建sse请求的上下文中的输入
@@ -114,6 +114,15 @@ async function getSessionStatusAndDecide(input: contextInput | ''): Promise<SDF<
 			return forReturn;
 		} else return forReturn;
 	}
+}
+/**
+ * 清除失效的会话状态，避免影响新会话的建立
+ */
+function resetStatus() {
+	localStorage.removeItem(sessionStatusKey);
+	localStorage.removeItem(llmSessionKey);
+	localStorage.removeItem(pathKey);
+	localStorage.removeItem(modelKey);
 }
 
 /**
@@ -255,13 +264,16 @@ function getSseData(
 
 		// 数据推送阶段的错误处理
 		eventSource.onerror = event => {
+			resetStatus();
 			setDone(true);
 			cleanup();
+			toast.error('连接错误,请稍后重试');
 			setTupError('9999', `连接错误,请稍后重试`);
 			console.error('SSE连接错误:', event);
 		};
 	} catch (error) {
 		// 连接创建阶段的错误处理
+		resetStatus();
 		setTupError('9999', `连接服务器失败，请稍后重试`);
 		console.error('创建EventSource失败:', error);
 		cleanup();
