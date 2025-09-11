@@ -3,6 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AichatModule } from './business/aichat/aichat.module';
+import { CareerModule } from './business/career/career.module';
+import { EducationModule } from './business/education/education.module';
 import { HjmModule } from './business/human-job-match/hjm.module';
 import { JobModule } from './business/job/job.module';
 import { KnowledgebaseModule } from './business/knowledge-base/knowledge-base.module';
@@ -50,7 +52,9 @@ import { UserModule } from './user/user.module';
 		PrismaAgentModule,
 		QuestionModule,
 		SseSessionManagerModule,
-		TaskManagerModule
+		TaskManagerModule,
+		EducationModule,
+		CareerModule
 	],
 	providers: [
 		{
