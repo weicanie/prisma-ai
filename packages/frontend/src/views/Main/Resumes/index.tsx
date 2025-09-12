@@ -201,12 +201,14 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 				enable: true,
 				searchColIds: ['name']
 			},
-			pagination: true
+			pagination: {
+				enable: true
+			}
 		},
-		onRowClick: (index: number) => {
+		onRowClick: (rowData: ResumeVo) => {
 			return () => {
-				navigate(`/main/resumes/detail/${resumeDatas[index]?.id}`, {
-					state: { param: resumeDatas[index]?.id }
+				navigate(`/main/resumes/detail/${rowData.id}`, {
+					state: { param: rowData.id }
 				});
 			};
 		},

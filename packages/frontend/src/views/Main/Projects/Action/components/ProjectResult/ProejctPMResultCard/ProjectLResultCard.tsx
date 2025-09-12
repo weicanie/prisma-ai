@@ -61,7 +61,7 @@ export const ProjectAnalysisResultCard: React.FC<ProjectAnalysisResultCardProps>
 						className={`font-semibold text-lg mb-3 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
 					>
 						<Lightbulb className="w-5 h-5 text-yellow-500" />
-						doro 深度分析结果
+						Prisma 深度分析结果
 					</h4>
 				}
 				defaultOpen={true}

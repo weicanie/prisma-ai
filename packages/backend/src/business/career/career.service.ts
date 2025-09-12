@@ -24,27 +24,27 @@ export class CareerService {
 	}
 
 	async findAll(userId: string) {
-		return this.careerModel.find({ 'userInfo.userId': userId }).sort({ startDate: -1 }).lean();
+		return this.careerModel.find({ 'userInfo.userId': userId }).sort({ startDate: -1 });
 	}
 
 	async findOne(id: string) {
-		const doc = await this.careerModel.findById(id).lean();
+		const doc = await this.careerModel.findById(id);
 		if (!doc) throw new NotFoundException('工作经历不存在');
 		return doc;
 	}
 
 	async update(id: string, updateCareerDto: UpdateCareerDto, userInfo: UserInfoFromToken) {
-		const $set: any = { ...updateCareerDto };
-		if (userInfo) $set.userInfo = userInfo;
-		if (updateCareerDto.startDate) $set.startDate = new Date(updateCareerDto.startDate as any);
-		if (updateCareerDto.endDate) $set.endDate = new Date(updateCareerDto.endDate as any);
-		const doc = await this.careerModel.findByIdAndUpdate(id, { $set }, { new: true }).lean();
+		const doc = await this.careerModel.findByIdAndUpdate(
+			id,
+			{ $set: updateCareerDto },
+			{ new: true }
+		);
 		if (!doc) throw new NotFoundException('工作经历不存在');
 		return doc;
 	}
 
 	async remove(id: string) {
-		const doc = await this.careerModel.findByIdAndDelete(id).lean();
+		const doc = await this.careerModel.findByIdAndDelete(id);
 		if (!doc) throw new NotFoundException('工作经历不存在');
 		return { id: doc.id } as any;
 	}

@@ -28,35 +28,30 @@ export class EducationService {
 	// 查询当前用户的教育经历列表
 	async findAll(userId: string) {
 		const filter = { 'userInfo.userId': userId };
-		return this.educationModel.find(filter).sort({ startDate: -1 }).lean();
+		return this.educationModel.find(filter).sort({ startDate: -1 });
 	}
 
 	// 根据 id 查询
 	async findOne(id: string) {
-		const doc = await this.educationModel.findById(id).lean();
+		const doc = await this.educationModel.findById(id);
 		if (!doc) throw new NotFoundException('教育经历不存在');
 		return doc;
 	}
 
 	// 更新
 	async update(id: string, updateEducationDto: UpdateEducationDto, userInfo: UserInfoFromToken) {
-		const { ...rest } = updateEducationDto;
-		const $set: any = { ...rest };
-		if (userInfo) {
-			$set.userInfo = {
-				...(userInfo ? { userInfo } : {})
-			};
-		}
-		if (rest.startDate) $set.startDate = new Date(rest.startDate as any);
-		if (rest.endDate) $set.endDate = new Date(rest.endDate as any);
-		const doc = await this.educationModel.findByIdAndUpdate(id, { $set }, { new: true }).lean();
+		const doc = await this.educationModel.findByIdAndUpdate(
+			id,
+			{ $set: updateEducationDto },
+			{ new: true }
+		);
 		if (!doc) throw new NotFoundException('教育经历不存在');
 		return doc;
 	}
 
 	// 删除
 	async remove(id: string) {
-		const doc = await this.educationModel.findByIdAndDelete(id).lean();
+		const doc = await this.educationModel.findByIdAndDelete(id);
 		if (!doc) throw new NotFoundException('教育经历不存在');
 		return { id: doc.id } as any;
 	}

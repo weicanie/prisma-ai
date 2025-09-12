@@ -2,6 +2,7 @@ import {
 	type ColumnDef,
 	type ColumnFiltersState,
 	type SortingState,
+	type TableOptions,
 	type VisibilityState,
 	flexRender,
 	getCoreRowModel,
@@ -61,7 +62,7 @@ export function DataTable<TData, TValue = unknown>({
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
 	const [sorting, setSorting] = React.useState<SortingState>([]);
 
-	const table = useReactTable({
+	const tableConfig: TableOptions<TData> = {
 		data,
 		columns,
 		state: {
@@ -70,6 +71,9 @@ export function DataTable<TData, TValue = unknown>({
 			columnFilters, // 列过滤状态 - 存储各列的过滤条件
 			sorting // 排序状态 - 存储当前的排序规则（当前是按某列来排,复合排序需要额外配置）
 		},
+		manualPagination: options.pagination.manualPagination ?? false,
+		rowCount: options.pagination.manualPagination ? (options.pagination.rowCount ?? 0) : undefined,
+		autoResetPageIndex: options.pagination.manualPagination ?? true, //不管是否启用服务端分页，都自动重置页码
 		enableRowSelection: true,
 		onRowSelectionChange: setRowSelection,
 		onSortingChange: setSorting,
@@ -90,7 +94,16 @@ export function DataTable<TData, TValue = unknown>({
 		getSortedRowModel: getSortedRowModel(), // 排序行模型 - 处理数据排序
 		getFacetedRowModel: getFacetedRowModel(), // 分面行模型 - 用于过滤器选项生成
 		getFacetedUniqueValues: getFacetedUniqueValues() // 获取列的唯一值 - 用于过滤器选项
-	});
+	};
+
+	if (options.pagination.pageIndex !== undefined) {
+		tableConfig.state!.pagination = {
+			pageIndex: options.pagination.pageIndex ?? 0,
+			pageSize: options.pagination.pageSize ?? 10
+		};
+	}
+
+	const table = useReactTable(tableConfig);
 
 	return (
 		<div className="space-y-4 ">
@@ -102,11 +115,12 @@ export function DataTable<TData, TValue = unknown>({
 					createBtn={createBtn}
 					actionBtns={actionBtns}
 					mainTable={mainTable}
+					filterOptions={options.toolbar.filterOptions}
 				/>
 			)}
 			{/* 表格 */}
 			<div className="rounded-md border">
-				<Table>
+				<Table className="max-w-full overflow-x-auto scb-thin">
 					<TableHeader>
 						{table.getHeaderGroups().map(headerGroup => (
 							<TableRow key={headerGroup.id}>
@@ -122,13 +136,14 @@ export function DataTable<TData, TValue = unknown>({
 							</TableRow>
 						))}
 					</TableHeader>
-					<TableBody>
+					<TableBody className="scb-thin">
 						{table.getRowModel().rows?.length ? (
-							table.getRowModel().rows.map((row, index) => (
+							// 这里的index是当前页的index（0~pagesize-1）, 不是data中的index
+							table.getRowModel().rows.map(row => (
 								<TableRow
 									key={row.id}
 									data-state={row.getIsSelected() && 'selected'}
-									onClick={onRowClick ? onRowClick(index) : undefined}
+									onClick={onRowClick ? onRowClick(row.original) : undefined}
 									className="cursor-pointer hover:bg-muted/50"
 								>
 									{row.getVisibleCells().map(cell => (
@@ -152,9 +167,8 @@ export function DataTable<TData, TValue = unknown>({
 					</TableBody>
 				</Table>
 			</div>
-			{/* 分页,当行数超过7行时显示 */}
-			{options.pagination && table.getRowModel().rows.length > 7 && (
-				<DataTablePagination table={table} />
+			{options.pagination.enable && (
+				<DataTablePagination<TData> table={table} options={options.pagination} />
 			)}
 		</div>
 	);

@@ -1,13 +1,15 @@
 import {
 	Book,
 	Briefcase,
+	CircleDollarSign,
 	FileText,
+	GraduationCap,
 	LibraryBig,
 	ListChecks,
 	Pyramid,
-	Rocket,
 	Sparkles,
-	Target
+	Target,
+	type LucideIcon
 } from 'lucide-react';
 import * as React from 'react';
 
@@ -29,7 +31,29 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const userInfoData = localStorage.getItem('userInfo');
 	const userInfo = userInfoData && JSON.parse(userInfoData);
 	//流程、分组
-	const data = {
+	const data: {
+		navMain: {
+			title: string;
+			icon: LucideIcon;
+			url: string;
+			groupLabel?: string;
+			items?: {
+				title: string;
+				icon: LucideIcon;
+				url: string;
+			}[];
+		}[];
+		user: {
+			name: string;
+			email: string;
+			avatar: string;
+		};
+		teams: {
+			name: string;
+			logo: LucideIcon;
+			plan: string;
+		}[];
+	} = {
 		user: {
 			name: userInfo?.username || '示例用户',
 			email: userInfo?.email || 'user@example.com',
@@ -46,49 +70,57 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			{
 				title: '知识库',
 				icon: LibraryBig,
-				url: '/main/knowledge'
+				url: '/main/knowledge',
+				groupLabel: '知识库'
 			},
 			{
-				title: '简历优化',
-				url: '/main/job',
-				isOpen: true,
+				title: '职业技能',
+				icon: ListChecks,
+				url: '/main/skills',
+				groupLabel: '简历优化'
+			},
+			{
+				title: '项目经验',
 				icon: Sparkles,
-				items: [
-					{ title: '职业技能', icon: ListChecks, url: '/main/skills' },
-					{ title: '项目经验', icon: Sparkles, url: '/main/projects' },
-					{ title: '简历组装', icon: FileText, url: '/main/resumes' }
-				]
+				url: '/main/projects'
 			},
 			{
-				title: '人岗匹配',
+				title: '教育经历',
+				icon: GraduationCap,
+				url: '/main/education',
+				groupLabel: '简历编写'
+			},
+			{
+				title: '工作经历',
+				icon: Briefcase,
+				url: '/main/career'
+			},
+			{
+				title: '简历组装',
+				icon: FileText,
+				url: '/main/resumes'
+			},
+			{
+				title: '岗位数据获取',
+				icon: CircleDollarSign,
+				url: '/main/hjm/get-jobs',
+				groupLabel: '人岗匹配'
+			},
+			{
+				title: '简历匹配岗位',
 				icon: Target,
-				url: '/main/hjm',
-				isOpen: true,
-				items: [
-					{ title: '岗位数据获取', icon: Briefcase, url: '/main/hjm/get-jobs' },
-					{ title: '简历匹配岗位', icon: Target, url: '/main/hjm/match-jobs' },
-					{
-						title: '岗位定制简历',
-						icon: FileText,
-						url: '/main/job'
-					}
-				]
+				url: '/main/hjm/match-jobs'
 			},
-
 			{
-				title: '面向offer学习',
-				icon: Rocket,
-				url: '/main/offer',
-				isOpen: true,
-				items: [
-					{
-						title: '集成面试题库和 anki',
-						icon: Book,
-						url: '/main/offer/anki'
-					}
-					// { title: '简历延申八股', url: '/main/offer/questions' },
-					// { title: '学习路线', url: '/main/offer/road' }
-				]
+				title: '岗位定制简历',
+				icon: FileText,
+				url: '/main/job'
+			},
+			{
+				title: '集成面试题库和 anki',
+				icon: Book,
+				url: '/main/offer/anki',
+				groupLabel: '面向offer学习'
 			}
 		]
 	};

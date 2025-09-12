@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { HjmMatchDto, UserInfoFromToken } from '@prisma-ai/shared';
+import { type HjmMatchDto, type UserInfoFromToken } from '@prisma-ai/shared';
 import * as crypto from 'crypto';
 
 import { RequireLogin, UserInfo } from '../../decorator';

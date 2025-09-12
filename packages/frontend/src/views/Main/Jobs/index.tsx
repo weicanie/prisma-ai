@@ -184,12 +184,14 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 					enable: true,
 					searchColIds: ['jobName']
 				},
-				pagination: true
+				pagination: {
+					enable: true
+				}
 			},
-			onRowClick: (index: number) => {
+			onRowClick: (rowData: JobVo) => {
 				return () => {
-					navigate(`/main/job/detail/${jobDatas[index]?.id}`, {
-						state: { param: jobDatas[index]?.id }
+					navigate(`/main/job/detail/${rowData.id}`, {
+						state: { param: rowData.id }
 					});
 				};
 			},
@@ -312,12 +314,14 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 					enable: true,
 					searchColIds: ['name']
 				},
-				pagination: true
+				pagination: {
+					enable: true
+				}
 			},
-			onRowClick: (index: number) => {
+			onRowClick: (rowData: ResumeVo) => {
 				return () => {
-					navigate(`/main/job/resumeMatched/${resumeMatchedDatas[index]?.id}`, {
-						state: { param: resumeMatchedDatas[index]?.id }
+					navigate(`/main/job/resumeMatched/${rowData.id}`, {
+						state: { param: rowData.id }
 					});
 				};
 			},
@@ -328,7 +332,7 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 			<>
 				<PageHeader
 					title={title ?? '岗位'}
-					description={description ?? '追踪岗位, 并借助 doro 将您的简历与岗位信息进行匹配'}
+					description={description ?? '追踪岗位, 并借助 Prisma 将您的简历与岗位信息进行匹配'}
 				></PageHeader>
 				<div className="pl-10 pr-10">
 					<ConfigDataTable dataTableConfig={dataTableConfig} data={jobDatas} />
@@ -353,7 +357,7 @@ const JobsPage = () => {
 	const dispatch = useDispatch();
 	const JobsProps = {
 		title: '岗位',
-		description: '追踪岗位, 并借助 doro 将您的简历与岗位信息进行匹配',
+		description: '追踪岗位, 并借助 Prisma 将您的简历与岗位信息进行匹配',
 		mainTable: true,
 		selectColShow: true,
 		selectionHandler: (selectedRows: unknown[]) => {

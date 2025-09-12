@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { UserInfo } from '../../project/entities/project.entity';
 
-// 学历枚举（可根据需要扩展）
+// 学历枚举
 export type EducationDegree = '博士' | '硕士' | '本科' | '大专' | '高中' | '其他';
 
 @Schema({ _id: false })
@@ -26,7 +26,7 @@ export class Education {
 	@Prop({ required: true })
 	major: string; // 专业名称
 
-	@Prop({ required: true })
+	@Prop({ type: String, required: true })
 	degree: EducationDegree; // 学历层次
 
 	@Prop({ required: true })
