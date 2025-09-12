@@ -1,0 +1,644 @@
+{
+  "common": {
+    "title": "魔方简历",
+    "subtitle": "AI 驱动简历编辑器",
+    "description": "魔方简历是一款开源的简历编辑器，免费，隐私优先。无需注册登录，数据完全存储在本地，支持数据导出备份，确保您的简历数据随时可用。",
+    "dashboard": "仪表盘",
+    "edit": "编辑",
+    "delete": "删除",
+    "newResume": "新建简历",
+    "copy": "复制"
+  },
+  "home": {
+    "header": {
+      "title": "魔方简历",
+      "startButton": "开始使用",
+      "features": "功能特点",
+      "pricing": "定价",
+      "about": "关于我们",
+      "login": "登录",
+      "register": "注册",
+      "dashboard": "控制台"
+    },
+    "hero": {
+      "badge": "免费简历创作",
+      "title": "让简历创作变得简单而智能",
+      "subtitle": "魔方简历利用 AI 技术，帮助您快速创建专业的简历。无需注册，免费使用，数据安全存储。",
+      "cta": "立即开始",
+      "secondary": "浏览模板"
+    },
+    "features": {
+      "title": "为什么选择魔方简历？",
+      "subtitle": "我们提供一站式简历解决方案，让您的求职之路更加顺畅",
+      "ai": {
+        "badge": "AI 智能纠错",
+        "title": "智能识别，专业建议",
+        "description": "内置智能语法检查，自动识别不恰当的表达，提供专业的修改建议，让您的简历更加出色。",
+        "item1": "智能润色",
+        "item1_description": "AI 自动优化文案表达，让简历更专业",
+        "item2": "语法检查",
+        "item2_description": "自动检测并修正语法和拼写错误"
+      },
+      "storage": {
+        "badge": "本地存储",
+        "title": "数据安全，隐私优先",
+        "description": "所有简历数据完全存储在您的本地设备中，无需担心隐私泄露。支持数据导出备份，确保您的简历数据随时可用。",
+        "item1": "本地文件存储",
+        "item1_description": "简历数据安全存储在您的电脑硬盘中",
+        "item2": "多种导出格式",
+        "item2_description": "支持PDF和JSON格式导出",
+        "item3": "支持数据导出备份"
+      },
+      "preview": {
+        "badge": "实时预览",
+        "title": "所见即所得",
+        "description": "边编辑边预览，实时查看简历效果。支持多种专业模板，让您的简历既美观又规范。快速导出PDF，随时投递简历。",
+        "item1": "实时预览编辑效果",
+        "item2": "多种导出格式支持"
+      }
+    },
+    "news": {
+      "label": "新闻",
+      "content": " 全新的 AI 简历优化功能已上线"
+    },
+    "cta": {
+      "title": "开启你的新职业篇章",
+      "description": "立即使用魔方简历，创建一份令人印象深刻的简历",
+      "button": "免费开始使用"
+    },
+    "footer": {
+      "copyright": " 2025 魔方简历. 保留所有权利."
+    },
+    "changelog": "更新日志",
+    "faq": {
+      "title": "常见问题",
+      "items": [
+        {
+          "question": "使用魔方简历需要付费吗？",
+          "answer": "魔方简历目前是免费的，满足基础简历制作需求，开源版本的功能不会变更，导出PDF功能也永远不会收费。"
+        },
+        {
+          "question": "我的简历数据安全吗？",
+          "answer": "是的，非常安全。魔方简历采用本地存储方式，您的所有数据都保存在您自己的设备上，不存在云存储，完全保护您的隐私。"
+        },
+        {
+          "question": "支持哪些简历格式导出？",
+          "answer": "目前支持导出PDF格式，确保您的简历在任何设备上都能保持一致的排版效果。未来我们还将支持更多导出格式。"
+        },
+        {
+          "question": "多设备如何同步",
+          "answer": "我们提供了导出JSON配置，您可以将简历的配置以JSON格式保存，随时随地，任何设备上都可以打开查看。"
+        },
+        {
+          "question": "自定义程度如何？",
+          "answer": "我们提供丰富的自定义操作，包括颜色、布局等，让您能够根据个人喜好和行业特点调整简历风格。"
+        }
+      ]
+    }
+  },
+  "dashboard": {
+    "sidebar": {
+      "resumes": "我的简历",
+      "settings": "通用设置",
+      "templates": "简历模板",
+      "ai": "AI服务商"
+    },
+    "resumes": {
+      "created": "创建于",
+      "synced": "已备份文件夹",
+      "view": "去查看",
+      "myResume": "我的简历",
+      "create": "新建简历",
+      "newResume": "新建简历",
+      "newResumeDescription": "创建一个新简历以开始。",
+      "import": "导入 JSON 配置",
+      "untitled": "未命名简历",
+      "importSuccess": "配置导入成功",
+      "importError": "配置导入失败，请检查文件格式",
+      "notice": {
+        "title": "注意",
+        "description": "建议在设置里中配置简历备份文件夹，防止您的数据可能会在浏览器清除缓存后丢失",
+        "goToSettings": "前往设置"
+      }
+    },
+    "settings": {
+      "title": "设置",
+      "syncDirectory": {
+        "title": "同步目录",
+        "description": "选择一个文件夹来同步和备份您的简历。",
+        "currentSyncFolder": "当前同步文件夹",
+        "noFolderConfigured": "尚未配置同步文件夹",
+        "changeFolder": "更改文件夹",
+        "selectFolder": "选择文件夹"
+      },
+      "sync": {
+        "title": "同步目录",
+        "description": "选择一个文件夹来同步和备份您的简历。",
+        "select": "选择文件夹"
+      },
+      "ai": {
+        "title": "AI 配置",
+        "currentModel": "当前使用的模型",
+        "selectModel": "选择模型",
+        "getApiKey": "获取 API Key",
+        "doubao": {
+          "title": "豆包",
+          "description": "在火山引擎获取 API 密钥",
+          "apiKey": "API Key",
+          "modelId": "模型 ID"
+        },
+        "deepseek": {
+          "title": "DeepSeek",
+          "description": "在 DeepSeek 开放平台获取 API 密钥",
+          "apiKey": "API Key"
+        },
+        "openai": {
+          "title": "OpenAI",
+          "description": "在 OpenAI 或兼容 OpenAI 格式的开放平台获取 API 密钥",
+          "apiKey": "API Key",
+          "modelId": "模型 ID",
+          "apiEndpoint": "API 端点，如：https://openai.example.org/v1"
+        }
+      }
+    },
+    "templates": {
+      "title": "模板",
+      "useTemplate": "使用此模板",
+      "preview": "预览",
+      "switchTemplate": "切换模版",
+      "classic": {
+        "name": "经典模板",
+        "description": "传统简约的简历布局，适合大多数求职场景"
+      },
+      "modern": {
+        "name": "两栏布局",
+        "description": "经典两栏，突出个人特色"
+      },
+      "leftRight": {
+        "name": "模块标题背景色",
+        "description": "模块标题背景鲜明，突出美观特色"
+      },
+      "timeline": {
+        "name": "时间轴布局",
+        "description": "时间轴风格，突出经历的时间顺序"
+      }
+    }
+  },
+  "pdfExport": {
+    "button": {
+      "export": "导出",
+      "exportPdf": "PDF(服务端)",
+      "exportJson": "JSON配置",
+      "exporting": "导出中...",
+      "exportingJson": "导出中...",
+      "print": "PDF(浏览器打印)"
+    },
+    "toast": {
+      "success": "PDF导出成功",
+      "error": "PDF导出失败",
+      "jsonSuccess": "配置导出成功",
+      "jsonError": "配置导出失败"
+    }
+  },
+  "workbench": {
+    "sidePanel": {
+      "layout": {
+        "title": "布局",
+        "addCustomSection": "添加自定义模块"
+      },
+      "theme": {
+        "title": "主题色",
+        "custom": "自定义"
+      },
+      "typography": {
+        "title": "排版",
+        "font": {
+          "title": "字体",
+          "sans": "无衬线体",
+          "serif": "衬线体",
+          "mono": "等宽体"
+        },
+        "lineHeight": {
+          "title": "行高",
+          "normal": "默认",
+          "relaxed": "适中",
+          "loose": "宽松"
+        },
+        "baseFontSize": {
+          "title": "基础字号"
+        },
+        "headerSize": {
+          "title": "模块标题字号"
+        },
+        "subheaderSize": {
+          "title": "模块项一级标题字号"
+        }
+      },
+      "spacing": {
+        "title": "间距",
+        "pagePadding": {
+          "title": "页边距"
+        },
+        "sectionSpacing": {
+          "title": "模块间距"
+        },
+        "paragraphSpacing": {
+          "title": "段落间距"
+        }
+      },
+      "mode": {
+        "title": "模式",
+        "useIconMode": {
+          "title": "图标模式"
+        },
+        "centerSubtitle": {
+          "title": "副标题居中"
+        }
+      }
+    },
+    "basicPanel": {
+      "title": "资料",
+      "basicField": "基础字段",
+      "customField": "自定义字段",
+      "githubContributions": "Github贡献",
+      "layout": "布局",
+      "layoutLeft": "居左",
+      "layoutCenter": "居中",
+      "layoutRight": "居右",
+      "avatar": "头像",
+      "customFields": {
+        "placeholders": {
+          "label": "标签",
+          "value": "值"
+        },
+        "addButton": "添加自定义字段"
+      },
+      "basicFields": {
+        "name": "姓名",
+        "title": "职位",
+        "email": "邮箱",
+        "phone": "电话",
+        "website": "个人网站",
+        "location": "地址",
+        "birthDate": "生日",
+        "employementStatus": "状态"
+      },
+      "fieldVisibility": {
+        "show": "显示",
+        "hide": "隐藏"
+      }
+    },
+    "experiencePanel": {
+      "title": "工作经历",
+      "addButton": "添加工作经历",
+      "defaultProject": {
+        "company": "某科技有限公司",
+        "position": "高级前端工程师",
+        "date": "2020-至今",
+        "details": "负责公司核心产品..."
+      },
+      "placeholders": {
+        "company": "请输入公司名称",
+        "position": "请输入职位",
+        "date": "请输入工作时间",
+        "details": "请输入工作职责和成就"
+      }
+    },
+    "experienceItem": {
+      "labels": {
+        "company": "公司名称",
+        "position": "岗位",
+        "date": "工作时间",
+        "details": "工作职责"
+      },
+      "placeholders": {
+        "company": "请输入公司名称",
+        "position": "如：前端工程师",
+        "date": "如：2020-至今",
+        "details": "描述你在这份工作中的职责和成就"
+      },
+      "buttons": {
+        "edit": "编辑",
+        "save": "保存",
+        "cancel": "取消",
+        "delete": "删除"
+      },
+      "visibility": {
+        "show": "显示",
+        "hide": "隐藏"
+      }
+    },
+    "projectPanel": {
+      "title": "项目经历",
+      "addButton": "添加项目",
+      "defaultProject": {
+        "name": "个人项目",
+        "description": "项目描述",
+        "role": "负责内容",
+        "technologies": "技术栈",
+        "date": "2023.01 - 2023.06"
+      },
+      "placeholders": {
+        "name": "项目名称",
+        "description": "简要描述项目背景和目标",
+        "role": "你在项目中的角色和职责",
+        "technologies": "使用的技术和工具",
+        "date": "项目时间范围",
+        "link": "项目链接"
+      }
+    },
+    "projectItem": {
+      "labels": {
+        "name": "项目名称",
+        "role": "项目角色",
+        "date": "项目时间",
+        "description": "项目描述",
+        "link": "项目链接"
+      },
+      "placeholders": {
+        "name": "请输入项目名称",
+        "role": "你在项目中的角色",
+        "date": "项目时间范围",
+        "description": "简要描述项目背景和目标",
+        "link": "项目链接（可选）"
+      },
+      "buttons": {
+        "edit": "编辑",
+        "save": "保存",
+        "cancel": "取消",
+        "delete": "删除"
+      },
+      "visibility": {
+        "show": "显示",
+        "hide": "隐藏"
+      }
+    },
+    "educationPanel": {
+      "title": "教育背景",
+      "addButton": "添加教育经历",
+      "defaultProject": {
+        "school": "学校名称",
+        "degree": "学历",
+        "major": "专业",
+        "date": "2020.09 - 2024.06"
+      },
+      "placeholders": {
+        "school": "请输入学校名称",
+        "degree": "请选择学历",
+        "major": "请输入专业名称",
+        "date": "请输入就读时间范围"
+      }
+    },
+    "educationItem": {
+      "labels": {
+        "school": "学校名称",
+        "degree": "学历",
+        "major": "专业",
+        "date": "就读时间",
+        "description": "学校简介",
+        "gpa": "GPA",
+        "startDate": "开始时间",
+        "endDate": "结束时间"
+      },
+      "placeholders": {
+        "school": "请输入学校名称",
+        "degree": "请选择学历",
+        "major": "请输入专业名称",
+        "date": "请输入就读时间范围",
+        "description": "请输入学校简介",
+        "gpa": "请输入GPA"
+      },
+      "buttons": {
+        "edit": "编辑",
+        "save": "保存",
+        "cancel": "取消",
+        "delete": "删除"
+      },
+      "visibility": {
+        "show": "显示",
+        "hide": "隐藏"
+      }
+    }
+  },
+  "field": {
+    "selectDate": "选择日期",
+    "enterYear": "输入年份"
+  },
+  "richEditor": {
+    "bold": "加粗",
+    "italic": "斜体",
+    "underline": "下划线",
+    "textColor": "文字颜色",
+    "backgroundColor": "背景颜色",
+    "alignLeft": "左对齐",
+    "alignCenter": "居中对齐",
+    "alignRight": "右对齐",
+    "alignJustify": "两端对齐",
+    "bulletList": "无序列表",
+    "orderedList": "有序列表",
+    "undo": "撤销",
+    "redo": "重做",
+    "aiPolish": "AI 润色",
+    "paragraph": "正文",
+    "heading1": "标题 1",
+    "heading2": "标题 2",
+    "heading3": "标题 3",
+    "colors": {
+      "black": "黑色",
+      "darkGray": "深灰",
+      "gray": "灰色",
+      "red": "红色",
+      "orange": "橙色",
+      "orangeYellow": "橙黄",
+      "yellow": "黄色",
+      "yellowGreen": "黄绿",
+      "green": "绿色",
+      "cyan": "青色",
+      "lightBlue": "浅蓝",
+      "blue": "蓝色",
+      "purple": "紫色",
+      "magenta": "紫红",
+      "pink": "粉色"
+    }
+  },
+  "iconSelector": {
+    "all": "全部",
+    "searchPlaceholder": "搜索图标...",
+    "noMatchingIcons": "未找到匹配的图标",
+    "tryOtherKeywords": "请尝试其他搜索关键词",
+    "selectOtherCategory": "请选择其他分类",
+    "categories": {
+      "personal": "个人信息",
+      "education": "教育背景",
+      "experience": "工作经验",
+      "skills": "技能",
+      "languages": "语言",
+      "projects": "项目",
+      "achievements": "成就证书",
+      "hobbies": "兴趣爱好",
+      "social": "社交媒体",
+      "others": "其他"
+    },
+    "icons": {
+      "user": "用户",
+      "email": "邮箱",
+      "phone": "电话",
+      "address": "地址",
+      "website": "网站",
+      "mobile": "手机",
+      "education": "学历",
+      "school": "学校",
+      "major": "专业",
+      "library": "图书馆",
+      "scholarship": "奖学金",
+      "work": "工作",
+      "company": "公司",
+      "office": "办公室",
+      "dateRange": "日期范围",
+      "workTime": "工作时间",
+      "programming": "编程",
+      "system": "系统",
+      "database": "数据库",
+      "terminal": "终端",
+      "techStack": "技术栈",
+      "language": "语言",
+      "speaking": "口语",
+      "communication": "交流",
+      "project": "项目",
+      "branch": "分支",
+      "release": "发布",
+      "target": "目标",
+      "trophy": "奖杯",
+      "medal": "奖牌",
+      "star": "星级",
+      "interest": "兴趣",
+      "music": "音乐",
+      "art": "艺术",
+      "photography": "摄影",
+      "linkedin": "领英",
+      "twitter": "推特",
+      "facebook": "脸书",
+      "instagram": "照片",
+      "profile": "简介",
+      "review": "审核",
+      "filter": "筛选",
+      "link": "链接",
+      "salary": "薪资",
+      "idea": "创意",
+      "send": "发送",
+      "share": "分享",
+      "settings": "设置",
+      "search": "搜索",
+      "flag": "标记",
+      "bookmark": "收藏",
+      "thumbsUp": "点赞",
+      "skill": "技能"
+    }
+  },
+  "photoConfig": {
+    "title": "头像设置",
+    "description": "自定义您的简历头像",
+    "upload": {
+      "title": "在线链接",
+      "dragHint": "拖拽或点击上传图片",
+      "sizeLimit": "图片大小不能超过2MB",
+      "typeLimit": "请上传图片文件",
+      "urlPlaceholder": "输入图片链接",
+      "invalidUrl": "图片链接无效或无法访问，请尝试使用其他图片链接",
+      "timeout": "加载超时",
+      "loadError": "图片加载失败"
+    },
+    "config": {
+      "aspectRatio": "宽高比",
+      "size": "尺寸",
+      "width": "宽度",
+      "height": "高度",
+      "border-radius": "圆角",
+      "widthPlaceholder": "宽度",
+      "heightPlaceholder": "高度",
+      "ratios": {
+        "1:1": "1:1 正方形",
+        "4:3": "4:3 横版",
+        "3:4": "3:4 竖版",
+        "16:9": "16:9 宽屏",
+        "custom": "自定义"
+      },
+      "borderRadius": {
+        "none": "无",
+        "medium": "中等",
+        "full": "圆形",
+        "custom": "自定义",
+        "customPlaceholder": "自定义圆角大小"
+      }
+    },
+    "actions": {
+      "reset": "重置",
+      "close": "关闭",
+      "cancel": "取消",
+      "removePhoto": "删除头像"
+    }
+  },
+  "previewDock": {
+    "switchTemplate": "切换模版",
+    "grammarCheck": {
+      "idle": "AI语法纠错",
+      "checking": "检查中...",
+      "configurePrompt": "请先配置 ApiKey 和 模型Id",
+      "configureButton": "去配置",
+      "errorToast": "语法检查失败，请重试"
+    },
+    "sidePanel": {
+      "expand": "展开侧边栏",
+      "collapse": "收起侧边栏"
+    },
+    "editPanel": {
+      "expand": "展开编辑面板",
+      "collapse": "收起编辑面板"
+    },
+    "github": "GitHub",
+    "backToDashboard": "返回仪表盘",
+    "copyResume": {
+      "tooltip": "复制简历",
+      "success": "简历复制成功",
+      "error": "简历复制失败"
+    },
+    "export": {
+      "tooltip": "导出简历",
+      "pdf": "导出PDF",
+      "json": "导出JSON",
+      "print": "打印"
+    }
+  },
+  "aiPolishDialog": {
+    "title": "AI 润色",
+    "description": {
+      "polishing": "正在为您润色内容...",
+      "finished": "已经为您优化了内容，请查看效果"
+    },
+    "error": {
+      "configRequired": "请先配置 AI 模型",
+      "polishFailed": "润色失败",
+      "applied": "已应用润色内容"
+    },
+    "content": {
+      "original": "原始内容",
+      "polished": "润色后的内容"
+    },
+    "button": {
+      "regenerate": "重新生成",
+      "generating": "生成中...",
+      "apply": "应用内容"
+    }
+  },
+  "templates": {
+    "switchTemplate": "切换模板"
+  },
+  "themeModal": {
+    "delete": {
+      "title": "确定要删除吗",
+      "description": "您确定要删除{title}吗？",
+      "confirmText": "删除",
+      "cancelText": "取消"
+    }
+  }
+}
