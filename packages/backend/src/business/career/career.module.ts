@@ -7,6 +7,7 @@ import { Career, CareerSchema } from './entities/career.entity';
 @Module({
 	imports: [MongooseModule.forFeature([{ name: Career.name, schema: CareerSchema }])],
 	controllers: [CareerController],
-	providers: [CareerService]
+	providers: [CareerService],
+	exports: [CareerService]
 })
 export class CareerModule {}

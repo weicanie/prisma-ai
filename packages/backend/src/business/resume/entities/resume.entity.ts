@@ -14,6 +14,12 @@ export class Resume {
 	@Prop({ type: [{ type: Types.ObjectId, ref: 'Project' }] })
 	projects: Types.ObjectId[];
 
+	@Prop({ type: [{ type: Types.ObjectId, ref: 'Career' }] })
+	careers: Types.ObjectId[];
+
+	@Prop({ type: [{ type: Types.ObjectId, ref: 'Education' }] })
+	educations: Types.ObjectId[];
+
 	@Prop({ type: UserInfo, required: true })
 	userInfo: UserInfo;
 

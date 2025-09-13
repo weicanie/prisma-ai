@@ -10,7 +10,11 @@ import {
 	Sse,
 	ValidationPipe
 } from '@nestjs/common';
-import { type UserInfoFromToken, SelectedLLM } from '@prisma-ai/shared';
+import {
+	SelectedLLM,
+	type UpdateResumeContentDto,
+	type UserInfoFromToken
+} from '@prisma-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { SseManagerService } from '../../manager/sse-session-manager/sse-manager.service';
 import { CreateResumeDto } from './dto/create-resume.dto';
@@ -88,6 +92,9 @@ export class ResumeController {
 		return this.resumeService.findAllResumeMatched(userInfo, pageNumber, limitNumber);
 	}
 
+	/**
+	 * 更新简历及其关联的文档id(技能、项目、教育经历、职业经历)
+	 */
 	@RequireLogin()
 	@Patch(':id')
 	update(
@@ -96,6 +103,19 @@ export class ResumeController {
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
 		return this.resumeService.update(id, updateResumeDto, userInfo);
+	}
+
+	/**
+	 * 更新简历及其关联的文档内容(技能、项目、教育经历、职业经历)
+	 */
+	@RequireLogin()
+	@Patch('content/:id')
+	updateFromContent(
+		@Param('id') id: string,
+		@Body() updateResumeDto: UpdateResumeContentDto,
+		@UserInfo() userInfo: UserInfoFromToken
+	) {
+		return this.resumeService.updateFromContent(id, updateResumeDto, userInfo);
 	}
 
 	@RequireLogin()

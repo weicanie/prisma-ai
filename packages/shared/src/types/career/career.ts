@@ -9,6 +9,7 @@ export interface CreateCareerDtoShared {
 	visible?: boolean;
 	details?: string;
 }
+export type UpdateCareerDto = Partial<CreateCareerDtoShared>;
 
 // 与后端 Mongo Schema 的 toJSON 输出对齐
 export interface CareerVO {

@@ -15,6 +15,9 @@ import {
 	SelectedLLM,
 	SkillVo,
 	StreamingChunk,
+	updateProjectDto,
+	UpdateResumeContentDto,
+	UpdateSkillDto,
 	UserFeedback,
 	UserInfoFromToken
 } from '@prisma-ai/shared';
@@ -23,15 +26,22 @@ import { from, Observable } from 'rxjs';
 import { ChainService } from '../../chain/chain.service';
 import { HjmChainService } from '../../chain/hjm-chain.service';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
+import { redisStoreResult } from '../../manager/sse-session-manager/sse-manager.service';
 import { TaskManagerService } from '../../manager/task-manager/task-manager.service';
 import { RedisService } from '../../redis/redis.service';
 import { WithFuncPool } from '../../utils/abstract';
+import { asyncMap } from '../../utils/awaitMap';
 import { PopulateFields, SseFunc } from '../../utils/type';
+import { CareerService } from '../career/career.service';
+import { UpdateCareerDto } from '../career/dto/update-career.dto';
+import { UpdateEducationDto } from '../education/dto/update-education.dto';
+import { EducationService } from '../education/education.service';
 import { Job, JobDocument } from '../job/entities/job.entity';
 import { JobService } from '../job/job.service';
 import { Project, ProjectDocument } from '../project/entities/project.entity';
+import { ProjectService } from '../project/project.service';
 import { Skill, SkillDocument } from '../skill/entities/skill.entity';
-import { redisStoreResult } from '../sse/llm-sse.service';
+import { SkillService } from '../skill/skill.service';
 import { CreateResumeDto } from './dto/create-resume.dto';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import { Resume, ResumeDocument } from './entities/resume.entity';
@@ -66,7 +76,11 @@ export class ResumeService implements WithFuncPool, OnModuleInit {
 		public redisService: RedisService,
 		private readonly jobService: JobService,
 		private readonly hjmChainService: HjmChainService,
-		private readonly taskManager: TaskManagerService
+		private readonly taskManager: TaskManagerService,
+		private readonly careerService: CareerService,
+		private readonly educationService: EducationService,
+		private readonly skillService: SkillService,
+		private readonly projectService: ProjectService
 	) {
 		this.funcPool = {
 			resumeMatchJob: this.resumeMatchJob.bind(this)
@@ -265,6 +279,8 @@ export class ResumeService implements WithFuncPool, OnModuleInit {
 			...createResumeDto,
 			skill: new Types.ObjectId(createResumeDto.skill),
 			projects: createResumeDto.projects?.map(id => new Types.ObjectId(id)),
+			careers: createResumeDto.careers?.map(id => new Types.ObjectId(id)),
+			educations: createResumeDto.educations?.map(id => new Types.ObjectId(id)),
 			userInfo,
 			status: ResumeStatus.committed
 		});
@@ -354,9 +370,11 @@ export class ResumeService implements WithFuncPool, OnModuleInit {
 			})
 			.populate('skill')
 			.populate('projects')
+			.populate('careers')
+			.populate('educations')
 			.exec()) as PopulateFields<
 			ResumeDocument,
-			'projects' | 'skill',
+			'projects' | 'skill' | 'careers' | 'educations',
 			{
 				projects: ProjectDocument[];
 				skill: SkillDocument;
@@ -374,7 +392,7 @@ export class ResumeService implements WithFuncPool, OnModuleInit {
 		id: string,
 		updateResumeDto: UpdateResumeDto,
 		userInfo: UserInfoFromToken
-	): Promise<ResumeVo> {
+	): Promise<string> {
 		if (!Types.ObjectId.isValid(id)) {
 			throw new NotFoundException(`Invalid ID format: "${id}"`);
 		}
@@ -387,22 +405,72 @@ export class ResumeService implements WithFuncPool, OnModuleInit {
 				projectId => new Types.ObjectId(projectId)
 			);
 		}
+		if (updateResumeDto.educations) {
+			updateData.educations = updateResumeDto.educations.map(
+				educationId => new Types.ObjectId(educationId)
+			);
+		}
+		if (updateResumeDto.careers) {
+			updateData.careers = updateResumeDto.careers.map(careerId => new Types.ObjectId(careerId));
+		}
 
-		const existingResume = await this.resumeModel
-			.findOneAndUpdate(
-				{ _id: new Types.ObjectId(id), 'userInfo.userId': userInfo.userId },
-				updateData,
+		const newResume = await this.resumeModel
+			.findByIdAndUpdate(
+				id,
+				{
+					$set: updateData
+				},
 				{ new: true }
 			)
 			.exec();
 
-		if (!existingResume) {
+		if (!newResume) {
 			throw new NotFoundException(`Resume with ID "${id}" not found or access denied`);
 		}
 
-		const newResume = this.findOne(id, userInfo);
+		return '更新成功';
+	}
 
-		return newResume;
+	async updateFromContent(
+		id: string,
+		updateResumeContentDto: UpdateResumeContentDto,
+		userInfo: UserInfoFromToken
+	): Promise<string> {
+		try {
+			const { name, skill, projects, careers, educations } = updateResumeContentDto;
+			if (name) {
+				await this.resumeModel.findByIdAndUpdate(id, { $set: { name } }, { new: true });
+			}
+			if (skill) {
+				await this.skillService.update(skill.id, skill as UpdateSkillDto, userInfo);
+			}
+			if (projects) {
+				await asyncMap(projects, async project => {
+					await this.projectService.updateProject(
+						project.id,
+						project as updateProjectDto,
+						userInfo
+					);
+				});
+			}
+			if (careers) {
+				await asyncMap(careers, async career => {
+					await this.careerService.update(career.id, career as UpdateCareerDto, userInfo);
+				});
+			}
+			if (educations) {
+				await asyncMap(educations, async education => {
+					await this.educationService.update(
+						education.id,
+						education as UpdateEducationDto,
+						userInfo
+					);
+				});
+			}
+			return '更新成功';
+		} catch (error) {
+			throw Error('更新失败' + error.message);
+		}
 	}
 
 	async remove(id: string, userInfo: UserInfoFromToken): Promise<{ message: string }> {

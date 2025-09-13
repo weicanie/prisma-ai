@@ -13,7 +13,7 @@ export interface CreateEducationDtoShared {
 	gpa?: string;
 	description?: string;
 }
-
+export type UpdateEducationDto = Partial<CreateEducationDtoShared>;
 // 与后端 Mongo Schema 的 toJSON 输出对齐
 export interface EducationVO {
 	id: string;
