@@ -169,7 +169,7 @@ const Knowledges: React.FC<KnowledgesProps<KnowledgeVo>> = ({
 				searchColIds: ['name']
 			},
 			pagination: {
-				enable: true
+				enable: knowledgeData.length > 10
 			}
 		},
 		onRowClick: (rowData: KnowledgeVo) => {

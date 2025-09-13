@@ -101,6 +101,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				url: '/main/resumes'
 			},
 			{
+				title: '简历编辑',
+				icon: FileText,
+				url: '/main/resume-editor'
+			},
+			{
 				title: '岗位数据获取',
 				icon: CircleDollarSign,
 				url: '/main/hjm/get-jobs',

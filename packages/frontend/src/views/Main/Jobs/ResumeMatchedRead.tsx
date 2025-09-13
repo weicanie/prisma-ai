@@ -30,7 +30,6 @@ const ResumeMatchedRead: React.FC<ResumeMatchedReadProps> = () => {
 		return <div>错误:{data?.message}</div>;
 	}
 	const resumeDatas = data.data.data;
-	console.log('🚀 ~ resumeDatas:', resumeDatas);
 
 	const resumeData = resumeDatas?.find(resume => resume.id === resumeMatchedId);
 	const jobData = resumeData?.job;

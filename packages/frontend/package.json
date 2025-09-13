@@ -4,8 +4,8 @@
 	"version": "4.0.1",
 	"type": "module",
 	"scripts": {
-		"dev": "vite",
-		"start": "vite",
+		"dev": "vite --port 5173",
+		"start": "vite --port 5173",
 		"build": "tsc -b && vite build",
 		"lint": "eslint .",
 		"preview": "vite preview"
@@ -61,6 +61,7 @@
 		"lodash": "^4.17.21",
 		"lucide-react": "^0.509.0",
 		"motion": "^12.10.5",
+		"qiankun": "^2.10.16",
 		"react": "^19.1.0",
 		"react-dom": "^19.1.0",
 		"react-hook-form": "^7.56.3",

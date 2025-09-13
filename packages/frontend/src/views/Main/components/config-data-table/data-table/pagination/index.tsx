@@ -21,7 +21,7 @@ interface DataTablePaginationProps<TData> {
 export function DataTablePagination<TData>({ table, options }: DataTablePaginationProps<TData>) {
 	const {
 		showSizeChanger = true,
-		pageSize = 5,
+		pageSize = 10,
 		pageSizeOptions = [10],
 		setPageSize,
 		pageIndex = 0,
@@ -81,7 +81,6 @@ export function DataTablePagination<TData>({ table, options }: DataTablePaginati
 								<SelectValue placeholder={table.getState().pagination.pageSize} />
 							</SelectTrigger>
 							<SelectContent side="top">
-								{/* 服务器分页pageSize锁定为10，不然缓存会出问题 */}
 								{pageSizeOptions.map(pageSize => (
 									<SelectItem key={pageSize} value={`${pageSize}`}>
 										{pageSize}

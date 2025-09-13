@@ -17,11 +17,20 @@ import CareerCreate from './Create';
 import CareerUpdate from './Update';
 
 interface CareersProps<TData> {
-	selectColShow?: boolean;
-	selectionHandler?: (rows: TData[]) => void;
+	selectColShow?: boolean; // 是否显示选择列
+	selectionHandler?: (rows: TData[]) => void; //储存选中状态到store
+	title?: string; // 页面标题
+	description?: string; // 页面描述
+	mainTable?: boolean; // 是否为主表格
 }
 
-const Careers: React.FC<CareersProps<CareerVO>> = ({ selectColShow, selectionHandler }) => {
+const Careers: React.FC<CareersProps<CareerVO>> = ({
+	selectColShow,
+	selectionHandler,
+	title,
+	description,
+	mainTable = true
+}) => {
 	const { data, status } = useCustomQuery([CareerQueryKey.Careers], () => findAllCareers());
 	const queryClient = useQueryClient();
 	const removeMutation = useCustomMutation(removeCareer, {
@@ -118,7 +127,7 @@ const Careers: React.FC<CareersProps<CareerVO>> = ({ selectColShow, selectionHan
 		},
 		options: {
 			toolbar: { enable: true, searchColIds: ['company', 'position'] },
-			pagination: { enable: true }
+			pagination: { enable: careerData.length > 10 }
 		},
 		onRowClick: (rowData: CareerVO) => () => {
 			navigate(`/main/career/detail/${rowData?.id}`, {
@@ -126,12 +135,13 @@ const Careers: React.FC<CareersProps<CareerVO>> = ({ selectColShow, selectionHan
 			});
 		},
 		createBtn: <CareerCreate />,
-		selectionHandler
+		selectionHandler,
+		mainTable
 	};
 
 	return (
 		<>
-			<PageHeader title="工作经历" description="管理你的工作经历" />
+			<PageHeader title={title ?? '工作经历'} description={description ?? '管理你的工作经历'} />
 			<div className="pl-10 pr-10">
 				<ConfigDataTable dataTableConfig={dataTableConfig} data={careerData} />
 			</div>

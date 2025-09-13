@@ -17,13 +17,19 @@ import EducationCreate from './Create';
 import EducationUpdate from './Update';
 
 interface EducationsProps<TData> {
-	selectColShow?: boolean;
-	selectionHandler?: (rows: TData[]) => void;
+	selectColShow?: boolean; // 是否显示选择列
+	selectionHandler?: (rows: TData[]) => void; //储存选中状态到store
+	title?: string; // 页面标题
+	description?: string; // 页面描述
+	mainTable?: boolean; // 是否为主表格
 }
 
 const Educations: React.FC<EducationsProps<EducationVO>> = ({
 	selectColShow,
-	selectionHandler
+	selectionHandler,
+	title,
+	description,
+	mainTable = true
 }) => {
 	const { data, status } = useCustomQuery([EducationQueryKey.Educations], () =>
 		findAllEducations()
@@ -127,7 +133,7 @@ const Educations: React.FC<EducationsProps<EducationVO>> = ({
 		},
 		options: {
 			toolbar: { enable: true, searchColIds: ['school', 'major'] },
-			pagination: { enable: true }
+			pagination: { enable: eduData.length > 10 }
 		},
 		onRowClick: (rowData: EducationVO) => () => {
 			navigate(`/main/education/detail/${rowData?.id}`, {
@@ -135,12 +141,13 @@ const Educations: React.FC<EducationsProps<EducationVO>> = ({
 			});
 		},
 		createBtn: <EducationCreate />,
-		selectionHandler
+		selectionHandler,
+		mainTable
 	};
 
 	return (
 		<>
-			<PageHeader title="教育经历" description="管理你的教育经历" />
+			<PageHeader title={title ?? '教育经历'} description={description ?? '管理你的教育经历'} />
 			<div className="pl-10 pr-10">
 				<ConfigDataTable dataTableConfig={dataTableConfig} data={eduData} />
 			</div>

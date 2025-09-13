@@ -1,5 +1,6 @@
 import { lazy } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import EditorContainerPage from '../views/Main/ResumeEditor';
 import PrivateRoute from './PrivateRoute';
 import UpdateBreadRouter from './UpdateBreadRouter';
 const AIChat = lazy(() => import('../components/aichat/AIChat'));
@@ -146,41 +147,6 @@ export const routes = [
 					}
 				]
 			},
-			// 简历组装
-			{
-				path: '/main/resumes',
-				element: (
-					<UpdateBreadRouter>
-						<Outlet />
-					</UpdateBreadRouter>
-				),
-				children: [
-					{
-						path: '',
-						element: (
-							<UpdateBreadRouter>
-								<Resumes />
-							</UpdateBreadRouter>
-						)
-					},
-					{
-						path: 'detail/:resumeId',
-						element: (
-							<UpdateBreadRouter>
-								<ResumeRead></ResumeRead>
-							</UpdateBreadRouter>
-						)
-					},
-					{
-						path: 'action/:resumeId/:jobId',
-						element: (
-							<UpdateBreadRouter>
-								<ResumeActions></ResumeActions>
-							</UpdateBreadRouter>
-						)
-					}
-				]
-			},
 			// 教育经历
 			{
 				path: '/main/education',
@@ -232,6 +198,56 @@ export const routes = [
 								<CareerRead />
 							</UpdateBreadRouter>
 						)
+					}
+				]
+			},
+			// 简历组装
+			{
+				path: '/main/resumes',
+				element: (
+					<UpdateBreadRouter>
+						<Outlet />
+					</UpdateBreadRouter>
+				),
+				children: [
+					{
+						path: '',
+						element: (
+							<UpdateBreadRouter>
+								<Resumes />
+							</UpdateBreadRouter>
+						)
+					},
+					{
+						path: 'detail/:resumeId',
+						element: (
+							<UpdateBreadRouter>
+								<ResumeRead></ResumeRead>
+							</UpdateBreadRouter>
+						)
+					},
+					{
+						path: 'action/:resumeId/:jobId',
+						element: (
+							<UpdateBreadRouter>
+								<ResumeActions></ResumeActions>
+							</UpdateBreadRouter>
+						)
+					}
+				]
+			},
+			// 简历编辑
+			{
+				path: '/main/resume-editor',
+				element: (
+					<UpdateBreadRouter>
+						<Outlet />
+					</UpdateBreadRouter>
+				),
+				children: [
+					{
+						path: '',
+						element: <EditorContainerPage />
 					}
 				]
 			},
@@ -363,6 +379,8 @@ export const path_name: Record<string, string> = {
 	'/main/resumes': '简历',
 	'/main/resumes/detail': '详情',
 	'/main/resumes/action': 'AI优化',
+
+	'/main/resume-editor': '简历编辑器',
 
 	'/main/job': '岗位',
 	'/main/job/detail': '详情',

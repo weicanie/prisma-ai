@@ -169,7 +169,7 @@ const Skills: React.FC<SkillsProps<SkillVo>> = ({
 				searchColIds: ['type']
 			},
 			pagination: {
-				enable: true
+				enable: skillDatas.length > 10
 			}
 		},
 		onRowClick: (rowData: SkillVo) => {

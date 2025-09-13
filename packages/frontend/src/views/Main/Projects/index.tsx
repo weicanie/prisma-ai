@@ -164,7 +164,7 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 				searchColIds: ['name']
 			},
 			pagination: {
-				enable: true
+				enable: projectDatas.length > 10
 			}
 		},
 		onRowClick: (rowData: ProjectVo) => {

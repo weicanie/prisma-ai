@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import type { JobVo, ResumeVo } from '@prisma-ai/shared';
+import type { JobVo, ResumeMatchedVo, ResumeVo } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Row, Table } from '@tanstack/react-table';
 import React, { memo } from 'react';
@@ -185,7 +185,7 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 					searchColIds: ['jobName']
 				},
 				pagination: {
-					enable: true
+					enable: jobDatas.length > 10
 				}
 			},
 			onRowClick: (rowData: JobVo) => {
@@ -220,7 +220,7 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 			description: '选择要匹配的简历',
 			mainTable: false
 		};
-		const dataTableConfigResumeMatched: DataTableConfig<ResumeVo> = {
+		const dataTableConfigResumeMatched: DataTableConfig<ResumeMatchedVo> = {
 			columns: {
 				dataCols: [
 					{
@@ -315,10 +315,10 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 					searchColIds: ['name']
 				},
 				pagination: {
-					enable: true
+					enable: resumeMatchedDatas.length > 10
 				}
 			},
-			onRowClick: (rowData: ResumeVo) => {
+			onRowClick: (rowData: ResumeMatchedVo) => {
 				return () => {
 					navigate(`/main/job/resumeMatched/${rowData.id}`, {
 						state: { param: rowData.id }
