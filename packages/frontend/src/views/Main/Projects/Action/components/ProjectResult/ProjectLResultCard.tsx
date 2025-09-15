@@ -27,7 +27,6 @@ export const ProjectAnalysisResultCard: React.FC<ProjectAnalysisResultCardProps>
 	handleFeedback
 }) => {
 	resultData = resultData as lookupResultDto | null;
-	console.log('resultData', resultData);
 
 	const score = resultData?.score;
 	const [animatedScore, setAnimatedScore] = useState(0);
