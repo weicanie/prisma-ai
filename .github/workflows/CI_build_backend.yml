@@ -63,6 +63,8 @@ jobs:
             # enable=...: 这个规则只在满足条件时生效。
             # 此处表示，只有当工作流是手动触发时，才使用输入的 'version_tag' 作为标签。
             type=raw,value=${{ github.event.inputs.version_tag }},enable=${{ github.event_name == 'workflow_dispatch' }}
+            # 在默认分支(main)上构建时同时打 latest 标签
+            type=raw,value=latest,enable={{is_default_branch}}
 
       # 步骤3：设置 QEMU
       # QEMU 是一个模拟器，用于在 Actions 的 x86 环境中模拟 ARM 等其他架构，是多平台构建的基础。

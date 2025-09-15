@@ -4,10 +4,10 @@
 echo "设置目录权限..."
 
 # 安全创建目录（已存在时静默成功）
-mkdir -p ./projects ./models ./docker-data/nest-app/logs
+mkdir -p ./projects ./models ./resumes ./docker-data/nest-app/logs
 
 # 授权给所有用户（可读/可写/可执行）
-chmod 777 ./projects ./models ./docker-data/nest-app/logs
+chmod 777 ./projects ./models ./resumes ./docker-data/nest-app/logs
 
 echo "✅ 设置目录权限"
 

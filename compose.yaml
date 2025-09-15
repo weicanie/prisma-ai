@@ -9,7 +9,7 @@ services:
       - "3123:3000"
 
   prisma-ai-backend:
-    image: docker.1ms.run/onlyie/prisma-ai-backend:3.3.5
+    image: docker.1ms.run/onlyie/prisma-ai-backend:latest
     depends_on:
       # mysql经常需要启动好几次才能成功,得在它启动成功后再启动服务
       mysql-container:
@@ -44,9 +44,14 @@ services:
       - ./packages/backend/prisma_agent_config.json:/app/packages/backend/prisma_agent_config.json
       - ./projects:/app/projects
       - ./models:/app/models
-
+  magic-resume-container:
+    image: docker.1ms.run/onlyie/prisma-ai-resume-editor:latest
+    ports:
+      - '3009:3009'
+    restart: unless-stopped
+    container_name: magic-resume
   nginx-container:
-    image: docker.1ms.run/onlyie/prisma-ai-nginx:3.3.5
+    image: docker.1ms.run/onlyie/prisma-ai-nginx:latest
     ports:
       - '80:80' # HTTP
       # HTTPS (如需启用)
@@ -122,11 +127,6 @@ services:
       MINIO_ROOT_PASSWORD: admin123.
       MINIO_DEFAULT_BUCKETS: prisma-ai
     command: server /bitnami/minio/data --console-address :9001
-  magic-resume-container:
-    image: docker.1ms.run/onlyie/prisma-ai-resume-editor:3.3.5
-    ports:
-      - '3009:3009'
-    restart: unless-stopped
-    container_name: magic-resume
+
 
 #使用默认桥接网络
