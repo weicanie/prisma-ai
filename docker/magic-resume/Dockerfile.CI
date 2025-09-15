@@ -1,20 +1,22 @@
 # syntax=docker.io/docker/dockerfile:1
 
-FROM node:20-alpine AS base
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN npm install -g corepack@latest && corepack enable
+ARG PNPM_VERSION=9.15.4
+ARG NODE_VERSION=20.11.0
+
+FROM node:${NODE_VERSION} AS base
+RUN npm install -g pnpm@${PNPM_VERSION}
 
 WORKDIR /app
 
 FROM base AS deps
-COPY package.json pnpm-lock.yaml* ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install  --frozen-lockfile --force
+COPY ./packages/magic-resume/package.json ./packages/magic-resume/pnpm-lock.yaml* ./
+COPY ./package.json ./pnpm-lock.yaml ./pnpm-workspace.yaml* ./
+RUN pnpm install --filter magic-resume --frozen-lockfile --force
 
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY ./packages/magic-resume/ .
 
 RUN pnpm run build
 
@@ -37,9 +39,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
-EXPOSE 3000
+EXPOSE 3009
 
-ENV PORT 3000
+ENV PORT 3009
 ENV HOSTNAME "0.0.0.0"
 
 CMD ["node", "server.js"]

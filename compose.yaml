@@ -122,5 +122,11 @@ services:
       MINIO_ROOT_PASSWORD: admin123.
       MINIO_DEFAULT_BUCKETS: prisma-ai
     command: server /bitnami/minio/data --console-address :9001
+  magic-resume-container:
+    image: docker.1ms.run/onlyie/prisma-ai-resume-editor:3.3.5
+    ports:
+      - '3009:3009'
+    restart: unless-stopped
+    container_name: magic-resume
 
 #使用默认桥接网络

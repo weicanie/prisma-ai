@@ -112,5 +112,13 @@ services:
     depends_on:
       - prisma-ai-backend
       - minio-container
+  magic-resume-container:
+    build:
+      context: .
+      dockerfile: ./docker/magic-resume/Dockerfile.CI
+    ports:
+      - '3009:3009'
+    restart: unless-stopped
+    container_name: magic-resume
     
 #使用默认桥接网络
