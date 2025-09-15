@@ -1,4 +1,4 @@
-name: '发布前端服务镜像'
+name: '发布简历编辑器镜像'
 
 on:
   # 触发器1：手动触发 (workflow_dispatch)
@@ -11,7 +11,7 @@ on:
         type: string
         default: 'prisma-ai-resume-editor'
       dockerfile_path:
-        description: 'Dockerfile 的路径 (例如 ./docker/frontend/Dockerfile)'
+        description: 'Dockerfile 的路径 (例如 ./docker/magic-resume/Dockerfile.CI)'
         required: true
         type: string
         default: './docker/magic-resume/Dockerfile.CI'
