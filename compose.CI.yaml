@@ -33,6 +33,30 @@ services:
       - ./packages/backend/prisma_agent_config.json:/app/packages/backend/prisma_agent_config.json
       - ./projects:/app/projects
       - ./models:/app/models
+  magic-resume-container:
+  build:
+    context: .
+    dockerfile: ./docker/magic-resume/Dockerfile.CI
+  ports:
+    - '3009:3009'
+  restart: unless-stopped
+  container_name: magic-resume
+  nginx-container:
+    build:
+      context: .
+      dockerfile: ./docker/frontend/Dockerfile.CI
+    ports:
+      - '80:80' # HTTP
+      # HTTPS (如需启用)
+      # - '443:443' 
+    volumes:
+      - ./nginx/logs:/var/log/nginx # Nginx 日志
+      # 如果启用 HTTPS，还需要
+      # - ./nginx/ssl:/etc/nginx/ssl
+    restart: unless-stopped
+    depends_on:
+      - prisma-ai-backend
+      - minio-container
   mysql-container:
     image: library/mysql
     #占用的主机端口:网络内访问使用的端口
@@ -96,29 +120,7 @@ services:
       MINIO_ROOT_PASSWORD: admin123.
       MINIO_DEFAULT_BUCKETS: prisma-ai
     command: server /bitnami/minio/data --console-address :9001
-  nginx-container:
-    build:
-      context: .
-      dockerfile: ./docker/frontend/Dockerfile.CI
-    ports:
-      - '80:80' # HTTP
-      # HTTPS (如需启用)
-      # - '443:443' 
-    volumes:
-      - ./nginx/logs:/var/log/nginx # Nginx 日志
-      # 如果启用 HTTPS，还需要
-      # - ./nginx/ssl:/etc/nginx/ssl
-    restart: unless-stopped
-    depends_on:
-      - prisma-ai-backend
-      - minio-container
-  magic-resume-container:
-    build:
-      context: .
-      dockerfile: ./docker/magic-resume/Dockerfile.CI
-    ports:
-      - '3009:3009'
-    restart: unless-stopped
-    container_name: magic-resume
+
+
     
 #使用默认桥接网络
