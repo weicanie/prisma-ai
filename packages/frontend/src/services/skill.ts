@@ -41,7 +41,13 @@ export async function findOneUserSkill(id: string) {
  * @param skillUpdateData 更新技能所需的数据
  * @returns 返回更新后的技能数据
  */
-export async function updateSkill(id: string, skillUpdateData: UpdateSkillDto) {
+export async function updateSkill({
+	id,
+	skillUpdateData
+}: {
+	id: string;
+	skillUpdateData: UpdateSkillDto;
+}) {
 	const res = await instance.patch<UpdateSkillDto, SDF<SkillVo>>(`/skill/${id}`, skillUpdateData);
 	return res.data;
 }

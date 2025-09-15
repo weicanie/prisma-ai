@@ -7,7 +7,7 @@ import { createSkill } from '../../../services/skill';
 import { selectSkillMd, setSkillDataFromMd } from '../../../store/skills';
 import { DialogBtn } from '../components/DialogBtn';
 import MilkdownEditor from '../components/Editor';
-import { SkillForm } from './SkillForm';
+import SkillForm from './SkillForm';
 
 interface SkillCreateProps {
 	_?: string;

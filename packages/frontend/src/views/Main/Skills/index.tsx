@@ -15,6 +15,7 @@ import { DataTableColumnHeader } from '../components/config-data-table/data-tabl
 import { DataTableRowActions } from '../components/config-data-table/data-table/columns/row-actions';
 import { PageHeader } from '../components/PageHeader';
 import { SkillCreate } from './SkillCreate';
+import SkillUpdate from './Update';
 
 interface SkillsProps<TData> {
 	selectColShow?: boolean; // 是否显示选择列
@@ -155,6 +156,9 @@ const Skills: React.FC<SkillsProps<SkillVo>> = ({
 									onClick: () => {
 										removeMutation.mutate(row.original.id);
 									}
+								},
+								{
+									component: <SkillUpdate id={row.original.id} />
 								}
 							]}
 						/>

@@ -96,7 +96,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				url: '/main/career'
 			},
 			{
-				title: '简历组装',
+				title: '简历组装与导出',
 				icon: FileText,
 				url: '/main/resumes'
 			},

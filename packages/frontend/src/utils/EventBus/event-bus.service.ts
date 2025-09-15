@@ -4,13 +4,16 @@ export enum EventList {
 	//llm会话被用户释放
 	sessionFree = 'sessionFree',
 	//用户token更新
-	tokenUpdated = 'tokenUpdated'
+	tokenUpdated = 'tokenUpdated',
+	//主应用主题更新
+	themeUpdated = 'themeUpdated'
 }
 
 /* 事件名到payload类型的映射 */
 export interface Event_Payload {
 	[EventList.sessionFree]: void;
 	[EventList.tokenUpdated]: void;
+	[EventList.themeUpdated]: 'light' | 'dark' | 'system';
 }
 
 /**

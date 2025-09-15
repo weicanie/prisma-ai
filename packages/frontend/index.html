@@ -14,6 +14,31 @@
 			rel="stylesheet"
 		/>
 		<title>PrismaAI</title>
+		<!-- 避免页面白屏闪烁 -->
+		<style>
+			html,
+			body {
+				margin: 0;
+				padding: 0;
+				width: 100%;
+				height: 100%;
+				/* 浅色模式下的背景色 */
+				background-color: #fafafa;
+			}
+
+			#root {
+				height: 100%;
+			}
+
+			/* 支持深色模式 */
+			@media (prefers-color-scheme: dark) {
+				html,
+				body {
+					/* 深色模式下的背景色 */
+					background-color: #1a1a1a;
+				}
+			}
+		</style>
 	</head>
 	<body>
 		<div id="root"></div>

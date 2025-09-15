@@ -8,6 +8,7 @@
 	theme名字 -> 提供的主题对象
 */
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { eventBusService, EventList } from './EventBus/event-bus.service';
 
 type ThemeType = 'light' | 'dark' | 'system';
 
@@ -57,6 +58,8 @@ export const ThemeProviderDiy: React.FC<{ children: React.ReactNode }> = ({ chil
 		const root = window.document.documentElement;
 		root.classList.remove('light', 'dark');
 		root.classList.add(resolvedTheme);
+		//发送主题更新事件，以便微应用更新主题
+		eventBusService.emit(EventList.themeUpdated, resolvedTheme);
 	}, [resolvedTheme]);
 
 	return (

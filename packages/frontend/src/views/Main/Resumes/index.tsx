@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useCustomMutation, useCustomQuery } from '../../../query/config';
 import { ResumeQueryKey } from '../../../query/keys';
-import { findAllUserResumes, removeResume } from '../../../services/resume';
+import { exportResumeToEditor, findAllUserResumes, removeResume } from '../../../services/resume';
 import { setResumeData } from '../../../store/resume';
 import Careers from '../Career';
 import { ConfigDataTable } from '../components/config-data-table';
@@ -51,6 +51,15 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 		},
 		onError: () => {
 			toast.error('删除失败');
+		}
+	});
+
+	const exportToEditorMutation = useCustomMutation(exportResumeToEditor, {
+		onSuccess: () => {
+			toast.success('导出成功');
+		},
+		onError: () => {
+			toast.error('导出失败');
 		}
 	});
 
@@ -189,6 +198,12 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 									label: '删除',
 									onClick: () => {
 										removeMutation.mutate(row.original.id);
+									}
+								},
+								{
+									label: '导出',
+									onClick: () => {
+										exportToEditorMutation.mutate(row.original.id);
 									}
 								}
 							]}
