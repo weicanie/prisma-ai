@@ -19,6 +19,7 @@ const syncResumeToFile = async (resumeData: ResumeData, prevResume?: ResumeData)
 
 		const dirHandle = handle as FileSystemDirectoryHandle;
 
+		// 避免简历标题发生变化时保留不再使用的文件
 		if (prevResume && prevResume.id === resumeData.id && prevResume.title !== resumeData.title) {
 			try {
 				await dirHandle.removeEntry(`${prevResume.title}.json`);
@@ -26,12 +27,12 @@ const syncResumeToFile = async (resumeData: ResumeData, prevResume?: ResumeData)
 				console.warn('Error deleting old file:', error);
 			}
 		}
-
 		const fileName = `${resumeData.title}.json`;
 		const fileHandle = await dirHandle.getFileHandle(fileName, {
 			create: true
 		});
 		const writable = await fileHandle.createWritable();
+		// 如果简历文件已存在，则直接替换其内容
 		await writable.write(JSON.stringify(resumeData, null, 2));
 		await writable.close();
 	} catch (error) {
@@ -86,11 +87,11 @@ const getResumesFromFiles = async (updateResumeFromFile: (resume: ResumeData) =>
 	}
 };
 
-const syncResuemToDB = async (resumeData: ResumeData, prevResume?: ResumeData) => {
+const syncResuemToAPI = async (resumeData: ResumeData, prevResume?: ResumeData) => {
 	try {
-		await fetch(`${process.env.PRISMA_AI_BACKEND_URL}/content/${resumeData.id}`, {
-			method: 'Patch',
-			body: JSON.stringify(resumeData),
+		await fetch(`${process.env.NEXT_PUBLIC_RESUME_REPO_URL}`, {
+			method: 'POST',
+			body: JSON.stringify({ actionType: 'sync', payload: { resumeData, prevResume } }),
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -101,10 +102,11 @@ const syncResuemToDB = async (resumeData: ResumeData, prevResume?: ResumeData) =
 	}
 };
 
-const deleteResumeFromDB = async (resumeData: ResumeData) => {
+const deleteResumeFromAPI = async (resumeData: ResumeData) => {
 	try {
-		await fetch(`${process.env.PRISMA_AI_BACKEND_URL}/resume/${resumeData.id}`, {
-			method: 'Delete',
+		await fetch(`${process.env.NEXT_PUBLIC_RESUME_REPO_URL}`, {
+			method: 'POST',
+			body: JSON.stringify({ actionType: 'delete', payload: { resumeData } }),
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -115,17 +117,19 @@ const deleteResumeFromDB = async (resumeData: ResumeData) => {
 	}
 };
 
-const getResumesFromDB = async (updateResumeFromFile: (resume: ResumeData) => void) => {
+const getResumesFromAPI = async (updateResumeFromFile: (resume: ResumeData) => void) => {
 	try {
-		const response = await fetch(`${process.env.PRISMA_AI_BACKEND_URL}/resume/all`, {
-			method: 'Get',
+		const response = await fetch(`${process.env.NEXT_PUBLIC_RESUME_REPO_URL}`, {
+			method: 'POST',
+			body: JSON.stringify({ actionType: 'get' }),
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${localStorage.getItem('token')}`
 			}
 		});
 		const data = await response.json();
-		for (const resume of data) {
+		// data.data: prisma-ai后端统一返回`SDF`
+		for (const resume of data.data) {
 			updateResumeFromFile(resume);
 		}
 	} catch (error) {
@@ -133,17 +137,19 @@ const getResumesFromDB = async (updateResumeFromFile: (resume: ResumeData) => vo
 	}
 };
 
-const fileManager: ResumeRepositoryManager = {
+// 使用浏览器端的 File System Access API
+const clientfileManager: ResumeRepositoryManager = {
 	syncResumeToRepository: syncResumeToFile,
 	deleteResumeFromRepository: deleteResumeFromFile,
 	getResumeFromRepository: getResumesFromFiles
 };
 
-const dbManager: ResumeRepositoryManager = {
-	syncResumeToRepository: syncResuemToDB,
-	deleteResumeFromRepository: deleteResumeFromDB,
-	getResumeFromRepository: getResumesFromDB
+// 使用外部API（服务器文件系统、数据库、OSS...）
+const outerAPIManager: ResumeRepositoryManager = {
+	syncResumeToRepository: syncResuemToAPI,
+	deleteResumeFromRepository: deleteResumeFromAPI,
+	getResumeFromRepository: getResumesFromAPI
 };
-const resumeRepoManager = fileManager;
+const resumeRepoManager = outerAPIManager;
 
 export { resumeRepoManager };
