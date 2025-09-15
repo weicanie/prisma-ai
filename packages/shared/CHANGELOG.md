@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.1.0](https://github.com/weicanie/prisma-ai/compare/v4.0.1...v4.1.0) (2025-09-15)
+
+### Features
+
+- 工作经历、教育经历的CRUD UI ([c68aa12](https://github.com/weicanie/prisma-ai/commit/c68aa12c946511bf3ae6c10c0fcb98ff9acc393f))
+- 工作经历、教育经历的CRUD接口 ([fd979e4](https://github.com/weicanie/prisma-ai/commit/fd979e49a8e9104897a6c8b96bfffd8dfd1e3015))
+- 简历数据的内容更新 ([325ee79](https://github.com/weicanie/prisma-ai/commit/325ee7984bb28e7450412d19c2a3db6ee32cf8dd))
+
 # [4.0.0](https://github.com/weicanie/prisma-ai/compare/v3.6.3...v4.0.0) (2025-08-25)
 
 **Note:** Version bump only for package @prisma-ai/shared

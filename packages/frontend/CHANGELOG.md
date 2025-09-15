@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.1.0](https://github.com/weicanie/prisma-ai/compare/v4.0.1...v4.1.0) (2025-09-15)
+
+### Bug Fixes
+
+- **frontend:** type errors ([cdbd027](https://github.com/weicanie/prisma-ai/commit/cdbd0270cd036f6c0749163dfcd072bbef7e0502))
+
+### Features
+
+- 工作经历、教育经历的CRUD UI ([c68aa12](https://github.com/weicanie/prisma-ai/commit/c68aa12c946511bf3ae6c10c0fcb98ff9acc393f))
+- 工作经历、教育经历的CRUD接口 ([fd979e4](https://github.com/weicanie/prisma-ai/commit/fd979e49a8e9104897a6c8b96bfffd8dfd1e3015))
+- 前端在sse连接出错时失效当前会话状态 ([996530d](https://github.com/weicanie/prisma-ai/commit/996530db8ce69af846a19ff1cbdbe7701d5b31d3))
+- 通过qiankun + iframe微前端接入magic-resume ([72b4fad](https://github.com/weicanie/prisma-ai/commit/72b4fad6d2235484fac23acc682227e7be4ec7ef))
+- 完善会话清除功能 ([6cd5508](https://github.com/weicanie/prisma-ai/commit/6cd55084731e4cc0eac880aef7dd53fbcb83db01))
+- **frontend:** 进一步完善UI ([f713ea5](https://github.com/weicanie/prisma-ai/commit/f713ea57d844a2f39ba8e8e97bee77aa9149ed73))
+- **frontend:** 完善前端UI ([4f652dc](https://github.com/weicanie/prisma-ai/commit/4f652dcb3102ec863b814505da12deaa9b4dfec8))
+
 ## [4.0.1](https://github.com/weicanie/prisma-ai/compare/v4.0.0...v4.0.1) (2025-08-27)
 
 ### Bug Fixes

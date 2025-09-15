@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.1.0](https://github.com/weicanie/prisma-ai/compare/v4.0.1...v4.1.0) (2025-09-15)
+
+### Bug Fixes
+
+- **frontend:** type errors ([cdbd027](https://github.com/weicanie/prisma-ai/commit/cdbd0270cd036f6c0749163dfcd072bbef7e0502))
+- **magic-resume:** docker build ([96e5eaf](https://github.com/weicanie/prisma-ai/commit/96e5eaf8af2f59195cb07c2992e84094b0cfb016))
+
+### Features
+
+- 工作经历、教育经历的CRUD UI ([c68aa12](https://github.com/weicanie/prisma-ai/commit/c68aa12c946511bf3ae6c10c0fcb98ff9acc393f))
+- 工作经历、教育经历的CRUD接口 ([fd979e4](https://github.com/weicanie/prisma-ai/commit/fd979e49a8e9104897a6c8b96bfffd8dfd1e3015))
+- 简历数据的内容更新 ([325ee79](https://github.com/weicanie/prisma-ai/commit/325ee7984bb28e7450412d19c2a3db6ee32cf8dd))
+- 前端在sse连接出错时失效当前会话状态 ([996530d](https://github.com/weicanie/prisma-ai/commit/996530db8ce69af846a19ff1cbdbe7701d5b31d3))
+- 通过qiankun + iframe微前端接入magic-resume ([72b4fad](https://github.com/weicanie/prisma-ai/commit/72b4fad6d2235484fac23acc682227e7be4ec7ef))
+- 完善会话清除功能 ([6cd5508](https://github.com/weicanie/prisma-ai/commit/6cd55084731e4cc0eac880aef7dd53fbcb83db01))
+- **backend:** 后端提供简历json文件数据源 ([c69fbe9](https://github.com/weicanie/prisma-ai/commit/c69fbe96a4cffe0be20f568a079cfb25cca0eb13))
+- **frontend:** 进一步完善UI ([f713ea5](https://github.com/weicanie/prisma-ai/commit/f713ea57d844a2f39ba8e8e97bee77aa9149ed73))
+- **frontend:** 完善前端UI ([4f652dc](https://github.com/weicanie/prisma-ai/commit/4f652dcb3102ec863b814505da12deaa9b4dfec8))
+- magic resume init ([5f7e5c9](https://github.com/weicanie/prisma-ai/commit/5f7e5c9f08e1e3073676d2c5099729d313a54865))
+- **magic-resume:** 和主应用同步主题 ([be94069](https://github.com/weicanie/prisma-ai/commit/be9406903e6a4093106475d4396021f9279cc46b))
+- **magic-resume:** 简历数据CRUD拓展支持文件系统和数据库 ([d7977ff](https://github.com/weicanie/prisma-ai/commit/d7977ff490bb5385514437fdb60e41651e186c66))
+- **magic-resume:** 去掉多余功能、定制UI ([00dffb4](https://github.com/weicanie/prisma-ai/commit/00dffb4bdfba3f408d7ab6a88506ae03fa410c46))
+- **magic-resume:** 完善外部简历数据源接入支持 ([242e7eb](https://github.com/weicanie/prisma-ai/commit/242e7eba8a21374732588f8c86dea931dfb52a12))
+- **magic-resume:** 完善微前端接入支持 ([3405fe2](https://github.com/weicanie/prisma-ai/commit/3405fe291c6ff123e7f14c3e17982a22974ab664))
+
 ## [4.0.1](https://github.com/weicanie/prisma-ai/compare/v4.0.0...v4.0.1) (2025-08-27)
 
 ### Bug Fixes
