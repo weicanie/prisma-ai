@@ -15,6 +15,7 @@ import { Skill, SkillSchema } from '../skill/entities/skill.entity';
 import { SkillModule } from '../skill/skill.module';
 import { Resume, ResumeSchema } from './entities/resume.entity';
 import { ResumeMatched, ResumeMatchedSchema } from './entities/resumeMatched.entity';
+import { ResumeJsonService } from './resume-repo.service';
 import { ResumeController } from './resume.controller';
 import { ResumeService } from './resume.service';
 
@@ -41,6 +42,7 @@ import { ResumeService } from './resume.service';
 	controllers: [ResumeController],
 	providers: [
 		ResumeService,
+		ResumeJsonService,
 		{
 			provide: 'WithFuncPoolResumeService',
 			useExisting: ResumeService

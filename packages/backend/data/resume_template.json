@@ -1,0 +1,180 @@
+{
+	"title": "简历名",
+	"basic": {
+		"name": "名字",
+		"title": "职位意向",
+		"employementStatus": "工作状态",
+		"email": "xxx@xxx.com",
+		"phone": "xxx",
+		"location": "所在地",
+		"birthDate": "2000-01-01",
+		"fieldOrder": [
+			{
+				"id": "1",
+				"key": "name",
+				"label": "姓名",
+				"type": "text",
+				"visible": true
+			},
+			{
+				"id": "2",
+				"key": "title",
+				"label": "职位",
+				"type": "text",
+				"visible": true
+			},
+			{
+				"id": "3",
+				"key": "employementStatus",
+				"label": "状态",
+				"type": "text",
+				"visible": true
+			},
+			{
+				"id": "4",
+				"key": "birthDate",
+				"label": "生日",
+				"type": "date",
+				"visible": true
+			},
+			{
+				"id": "5",
+				"key": "email",
+				"label": "邮箱",
+				"type": "text",
+				"visible": true
+			},
+			{
+				"id": "6",
+				"key": "phone",
+				"label": "电话",
+				"type": "text",
+				"visible": true
+			},
+			{
+				"id": "7",
+				"key": "location",
+				"label": "所在地",
+				"type": "text",
+				"visible": true
+			}
+		],
+		"icons": {
+			"email": "Mail",
+			"phone": "Phone",
+			"birthDate": "CalendarRange",
+			"employementStatus": "Briefcase",
+			"location": "MapPin"
+		},
+		"photoConfig": {
+			"width": 90,
+			"height": 120,
+			"aspectRatio": "1:1",
+			"borderRadius": "none",
+			"customBorderRadius": 0,
+			"visible": false
+		},
+		"customFields": [
+			{
+				"id": "personal",
+				"label": "个人网站",
+				"value": "https://pinkprisma.com",
+				"icon": "Globe"
+			}
+		],
+		"photo": "/avatar.png",
+		"githubKey": "",
+		"githubUseName": "",
+		"githubContributionsVisible": false
+	},
+	"education": [
+		{
+			"id": "1",
+			"school": "学校",
+			"major": "专业",
+			"degree": "本科",
+			"startDate": "2022-09",
+			"endDate": "2026-06",
+			"visible": true,
+			"gpa": "",
+			"description": ""
+		}
+	],
+	"skillContent": "",
+	"experience": [
+		{
+			"id": "1",
+			"company": "公司",
+			"position": "职位",
+			"date": "2025/01 - 至今",
+			"visible": true,
+			"details": ""
+		}
+	],
+	"draggingProjectId": null,
+	"projects": [
+		{
+			"id": "p1",
+			"name": "名称",
+			"role": "角色",
+			"date": "2025/01 - 至今",
+			"description": "",
+			"visible": true
+		}
+	],
+	"menuSections": [
+		{
+			"id": "basic",
+			"title": "基本信息",
+			"icon": "👤",
+			"enabled": true,
+			"order": 0
+		},
+		{
+			"id": "skills",
+			"title": "专业技能",
+			"icon": "⚡",
+			"enabled": true,
+			"order": 1
+		},
+		{
+			"id": "experience",
+			"title": "工作经验",
+			"icon": "💼",
+			"enabled": true,
+			"order": 2
+		},
+		{
+			"id": "projects",
+			"title": "项目经历",
+			"icon": "🚀",
+			"enabled": true,
+			"order": 3
+		},
+		{
+			"id": "education",
+			"title": "教育经历",
+			"icon": "🎓",
+			"enabled": true,
+			"order": 4
+		}
+	],
+	"customData": {},
+	"activeSection": "basic",
+	"globalSettings": {
+		"baseFontSize": 16,
+		"pagePadding": 32,
+		"paragraphSpacing": 12,
+		"lineHeight": 1.5,
+		"sectionSpacing": 10,
+		"headerSize": 18,
+		"subheaderSize": 16,
+		"useIconMode": true,
+		"themeColor": "#000000",
+		"centerSubtitle": true
+	},
+	"id": "f3d88461-ed84-412d-8d04-4aa71155fc3c",
+	"createdAt": "2025-09-13T14:44:24.851Z",
+	"updatedAt": "2025-09-13T14:44:24.851Z",
+	"templateId": "classic"
+}
