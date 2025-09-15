@@ -17,7 +17,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 300 50% 100%;
     --foreground: 224 71.4% 4.1%;
     --card: 0 0% 100%;
     --card-foreground: 224 71.4% 4.1%;
@@ -110,7 +110,7 @@
       background: rgba(102, 102, 102, 0.8);
     }
 
-    --background: 240 5.9% 10%;
+    --background: 340 0% 4%;
     --foreground: 210 20% 98%;
     --card: 224 71.4% 4.1%;
     --card-foreground: 210 20% 98%;
