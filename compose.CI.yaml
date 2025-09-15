@@ -34,13 +34,13 @@ services:
       - ./projects:/app/projects
       - ./models:/app/models
   magic-resume-container:
-  build:
-    context: .
-    dockerfile: ./docker/magic-resume/Dockerfile.CI
-  ports:
-    - '3009:3009'
-  restart: unless-stopped
-  container_name: magic-resume
+    build:
+      context: .
+      dockerfile: ./docker/magic-resume/Dockerfile.CI
+    ports:
+      - '3009:3009'
+    restart: unless-stopped
+    container_name: magic-resume
   nginx-container:
     build:
       context: .
