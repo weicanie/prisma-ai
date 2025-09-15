@@ -9,15 +9,25 @@ RUN npm install -g pnpm@${PNPM_VERSION}
 WORKDIR /app
 
 FROM base AS deps
-COPY ./packages/magic-resume/package.json ./packages/magic-resume/pnpm-lock.yaml* ./
+# 复制 monorepo 配置文件
 COPY ./package.json ./pnpm-lock.yaml ./pnpm-workspace.yaml* ./
-RUN pnpm install --filter magic-resume --frozen-lockfile --force
+# 只复制 magic-resume 的 package.json（没有独立的 pnpm-lock.yaml）
+COPY ./packages/magic-resume/package.json ./packages/magic-resume/
+# 安装依赖，只针对 magic-resume 包
+RUN pnpm install --filter magic-resume --frozen-lockfile
 
 FROM base AS builder
 WORKDIR /app
+# 复制依赖
 COPY --from=deps /app/node_modules ./node_modules
-COPY ./packages/magic-resume/ .
+COPY --from=deps /app/packages/magic-resume/node_modules ./packages/magic-resume/node_modules
+# 复制源码
+COPY ./packages/magic-resume ./packages/magic-resume
+# 复制 monorepo 配置
+COPY ./package.json ./pnpm-lock.yaml ./pnpm-workspace.yaml* ./
 
+# 切换到 magic-resume 目录进行构建
+WORKDIR /app/packages/magic-resume
 RUN pnpm run build
 
 FROM base AS runner
@@ -25,17 +35,18 @@ WORKDIR /app
 
 ENV NODE_ENV production
 
-
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/public ./public
+# 复制 Next.js 构建产物
+COPY --from=builder /app/packages/magic-resume/public ./public
 
 RUN mkdir .next
 RUN chown nextjs:nodejs .next
 
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# 复制 Next.js 的 构建产物
+COPY --from=builder --chown=nextjs:nodejs /app/packages/magic-resume/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/packages/magic-resume/.next/static ./.next/static
 
 USER nextjs
 

@@ -23,7 +23,7 @@ enum ToastType {
 	Info = 'info'
 }
 const toastQueue = new Set<string>();
-let curTimer: NodeJS.Timeout | null = null;
+let curTimer: ReturnType<typeof setTimeout> | null = null;
 function addToastToQueue(message: string, type: ToastType = ToastType.Success) {
 	if (toastQueue.has(JSON.stringify({ message, type }))) {
 		return;

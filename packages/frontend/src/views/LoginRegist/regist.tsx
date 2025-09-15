@@ -28,7 +28,7 @@ export default function Register() {
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [dialogContent, setDialogContent] = useState({ title: '', content: '' });
 	const [countdown, setCountdown] = useState(0);
-	const timerRef = useRef<NodeJS.Timeout | null>(null);
+	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const form = useForm<z.infer<typeof registformSchema>>({
 		resolver: zodResolver(registformSchema),
 		defaultValues: {

@@ -10,7 +10,7 @@ import FeedBack from '../../FeedBack';
 
 type ProjectAnalysisResultCardProps = Pick<
 	ProjectResultProps,
-	'done' | 'mergedData' | 'handleMerge'
+	'done' | 'resultData' | 'handleMerge'
 > & {
 	isDark: boolean;
 	handleFeedback: (content: string) => void;
@@ -20,15 +20,15 @@ type ProjectAnalysisResultCardProps = Pick<
  * 用于展示AI对项目的拷打/分析结果，包括问题、解决方案和评分。
  */
 export const ProjectAnalysisResultCard: React.FC<ProjectAnalysisResultCardProps> = ({
-	mergedData,
+	resultData,
 	isDark,
 	done,
 	handleMerge,
 	handleFeedback
 }) => {
-	mergedData = mergedData as lookupResultDto | null;
+	resultData = resultData as lookupResultDto | null;
 
-	const score = mergedData?.score;
+	const score = resultData?.score;
 	const [animatedScore, setAnimatedScore] = useState(0);
 	const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
@@ -42,7 +42,7 @@ export const ProjectAnalysisResultCard: React.FC<ProjectAnalysisResultCardProps>
 		return () => clearTimeout(animationTimeout);
 	}, [score]);
 
-	if (!mergedData) return;
+	if (!resultData) return;
 	// 根据分数确定进度条颜色
 	let gaugePrimaryColor: string;
 	if (score! < 60) {
@@ -92,7 +92,7 @@ export const ProjectAnalysisResultCard: React.FC<ProjectAnalysisResultCardProps>
 					</div>
 
 					{/* 存在的问题 */}
-					{mergedData.problem && mergedData.problem.length > 0 && (
+					{resultData.problem && resultData.problem.length > 0 && (
 						<div>
 							<h4
 								className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-orange-400' : 'text-orange-600'}`}
@@ -101,7 +101,7 @@ export const ProjectAnalysisResultCard: React.FC<ProjectAnalysisResultCardProps>
 								存在的问题
 							</h4>
 							<ul className="space-y-3">
-								{mergedData.problem.map((p, index) => (
+								{resultData.problem.map((p, index) => (
 									<li
 										key={`problem-${index}`}
 										className={`p-3 rounded-lg ${isDark ? 'bg-orange-900/20 border border-orange-800' : 'bg-orange-50 border border-orange-200'}`}
@@ -119,7 +119,7 @@ export const ProjectAnalysisResultCard: React.FC<ProjectAnalysisResultCardProps>
 					)}
 
 					{/* 解决方案建议 */}
-					{mergedData.solution && mergedData.solution.length > 0 && (
+					{resultData.solution && resultData.solution.length > 0 && (
 						<div>
 							<h4
 								className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-green-400' : 'text-green-600'}`}
@@ -128,7 +128,7 @@ export const ProjectAnalysisResultCard: React.FC<ProjectAnalysisResultCardProps>
 								解决方案
 							</h4>
 							<ul className="space-y-3">
-								{mergedData.solution.map((s, index) => (
+								{resultData.solution.map((s, index) => (
 									<li
 										key={`solution-${index}`}
 										className={`p-3 rounded-lg ${isDark ? 'bg-green-900/20 border border-green-800' : 'bg-green-50 border border-green-200'}`}

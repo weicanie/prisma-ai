@@ -23,8 +23,8 @@ export default defineConfig({
 					'antd-vendor': ['antd'],
 					'antd-icon-vendor': ['@ant-design/icons'],
 					'antd-x-vendor': ['@ant-design/x'],
-					'copilotkit-core-vendor': ['@copilotkit/react-core'],
-					'copilotkit-ui-vendor': ['@copilotkit/react-ui'],
+					// 'copilotkit-core-vendor': ['@copilotkit/react-core'],
+					// 'copilotkit-ui-vendor': ['@copilotkit/react-ui'],
 					'milkdown-vendor': [
 						'@milkdown/core',
 						'@milkdown/react',

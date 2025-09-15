@@ -188,8 +188,7 @@ export const OriginalProject: React.FC<OriginalProjectProps> = ({
 									<Separator />
 									<ProjectAnalysisResultCard
 										isDark={isDark}
-										resultData={projectData.lookupResult}
-										mergedData={null}
+										mergedData={projectData.lookupResult}
 										handleFeedback={() => {}}
 									/>
 								</>
