@@ -1,19 +1,19 @@
 'use client';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardTitle } from '@/components/ui/card';
 import { initialResumeState } from '@/config/initialResumeData';
 import { cn } from '@/lib/utils';
 import { useResumeStore } from '@/store/useResumeStore';
-import { getConfig, getFileHandle } from '@/utils/fileSystem';
 import { AnimatePresence, motion } from 'framer-motion';
-import { AlertCircle, FileText, Plus, Settings, Upload } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 import { toast } from 'sonner';
 
 import { generateUUID } from '@/utils/uuid';
+import { useTheme } from 'next-themes';
+import { useThemeStore } from '../../../../store/theme';
 const ResumesList = () => {
 	return <ResumeWorkbench />;
 };
@@ -29,25 +29,15 @@ const ResumeWorkbench = () => {
 		deleteResume,
 		createResume
 	} = useResumeStore();
+
+	const { theme } = useThemeStore();
+	const { setTheme } = useTheme();
+	useEffect(() => {
+		setTheme(theme);
+	}, [theme]);
+
 	const router = useRouter();
 	const [hasConfiguredFolder, setHasConfiguredFolder] = React.useState(false);
-
-	/* 作为微应用接收token */
-	useEffect(() => {
-		const handleMessage = (event: MessageEvent) => {
-			if (event.data && event.data.type === 'SET_TOKEN') {
-				// 将接收到的 token 设置到微应用的 localStorage
-				localStorage.setItem('token', event.data.token);
-				console.log('微应用接收到 token:', event.data.token);
-			}
-		};
-
-		window.addEventListener('message', handleMessage);
-
-		return () => {
-			window.removeEventListener('message', handleMessage);
-		};
-	}, []);
 
 	// 将文件系统中的简历数据同步到store
 	useEffect(() => {
@@ -57,25 +47,29 @@ const ResumeWorkbench = () => {
 	}, [resumes, updateResume]);
 
 	// 检查是否配置了简历文件目录（用于在本地持久化，因为indexDB会随浏览器缓存删除而清除）
-	useEffect(() => {
-		const loadSavedConfig = async () => {
-			try {
-				const handle = await getFileHandle('syncDirectory');
-				const path = await getConfig('syncDirectoryPath');
-				if (handle && path) {
-					setHasConfiguredFolder(true);
-				}
-			} catch (error) {
-				console.error('Error loading saved config:', error);
-			}
-		};
+	// useEffect(() => {
+	// 	const loadSavedConfig = async () => {
+	// 		try {
+	// 			const handle = await getFileHandle('syncDirectory');
+	// 			const path = await getConfig('syncDirectoryPath');
+	// 			if (handle && path) {
+	// 				setHasConfiguredFolder(true);
+	// 			}
+	// 		} catch (error) {
+	// 			console.error('Error loading saved config:', error);
+	// 		}
+	// 	};
 
-		loadSavedConfig();
-	}, []);
+	// 	loadSavedConfig();
+	// }, []);
 
 	const handleCreateResume = () => {
 		const newId = createResume(null);
 		setActiveResume(newId);
+	};
+
+	const handleCreateResumeFromTemplate = () => {
+		router.push('/app/dashboard/templates');
 	};
 
 	const handleImportJson = () => {
@@ -116,9 +110,9 @@ const ResumeWorkbench = () => {
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.3 }}
-			className="flex-1 space-y-6"
+			className="flex-1 space-y-6 py-6 px-4"
 		>
-			<motion.div
+			{/* <motion.div
 				className="flex w-full items-center justify-center px-4"
 				initial={{ y: 20, opacity: 0 }}
 				animate={{ y: 0, opacity: 1 }}
@@ -168,7 +162,7 @@ const ResumeWorkbench = () => {
 						</AlertDescription>
 					</Alert>
 				)}
-			</motion.div>
+			</motion.div> */}
 
 			<motion.div
 				className="px-4 sm:px-6 flex items-center justify-between"
@@ -176,11 +170,11 @@ const ResumeWorkbench = () => {
 				animate={{ y: 0, opacity: 1 }}
 				transition={{ duration: 0.3 }}
 			>
-				<h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+				<h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
 					{t('dashboard.resumes.myResume')}
 				</h1>
 				<div className="flex items-center space-x-2">
-					<motion.div
+					{/* <motion.div
 						whileHover={{ scale: 1.05 }}
 						whileTap={{ scale: 0.95 }}
 						transition={{ type: 'spring', stiffness: 400, damping: 17 }}
@@ -193,19 +187,18 @@ const ResumeWorkbench = () => {
 							<Upload className="mr-2 h-4 w-4" />
 							{t('dashboard.resumes.import')}
 						</Button>
-					</motion.div>
+					</motion.div> */}
 					<motion.div
 						whileHover={{ scale: 1.05 }}
 						whileTap={{ scale: 0.95 }}
 						transition={{ type: 'spring', stiffness: 400, damping: 17 }}
 					>
 						<Button
-							onClick={handleCreateResume}
+							onClick={handleCreateResumeFromTemplate}
 							variant="default"
 							className="bg-gray-900 text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
 						>
-							<Plus className="mr-2 h-4 w-4" />
-							{t('dashboard.resumes.create')}
+							{t('dashboard.resumes.createFromTemplate')}
 						</Button>
 					</motion.div>
 				</div>
@@ -218,7 +211,7 @@ const ResumeWorkbench = () => {
 				transition={{ duration: 0.3, delay: 0.2 }}
 			>
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-					<motion.div
+					{/* <motion.div
 						whileHover={{ scale: 1.02 }}
 						whileTap={{ scale: 0.98 }}
 						transition={{ type: 'spring', stiffness: 400, damping: 17 }}
@@ -247,7 +240,7 @@ const ResumeWorkbench = () => {
 								</CardDescription>
 							</CardContent>
 						</Card>
-					</motion.div>
+					</motion.div> */}
 
 					<AnimatePresence>
 						{Object.entries(resumes).map(([id, resume], index) => (

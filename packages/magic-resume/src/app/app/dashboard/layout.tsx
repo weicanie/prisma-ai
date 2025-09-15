@@ -4,7 +4,6 @@ import { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages, getTranslations } from 'next-intl/server';
 import { ReactNode } from 'react';
-import Client from './client';
 type Props = {
 	children: ReactNode;
 	params: {
@@ -26,8 +25,8 @@ export default async function LocaleLayout({ children }: Props) {
 		<Document locale={locale}>
 			<NextIntlClientProvider messages={messages}>
 				<Providers>
-					<Client>{children}</Client>
-					{/* {children} */}
+					{/* <Client>{children}</Client> */}
+					{children}
 				</Providers>
 			</NextIntlClientProvider>
 		</Document>
