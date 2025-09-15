@@ -253,7 +253,7 @@ const Action: React.FC<ActionProps> = () => {
 		<div className={`min-h-screen transition-colors duration-200 bg-global`}>
 			<div className="container mx-auto px-4 py-8">
 				{/* 页面标题 */}
-				{/* <PageHeader title="项目经验优化" description="让 doro 深度优化您的项目经验"></PageHeader> */}
+				{/* <PageHeader title="项目经验优化" description="让 Prisma 深度优化您的项目经验"></PageHeader> */}
 
 				{/* 两栏布局 */}
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 ">

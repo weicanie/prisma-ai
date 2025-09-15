@@ -17,19 +17,21 @@ import { projectSchemaForm, type ProjectDto } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { throttle } from 'lodash';
 import { CheckIcon, ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
-import { useState, type PropsWithChildren } from 'react';
+import { useEffect, useState, type PropsWithChildren } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useCustomMutation } from '../../../query/config';
+import { toast } from 'sonner';
+import { useCustomMutation, useCustomQuery } from '../../../query/config';
 import { ProjectQueryKey } from '../../../query/keys';
-import { createProject } from '../../../services/project';
+import { createProject, findById, updateProject } from '../../../services/project';
 import { resetProjectData, selectProjectData, setDataFromDto } from '../../../store/projects';
 
 type PropsType = PropsWithChildren<{
-	isUseMdEditor: boolean;
-	setIsUseMdEditor: React.Dispatch<React.SetStateAction<boolean>>;
+	//用于父组件控制是否使用md编辑器
+	isUseMdEditor?: boolean;
+	setIsUseMdEditor?: React.Dispatch<React.SetStateAction<boolean>>;
+	id?: string; //传入id时为编辑模式
 }>;
-
-const ProjectForm: React.FC<PropsType> = ({ setIsUseMdEditor }) => {
+const ProjectForm: React.FC<PropsType> = ({ setIsUseMdEditor, id }) => {
 	const [currentStep, setCurrentStep] = useState(0);
 	const totalSteps = 3;
 	const stepTitles = ['项目信息', '技术栈', '项目亮点'];
@@ -47,29 +49,66 @@ const ProjectForm: React.FC<PropsType> = ({ setIsUseMdEditor }) => {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [ProjectQueryKey.Projects] });
 			dispatch(resetProjectData()); // 重置表单
+			toast.success('项目创建成功');
 		},
 		onError: error => {
+			toast.error('项目上传失败');
 			console.error('项目上传失败:', error);
 		}
 	});
+
+	const updateProjectMutation = useCustomMutation(updateProject, {
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: [ProjectQueryKey.Projects] });
+			dispatch(resetProjectData()); // 重置表单
+			toast.success('项目更新成功');
+		},
+		onError: error => {
+			toast.error('项目更新失败');
+			console.error('项目更新失败:', error);
+		}
+	});
+	const form = useForm<z.infer<typeof projectSchemaForm>>({
+		resolver: zodResolver(projectSchemaForm),
+		defaultValues: values
+	});
+	const { data, status } = useCustomQuery(
+		[ProjectQueryKey.Projects, id],
+		() => findById(id as string),
+		{
+			enabled: Boolean(id)
+		}
+	);
+	const projectData = data?.data;
+	useEffect(() => {
+		if (status === 'pending') return;
+		if (status === 'error') return;
+		if (projectData) {
+			form.setValue('info.name', projectData.info.name);
+			form.setValue('info.desc', projectData.info.desc);
+			form.setValue('info.techStack', projectData.info.techStack);
+			form.setValue('lightspot.team', projectData.lightspot.team);
+			form.setValue('lightspot.skill', projectData.lightspot.skill);
+			form.setValue('lightspot.user', projectData.lightspot.user);
+		}
+	}, [status]);
+
 	//FIXME 用type="submit"的提交按钮,到第二步时就会提交,此时提交按钮应该才刚渲染(分步表单支持有问题？)
 	async function onSubmit(values: z.infer<typeof projectSchemaForm>) {
 		// 只有点击了提交按钮才允许提交
 		if (currentStep !== totalSteps) {
 			return;
 		}
-		uploadProjectMutation.mutate(values);
+		if (id) {
+			updateProjectMutation.mutate({ id, ...values });
+		} else {
+			uploadProjectMutation.mutate(values);
+		}
 	}
-
-	const form = useForm<z.infer<typeof projectSchemaForm>>({
-		resolver: zodResolver(projectSchemaForm),
-		defaultValues: values
-	});
 
 	// 使用 useFieldArray 实现动态数组
 	const techStackArray = useFieldArray({
 		control: form.control,
-
 		//@ts-expect-error 内部类型体操失误导致误报, 实际没有问题
 		name: 'info.techStack'
 	});
@@ -220,6 +259,8 @@ const ProjectForm: React.FC<PropsType> = ({ setIsUseMdEditor }) => {
 		</div>
 	);
 
+	// const isEdit = !!id;
+
 	// 渲染技术栈步骤
 	const renderTechStack = () => (
 		<div className="space-y-8">
@@ -317,6 +358,14 @@ const ProjectForm: React.FC<PropsType> = ({ setIsUseMdEditor }) => {
 			))}
 		</div>
 	);
+	//使用分步后，没有在每一步结束时验证当前字段，而是在提交时验证，因此需要提示用户检查此前的输入是否合法
+	const renderError = () => {
+		return (
+			<div className="text-center">
+				<p>提交失败，请检查此前步骤的输入内容是否合法，或者检查网络状况</p>
+			</div>
+		);
+	};
 
 	// 渲染当前步骤内容
 	const renderStepContent = () => {
@@ -327,6 +376,8 @@ const ProjectForm: React.FC<PropsType> = ({ setIsUseMdEditor }) => {
 				return renderTechStack();
 			case 2:
 				return renderProjectHighlights();
+			case 3:
+				return renderError();
 			default:
 				return null;
 		}
@@ -337,7 +388,9 @@ const ProjectForm: React.FC<PropsType> = ({ setIsUseMdEditor }) => {
 			<div className=" w-full h-full">
 				<Form {...form}>
 					<form
-						onSubmit={form.handleSubmit(onSubmit)}
+						onSubmit={e => {
+							form.handleSubmit(onSubmit)(e);
+						}}
 						onChange={() => onChange(form.getValues())}
 						style={{ overflow: 'auto', padding: '2px' }}
 						className="space-y-8"
@@ -355,7 +408,7 @@ const ProjectForm: React.FC<PropsType> = ({ setIsUseMdEditor }) => {
 									<Button
 										type="button"
 										variant="outline"
-										onClick={() => setIsUseMdEditor(true)}
+										onClick={() => setIsUseMdEditor?.(true)}
 										className="group flex items-center"
 									>
 										使用md编辑器

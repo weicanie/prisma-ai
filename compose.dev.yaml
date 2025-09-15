@@ -66,6 +66,14 @@ services:
     depends_on:
       - prisma-ai-backend
       - minio-container
+  magic-resume-container:
+    build:
+      context: .
+      dockerfile: ./docker/magic-resume/Dockerfile.CI
+    ports:
+      - '3009:3009'
+    restart: unless-stopped
+    container_name: magic-resume
   mysql-container:
     image: docker.1ms.run/library/mysql
     #占用的主机端口:网络内访问使用的端口

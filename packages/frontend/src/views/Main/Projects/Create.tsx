@@ -8,7 +8,7 @@ import { useCustomMutation } from '../../../query/config';
 import { ProjectQueryKey } from '../../../query/keys';
 import { createProject } from '../../../services/project';
 import { resetProjectData, selectProjectMd, setDataFromMd } from '../../../store/projects';
-import { CreateBtn } from '../components/CreateBtn';
+import { DialogBtn } from '../components/DialogBtn';
 import MilkdownEditor from '../components/Editor';
 import ProjectForm from './ProjectForm';
 
@@ -79,9 +79,9 @@ const CreateProject: React.FC<CreateProjectProps> = () => {
 	);
 	return (
 		<>
-			<CreateBtn title={'创建项目经验'} description="创建你的项目经验">
+			<DialogBtn title={'创建项目经验'} description="创建你的项目经验">
 				{dialogContent}
-			</CreateBtn>
+			</DialogBtn>
 		</>
 	);
 };

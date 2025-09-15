@@ -114,7 +114,7 @@ export const ResumeResult: React.FC<ResumeResultProps> = ({
 			<CardHeader>
 				<CardTitle className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
 					<div className="animate-pulse w-4 h-4 bg-blue-500 rounded-full"></div>
-					{isReasoning ? `doro 正在分析和推理...` : `doro 的推理过程`}
+					{isReasoning ? `Prisma 正在分析和推理...` : `Prisma 的推理过程`}
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-0 h-full">
@@ -128,8 +128,8 @@ export const ResumeResult: React.FC<ResumeResultProps> = ({
 				>
 					{reasonContent ||
 						(selectedllm === SelectedLLM.deepseek_reasoner
-							? 'doro 在等待你的指示送达...'
-							: 'doro 正在后台动态思考...')}
+							? 'Prisma 在等待你的指示送达...'
+							: 'Prisma 正在后台动态思考...')}
 					<span className="animate-pulse text-blue-400">▋</span>
 				</div>
 			</CardContent>
@@ -144,7 +144,7 @@ export const ResumeResult: React.FC<ResumeResultProps> = ({
 					className={`flex items-center gap-2 font-mono ${isDark ? 'text-white' : 'text-gray-900'}`}
 				>
 					<div className="animate-pulse w-4 h-4 bg-blue-500 rounded-full"></div>
-					doro 的生成结果
+					Prisma 的生成结果
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-0 h-full">
@@ -156,7 +156,7 @@ export const ResumeResult: React.FC<ResumeResultProps> = ({
 					}`}
 					style={{ scrollBehavior: 'smooth' }}
 				>
-					{content || 'doro 在等待你的指示送达...'}
+					{content || 'Prisma 在等待你的指示送达...'}
 					<span className="animate-pulse text-blue-400">▋</span>
 				</div>
 			</CardContent>

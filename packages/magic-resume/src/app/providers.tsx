@@ -1,0 +1,19 @@
+'use client';
+
+import { Analytics } from '@vercel/analytics/next';
+import { ThemeProvider } from 'next-themes';
+
+export function Providers({ children }: { children: React.ReactNode }) {
+	return (
+		<ThemeProvider
+			attribute="class"
+			defaultTheme="system"
+			enableSystem
+			disableTransitionOnChange
+			storageKey="magic-resume-theme"
+		>
+			{children}
+			<Analytics />
+		</ThemeProvider>
+	);
+}

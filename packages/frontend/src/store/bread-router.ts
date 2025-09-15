@@ -16,20 +16,19 @@ const slice = createSlice({
 	reducers: {
 		/* 路由跳转后,根据当前路由更新面包屑导航 */
 		updateAction: (state, { payload: path }: { payload: string }) => {
+			// path：去重路由参数后的URL Path
 			if (!path || !path_name[path]) {
 				return;
 			}
-			const names = path_name[path].split('-');
-			const paths = path.split('/');
-
-			if (paths[0] === '') paths.shift();
-			if (paths[0] === 'main') paths.shift();
-
+			const paths = path.split('/').filter(item => item !== '');
 			state.list = [];
-			for (let i = 0; i < paths.length; i++) {
-				const name = names[i] || '';
-				const path = '/main/' + paths.slice(0, i + 1).join('/');
-				state.list.push({ name, path });
+			// 将paths中的元素映射为面包屑列表的元素,添加到state.list中用于面包屑组件渲染
+			// 查找所有存在name的path
+			for (let i = paths.length; i >= 0; i--) {
+				const subPath = '/' + paths.slice(0, paths.length - i).join('/');
+				if (path_name[subPath]) {
+					state.list.push({ name: path_name[subPath], path: subPath });
+				}
 			}
 		}
 	}

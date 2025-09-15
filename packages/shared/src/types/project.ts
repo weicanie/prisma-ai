@@ -29,6 +29,7 @@ export type lookupResultDto = z.infer<typeof lookupResultSchema>;
 /* 含lookupResult的projectDto */
 export type projectLookupedDto = z.infer<typeof projectLookupedSchema>;
 export type ProjectDto = z.infer<typeof projectSchema>;
+export type updateProjectDto = Partial<ProjectDto>;
 export type ProjectPolishedDto = z.infer<typeof projectPolishedSchema>;
 export type ProjectMinedDto = z.infer<typeof projectMinedSchema>;
 

@@ -5,9 +5,9 @@ import { z } from 'zod';
 import { useCustomMutation } from '../../../query/config';
 import { createSkill } from '../../../services/skill';
 import { selectSkillMd, setSkillDataFromMd } from '../../../store/skills';
-import { CreateBtn } from '../components/CreateBtn';
+import { DialogBtn } from '../components/DialogBtn';
 import MilkdownEditor from '../components/Editor';
-import { SkillForm } from './SkillForm';
+import SkillForm from './SkillForm';
 
 interface SkillCreateProps {
 	_?: string;
@@ -66,8 +66,8 @@ export const SkillCreate: React.FC<SkillCreateProps> = () => {
 	);
 
 	return (
-		<CreateBtn title={'创建职业技能'} description="添加您的专业技能">
+		<DialogBtn title={'创建职业技能'} description="添加您的专业技能">
 			{dialogContent}
-		</CreateBtn>
+		</DialogBtn>
 	);
 };

@@ -4,8 +4,8 @@
 	"version": "4.0.1",
 	"type": "module",
 	"scripts": {
-		"dev": "vite",
-		"start": "vite",
+		"dev": "vite --port 5173",
+		"start": "vite --port 5173",
 		"build": "tsc -b && vite build",
 		"lint": "eslint .",
 		"preview": "vite preview"
@@ -57,9 +57,11 @@
 		"clsx": "^2.1.1",
 		"cmdk": "^1.1.1",
 		"dayjs": "^1.11.13",
+		"framer-motion": "^12.23.12",
 		"lodash": "^4.17.21",
 		"lucide-react": "^0.509.0",
 		"motion": "^12.10.5",
+		"qiankun": "^2.10.16",
 		"react": "^19.1.0",
 		"react-dom": "^19.1.0",
 		"react-hook-form": "^7.56.3",
@@ -76,14 +78,14 @@
 		"tailwindcss": "^4.1.3"
 	},
 	"devDependencies": {
-		"@vitejs/plugin-react": "^4.4.1",
-		"tailwind-scrollbar": "^4.0.2",
-		"tw-animate-css": "^1.2.9",
-		"vite": "^6.3.5",
-		"typescript": "^5.8.2",
 		"@types/lodash": "^4.17.1",
 		"@types/react": "^18.3.3",
 		"@types/react-dom": "^18.3.0",
-		"@types/react-transition-group": "^4.4.10"
+		"@types/react-transition-group": "^4.4.10",
+		"@vitejs/plugin-react": "^4.4.1",
+		"tailwind-scrollbar": "^4.0.2",
+		"tw-animate-css": "^1.2.9",
+		"typescript": "^5.8.2",
+		"vite": "^6.3.5"
 	}
 }

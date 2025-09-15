@@ -10,18 +10,25 @@ import {
 	Sse,
 	ValidationPipe
 } from '@nestjs/common';
-import { type UserInfoFromToken, SelectedLLM } from '@prisma-ai/shared';
+import {
+	SelectedLLM,
+	type UpdateResumeContentDto,
+	type UserInfoFromToken
+} from '@prisma-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { SseManagerService } from '../../manager/sse-session-manager/sse-manager.service';
 import { CreateResumeDto } from './dto/create-resume.dto';
+import { ResumeRepoDto } from './dto/resumeRepo.dto';
 import { UpdateResumeDto } from './dto/update-resume.dto';
+import { ResumeJsonService } from './resume-repo.service';
 import { ResumeService } from './resume.service';
 
 @Controller('resume')
 export class ResumeController {
 	constructor(
 		private readonly resumeService: ResumeService,
-		private readonly sseManagerService: SseManagerService
+		private readonly sseManagerService: SseManagerService,
+		private readonly resumeJsonService: ResumeJsonService
 	) {}
 
 	@RequireLogin()
@@ -88,6 +95,9 @@ export class ResumeController {
 		return this.resumeService.findAllResumeMatched(userInfo, pageNumber, limitNumber);
 	}
 
+	/**
+	 * 更新简历及其关联的文档id(技能、项目、教育经历、职业经历)
+	 */
 	@RequireLogin()
 	@Patch(':id')
 	update(
@@ -98,9 +108,34 @@ export class ResumeController {
 		return this.resumeService.update(id, updateResumeDto, userInfo);
 	}
 
+	/**
+	 * 更新简历及其关联的文档内容(技能、项目、教育经历、职业经历)
+	 */
+	@RequireLogin()
+	@Patch('content/:id')
+	updateFromContent(
+		@Param('id') id: string,
+		@Body() updateResumeDto: UpdateResumeContentDto,
+		@UserInfo() userInfo: UserInfoFromToken
+	) {
+		return this.resumeService.updateFromContent(id, updateResumeDto, userInfo);
+	}
+
 	@RequireLogin()
 	@Delete(':id')
 	remove(@Param('id') id: string, @UserInfo() userInfo: UserInfoFromToken) {
 		return this.resumeService.remove(id, userInfo);
+	}
+
+	@RequireLogin()
+	@Get('export/:id')
+	exportResume(@Param('id') id: string, @UserInfo() userInfo: UserInfoFromToken) {
+		return this.resumeJsonService.exportResume(id, userInfo);
+	}
+
+	@RequireLogin()
+	@Post('repo')
+	resumeRepositoryManager(@Body() repoDto: ResumeRepoDto, @UserInfo() userInfo: UserInfoFromToken) {
+		return this.resumeJsonService.handleRepoAction(repoDto);
 	}
 }

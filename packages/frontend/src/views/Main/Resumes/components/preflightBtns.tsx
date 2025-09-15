@@ -22,11 +22,11 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({ availableActions, handleM
 			<CardHeader>
 				<CardTitle className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
 					<Zap className="w-5 h-5" />
-					doro 定制岗位专用简历
+					Prisma 定制岗位专用简历
 					<ChangeLLMJob />
 				</CardTitle>
 				<CardDescription className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-					doro 将会分析目标岗位和您的简历，让您的简历契合、匹配目标岗位
+					Prisma 将会分析目标岗位和您的简历，让您的简历契合、匹配目标岗位
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -46,7 +46,7 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({ availableActions, handleM
 								简历-岗位匹配
 							</h3>
 							<p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-								doro 会让招聘方第一眼就认为您是这个岗位的合适人选
+								Prisma 会让招聘方第一眼就认为您是这个岗位的合适人选
 							</p>
 							<Button
 								onClick={handleMatch}
@@ -55,7 +55,7 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({ availableActions, handleM
 									isDark ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600'
 								} text-white`}
 							>
-								<FileSearch className="mr-2 h-5 w-5" /> 使用 doro 定制岗位专用简历
+								<FileSearch className="mr-2 h-5 w-5" /> 使用 Prisma 定制岗位专用简历
 							</Button>
 						</Card>
 					)}

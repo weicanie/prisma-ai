@@ -15,6 +15,7 @@ import { DataTableColumnHeader } from '../components/config-data-table/data-tabl
 import { DataTableRowActions } from '../components/config-data-table/data-table/columns/row-actions';
 import { PageHeader } from '../components/PageHeader';
 import CreateProject from './Create';
+import ProjectUpdate from './Update';
 
 interface ProjectsProps<TData> {
 	selectColShow?: boolean; // 是否显示选择列
@@ -134,7 +135,6 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 
 			selectCol,
 
-			//TODO 添加编辑功能
 			rowActionsCol: [
 				{
 					id: 'actions',
@@ -147,6 +147,9 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 									onClick: () => {
 										removeMutation.mutate(row.original.id);
 									}
+								},
+								{
+									component: <ProjectUpdate id={row.original.id} />
 								}
 							]}
 						/>
@@ -160,12 +163,14 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 				enable: true,
 				searchColIds: ['name']
 			},
-			pagination: true
+			pagination: {
+				enable: projectDatas.length > 10
+			}
 		},
-		onRowClick: (index: number) => {
+		onRowClick: (rowData: ProjectVo) => {
 			return () => {
-				navigate(`/main/projects/action/${projectDatas[index]?.id}`, {
-					state: { param: projectDatas[index]?.id }
+				navigate(`/main/projects/action/${rowData.id}`, {
+					state: { param: rowData.id }
 				});
 			};
 		},
@@ -181,7 +186,7 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 				title={title ?? '项目经验'}
 				description={
 					description ??
-					'项目经验决定面试机会、面试表现。点击项目让 doro 深入分析你的项目、彻底优化你的项目经验'
+					'项目经验决定面试机会、面试表现。点击项目让 Prisma 深入分析你的项目、彻底优化你的项目经验'
 				}
 			></PageHeader>
 			<div className="pl-10 pr-10 ">

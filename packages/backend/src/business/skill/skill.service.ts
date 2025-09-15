@@ -41,11 +41,7 @@ export class SkillService {
 		userInfo: UserInfoFromToken
 	): Promise<SkillVo> {
 		const existingSkill = await this.skillModel
-			.findOneAndUpdate(
-				{ _id: id, 'userInfo.userId': userInfo.userId },
-				updateSkillDto,
-				{ new: true } // Return the updated document
-			)
+			.findByIdAndUpdate(id, { $set: updateSkillDto }, { new: true })
 			.exec();
 		if (!existingSkill) {
 			throw new NotFoundException(`Skill with ID "${id}" not found`);

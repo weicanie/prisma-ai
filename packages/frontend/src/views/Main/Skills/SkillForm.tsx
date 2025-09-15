@@ -16,12 +16,12 @@ import { Input } from '@/components/ui/input';
 import { type CreateSkillDto, type SkillItem } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { ChevronRight, Plus, Trash2, X } from 'lucide-react';
-import { memo, useReducer } from 'react';
+import { memo, useEffect, useReducer } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
-import { useCustomMutation } from '../../../query/config';
+import { useCustomMutation, useCustomQuery } from '../../../query/config';
 import { SkillQueryKey } from '../../../query/keys';
-import { createSkill } from '../../../services/skill';
+import { createSkill, findOneUserSkill, updateSkill } from '../../../services/skill';
 import { resetSkillData, selectSkillData, setSkillDataFromDto } from '../../../store/skills';
 
 /* 定义表单schema
@@ -109,12 +109,13 @@ const convertToOriginalFormat = (formData: SkillFormData) => {
 };
 
 interface SkillFormProps {
-	setIsUseMdEditor: React.Dispatch<React.SetStateAction<boolean>>;
-	isUseMdEditor: boolean;
+	setIsUseMdEditor?: React.Dispatch<React.SetStateAction<boolean>>;
+	isUseMdEditor?: boolean;
+	id?: string; // 若存在则为编辑模式
 }
 
-export const SkillForm = memo((props: SkillFormProps) => {
-	const { setIsUseMdEditor } = props;
+const SkillForm = memo((props: SkillFormProps) => {
+	const { setIsUseMdEditor, id } = props;
 
 	const values = useSelector(selectSkillData);
 
@@ -133,10 +134,39 @@ export const SkillForm = memo((props: SkillFormProps) => {
 		}
 	});
 
+	const updateSkillMutation = useCustomMutation(updateSkill, {
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: [SkillQueryKey.Skills] });
+			dispatch(resetSkillData());
+		}
+	});
+	const { data, status } = useCustomQuery(
+		[SkillQueryKey.Skills, id],
+		() => findOneUserSkill(id as string),
+		{
+			enabled: Boolean(id)
+		}
+	);
+	const skill = data?.data;
+	useEffect(() => {
+		if (status === 'pending') return;
+		if (status === 'error') return;
+		if (skill) {
+			const formData = convertToFormData(skill);
+			form.setValue('name', skill.name);
+			form.setValue('types', formData.types);
+			form.setValue('skills', formData.skills);
+		}
+	}, [status]);
+
 	const onSubmit = (data: SkillFormData) => {
 		const convertedData = convertToOriginalFormat(data);
 		console.log('通过表单提交的技能数据:', convertedData);
-		uploadSkillMutation.mutate(convertedData);
+		if (id) {
+			updateSkillMutation.mutate({ id, skillUpdateData: convertedData });
+		} else {
+			uploadSkillMutation.mutate(convertedData);
+		}
 	};
 
 	// 管理技能类型数组
@@ -379,7 +409,7 @@ export const SkillForm = memo((props: SkillFormProps) => {
 							<Button
 								type="button"
 								variant="outline"
-								onClick={() => setIsUseMdEditor(true)}
+								onClick={() => setIsUseMdEditor?.(true)}
 								className="group flex items-center"
 							>
 								使用md编辑器
@@ -392,3 +422,5 @@ export const SkillForm = memo((props: SkillFormProps) => {
 		</div>
 	);
 });
+
+export default SkillForm;

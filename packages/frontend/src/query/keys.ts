@@ -18,3 +18,11 @@ export enum JobQueryKey {
 export enum KnowledgeQueryKey {
 	Knowledges = 'knowledges'
 }
+
+export enum EducationQueryKey {
+	Educations = 'educations'
+}
+
+export enum CareerQueryKey {
+	Careers = 'careers'
+}

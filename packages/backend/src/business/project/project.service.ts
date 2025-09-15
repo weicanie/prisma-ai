@@ -1,12 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import {
-	lookupResultSchema,
-	SelectedLLM,
-	ProjectStatus,
-	ProjectVo,
-	UserInfoFromToken
-} from '@prisma-ai/shared';
+import { ProjectStatus, ProjectVo, UserInfoFromToken } from '@prisma-ai/shared';
 import { Model } from 'mongoose';
 import { ChainService } from '../../chain/chain.service';
 import { ProjectChainService } from '../../chain/project-chain.service';
@@ -98,72 +92,6 @@ export class ProjectService {
 			return {
 				...project.value?.toObject()
 			} as ProjectVo;
-		}
-	}
-
-	/**
-	 * 非流式分析项目
-	 */
-	private async lookupProjectUnStream(project: ProjectDocument, userInfo: UserInfoFromToken) {
-		const chain = await this.projectChainService.lookupChain(false, SelectedLLM.deepseek_reasoner);
-		let [result] = await chain.invoke({
-			project: project.toObject() as ProjectDto,
-			userFeedback: { reflect: false, content: '' },
-			userInfo
-		});
-		let lookupResult = { ...result, userInfo, projectName: project.info.name };
-		// 格式验证
-		const validationResult = lookupResultSchema.safeParse(lookupResult);
-		if (!validationResult.success) {
-			const errorMessage = JSON.stringify(validationResult.error.format());
-			const fomartFixChain = await this.chainService.fomartFixChain(
-				lookupResultSchema,
-				errorMessage
-			);
-			const lookupResultStr = JSON.stringify(lookupResult);
-			lookupResult = await fomartFixChain.invoke({ input: lookupResultStr });
-		}
-		const existingProject = await this.projectModel
-			.findOne({
-				'userInfo.userId': userInfo.userId,
-				'info.name': project.info.name
-			})
-			.exec();
-		const existingLookupResult = existingProject?.lookupResult;
-
-		const lookupResultSave = {
-			...lookupResult,
-			userInfo,
-			projectName: project.info.name
-		};
-		if (existingLookupResult) {
-			// 更新
-			await this.projectModel.updateOne(
-				{ 'info.name': project.info.name, 'userInfo.userId': userInfo.userId },
-				{
-					$set: {
-						lookupResult: lookupResultSave,
-						status:
-							existingProject.status === ProjectStatus.committed
-								? ProjectStatus.lookuped
-								: existingProject.status
-					}
-				}
-			);
-		} else {
-			await this.projectModel.updateOne(
-				{ 'info.name': project.info.name, 'userInfo.userId': userInfo.userId },
-				{
-					$set: {
-						lookupResult: lookupResultSave,
-						status: existingProject
-							? existingProject.status === ProjectStatus.committed
-								? ProjectStatus.lookuped
-								: existingProject.status
-							: ProjectStatus.lookuped
-					}
-				}
-			);
 		}
 	}
 

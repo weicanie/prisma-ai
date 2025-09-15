@@ -1,6 +1,5 @@
-import { SkillItem } from '../entities/skill.entity';
-
+import { SkillItem } from '@prisma-ai/shared';
 export class CreateSkillDto {
-  readonly name: string;
-  readonly content: SkillItem[];
+	readonly name: string;
+	readonly content: SkillItem[];
 }

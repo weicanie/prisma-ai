@@ -3,7 +3,7 @@ import React from 'react';
 import { useCustomMutation } from '../../../query/config';
 import { ResumeQueryKey } from '../../../query/keys';
 import { createResume } from '../../../services/resume';
-import { CreateBtn } from '../components/CreateBtn';
+import { DialogBtn } from '../components/DialogBtn';
 import ResumeForm from './ResumeForm';
 
 interface ResumeCreateProps {
@@ -26,9 +26,9 @@ const ResumeCreate: React.FC<ResumeCreateProps> = () => {
 	);
 
 	return (
-		<CreateBtn title={'创建简历'} description="创建一份新的个人简历">
+		<DialogBtn title={'创建简历'} description="创建一份新的个人简历">
 			{dialogContent}
-		</CreateBtn>
+		</DialogBtn>
 	);
 };
 

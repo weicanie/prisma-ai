@@ -31,7 +31,7 @@ COPY ./packages/backend/package.json ./packages/backend/
 COPY ./packages/shared/package.json ./packages/shared/
 
 # 首先安装所有依赖
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --filter backend --filter @prisma-ai/shared --frozen-lockfile
 
 # 复制后端项目和共享包目录下所有文件（.dockerignore中忽略的文件不会被复制）
 COPY ./packages/backend ./packages/backend
@@ -64,7 +64,7 @@ COPY --from=builder /app/packages/backend/package.json ./packages/backend/
 COPY --from=builder /app/packages/shared/package.json ./packages/shared/
 
 #只安装生产依赖
-RUN pnpm install --prod --frozen-lockfile
+RUN pnpm install --filter backend --filter @prisma-ai/shared --prod --frozen-lockfile
 
 # 从构建阶段复制编译后的代码
 COPY --from=builder /app/packages/backend/dist ./packages/backend/dist

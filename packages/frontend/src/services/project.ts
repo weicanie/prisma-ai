@@ -73,9 +73,9 @@ export async function findById(id: string) {
  * @param id 项目ID
  * @param projectUpdateDto 更新的项目信息
  */
-export async function updateProject(id: string, projectUpdateDto: Partial<ProjectDto>) {
+export async function updateProject(projectUpdateDto: Partial<ProjectDto> & { id: string }) {
 	const res = await instance.put<Partial<ProjectDto>, SDF<ProjectVo>>(
-		`/project/${id}`,
+		`/project/${projectUpdateDto.id}`,
 		projectUpdateDto
 	);
 	return res.data;

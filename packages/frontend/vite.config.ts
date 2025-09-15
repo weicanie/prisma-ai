@@ -6,6 +6,15 @@ import { defineConfig } from 'vite';
 // https://vite.dev/config/
 export default defineConfig({
 	plugins: [tailwindcss(), react()],
+	// server: {
+	// 	proxy: {
+	// 		'/resume-editor': {
+	// 			target: 'http://localhost:3009',
+	// 			changeOrigin: true,
+	// 			ws: true
+	// 		}
+	// 	}
+	// },
 	build: {
 		rollupOptions: {
 			output: {

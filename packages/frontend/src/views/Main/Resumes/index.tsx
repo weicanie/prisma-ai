@@ -9,13 +9,15 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useCustomMutation, useCustomQuery } from '../../../query/config';
 import { ResumeQueryKey } from '../../../query/keys';
-import { findAllUserResumes, removeResume } from '../../../services/resume';
+import { exportResumeToEditor, findAllUserResumes, removeResume } from '../../../services/resume';
 import { setResumeData } from '../../../store/resume';
+import Careers from '../Career';
 import { ConfigDataTable } from '../components/config-data-table';
 import type { DataTableConfig } from '../components/config-data-table/config.type';
 import { DataTableColumnHeader } from '../components/config-data-table/data-table/columns/header';
 import { DataTableRowActions } from '../components/config-data-table/data-table/columns/row-actions';
 import { PageHeader } from '../components/PageHeader';
+import Educations from '../Education';
 import Projects from '../Projects';
 import Skills from '../Skills';
 import ResumeCreate from './ResumeCreate';
@@ -49,6 +51,15 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 		},
 		onError: () => {
 			toast.error('删除失败');
+		}
+	});
+
+	const exportToEditorMutation = useCustomMutation(exportResumeToEditor, {
+		onSuccess: () => {
+			toast.success('导出成功');
+		},
+		onError: () => {
+			toast.error('导出失败');
 		}
 	});
 
@@ -188,6 +199,12 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 									onClick: () => {
 										removeMutation.mutate(row.original.id);
 									}
+								},
+								{
+									label: '导出',
+									onClick: () => {
+										exportToEditorMutation.mutate(row.original.id);
+									}
 								}
 							]}
 						/>
@@ -201,12 +218,14 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 				enable: true,
 				searchColIds: ['name']
 			},
-			pagination: true
+			pagination: {
+				enable: resumeDatas.length > 10
+			}
 		},
-		onRowClick: (index: number) => {
+		onRowClick: (rowData: ResumeVo) => {
 			return () => {
-				navigate(`/main/resumes/detail/${resumeDatas[index]?.id}`, {
-					state: { param: resumeDatas[index]?.id }
+				navigate(`/main/resumes/detail/${rowData.id}`, {
+					state: { param: rowData.id }
 				});
 			};
 		},
@@ -214,7 +233,6 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 		selectionHandler,
 		mainTable
 	};
-	//添加选择列
 	const SkillsProps = {
 		selectColShow: true,
 		//将选中状态存储到store
@@ -225,19 +243,44 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 		description: '选择一个职业技能',
 		mainTable: false
 	};
-	//添加选择列
 	const ProjectsProps = {
 		selectColShow: true,
 		//将选中状态存储到store
 		selectionHandler: (selectedRows: unknown[]) => {
 			dispatch(
 				setResumeData({
-					projects: selectedRows.map((row: unknown): string => (row as ResumeVo).id!)
+					projects: selectedRows.map((row: unknown): string => (row as { id: string }).id!)
 				})
 			);
 		},
 		title: '',
 		description: '选择若干项目经验',
+		mainTable: false
+	};
+	const CareersProps = {
+		selectColShow: true,
+		selectionHandler: (selectedRows: unknown[]) => {
+			dispatch(
+				setResumeData({
+					careers: selectedRows.map((row: unknown): string => (row as { id: string }).id!)
+				})
+			);
+		},
+		title: '',
+		description: '选择若干工作经历',
+		mainTable: false
+	};
+	const EducationsProps = {
+		selectColShow: true,
+		selectionHandler: (selectedRows: unknown[]) => {
+			dispatch(
+				setResumeData({
+					educations: selectedRows.map((row: unknown): string => (row as { id: string }).id!)
+				})
+			);
+		},
+		title: '',
+		description: '选择若干教育经历',
 		mainTable: false
 	};
 
@@ -255,6 +298,8 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 				<>
 					<Skills {...SkillsProps}></Skills>
 					<Projects {...ProjectsProps}></Projects>
+					<Careers {...CareersProps}></Careers>
+					<Educations {...EducationsProps}></Educations>
 				</>
 			)}
 		</>

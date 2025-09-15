@@ -87,3 +87,12 @@ export async function findAllResumeMatched(page?: number, limit?: number) {
 	);
 	return res.data;
 }
+
+/**
+ * 简历导出到编辑器
+ * @param id 简历ID
+ */
+export async function exportResumeToEditor(id: string) {
+	const res = await instance.get<SDF<string>>(`/resume/export/${id}`);
+	return res.data;
+}

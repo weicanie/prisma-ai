@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import type { JobVo, ResumeVo } from '@prisma-ai/shared';
+import type { JobVo, ResumeMatchedVo, ResumeVo } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Row, Table } from '@tanstack/react-table';
 import React, { memo } from 'react';
@@ -184,12 +184,14 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 					enable: true,
 					searchColIds: ['jobName']
 				},
-				pagination: true
+				pagination: {
+					enable: jobDatas.length > 10
+				}
 			},
-			onRowClick: (index: number) => {
+			onRowClick: (rowData: JobVo) => {
 				return () => {
-					navigate(`/main/job/detail/${jobDatas[index]?.id}`, {
-						state: { param: jobDatas[index]?.id }
+					navigate(`/main/job/detail/${rowData.id}`, {
+						state: { param: rowData.id }
 					});
 				};
 			},
@@ -218,7 +220,7 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 			description: '选择要匹配的简历',
 			mainTable: false
 		};
-		const dataTableConfigResumeMatched: DataTableConfig<ResumeVo> = {
+		const dataTableConfigResumeMatched: DataTableConfig<ResumeMatchedVo> = {
 			columns: {
 				dataCols: [
 					{
@@ -312,12 +314,14 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 					enable: true,
 					searchColIds: ['name']
 				},
-				pagination: true
+				pagination: {
+					enable: resumeMatchedDatas.length > 10
+				}
 			},
-			onRowClick: (index: number) => {
+			onRowClick: (rowData: ResumeMatchedVo) => {
 				return () => {
-					navigate(`/main/job/resumeMatched/${resumeMatchedDatas[index]?.id}`, {
-						state: { param: resumeMatchedDatas[index]?.id }
+					navigate(`/main/job/resumeMatched/${rowData.id}`, {
+						state: { param: rowData.id }
 					});
 				};
 			},
@@ -328,7 +332,7 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 			<>
 				<PageHeader
 					title={title ?? '岗位'}
-					description={description ?? '追踪岗位, 并借助 doro 将您的简历与岗位信息进行匹配'}
+					description={description ?? '追踪岗位, 并借助 Prisma 将您的简历与岗位信息进行匹配'}
 				></PageHeader>
 				<div className="pl-10 pr-10">
 					<ConfigDataTable dataTableConfig={dataTableConfig} data={jobDatas} />
@@ -353,7 +357,7 @@ const JobsPage = () => {
 	const dispatch = useDispatch();
 	const JobsProps = {
 		title: '岗位',
-		description: '追踪岗位, 并借助 doro 将您的简历与岗位信息进行匹配',
+		description: '追踪岗位, 并借助 Prisma 将您的简历与岗位信息进行匹配',
 		mainTable: true,
 		selectColShow: true,
 		selectionHandler: (selectedRows: unknown[]) => {

@@ -1,16 +1,23 @@
 import { Separator } from '@/components/ui/separator';
+import { prefetchApps } from 'qiankun';
+import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '../../components/ui/sidebar';
 import { BreadcrumbNav } from './components/Breadcrumb';
 import { AppSidebar } from './components/Siderbar/app-sidebar';
 import { ThemeSwitcher } from './components/ThemeSwitcher';
+
 // 自定义触发器
 // function CustomTrigger() {
 // const { toggleSidebar } = useSidebar();
 // return <button onClick={toggleSidebar}>Toggle Sidebar</button>;
 //}
-//TODO 定制不同业务的表格搜索：搜索哪列？还是直接全局搜索？
 function Main() {
+	// 预加载微应用
+	useEffect(() => {
+		prefetchApps([{ name: 'magic-resume', entry: 'http://localhost:3009/mfe-entry.html' }]);
+	}, []);
+
 	return (
 		<>
 			<SidebarProvider
@@ -30,7 +37,7 @@ function Main() {
 				{/* 侧边栏 */}
 				<AppSidebar variant="inset" />
 				{/* 内容 */}
-				<SidebarInset className="bg-global">
+				<SidebarInset className="bg-background">
 					<header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
 						<div className="flex items-center gap-2 px-4">
 							<SidebarTrigger className="-ml-1" />

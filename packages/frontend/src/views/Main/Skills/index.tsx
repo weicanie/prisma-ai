@@ -15,6 +15,7 @@ import { DataTableColumnHeader } from '../components/config-data-table/data-tabl
 import { DataTableRowActions } from '../components/config-data-table/data-table/columns/row-actions';
 import { PageHeader } from '../components/PageHeader';
 import { SkillCreate } from './SkillCreate';
+import SkillUpdate from './Update';
 
 interface SkillsProps<TData> {
 	selectColShow?: boolean; // 是否显示选择列
@@ -155,6 +156,9 @@ const Skills: React.FC<SkillsProps<SkillVo>> = ({
 									onClick: () => {
 										removeMutation.mutate(row.original.id);
 									}
+								},
+								{
+									component: <SkillUpdate id={row.original.id} />
 								}
 							]}
 						/>
@@ -168,12 +172,14 @@ const Skills: React.FC<SkillsProps<SkillVo>> = ({
 				enable: true,
 				searchColIds: ['type']
 			},
-			pagination: true
+			pagination: {
+				enable: skillDatas.length > 10
+			}
 		},
-		onRowClick: (index: number) => {
+		onRowClick: (rowData: SkillVo) => {
 			return () => {
-				navigate(`/main/skills/detail/${skillDatas[index]?.id}`, {
-					state: { param: skillDatas[index]?.id }
+				navigate(`/main/skills/detail/${rowData.id}`, {
+					state: { param: rowData.id }
 				});
 			};
 		},
@@ -187,7 +193,7 @@ const Skills: React.FC<SkillsProps<SkillVo>> = ({
 			<PageHeader
 				title={title ?? '职业技能'}
 				description={
-					description ?? '上传您的专业技能, doro 会在优化您的简历时会着重参考您的专业技能'
+					description ?? '上传您的专业技能, Prisma 会在优化您的简历时会着重参考您的专业技能'
 				}
 			></PageHeader>
 			<div className="pl-10 pr-10">

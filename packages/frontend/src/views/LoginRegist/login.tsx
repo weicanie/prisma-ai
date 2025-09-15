@@ -14,6 +14,7 @@ import Prism from '../../components/Prism';
 import Wall from '../../components/Wall';
 import { useCustomMutation } from '../../query/config';
 import { login } from '../../services/login_regist';
+import { eventBusService, EventList } from '../../utils/EventBus/event-bus.service';
 import { useTheme } from '../../utils/theme';
 import { TextField } from '../Saas/components/c-cpns/Fields';
 
@@ -32,6 +33,8 @@ export default function Login() {
 			res.data.userId = res.data.id;
 			localStorage.setItem('token', res.data.token);
 			localStorage.setItem('userInfo', JSON.stringify(res.data));
+			//发送token更新事件，以便微应用更新token
+			eventBusService.emit(EventList.tokenUpdated);
 			navigate('/main');
 		}
 	});

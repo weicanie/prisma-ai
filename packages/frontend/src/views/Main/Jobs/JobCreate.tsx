@@ -1,5 +1,5 @@
 import React from 'react';
-import { CreateBtn } from '../components/CreateBtn';
+import { DialogBtn } from '../components/DialogBtn';
 import { JobForm } from './JobForm';
 
 interface JobCreateProps {
@@ -16,9 +16,9 @@ const JobCreate: React.FC<JobCreateProps> = () => {
 	);
 
 	return (
-		<CreateBtn title={'创建岗位'} description="添加您关注的职位信息">
+		<DialogBtn title={'创建岗位'} description="添加您关注的职位信息">
 			{dialogContent}
-		</CreateBtn>
+		</DialogBtn>
 	);
 };
 

@@ -31,12 +31,12 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({
 			<CardHeader>
 				<CardTitle className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
 					<Zap className="w-5 h-5" />
-					doro 简历优化
+					Prisma 简历优化
 					<ChangeLLM />
 					<FreeSession></FreeSession>
 				</CardTitle>
 				<CardDescription className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-					doro 将逐步深度优化你的项目经验
+					Prisma 将逐步深度优化你的项目经验
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -55,7 +55,7 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({
 										isDark ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600'
 									} text-white `}
 								>
-									<Wand2 className="mr-2 h-5 w-5" /> 使用 doro 分析项目
+									<Wand2 className="mr-2 h-5 w-5" /> 使用 Prisma 分析项目
 								</Button>
 							</div>
 							<div className="text-center opacity-0 max-h-0 group-hover:opacity-100 group-hover:max-h-96 overflow-hidden transition-all duration-500 ease-in-out">
@@ -68,7 +68,7 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({
 									项目深度分析
 								</h3>
 								<p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-									让 doro 帮助您分析项目的潜在问题和改进方向。
+									让 Prisma 帮助您分析项目的潜在问题和改进方向。
 								</p>
 							</div>
 						</Card>
@@ -100,7 +100,7 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({
 									项目深度优化
 								</h3>
 								<p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-									让 doro 根据分析结果帮助您优化项目经验。
+									让 Prisma 根据分析结果帮助您优化项目经验。
 								</p>
 							</div>
 						</Card>
@@ -137,7 +137,7 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({
 									亮点深度挖掘
 								</h3>
 								<p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-									让 doro 帮助您挖掘项目亮点。
+									让 Prisma 帮助您挖掘项目亮点。
 								</p>
 							</div>
 						</Card>
@@ -171,7 +171,7 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({
 									亮点协同实现
 								</h3>
 								<p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-									让 doro 协助您实现项目亮点。
+									让 Prisma 协助您实现项目亮点。
 								</p>
 							</div>
 						</Card>

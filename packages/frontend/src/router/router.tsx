@@ -1,5 +1,6 @@
 import { lazy } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import EditorContainerPage from '../views/Main/ResumeEditor';
 import PrivateRoute from './PrivateRoute';
 import UpdateBreadRouter from './UpdateBreadRouter';
 const AIChat = lazy(() => import('../components/aichat/AIChat'));
@@ -24,7 +25,10 @@ const SkillRead = lazy(() => import('../views/Main/Skills/SkillRead'));
 const DataCrawl = lazy(() => import('../views/Main/Hjm/DataCrawl'));
 const JobMatch = lazy(() => import('../views/Main/Hjm/JobMatch'));
 const Anki = lazy(() => import('../views/Main/Anki/Anki'));
-
+const Education = lazy(() => import('../views/Main/Education'));
+const EducationRead = lazy(() => import('../views/Main/Education/Read'));
+const Career = lazy(() => import('../views/Main/Career'));
+const CareerRead = lazy(() => import('../views/Main/Career/Read'));
 export const routes = [
 	{
 		path: '',
@@ -61,6 +65,33 @@ export const routes = [
 			{
 				path: '',
 				element: <Navigate to="/main/projects" />
+			},
+			// 知识库
+			{
+				path: '/main/knowledge',
+				element: (
+					<UpdateBreadRouter>
+						<Outlet />
+					</UpdateBreadRouter>
+				),
+				children: [
+					{
+						path: '',
+						element: (
+							<UpdateBreadRouter>
+								<Knowledges />
+							</UpdateBreadRouter>
+						)
+					},
+					{
+						path: 'detail/:knowledgeId',
+						element: (
+							<UpdateBreadRouter>
+								<KnowledgeRead></KnowledgeRead>
+							</UpdateBreadRouter>
+						)
+					}
+				]
 			},
 			// 职业技能
 			{
@@ -116,7 +147,61 @@ export const routes = [
 					}
 				]
 			},
-			// 简历
+			// 教育经历
+			{
+				path: '/main/education',
+				element: (
+					<UpdateBreadRouter>
+						<Outlet />
+					</UpdateBreadRouter>
+				),
+				children: [
+					{
+						path: '',
+						element: (
+							<UpdateBreadRouter>
+								<Education />
+							</UpdateBreadRouter>
+						)
+					},
+					{
+						path: 'detail/:id',
+						element: (
+							<UpdateBreadRouter>
+								<EducationRead />
+							</UpdateBreadRouter>
+						)
+					}
+				]
+			},
+			//工作经历
+			{
+				path: '/main/career',
+				element: (
+					<UpdateBreadRouter>
+						<Outlet />
+					</UpdateBreadRouter>
+				),
+				children: [
+					{
+						path: '',
+						element: (
+							<UpdateBreadRouter>
+								<Career />
+							</UpdateBreadRouter>
+						)
+					},
+					{
+						path: 'detail/:id',
+						element: (
+							<UpdateBreadRouter>
+								<CareerRead />
+							</UpdateBreadRouter>
+						)
+					}
+				]
+			},
+			// 简历组装
 			{
 				path: '/main/resumes',
 				element: (
@@ -148,6 +233,21 @@ export const routes = [
 								<ResumeActions></ResumeActions>
 							</UpdateBreadRouter>
 						)
+					}
+				]
+			},
+			// 简历编辑
+			{
+				path: '/main/resume-editor',
+				element: (
+					<UpdateBreadRouter>
+						<Outlet />
+					</UpdateBreadRouter>
+				),
+				children: [
+					{
+						path: '',
+						element: <EditorContainerPage />
 					}
 				]
 			},
@@ -212,32 +312,6 @@ export const routes = [
 						)
 					}
 				]
-			}, // 知识库
-			{
-				path: '/main/knowledge',
-				element: (
-					<UpdateBreadRouter>
-						<Outlet />
-					</UpdateBreadRouter>
-				),
-				children: [
-					{
-						path: '',
-						element: (
-							<UpdateBreadRouter>
-								<Knowledges />
-							</UpdateBreadRouter>
-						)
-					},
-					{
-						path: 'detail/:knowledgeId',
-						element: (
-							<UpdateBreadRouter>
-								<KnowledgeRead></KnowledgeRead>
-							</UpdateBreadRouter>
-						)
-					}
-				]
 			},
 			// 面向offer学习
 			{
@@ -288,27 +362,33 @@ export const routes = [
 
 /* 用于面包屑导航 */
 export const path_name: Record<string, string> = {
-	'/main/home': '首页',
+	'/main/knowledge': '知识库',
+	'/main/knowledge/detail': '详情',
 
 	'/main/skills': '职业技能',
-	'/main/skills/detail': '职业技能-详情',
+	'/main/skills/detail': '详情',
 	'/main/projects': '项目经验',
-	'/main/projects/action': '项目经验-AI优化',
+	'/main/projects/action': 'AI优化',
+
+	'/main/education': '教育经历',
+	'/main/education/detail': '详情',
+
+	'/main/career': '工作经历',
+	'/main/career/detail': '详情',
 
 	'/main/resumes': '简历',
-	'/main/resumes/detail': '简历-详情',
-	'/main/resumes/action': '简历-AI优化',
+	'/main/resumes/detail': '详情',
+	'/main/resumes/action': 'AI优化',
+
+	'/main/resume-editor': '简历编辑器',
 
 	'/main/job': '岗位',
-	'/main/job/detail': '岗位-详情',
+	'/main/job/detail': '详情',
 
-	'/main/hjm/get-jobs': '人岗匹配-爬取岗位',
-	'/main/hjm/match-jobs': '人岗匹配-匹配岗位',
+	'/main/hjm/get-jobs': '爬取岗位',
+	'/main/hjm/match-jobs': '匹配岗位',
 
-	'/main/knowledge': '知识库',
-	'/main/knowledge/detail': '知识库-详情',
-
-	'/main/offer/anki': '面向offer学习-集成面试题库和 anki',
-	'/main/offer/road': '面向offer学习-技术学习路线',
-	'/main/offer/questions': '面向offer学习-简历延申八股'
+	'/main/offer/anki': '集成面试题库和 anki',
+	'/main/offer/road': '技术学习路线',
+	'/main/offer/questions': '简历延申八股'
 };

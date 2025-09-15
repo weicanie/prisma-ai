@@ -1,5 +1,5 @@
 import React from 'react';
-import { CreateBtn } from '../components/CreateBtn';
+import { DialogBtn } from '../components/DialogBtn';
 import { KnowledgeForm } from './KnowledgeForm';
 
 interface KnowledgeCreateProps {
@@ -16,9 +16,9 @@ const KnowledgeCreate: React.FC<KnowledgeCreateProps> = () => {
 	);
 
 	return (
-		<CreateBtn title={'添加知识'} description="添加您的专业知识">
+		<DialogBtn title={'添加知识'} description="添加您的专业知识">
 			{dialogContent}
-		</CreateBtn>
+		</DialogBtn>
 	);
 };
 
