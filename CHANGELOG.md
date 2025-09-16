@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.8.6](https://github.com/weicanie/prisma-ai/compare/v4.1.5...v4.8.6) (2025-09-16)
+
+### Bug Fixes
+
+- 工作流参数 ([eba5898](https://github.com/weicanie/prisma-ai/commit/eba5898f80ea6325172aeca48ec0127c76273a55))
+- 简历编辑器微前端支持 ([542849e](https://github.com/weicanie/prisma-ai/commit/542849eb47accd84cd352c33f565ca5afc1730a9))
+
+### Features
+
+- iframe嵌入与路由支持 ([3c60b36](https://github.com/weicanie/prisma-ai/commit/3c60b36876fab15e856dec788b8ed2dedd62d03f))
+
 ## [4.1.5](https://github.com/weicanie/prisma-ai/compare/v4.1.4...v4.1.5) (2025-09-16)
 
 **Note:** Version bump only for package root
