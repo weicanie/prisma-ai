@@ -59,6 +59,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/pnpm-workspace.yaml ./pnpm-worksp
 
 # 应用文件
 COPY --from=builder --chown=nextjs:nodejs /app/packages/magic-resume/package.json ./packages/magic-resume/package.json
+# 微前端支持
+COPY --from=builder --chown=nextjs:nodejs /app/packages/magic-resume/public ./packages/magic-resume/public
 # 选择性复制 .next 内容，排除 cache 缓存（600+MB）
 # COPY --from=builder --chown=nextjs:nodejs /app/packages/magic-resume/.next ./packages/magic-resume/.next
 COPY --from=builder --chown=nextjs:nodejs /app/packages/magic-resume/.next/static ./packages/magic-resume/.next/static
