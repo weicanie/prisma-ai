@@ -1,7 +1,7 @@
 # syntax=docker.io/docker/dockerfile:1
 
 ARG PNPM_VERSION=9.15.4
-ARG NODE_VERSION=20.11.0
+ARG NODE_VERSION=20-alpine
 
 FROM node:${NODE_VERSION} AS base
 RUN npm install -g pnpm@${PNPM_VERSION}
@@ -11,48 +11,73 @@ WORKDIR /app
 FROM base AS deps
 # 复制 monorepo 配置文件
 COPY ./package.json ./pnpm-lock.yaml ./pnpm-workspace.yaml* ./
-# 只复制 magic-resume 的 package.json（没有独立的 pnpm-lock.yaml）
 COPY ./packages/magic-resume/package.json ./packages/magic-resume/
-# 安装依赖，只针对 magic-resume 包
+# 安装所有依赖（包括根目录和子包的依赖）
 RUN pnpm install --filter magic-resume --frozen-lockfile
 
 FROM base AS builder
 WORKDIR /app
-# 复制依赖
+
+# 设置构建环境变量
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# 复制node_modules
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/packages/magic-resume/node_modules ./packages/magic-resume/node_modules
-# 复制源码
+
+# 复制源码和配置
 COPY ./packages/magic-resume ./packages/magic-resume
-# 复制 monorepo 配置
 COPY ./package.json ./pnpm-lock.yaml ./pnpm-workspace.yaml* ./
 
 # 切换到 magic-resume 目录进行构建
 WORKDIR /app/packages/magic-resume
 RUN pnpm run build
 
+
+FROM base AS production-deps
+WORKDIR /app
+
+# 复制 monorepo 配置文件
+COPY ./package.json ./pnpm-lock.yaml ./pnpm-workspace.yaml* ./
+COPY ./packages/magic-resume/package.json ./packages/magic-resume/
+
+# 只安装生产依赖
+RUN pnpm install --filter magic-resume --prod --frozen-lockfile
+
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# 复制 Next.js 构建产物
-COPY --from=builder /app/packages/magic-resume/public ./public
+# 根目录的 monorepo 配置
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nextjs:nodejs /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
+# 应用文件
+COPY --from=builder --chown=nextjs:nodejs /app/packages/magic-resume/package.json ./packages/magic-resume/package.json
+# 选择性复制 .next 内容，排除 cache 缓存（600+MB）
+# COPY --from=builder --chown=nextjs:nodejs /app/packages/magic-resume/.next ./packages/magic-resume/.next
+COPY --from=builder --chown=nextjs:nodejs /app/packages/magic-resume/.next/static ./packages/magic-resume/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/packages/magic-resume/.next/server ./packages/magic-resume/.next/server
+COPY --from=builder --chown=nextjs:nodejs /app/packages/magic-resume/.next/*.json ./packages/magic-resume/.next/
+COPY --from=builder --chown=nextjs:nodejs /app/packages/magic-resume/.next/*.js ./packages/magic-resume/.next/
+COPY --from=builder --chown=nextjs:nodejs /app/packages/magic-resume/.next/BUILD_ID ./packages/magic-resume/.next/
 
-# 复制 Next.js 的 构建产物
-COPY --from=builder --chown=nextjs:nodejs /app/packages/magic-resume/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/packages/magic-resume/.next/static ./.next/static
+# node_modules
+COPY --from=production-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=production-deps --chown=nextjs:nodejs /app/packages/magic-resume/node_modules ./packages/magic-resume/node_modules
 
 USER nextjs
 
 EXPOSE 3009
 
-ENV PORT 3009
-ENV HOSTNAME "0.0.0.0"
+ENV PORT=3009
+ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+# 从 monorepo 结构中启动应用
+WORKDIR /app/packages/magic-resume
+CMD ["pnpm", "next", "start", "-p", "3009"]
