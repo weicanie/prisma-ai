@@ -7,7 +7,7 @@
 		"**/*spec.ts",
 		"agent_output",
 		"**/*.md",
-		"ai_data",
+		"data",
 		"crawl_data",
 		"logs"
 	]

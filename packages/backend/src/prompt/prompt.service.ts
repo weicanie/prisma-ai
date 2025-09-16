@@ -34,32 +34,32 @@ export class PromptService implements OnModuleInit {
 		try {
 			const promises = [
 				this._readPromptFile(
-					path.join(process.cwd(), 'ai_data/prompt/project_process/polish-T.md')
+					path.join(process.cwd(), 'data/prompt/project_process/polish-T.md')
 				),
-				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/project_process/mine-T.md')),
+				this._readPromptFile(path.join(process.cwd(), 'data/prompt/project_process/mine-T.md')),
 				this._readPromptFile(
-					path.join(process.cwd(), 'ai_data/prompt/project_process/lookup-T.md')
-				),
-				this._readPromptFile(
-					path.join(process.cwd(), 'ai_data/prompt/project_process/mine-fewshot.md')
-				),
-				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/hjm/match-T.md')),
-				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/hjm/hjm_rerank-T.md')),
-				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/hjm/hjm_transform-T.md')),
-				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/learn/diff_learn-T.md')),
-				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/unuse/text_to_json.md')),
-				this._readPromptFile(path.join(process.cwd(), 'ai_data/prompt/unuse/results_to_text.md')),
-				this._readPromptFile(
-					path.join(process.cwd(), 'ai_data/prompt/interview-summary/generate.md')
+					path.join(process.cwd(), 'data/prompt/project_process/lookup-T.md')
 				),
 				this._readPromptFile(
-					path.join(process.cwd(), 'ai_data/prompt/interview-summary/transform.md')
+					path.join(process.cwd(), 'data/prompt/project_process/mine-fewshot.md')
+				),
+				this._readPromptFile(path.join(process.cwd(), 'data/prompt/hjm/match-T.md')),
+				this._readPromptFile(path.join(process.cwd(), 'data/prompt/hjm/hjm_rerank-T.md')),
+				this._readPromptFile(path.join(process.cwd(), 'data/prompt/hjm/hjm_transform-T.md')),
+				this._readPromptFile(path.join(process.cwd(), 'data/prompt/learn/diff_learn-T.md')),
+				this._readPromptFile(path.join(process.cwd(), 'data/prompt/unuse/text_to_json.md')),
+				this._readPromptFile(path.join(process.cwd(), 'data/prompt/unuse/results_to_text.md')),
+				this._readPromptFile(
+					path.join(process.cwd(), 'data/prompt/interview-summary/generate.md')
 				),
 				this._readPromptFile(
-					path.join(process.cwd(), 'ai_data/prompt/interview-summary/generate_mindmap.md')
+					path.join(process.cwd(), 'data/prompt/interview-summary/transform.md')
 				),
 				this._readPromptFile(
-					path.join(process.cwd(), 'ai_data/prompt/question/generate_mindmap.md')
+					path.join(process.cwd(), 'data/prompt/interview-summary/generate_mindmap.md')
+				),
+				this._readPromptFile(
+					path.join(process.cwd(), 'data/prompt/question/generate_mindmap.md')
 				)
 			];
 			const [

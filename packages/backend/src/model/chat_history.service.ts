@@ -92,7 +92,7 @@ class JSONChatHistory extends BaseListChatMessageHistory {
 export class ChatHistoryService {
 	getChatHistory(
 		sessionId = 'json_chat_history',
-		dir = path.join(process.cwd(), 'ai_data/chat_history_data')
+		dir = path.join(process.cwd(), 'data/chat_history_data')
 	) {
 		return new JSONChatHistory({
 			sessionId,

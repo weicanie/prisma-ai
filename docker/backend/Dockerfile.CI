@@ -74,7 +74,7 @@ COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 # schema.prisma
 COPY --from=builder /app/packages/backend/prisma ./packages/backend/prisma
 # prompts
-COPY --from=builder /app/packages/backend/ai_data ./packages/backend/ai_data
+COPY --from=builder /app/packages/backend/data ./packages/backend/data
 # 启动脚本
 COPY --from=builder /app/packages/backend/scripts ./packages/backend/scripts
 COPY --from=builder /app/packages/backend/agent_output ./packages/backend/agent_output

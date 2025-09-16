@@ -3,12 +3,12 @@ packages:
 onlyBuiltDependencies:
   - sharp
   - tree-sitter
-  - tree-sitter-javascript
-  - tree-sitter-typescript
-  - tree-sitter-python
-  - tree-sitter-java
-  - tree-sitter-go
-  - tree-sitter-ruby
-  - tree-sitter-php
-  - tree-sitter-c
-  - tree-sitter-cpp
+  # - tree-sitter-javascript
+  # - tree-sitter-typescript
+  # - tree-sitter-python
+  # - tree-sitter-java
+  # - tree-sitter-go
+  # - tree-sitter-ruby
+  # - tree-sitter-php
+  # - tree-sitter-c
+  # - tree-sitter-cpp

@@ -1,11 +1,11 @@
 import { ChatDeepSeek } from '@langchain/deepseek';
 import { ChatGoogleGenerativeAI, GoogleGenerativeAIChatInput } from '@langchain/google-genai';
 import {
-	ChatOpenAI,
-	ChatOpenAIFields,
-	ClientOptions,
-	OpenAIEmbeddings,
-	OpenAIEmbeddingsParams
+    ChatOpenAI,
+    ChatOpenAIFields,
+    ClientOptions,
+    OpenAIEmbeddings,
+    OpenAIEmbeddingsParams
 } from '@langchain/openai';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -380,7 +380,7 @@ export class ModelService {
 
 	getChatHistory(
 		sessionId = 'json_chat_history',
-		dir = path.join(process.cwd(), 'ai_data/chat_history_data')
+		dir = path.join(process.cwd(), 'data/chat_history_data')
 	) {
 		return this.chatHistoryService.getChatHistory(sessionId, dir);
 	}

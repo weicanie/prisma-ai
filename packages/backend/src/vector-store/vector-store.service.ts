@@ -117,7 +117,6 @@ export class VectorStoreService {
 		const index = this.pinecone.Index(indexName);
 		const vectorStore = new PineconeStore(embeddings, { pineconeIndex: index, namespace });
 
-		//FIXME 能返回元数据?
 		const retriever = vectorStore.asRetriever(topK);
 		return retriever;
 	}
