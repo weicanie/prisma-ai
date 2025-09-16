@@ -56,15 +56,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 					},
 					'*'
 				);
-				console.log('微应用主动发送准备就绪消息');
 			}
 		};
 
 		// 延迟发送，确保组件完全渲染
-		const timer = setTimeout(notifyReady, 100);
+		notifyReady();
 
 		return () => {
-			clearTimeout(timer);
 			window.removeEventListener('message', handleMessage);
 		};
 	}, []);

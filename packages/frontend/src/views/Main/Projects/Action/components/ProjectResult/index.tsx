@@ -211,7 +211,6 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 		handleFeedback,
 		done
 	};
-	console.log('resultCardProps', resultCardProps);
 	const proejctResultCard = <ProejctPMResultCard {...resultCardProps} />;
 	const contentMap = {
 		lookup: <ProjectAnalysisResultCard {...resultCardProps} isDark={isDark} />,

@@ -6,6 +6,8 @@ packages/backend/generated
 **/*.log
 /nginx/logs/*
 /projects/*
+/resumes/*
+/models/*
 
 # Node.js
 /node_modules
@@ -34,7 +36,5 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
-# models
-/models/*
 
 .VSCodeCounter

@@ -22,7 +22,6 @@ export const ResumeMatchResultCard: React.FC<ResumeMatchResultCardProps> = ({
 	handleMerge,
 	handleFeedback
 }) => {
-	console.log('🚀 ~ resultData:', resultData);
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
 	const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);

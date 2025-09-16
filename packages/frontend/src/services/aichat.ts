@@ -36,7 +36,6 @@ export async function sendMessageToAI(message: ChatMessage) {
  * @returns 会话
  */
 export async function storeConversation(key: string, label: string, content: ChatMessage[]) {
-	console.log('🚀 ~ storeConversation ~ content:', content);
 	const body = { key, label, content };
 	const res = await instance.post<ConversationSendDto, ServerDataFormat<string>>(
 		'/aichat/store',

@@ -135,10 +135,7 @@ function getSseData(
 	setErrorMsg: (msg: string) => void,
 	setAnswering?: (answering: boolean) => void
 ) {
-	console.log('getSseData', {
-		path,
-		sessionStatus: localStorage.getItem(sessionStatusKey)
-	});
+
 	// 每次前sse重置useSseAnswer状态
 	setData('');
 	setReasonContent('');
