@@ -20,7 +20,6 @@ import {
 	Download,
 	Edit2,
 	FileJson,
-	Home,
 	Loader2,
 	PanelRightClose,
 	PanelRightOpen,
@@ -416,7 +415,7 @@ const PreviewDock = ({
 		try {
 			const newId = duplicateResume(activeResumeId);
 			toast.success(t('copyResume.success'));
-			router.push(`/app/workbench/${newId}`);
+			router.push(process.env.NEXT_PUBLIC_NGINX_PREFIX ? process.env.NEXT_PUBLIC_NGINX_PREFIX + `/app/workbench/${newId}` : `/app/workbench/${newId}`);
 		} catch (error) {
 			toast.error(t('copyResume.error'));
 		}
@@ -499,10 +498,10 @@ const PreviewDock = ({
 										</TooltipContent>
 									</Tooltip>
 									<DropdownMenuContent align="end" side="left">
-										<DropdownMenuItem onClick={handleExportPdf} disabled={isLoading}>
+										{/* <DropdownMenuItem onClick={handleExportPdf} disabled={isLoading}>
 											<Download className="w-4 h-4 mr-2" />
 											{t('export.pdf')}
-										</DropdownMenuItem>
+										</DropdownMenuItem> */}
 										<DropdownMenuItem onClick={handlePrint} disabled={isLoading}>
 											<Printer className="w-4 h-4 mr-2" />
 											{t('export.print')}
@@ -582,9 +581,9 @@ const PreviewDock = ({
 									</TooltipContent>
 								</Tooltip>
 							</DockIcon>
-							<div className="w-full h-[1px] bg-gray-200" />
+							{/* <div className="w-full h-[1px] bg-gray-200" /> */}
 
-							<DockIcon>
+							{/* <DockIcon>
 								<Tooltip>
 									<TooltipTrigger asChild>
 										<div
@@ -592,7 +591,7 @@ const PreviewDock = ({
 												'flex cursor-pointer h-7 w-7 items-center justify-center rounded-lg',
 												'hover:bg-gray-100/50 dark:hover:bg-neutral-800/50'
 											)}
-											onClick={() => router.push('/app/dashboard')}
+											onClick={() => router.push(process.env.NEXT_PUBLIC_NGINX_PREFIX ? process.env.NEXT_PUBLIC_NGINX_PREFIX + '/app/dashboard' : '/app/dashboard')}
 										>
 											<Home className="h-4 w-4" />
 										</div>
@@ -620,7 +619,7 @@ const PreviewDock = ({
 										<p>{t('github')}</p>
 									</TooltipContent>
 								</Tooltip>
-							</DockIcon>
+							</DockIcon> */}
 						</div>
 					</Dock>
 				</TooltipProvider>

@@ -165,7 +165,7 @@
 		"templates": {
 			"title": "模板",
 			"useTemplate": "使用此模板",
-			"imported": "导入的简历",
+			"imported": "已导入的简历",
 			"preview": "预览",
 			"switchTemplate": "切换模版",
 			"classic": {

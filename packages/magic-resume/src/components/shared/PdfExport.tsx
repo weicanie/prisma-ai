@@ -1,23 +1,23 @@
 "use client";
-import React, { useState, useRef } from "react";
-import { useTranslations } from "next-intl";
-import {
-  Download,
-  Loader2,
-  FileJson,
-  Printer,
-  ChevronDown
-} from "lucide-react";
-import { toast } from "sonner";
-import { useResumeStore } from "@/store/useResumeStore";
 import { Button } from "@/components/ui/button";
-import { PDF_EXPORT_CONFIG } from "@/config";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { PDF_EXPORT_CONFIG } from "@/config";
+import { useResumeStore } from "@/store/useResumeStore";
+import {
+  ChevronDown,
+  Download,
+  FileJson,
+  Loader2,
+  Printer
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
 
 const getOptimizedStyles = () => {
   const styleCache = new Map();
@@ -333,10 +333,10 @@ const PdfExport = () => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={handleExport} disabled={isLoading}>
+          {/* <DropdownMenuItem onClick={handleExport} disabled={isLoading}>
             <Download className="w-4 h-4 mr-2" />
             {t("button.exportPdf")}
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
           <DropdownMenuItem onClick={handlePrint} disabled={isLoading}>
             <Printer className="w-4 h-4 mr-2" />
             {t("button.print")}

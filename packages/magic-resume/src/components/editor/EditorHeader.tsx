@@ -34,17 +34,30 @@ export function EditorHeader({ isMobile }: EditorHeaderProps) {
 		>
 			<div className="flex items-center justify-between px-6 h-full pr-2">
 				<div className="flex items-center space-x-6  scrollbar-hide">
-					<motion.div
+				<motion.div
+						whileHover={{ scale: 1.05 }}
+						whileTap={{ scale: 0.95 }}
+						transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+					>
+						<Button
+							onClick={() => router.push(process.env.NEXT_PUBLIC_NGINX_PREFIX ? process.env.NEXT_PUBLIC_NGINX_PREFIX + '/app/dashboard/resumes' : '/app/dashboard/resumes')}
+							variant="default"
+							className="bg-gray-900 text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
+						>
+							{t('templates.imported')}
+						</Button>
+					</motion.div>
+					{/* <motion.div
 						className="flex items-center space-x-2 shrink-0 cursor-pointer"
 						whileHover={{ scale: 1.02 }}
 						whileTap={{ scale: 0.98 }}
 						onClick={() => {
-							router.push('/app/dashboard');
+							router.push(process.env.NEXT_PUBLIC_NGINX_PREFIX ? process.env.NEXT_PUBLIC_NGINX_PREFIX + '/app/dashboard' : '/app/dashboard');
 						}}
 					>
 						<span className="text-lg font-semibold">{t('common.title')}</span>
-						{/* <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" /> */}
-					</motion.div>
+						<div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+					</motion.div> */}
 				</div>
 
 				<div className="flex items-center space-x-3">

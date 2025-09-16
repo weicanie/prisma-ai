@@ -69,7 +69,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 			// 这里可以添加子菜单展开/折叠的逻辑
 		} else {
 			// 如果没有子菜单，直接导航
-			router.push(item.url || item.href || '/');
+			router.push((item.url || item.href || '/'));
 		}
 	};
 

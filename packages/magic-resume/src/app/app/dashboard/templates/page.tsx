@@ -81,7 +81,7 @@ const TemplatesPage = () => {
 			});
 		}
 
-		router.push(`/app/workbench/${resumeId}`);
+		router.push(process.env.NEXT_PUBLIC_NGINX_PREFIX ? process.env.NEXT_PUBLIC_NGINX_PREFIX + `/app/workbench/${resumeId}` : `/app/workbench/${resumeId}`);
 	};
 
 	return (
@@ -98,7 +98,7 @@ const TemplatesPage = () => {
 						transition={{ type: 'spring', stiffness: 400, damping: 17 }}
 					>
 						<Button
-							onClick={() => router.push('/app/dashboard/resumes')}
+							onClick={() => router.push(process.env.NEXT_PUBLIC_NGINX_PREFIX ? process.env.NEXT_PUBLIC_NGINX_PREFIX + '/app/dashboard/resumes' : '/app/dashboard/resumes')}
 							variant="default"
 							className="bg-gray-900 text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
 						>

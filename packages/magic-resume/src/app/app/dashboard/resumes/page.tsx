@@ -69,7 +69,7 @@ const ResumeWorkbench = () => {
 	};
 
 	const handleCreateResumeFromTemplate = () => {
-		router.push('/app/dashboard/templates');
+		router.push(process.env.NEXT_PUBLIC_NGINX_PREFIX ? process.env.NEXT_PUBLIC_NGINX_PREFIX + '/app/dashboard/templates' : '/app/dashboard/templates');
 	};
 
 	const handleImportJson = () => {
@@ -299,7 +299,7 @@ const ResumeWorkbench = () => {
 													onClick={e => {
 														e.stopPropagation();
 														setActiveResume(id);
-														router.push(`/app/workbench/${id}`);
+														router.push(process.env.NEXT_PUBLIC_NGINX_PREFIX ? process.env.NEXT_PUBLIC_NGINX_PREFIX + `/app/workbench/${id}` : `/app/workbench/${id}`);
 													}}
 												>
 													{t('common.edit')}

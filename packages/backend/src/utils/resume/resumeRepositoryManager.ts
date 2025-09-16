@@ -6,6 +6,7 @@ const resumesDirPath = path.join(process.cwd(), '..', '..', 'resumes');
 const resumesDirManager = {
 	createFile: async (fileName: string, content: string) => {
 		try {
+			resumesDirManager._initResumesDir();
 			fs.writeFileSync(path.join(resumesDirPath, fileName), content);
 		} catch (error) {
 			console.error('Error creating file:', error);
@@ -13,6 +14,7 @@ const resumesDirManager = {
 	},
 	removeFile: async (fileName: string) => {
 		try {
+			resumesDirManager._initResumesDir();
 			fs.unlinkSync(path.join(resumesDirPath, fileName));
 		} catch (error) {
 			console.error('Error removing file:', error);
@@ -20,6 +22,7 @@ const resumesDirManager = {
 	},
 	getFile: async (fileName: string) => {
 		try {
+			resumesDirManager._initResumesDir();
 			return fs.readFileSync(path.join(resumesDirPath, fileName), 'utf-8');
 		} catch (error) {
 			console.error('Error getting file:', error);
@@ -28,6 +31,7 @@ const resumesDirManager = {
 	//获取当前目录中的所有json文件内容
 	getFiles: async () => {
 		try {
+			resumesDirManager._initResumesDir();
 			const files = fs.readdirSync(resumesDirPath);
 			const jsonFiles = files.filter(file => file.endsWith('.json'));
 			const filesContent = jsonFiles.map(file =>
@@ -36,6 +40,11 @@ const resumesDirManager = {
 			return filesContent;
 		} catch (error) {
 			console.error('Error getting files:', error);
+		}
+	},
+	_initResumesDir() {
+		if (!fs.existsSync(resumesDirPath)) {
+			fs.mkdirSync(resumesDirPath);
 		}
 	}
 };
@@ -100,3 +109,4 @@ const serverResumefileManager: ResumeRepositoryManager = {
 };
 
 export { serverResumefileManager };
+
