@@ -18,7 +18,7 @@ COPY ./package.json ./pnpm-lock.yaml ./pnpm-workspace.yaml* ./
 COPY ./packages/frontend/package.json ./packages/frontend/
 COPY ./packages/shared/package.json ./packages/shared/
 
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --filter frontend --filter @prisma-ai/shared --frozen-lockfile
 
 COPY ./packages/shared ./packages/shared
 COPY ./packages/frontend ./packages/frontend

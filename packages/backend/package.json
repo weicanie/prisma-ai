@@ -22,8 +22,6 @@
     "p:md": "prisma migrate dev"
   },
   "dependencies": {
-    "@copilotkit/runtime": "^1.8.13",
-    "@huggingface/inference": "^4.0.4",
     "@langchain/community": "^0.3.42",
     "@langchain/core": "^0.3.64",
     "@langchain/deepseek": "^0.0.1",
@@ -75,7 +73,6 @@
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
     "sharp": "^0.34.2",
-    "tesseract.js": "^6.0.1",
     "tree-sitter": "^0.25.0",
     "tree-sitter-cpp": "^0.23.4",
     "tree-sitter-go": "^0.23.4",
@@ -83,8 +80,8 @@
     "tree-sitter-javascript": "^0.23.1",
     "tree-sitter-python": "^0.23.6",
     "tree-sitter-typescript": "^0.23.2",
-    "turndown": "^7.2.0",
-    "zod-to-json-schema": "^3.24.5"
+    "zod-to-json-schema": "^3.24.5",
+		"cross-env": "^10.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
