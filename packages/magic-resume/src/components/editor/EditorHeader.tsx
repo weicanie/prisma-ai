@@ -44,7 +44,7 @@ export function EditorHeader({ isMobile }: EditorHeaderProps) {
 							variant="default"
 							className="bg-gray-900 text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
 						>
-							{t('templates.imported')}
+							{t('dashboard.templates.imported')}
 						</Button>
 					</motion.div>
 					{/* <motion.div
