@@ -6,12 +6,12 @@ on:
   workflow_dispatch:
     inputs:
       image_name:
-        description: '要构建的镜像名称 (例如 prisma-ai-nginx)'
+        description: '要构建的镜像名称'
         required: true
         type: string
         default: 'prisma-ai-nginx'
       dockerfile_path:
-        description: 'Dockerfile 的路径 (例如 ./docker/frontend/Dockerfile)'
+        description: 'Dockerfile 的路径'
         required: true
         type: string
         default: './docker/frontend/Dockerfile'
@@ -49,7 +49,6 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           # 定义镜像的完整名称，格式为 '用户名/镜像名'
-          # 如果是手动触发，使用输入的 image_name；否则，默认使用 'prisma-ai-nginx'
           images: onlyie/${{ github.event.inputs.image_name || 'prisma-ai-nginx' }}
           # 定义标签的生成规则，可以同时生成多个标签
           tags: |
@@ -91,7 +90,6 @@ jobs:
         with:
           # Docker 构建上下文的路径，'.' 表示项目根目录。
           context: .
-          # Dockerfile 的路径，优先使用手动输入的路径，如果未提供，则使用默认的后端 Dockerfile 路径。
           file: ${{ github.event.inputs.dockerfile_path || './docker/frontend/Dockerfile.CI' }}
           # 多平台构建，为不同平台的用户提供适配的镜像
           platforms: linux/amd64,linux/arm64
