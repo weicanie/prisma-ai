@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.6](https://github.com/weicanie/prisma-ai/compare/v4.1.5...v4.1.6) (2025-09-17)
+
+### Features
+
+- iframe嵌入与路由支持 ([3c60b36](https://github.com/weicanie/prisma-ai/commit/3c60b36876fab15e856dec788b8ed2dedd62d03f))
+
 ## [4.8.6](https://github.com/weicanie/prisma-ai/compare/v4.1.5...v4.8.6) (2025-09-16)
 
 ### Features
