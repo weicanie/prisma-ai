@@ -288,7 +288,7 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 		<>
 			<PageHeader
 				title={title ?? '简历'}
-				description={description ?? '选择一个职业技能, 若干项目经验, 组合成您的简历'}
+				description={description ?? '组装您的简历并导出到简历编辑器进行编辑'}
 			></PageHeader>
 			<div className="pl-10 pr-10">
 				<ConfigDataTable dataTableConfig={dataTableConfig} data={resumeDatas} />

@@ -4,10 +4,12 @@ import {
 	CircleDollarSign,
 	FileText,
 	GraduationCap,
+	LayoutList,
 	LibraryBig,
 	ListChecks,
 	Pyramid,
 	Sparkles,
+	SquarePen,
 	Target,
 	type LucideIcon
 } from 'lucide-react';
@@ -84,27 +86,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				icon: Sparkles,
 				url: '/main/projects'
 			},
-			{
-				title: '教育经历',
-				icon: GraduationCap,
-				url: '/main/education',
-				groupLabel: '简历编写'
-			},
-			{
-				title: '工作经历',
-				icon: Briefcase,
-				url: '/main/career'
-			},
-			{
-				title: '组装简历',
-				icon: FileText,
-				url: '/main/resumes'
-			},
-			{
-				title: '简历编辑',
-				icon: FileText,
-				url: '/main/resume-editor'
-			},
+
 			{
 				title: '岗位数据获取',
 				icon: CircleDollarSign,
@@ -126,7 +108,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				icon: Book,
 				url: '/main/offer/anki',
 				groupLabel: '面向offer学习'
-			}
+			},
+			{
+				title: '教育经历',
+				icon: GraduationCap,
+				url: '/main/education',
+				groupLabel: '简历编辑'
+			},
+			{
+				title: '工作经历',
+				icon: Briefcase,
+				url: '/main/career'
+			},
+			{
+				title: '简历组装、导出',
+				icon: LayoutList,
+				url: '/main/resumes'
+			},
+			{
+				title: '简历编辑器',
+				icon: SquarePen,
+				url: '/main/resume-editor'
+			},
 		]
 	};
 	// const { state, open, setOpen, openMobile, setOpenMobile, isMobile, toggleSidebar } = useSidebar();
