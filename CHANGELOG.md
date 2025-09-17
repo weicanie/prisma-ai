@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.7](https://github.com/weicanie/prisma-ai/compare/v4.1.6...v4.1.7) (2025-09-17)
+
+### Bug Fixes
+
+- type error ([153cdde](https://github.com/weicanie/prisma-ai/commit/153cdde0a0ea53a65052d5a413821e261c01cf18))
+
 ## [4.1.6](https://github.com/weicanie/prisma-ai/compare/v4.1.5...v4.1.6) (2025-09-17)
 
 ### Bug Fixes
