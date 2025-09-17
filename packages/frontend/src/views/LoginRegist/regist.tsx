@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import registAgreement from '@/assets/注册协议.md?raw';
-import privacyAgreement from '@/assets/隐私协议.md?raw';
+// import registAgreement from '@/assets/注册协议.md?raw';
+// import privacyAgreement from '@/assets/隐私协议.md?raw';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
@@ -93,9 +93,9 @@ export default function Register() {
 
 	const openAgreementDialog = (type: 'regist' | 'privacy') => {
 		if (type === 'regist') {
-			setDialogContent({ title: '注册协议', content: registAgreement });
+			setDialogContent({ title: '注册协议', content: '' });
 		} else {
-			setDialogContent({ title: '隐私政策', content: privacyAgreement });
+			setDialogContent({ title: '隐私政策', content: '' });
 		}
 		setDialogOpen(true);
 	};
