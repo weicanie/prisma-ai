@@ -13,7 +13,8 @@ export default function LandingPage() {
 	return (
 		<>
 			<Header />
-			<main>
+			{/* 避免浏览器暗色模式下，页面背景色为黑色导致文字模糊不清 */}
+			<main className="bg-white">
 				<Hero />
 				<PrimaryFeatures />
 				<SecondaryFeatures />

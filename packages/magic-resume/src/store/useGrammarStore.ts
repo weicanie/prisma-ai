@@ -1,9 +1,10 @@
-import { create } from "zustand";
-import { toast } from "sonner";
-import Mark from "mark.js";
-import { useAIConfigStore } from "@/store/useAIConfigStore";
 import { AI_MODEL_CONFIGS } from "@/config/ai";
 import { cn } from "@/lib/utils";
+import { useAIConfigStore } from "@/store/useAIConfigStore";
+import { toast } from "sonner";
+import { create } from "zustand";
+//@ts-ignore
+import Mark from "mark.js";
 
 export interface GrammarError {
   error: string;

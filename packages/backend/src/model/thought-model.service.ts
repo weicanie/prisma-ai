@@ -10,7 +10,7 @@ import { z } from 'zod';
 import { DeepSeekStreamChunk } from '../type/sse';
 import { ModelService } from './model.service';
 // FIXME streamEvents + tool方案是可以实现gemini的思考/答案的分离输出，但prompt复杂（比如现在的要求复杂JSON输出）gemini的生成格式就会出错
-// TODO gemini-2.5-pro的思考/答案分离输出（不进行结构化），然后使用deepseek-chat进行结构化输出！！！
+// TODO gemini-2.5-pro的思考/答案分离输出（不进行结构化），然后使用deepseek-chat进行结构化输出
 // ChatGoogleGenerativeAI的特殊性？json、stream选项
 
 /**

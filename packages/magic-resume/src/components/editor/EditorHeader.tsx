@@ -1,12 +1,10 @@
 'use client';
 import { Button } from '@/components/ui/button';
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { Input } from '@/components/ui/input';
 import { useGrammarCheck } from '@/hooks/useGrammarCheck';
 import { useResumeStore } from '@/store/useResumeStore';
 import { getThemeConfig } from '@/theme/themeConfig';
 import { motion } from 'framer-motion';
-import { AlertCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import PdfExport from '../shared/PdfExport';
@@ -61,7 +59,7 @@ export function EditorHeader({ isMobile }: EditorHeaderProps) {
 				</div>
 
 				<div className="flex items-center space-x-3">
-					{errors.length > 0 && (
+					{/* {errors.length > 0 && (
 						<HoverCard>
 							<HoverCardTrigger asChild>
 								<div className="flex items-center space-x-1 cursor-pointer">
@@ -109,7 +107,7 @@ export function EditorHeader({ isMobile }: EditorHeaderProps) {
 								</div>
 							</HoverCardContent>
 						</HoverCard>
-					)}
+					)} */}
 					<Input
 						defaultValue={activeResume?.title || ''}
 						onBlur={e => {
