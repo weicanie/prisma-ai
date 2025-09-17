@@ -11,9 +11,6 @@ An open-source, free AI Career co-pilot that automates the entire process from r
 </div>
 
 <p align="center">
-  <a href="https://github.com/weicanie/prisma-ai/blob/main/LICENSE">
-    <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License">
-  </a>
   <a href="https://github.com/weicanie/prisma-ai/issues">
     <img src="https://img.shields.io/github/issues/weicanie/prisma-ai.svg" alt="Issues">
   </a>
@@ -169,4 +166,5 @@ We believe that with the power of the community, we can make Prisma-AI even bett
     - (2) Commercial competition, data resale, or other profit-seeking activities;
     - (3) High-frequency access that interferes with the normal operation of the website.
     - (4) Any behavior that violates the relevant laws and regulations of the People's Republic of China.
+
 
