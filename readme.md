@@ -175,6 +175,29 @@ Prisma‑AI 解决你求职时最头疼的 4 件事：
 
 ---
 
+## 📜 版权声明与许可证
+
+### 主项目许可证
+本项目（Prisma-AI）的主要代码遵循自定义版权协议，版权归 weicanie 所有。详细信息请参阅根目录下的 [LICENSE](LICENSE) 文件。
+
+### 第三方组件许可证
+本项目包含以下第三方开源组件，它们各自遵循不同的许可证：
+
+| 组件 | 路径 | 原项目 | 许可证 |
+|------|------|--------|--------|
+| Magic Resume 简历编辑器 | `packages/magic-resume/` | [JOYCEQL/magic-resume](https://github.com/JOYCEQL/magic-resume) | Apache License 2.0 + 商业条款 |
+
+**重要提示**：
+- 每个第三方组件都保留了其原始的 LICENSE 文件和版权声明
+- 使用这些组件时，请遵循其各自的许可证条款
+- 如需商业使用涉及第三方组件的功能，请查阅对应组件的许可证要求
+
+### 版权归属
+- **Prisma-AI 核心功能**：Copyright © 2025 - Present. weicanie <weicanie@outlook.com>
+- **Magic Resume 组件**：基于 Apache License 2.0，原作者为 JOYCEQL
+
+---
+
 ## ⚖️ 声明
 
 1.  运行本项目产出的所有数据都应只作为参考和学习使用。
