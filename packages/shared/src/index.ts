@@ -10,7 +10,7 @@ export * from './types/hjm';
 export * from './types/hjm.schema';
 export * from './types/job';
 export * from './types/job.schema';
-export * from './types/knowBase';
+export * from './types/knowbase/project';
 export * from './types/learn';
 export * from './types/learn.schema';
 export * from './types/login_regist';

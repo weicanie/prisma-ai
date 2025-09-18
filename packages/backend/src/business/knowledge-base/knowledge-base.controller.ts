@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { type UserInfoFromToken } from '@prisma-ai/shared';
 
-import { type PaginatedKnsResult, type UpdateKnowledgeDto } from '@prisma-ai/shared';
+import { type PaginatedProjectKnsResult, type UpdateProjectKnowledgeDto } from '@prisma-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { CreateKnowledgebaseDto } from './dto/create-knowledgebase.dto';
 import { KnowledgebaseService } from './knowledge-base.service';
@@ -25,7 +25,7 @@ export class KnowledgebaseController {
 		@UserInfo() userInfo: UserInfoFromToken,
 		@Query('page') page?: string,
 		@Query('limit') limit?: string
-	): Promise<PaginatedKnsResult> {
+	): Promise<PaginatedProjectKnsResult> {
 		// Added return type
 		const pageNumber = page ? parseInt(page, 10) : 1;
 		const limitNumber = limit ? parseInt(limit, 10) : 10;
@@ -42,7 +42,7 @@ export class KnowledgebaseController {
 	@Patch(':id')
 	update(
 		@Param('id') id: string,
-		@Body() updateKnowledgeDto: UpdateKnowledgeDto,
+		@Body() updateKnowledgeDto: UpdateProjectKnowledgeDto,
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
 		return this.knowledgebaseService.update(id, updateKnowledgeDto, userInfo);

@@ -56,9 +56,10 @@ async function retrieveNode(
 			? knowledgeVDBService.retrieveKonwbase_CRAG(
 					query,
 					agentConfig.topK.plan_step.knowledge,
-					userId
+					userId,
+					projectName
 				)
-			: knowledgeVDBService.retrieveKonwbase(query, agentConfig.topK.plan_step.knowledge, userId)
+			: knowledgeVDBService.retrieveKnowbase(query, agentConfig.topK.plan_step.knowledge, userId, projectName)
 	]);
 
 	const newStepPlan: Plan_step = {
@@ -403,3 +404,4 @@ PlanStepGraph.addEdge(START, 'retrieve')
 	.addEdge('generate_final_prompt', 'write_prompt_to_file')
 	.addEdge('write_prompt_to_file', END);
 export { PlanStepGraph };
+
