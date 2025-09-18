@@ -1,0 +1,590 @@
+<svg aria-roledescription="class" class="classDiagram" id="mermaid-oepee2x24me" preserveAspectRatio="xMidYMid meet" role="graphics-document document" viewBox="0 0 1132.515625 696" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <style>
+  #mermaid-oepee2x24me{font-family:ui-sans-serif,-apple-system,system-ui,Segoe UI,Helvetica;font-size:16px;fill:#333;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#mermaid-oepee2x24me .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#mermaid-oepee2x24me .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#mermaid-oepee2x24me .error-icon{fill:#dddddd;}#mermaid-oepee2x24me .error-text{fill:#222222;stroke:#222222;}#mermaid-oepee2x24me .edge-thickness-normal{stroke-width:1px;}#mermaid-oepee2x24me .edge-thickness-thick{stroke-width:3.5px;}#mermaid-oepee2x24me .edge-pattern-solid{stroke-dasharray:0;}#mermaid-oepee2x24me .edge-thickness-invisible{stroke-width:0;fill:none;}#mermaid-oepee2x24me .edge-pattern-dashed{stroke-dasharray:3;}#mermaid-oepee2x24me .edge-pattern-dotted{stroke-dasharray:2;}#mermaid-oepee2x24me .marker{fill:#999;stroke:#999;}#mermaid-oepee2x24me .marker.cross{stroke:#999;}#mermaid-oepee2x24me svg{font-family:ui-sans-serif,-apple-system,system-ui,Segoe UI,Helvetica;font-size:16px;}#mermaid-oepee2x24me p{margin:0;}#mermaid-oepee2x24me g.classGroup text{fill:#dddddd;stroke:none;font-family:ui-sans-serif,-apple-system,system-ui,Segoe UI,Helvetica;font-size:10px;}#mermaid-oepee2x24me g.classGroup text .title{font-weight:bolder;}#mermaid-oepee2x24me .nodeLabel,#mermaid-oepee2x24me .edgeLabel{color:#333333;}#mermaid-oepee2x24me .edgeLabel .label rect{fill:#ffffff;}#mermaid-oepee2x24me .label text{fill:#333333;}#mermaid-oepee2x24me .labelBkg{background:#ffffff;}#mermaid-oepee2x24me .edgeLabel .label span{background:#ffffff;}#mermaid-oepee2x24me .classTitle{font-weight:bolder;}#mermaid-oepee2x24me .node rect,#mermaid-oepee2x24me .node circle,#mermaid-oepee2x24me .node ellipse,#mermaid-oepee2x24me .node polygon,#mermaid-oepee2x24me .node path{fill:#ffffff;stroke:#dddddd;stroke-width:1px;}#mermaid-oepee2x24me .divider{stroke:#dddddd;stroke-width:1;}#mermaid-oepee2x24me g.clickable{cursor:pointer;}#mermaid-oepee2x24me g.classGroup rect{fill:#ffffff;stroke:#dddddd;}#mermaid-oepee2x24me g.classGroup line{stroke:#dddddd;stroke-width:1;}#mermaid-oepee2x24me .classLabel .box{stroke:none;stroke-width:0;fill:#ffffff;opacity:0.5;}#mermaid-oepee2x24me .classLabel .label{fill:#dddddd;font-size:10px;}#mermaid-oepee2x24me .relation{stroke:#999;stroke-width:1;fill:none;}#mermaid-oepee2x24me .dashed-line{stroke-dasharray:3;}#mermaid-oepee2x24me .dotted-line{stroke-dasharray:1 2;}#mermaid-oepee2x24me #compositionStart,#mermaid-oepee2x24me .composition{fill:#999!important;stroke:#999!important;stroke-width:1;}#mermaid-oepee2x24me #compositionEnd,#mermaid-oepee2x24me .composition{fill:#999!important;stroke:#999!important;stroke-width:1;}#mermaid-oepee2x24me #dependencyStart,#mermaid-oepee2x24me .dependency{fill:#999!important;stroke:#999!important;stroke-width:1;}#mermaid-oepee2x24me #dependencyStart,#mermaid-oepee2x24me .dependency{fill:#999!important;stroke:#999!important;stroke-width:1;}#mermaid-oepee2x24me #extensionStart,#mermaid-oepee2x24me .extension{fill:transparent!important;stroke:#999!important;stroke-width:1;}#mermaid-oepee2x24me #extensionEnd,#mermaid-oepee2x24me .extension{fill:transparent!important;stroke:#999!important;stroke-width:1;}#mermaid-oepee2x24me #aggregationStart,#mermaid-oepee2x24me .aggregation{fill:transparent!important;stroke:#999!important;stroke-width:1;}#mermaid-oepee2x24me #aggregationEnd,#mermaid-oepee2x24me .aggregation{fill:transparent!important;stroke:#999!important;stroke-width:1;}#mermaid-oepee2x24me #lollipopStart,#mermaid-oepee2x24me .lollipop{fill:#ffffff!important;stroke:#999!important;stroke-width:1;}#mermaid-oepee2x24me #lollipopEnd,#mermaid-oepee2x24me .lollipop{fill:#ffffff!important;stroke:#999!important;stroke-width:1;}#mermaid-oepee2x24me .edgeTerminals{font-size:11px;line-height:initial;}#mermaid-oepee2x24me .classTitleText{text-anchor:middle;font-size:18px;fill:#333;}#mermaid-oepee2x24me :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}
+ </style>
+ <g>
+  <defs>
+   <marker class="marker aggregation class" id="mermaid-oepee2x24me_class-aggregationStart" markerheight="240" markerwidth="190" orient="auto" refx="18" refy="7">
+    <path d="M 18,7 L9,13 L1,7 L9,1 Z"/>
+   </marker>
+  </defs>
+  <defs>
+   <marker class="marker aggregation class" id="mermaid-oepee2x24me_class-aggregationEnd" markerheight="28" markerwidth="20" orient="auto" refx="1" refy="7">
+    <path d="M 18,7 L9,13 L1,7 L9,1 Z"/>
+   </marker>
+  </defs>
+  <defs>
+   <marker class="marker extension class" id="mermaid-oepee2x24me_class-extensionStart" markerheight="240" markerwidth="190" orient="auto" refx="18" refy="7">
+    <path d="M 1,7 L18,13 V 1 Z"/>
+   </marker>
+  </defs>
+  <defs>
+   <marker class="marker extension class" id="mermaid-oepee2x24me_class-extensionEnd" markerheight="28" markerwidth="20" orient="auto" refx="1" refy="7">
+    <path d="M 1,1 V 13 L18,7 Z"/>
+   </marker>
+  </defs>
+  <defs>
+   <marker class="marker composition class" id="mermaid-oepee2x24me_class-compositionStart" markerheight="240" markerwidth="190" orient="auto" refx="18" refy="7">
+    <path d="M 18,7 L9,13 L1,7 L9,1 Z"/>
+   </marker>
+  </defs>
+  <defs>
+   <marker class="marker composition class" id="mermaid-oepee2x24me_class-compositionEnd" markerheight="28" markerwidth="20" orient="auto" refx="1" refy="7">
+    <path d="M 18,7 L9,13 L1,7 L9,1 Z"/>
+   </marker>
+  </defs>
+  <defs>
+   <marker class="marker dependency class" id="mermaid-oepee2x24me_class-dependencyStart" markerheight="240" markerwidth="190" orient="auto" refx="6" refy="7">
+    <path d="M 5,7 L9,13 L1,7 L9,1 Z"/>
+   </marker>
+  </defs>
+  <defs>
+   <marker class="marker dependency class" id="mermaid-oepee2x24me_class-dependencyEnd" markerheight="28" markerwidth="20" orient="auto" refx="13" refy="7">
+    <path d="M 18,7 L9,13 L14,7 L9,1 Z"/>
+   </marker>
+  </defs>
+  <defs>
+   <marker class="marker lollipop class" id="mermaid-oepee2x24me_class-lollipopStart" markerheight="240" markerwidth="190" orient="auto" refx="13" refy="7">
+    <circle cx="7" cy="7" fill="transparent" r="6" stroke="black"/>
+   </marker>
+  </defs>
+  <defs>
+   <marker class="marker lollipop class" id="mermaid-oepee2x24me_class-lollipopEnd" markerheight="240" markerwidth="190" orient="auto" refx="1" refy="7">
+    <circle cx="7" cy="7" fill="transparent" r="6" stroke="black"/>
+   </marker>
+  </defs>
+  <g class="root">
+   <g class="clusters"/>
+   <g class="edgePaths">
+    <path class="edge-thickness-normal edge-pattern-solid relation" d="M205.86,358.246L200.442,361.038C195.024,363.831,184.188,369.415,178.77,376.374C173.352,383.333,173.352,391.667,173.352,395.833L173.352,400" id="id_BaseChatModel_ChatOpenAI_1" marker-start="url(#mermaid-oepee2x24me_class-extensionStart)" style=";"/>
+    <path class="edge-thickness-normal edge-pattern-solid relation" d="M553.66,368L553.66,369.167C553.66,370.333,553.66,372.667,553.66,378C553.66,383.333,553.66,391.667,553.66,395.833L553.66,400" id="id_BaseChatModel_ChatAnthropic_2" marker-start="url(#mermaid-oepee2x24me_class-extensionStart)" style=";"/>
+    <path class="edge-thickness-normal edge-pattern-solid relation" d="M912.558,358.035L918.226,360.862C923.894,363.69,935.23,369.345,940.898,376.339C946.566,383.333,946.566,391.667,946.566,395.833L946.566,400" id="id_BaseChatModel_ChatMistralAI_3" marker-start="url(#mermaid-oepee2x24me_class-extensionStart)" style=";"/>
+   </g>
+   <g class="edgeLabels">
+    <g class="edgeLabel">
+     <g class="label" transform="translate(0, -12)">
+      <foreignObject height="24" width="100%">
+       <div class="labelBkg" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+        <span class="edgeLabel" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;"/>
+       </div>
+      </foreignObject>
+     </g>
+    </g>
+    <g class="edgeLabel">
+     <g class="label" transform="translate(0, -12)">
+      <foreignObject height="24" width="100%">
+       <div class="labelBkg" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+        <span class="edgeLabel" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;"/>
+       </div>
+      </foreignObject>
+     </g>
+    </g>
+    <g class="edgeLabel">
+     <g class="label" transform="translate(0, -12)">
+      <foreignObject height="24" width="100%">
+       <div class="labelBkg" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+        <span class="edgeLabel" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;"/>
+       </div>
+      </foreignObject>
+     </g>
+    </g>
+   </g>
+   <g class="nodes">
+    <g class="node default" id="classId-BaseChatModel-0" transform="translate(553.66015625, 179)">
+     <g class="basic label-container">
+      <path d="M-351.8671875 -171 L351.8671875 -171 L351.8671875 171 L-351.8671875 171" fill="#ffffff" stroke="none" stroke-width="0" style=""/>
+      <path d="M-351.8671875 -171 C-195.52058660743526 -171, -39.173985714870525 -171, 351.8671875 -171 M-351.8671875 -171 C-174.63430571220033 -171, 2.5985760755993397 -171, 351.8671875 -171 M351.8671875 -171 C351.8671875 -39.10580822210315, 351.8671875 92.7883835557937, 351.8671875 171 M351.8671875 -171 C351.8671875 -37.307584214042464, 351.8671875 96.38483157191507, 351.8671875 171 M351.8671875 171 C202.43424910158296 171, 53.00131070316593 171, -351.8671875 171 M351.8671875 171 C92.23659980302659 171, -167.39398789394681 171, -351.8671875 171 M-351.8671875 171 C-351.8671875 48.26905485014544, -351.8671875 -74.46189029970913, -351.8671875 -171 M-351.8671875 171 C-351.8671875 99.9806971978415, -351.8671875 28.961394395682987, -351.8671875 -171" fill="none" stroke="#dddddd" stroke-width="1.3" style=""/>
+     </g>
+     <g class="annotation-group text" transform="translate(-125.65625, -147)">
+      <g class="label" style="" transform="translate(0,-12)">
+       <foreignObject height="24" width="251.3125">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           «abstract from langchain-core»
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+     </g>
+     <g class="label-group text" transform="translate(-69.828125, -123)">
+      <g class="label" style="font-weight: bolder" transform="translate(0,-12)">
+       <foreignObject height="24" width="139.65625">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           BaseChatModel
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+     </g>
+     <g class="members-group text" transform="translate(-339.8671875, -75)"/>
+     <g class="methods-group text" transform="translate(-339.8671875, -45)">
+      <g class="label" style="" transform="translate(0,-12)">
+       <foreignObject height="24" width="544.28125">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +_generate(messages, stop, run_manager, **kwargs) : : ChatResult
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,12)">
+       <foreignObject height="24" width="554.078125">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +_agenerate(messages, stop, run_manager, **kwargs) : : ChatResult
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,36)">
+       <foreignObject height="24" width="497.59375">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +generate(messages, stop, callbacks, **kwargs) : : LLMResult
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,60)">
+       <foreignObject height="24" width="507.40625">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +agenerate(messages, stop, callbacks, **kwargs) : : LLMResult
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,84)">
+       <foreignObject height="24" width="257.375">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +invoke(input, config) : : output
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,108)">
+       <foreignObject height="24" width="268.15625">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +stream(input, config) : : Iterator
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,132)">
+       <foreignObject height="24" width="325.640625">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +astream(input, config) : : AsyncIterator
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,156)">
+       <foreignObject height="24" width="202.171875">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +bind_tools(tools) : : Self
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,180)">
+       <foreignObject height="24" width="330">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +with_structured_output(schema) : : Self
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+     </g>
+     <g class="divider" style="">
+      <path d="M-351.8671875 -99 C-158.39060669839395 -99, 35.085974103212095 -99, 351.8671875 -99 M-351.8671875 -99 C-80.96101425759332 -99, 189.94515898481336 -99, 351.8671875 -99" fill="none" stroke="#dddddd" stroke-width="1.3" style=""/>
+     </g>
+     <g class="divider" style="">
+      <path d="M-351.8671875 -75 C-152.99661132203488 -75, 45.87396485593024 -75, 351.8671875 -75 M-351.8671875 -75 C-108.49698880055769 -75, 134.87320989888462 -75, 351.8671875 -75" fill="none" stroke="#dddddd" stroke-width="1.3" style=""/>
+     </g>
+    </g>
+    <g class="node default" id="classId-ChatOpenAI-1" transform="translate(173.3515625, 544)">
+     <g class="basic label-container">
+      <path d="M-165.3515625 -144 L165.3515625 -144 L165.3515625 144 L-165.3515625 144" fill="#ffffff" stroke="none" stroke-width="0" style=""/>
+      <path d="M-165.3515625 -144 C-67.06001228214376 -144, 31.23153793571248 -144, 165.3515625 -144 M-165.3515625 -144 C-76.71254529944724 -144, 11.926471901105515 -144, 165.3515625 -144 M165.3515625 -144 C165.3515625 -69.55130199097056, 165.3515625 4.897396018058885, 165.3515625 144 M165.3515625 -144 C165.3515625 -36.21402056941858, 165.3515625 71.57195886116284, 165.3515625 144 M165.3515625 144 C61.82781745569832 144, -41.695927588603354 144, -165.3515625 144 M165.3515625 144 C68.69877261499549 144, -27.954017270009018 144, -165.3515625 144 M-165.3515625 144 C-165.3515625 72.3970642041069, -165.3515625 0.794128408213794, -165.3515625 -144 M-165.3515625 144 C-165.3515625 61.57118122235801, -165.3515625 -20.857637555283986, -165.3515625 -144" fill="none" stroke="#dddddd" stroke-width="1.3" style=""/>
+     </g>
+     <g class="annotation-group text" transform="translate(0, -120)"/>
+     <g class="label-group text" transform="translate(-53.609375, -120)">
+      <g class="label" style="font-weight: bolder" transform="translate(0,-12)">
+       <foreignObject height="24" width="107.21875">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           ChatOpenAI
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+     </g>
+     <g class="members-group text" transform="translate(-153.3515625, -72)">
+      <g class="label" style="" transform="translate(0,-12)">
+       <foreignObject height="24" width="148.265625">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +model_name: str
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,12)">
+       <foreignObject height="24" width="160.40625">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +temperature: float
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,36)">
+       <foreignObject height="24" width="219.46875">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +openai_api_key: SecretStr
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,60)">
+       <foreignObject height="24" width="98.390625">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +client: Any
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+     </g>
+     <g class="methods-group text" transform="translate(-153.3515625, 48)">
+      <g class="label" style="" transform="translate(0,-12)">
+       <foreignObject height="24" width="253.09375">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +_convert_messages_to_dicts()
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,12)">
+       <foreignObject height="24" width="180.96875">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +_create_chat_result()
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,36)">
+       <foreignObject height="24" width="89.96875">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +_stream()
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,60)">
+       <foreignObject height="24" width="99.765625">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +_astream()
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+     </g>
+     <g class="divider" style="">
+      <path d="M-165.3515625 -96 C-96.38842452678186 -96, -27.425286553563723 -96, 165.3515625 -96 M-165.3515625 -96 C-92.80743814142764 -96, -20.263313782855278 -96, 165.3515625 -96" fill="none" stroke="#dddddd" stroke-width="1.3" style=""/>
+     </g>
+     <g class="divider" style="">
+      <path d="M-165.3515625 24 C-60.22233187923689 24, 44.90689874152622 24, 165.3515625 24 M-165.3515625 24 C-98.2239454715766 24, -31.096328443153197 24, 165.3515625 24" fill="none" stroke="#dddddd" stroke-width="1.3" style=""/>
+     </g>
+    </g>
+    <g class="node default" id="classId-ChatAnthropic-2" transform="translate(553.66015625, 544)">
+     <g class="basic label-container">
+      <path d="M-164.95703125 -144 L164.95703125 -144 L164.95703125 144 L-164.95703125 144" fill="#ffffff" stroke="none" stroke-width="0" style=""/>
+      <path d="M-164.95703125 -144 C-63.04711920844427 -144, 38.862792833111456 -144, 164.95703125 -144 M-164.95703125 -144 C-38.225787855555666 -144, 88.50545553888867 -144, 164.95703125 -144 M164.95703125 -144 C164.95703125 -47.33140714143762, 164.95703125 49.337185717124754, 164.95703125 144 M164.95703125 -144 C164.95703125 -35.555039856346866, 164.95703125 72.88992028730627, 164.95703125 144 M164.95703125 144 C37.28313446356012 144, -90.39076232287977 144, -164.95703125 144 M164.95703125 144 C93.59037346979171 144, 22.22371568958343 144, -164.95703125 144 M-164.95703125 144 C-164.95703125 77.80856442826867, -164.95703125 11.617128856537335, -164.95703125 -144 M-164.95703125 144 C-164.95703125 76.83422314783147, -164.95703125 9.668446295662932, -164.95703125 -144" fill="none" stroke="#dddddd" stroke-width="1.3" style=""/>
+     </g>
+     <g class="annotation-group text" transform="translate(0, -120)"/>
+     <g class="label-group text" transform="translate(-64.8515625, -120)">
+      <g class="label" style="font-weight: bolder" transform="translate(0,-12)">
+       <foreignObject height="24" width="129.703125">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           ChatAnthropic
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+     </g>
+     <g class="members-group text" transform="translate(-152.95703125, -72)">
+      <g class="label" style="" transform="translate(0,-12)">
+       <foreignObject height="24" width="94.890625">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +model: str
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,12)">
+       <foreignObject height="24" width="160.40625">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +temperature: float
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,36)">
+       <foreignObject height="24" width="241.0625">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +anthropic_api_key: SecretStr
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,60)">
+       <foreignObject height="24" width="98.390625">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +client: Any
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+     </g>
+     <g class="methods-group text" transform="translate(-152.95703125, 48)">
+      <g class="label" style="" transform="translate(0,-12)">
+       <foreignObject height="24" width="175.515625">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +_format_messages()
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,12)">
+       <foreignObject height="24" width="180.96875">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +_create_chat_result()
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,36)">
+       <foreignObject height="24" width="89.96875">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +_stream()
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,60)">
+       <foreignObject height="24" width="99.765625">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +_astream()
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+     </g>
+     <g class="divider" style="">
+      <path d="M-164.95703125 -96 C-74.73092421991578 -96, 15.495182810168444 -96, 164.95703125 -96 M-164.95703125 -96 C-33.22714666707921 -96, 98.50273791584158 -96, 164.95703125 -96" fill="none" stroke="#dddddd" stroke-width="1.3" style=""/>
+     </g>
+     <g class="divider" style="">
+      <path d="M-164.95703125 24 C-67.73325282183339 24, 29.49052560633322 24, 164.95703125 24 M-164.95703125 24 C-93.48956440710874 24, -22.02209756421749 24, 164.95703125 24" fill="none" stroke="#dddddd" stroke-width="1.3" style=""/>
+     </g>
+    </g>
+    <g class="node default" id="classId-ChatMistralAI-3" transform="translate(946.56640625, 544)">
+     <g class="basic label-container">
+      <path d="M-177.94921875 -144 L177.94921875 -144 L177.94921875 144 L-177.94921875 144" fill="#ffffff" stroke="none" stroke-width="0" style=""/>
+      <path d="M-177.94921875 -144 C-81.84333008902719 -144, 14.262558571945618 -144, 177.94921875 -144 M-177.94921875 -144 C-74.30142807814222 -144, 29.346362593715554 -144, 177.94921875 -144 M177.94921875 -144 C177.94921875 -37.74990341767813, 177.94921875 68.50019316464375, 177.94921875 144 M177.94921875 -144 C177.94921875 -68.69255285304374, 177.94921875 6.614894293912528, 177.94921875 144 M177.94921875 144 C36.26203695325779 144, -105.42514484348442 144, -177.94921875 144 M177.94921875 144 C45.022967473242744 144, -87.90328380351451 144, -177.94921875 144 M-177.94921875 144 C-177.94921875 36.93625128182177, -177.94921875 -70.12749743635646, -177.94921875 -144 M-177.94921875 144 C-177.94921875 57.30805956595698, -177.94921875 -29.383880868086038, -177.94921875 -144" fill="none" stroke="#dddddd" stroke-width="1.3" style=""/>
+     </g>
+     <g class="annotation-group text" transform="translate(0, -120)"/>
+     <g class="label-group text" transform="translate(-61.3359375, -120)">
+      <g class="label" style="font-weight: bolder" transform="translate(0,-12)">
+       <foreignObject height="24" width="122.671875">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           ChatMistralAI
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+     </g>
+     <g class="members-group text" transform="translate(-165.94921875, -72)">
+      <g class="label" style="" transform="translate(0,-12)">
+       <foreignObject height="24" width="94.890625">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +model: str
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,12)">
+       <foreignObject height="24" width="160.40625">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +temperature: float
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,36)">
+       <foreignObject height="24" width="220.75">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +mistral_api_key: SecretStr
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,60)">
+       <foreignObject height="24" width="98.390625">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +client: Any
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+     </g>
+     <g class="methods-group text" transform="translate(-165.94921875, 48)">
+      <g class="label" style="" transform="translate(0,-12)">
+       <foreignObject height="24" width="270.5625">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +_convert_messages_to_mistral()
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,12)">
+       <foreignObject height="24" width="180.96875">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +_create_chat_result()
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,36)">
+       <foreignObject height="24" width="89.96875">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +_stream()
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+      <g class="label" style="" transform="translate(0,60)">
+       <foreignObject height="24" width="99.765625">
+        <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+         <span class="nodeLabel markdown-node-label" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           +_astream()
+          </p>
+         </span>
+        </div>
+       </foreignObject>
+      </g>
+     </g>
+     <g class="divider" style="">
+      <path d="M-177.94921875 -96 C-68.75399679113895 -96, 40.44122516772211 -96, 177.94921875 -96 M-177.94921875 -96 C-87.52767873546397 -96, 2.8938612790720697 -96, 177.94921875 -96" fill="none" stroke="#dddddd" stroke-width="1.3" style=""/>
+     </g>
+     <g class="divider" style="">
+      <path d="M-177.94921875 24 C-59.341052643145304 24, 59.26711346370939 24, 177.94921875 24 M-177.94921875 24 C-103.15666865090392 24, -28.36411855180785 24, 177.94921875 24" fill="none" stroke="#dddddd" stroke-width="1.3" style=""/>
+     </g>
+    </g>
+   </g>
+  </g>
+ </g>
+</svg>

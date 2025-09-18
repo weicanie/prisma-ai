@@ -1,0 +1,171 @@
+<svg aria-roledescription="flowchart-v2" class="flowchart" id="mermaid-q0vva9z3gy" preserveAspectRatio="xMidYMid meet" role="graphics-document document" viewBox="0 0 1206.0625 322" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <style>
+  #mermaid-q0vva9z3gy{font-family:ui-sans-serif,-apple-system,system-ui,Segoe UI,Helvetica;font-size:16px;fill:#333;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#mermaid-q0vva9z3gy .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#mermaid-q0vva9z3gy .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#mermaid-q0vva9z3gy .error-icon{fill:#dddddd;}#mermaid-q0vva9z3gy .error-text{fill:#222222;stroke:#222222;}#mermaid-q0vva9z3gy .edge-thickness-normal{stroke-width:1px;}#mermaid-q0vva9z3gy .edge-thickness-thick{stroke-width:3.5px;}#mermaid-q0vva9z3gy .edge-pattern-solid{stroke-dasharray:0;}#mermaid-q0vva9z3gy .edge-thickness-invisible{stroke-width:0;fill:none;}#mermaid-q0vva9z3gy .edge-pattern-dashed{stroke-dasharray:3;}#mermaid-q0vva9z3gy .edge-pattern-dotted{stroke-dasharray:2;}#mermaid-q0vva9z3gy .marker{fill:#999;stroke:#999;}#mermaid-q0vva9z3gy .marker.cross{stroke:#999;}#mermaid-q0vva9z3gy svg{font-family:ui-sans-serif,-apple-system,system-ui,Segoe UI,Helvetica;font-size:16px;}#mermaid-q0vva9z3gy p{margin:0;}#mermaid-q0vva9z3gy .label{font-family:ui-sans-serif,-apple-system,system-ui,Segoe UI,Helvetica;color:#333;}#mermaid-q0vva9z3gy .cluster-label text{fill:#444;}#mermaid-q0vva9z3gy .cluster-label span{color:#444;}#mermaid-q0vva9z3gy .cluster-label span p{background-color:transparent;}#mermaid-q0vva9z3gy .label text,#mermaid-q0vva9z3gy span{fill:#333;color:#333;}#mermaid-q0vva9z3gy .node rect,#mermaid-q0vva9z3gy .node circle,#mermaid-q0vva9z3gy .node ellipse,#mermaid-q0vva9z3gy .node polygon,#mermaid-q0vva9z3gy .node path{fill:#ffffff;stroke:#dddddd;stroke-width:1px;}#mermaid-q0vva9z3gy .rough-node .label text,#mermaid-q0vva9z3gy .node .label text,#mermaid-q0vva9z3gy .image-shape .label,#mermaid-q0vva9z3gy .icon-shape .label{text-anchor:middle;}#mermaid-q0vva9z3gy .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mermaid-q0vva9z3gy .rough-node .label,#mermaid-q0vva9z3gy .node .label,#mermaid-q0vva9z3gy .image-shape .label,#mermaid-q0vva9z3gy .icon-shape .label{text-align:center;}#mermaid-q0vva9z3gy .node.clickable{cursor:pointer;}#mermaid-q0vva9z3gy .root .anchor path{fill:#999!important;stroke-width:0;stroke:#999;}#mermaid-q0vva9z3gy .arrowheadPath{fill:#0b0b0b;}#mermaid-q0vva9z3gy .edgePath .path{stroke:#999;stroke-width:2.0px;}#mermaid-q0vva9z3gy .flowchart-link{stroke:#999;fill:none;}#mermaid-q0vva9z3gy .edgeLabel{background-color:#ffffff;text-align:center;}#mermaid-q0vva9z3gy .edgeLabel p{background-color:#ffffff;}#mermaid-q0vva9z3gy .edgeLabel rect{opacity:0.5;background-color:#ffffff;fill:#ffffff;}#mermaid-q0vva9z3gy .labelBkg{background-color:rgba(255, 255, 255, 0.5);}#mermaid-q0vva9z3gy .cluster rect{fill:#f8f8f8;stroke:#dddddd;stroke-width:1px;}#mermaid-q0vva9z3gy .cluster text{fill:#444;}#mermaid-q0vva9z3gy .cluster span{color:#444;}#mermaid-q0vva9z3gy div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:ui-sans-serif,-apple-system,system-ui,Segoe UI,Helvetica;font-size:12px;background:#dddddd;border:1px solid hsl(0, 0%, 76.6666666667%);border-radius:2px;pointer-events:none;z-index:100;}#mermaid-q0vva9z3gy .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#333;}#mermaid-q0vva9z3gy rect.text{fill:none;stroke-width:0;}#mermaid-q0vva9z3gy .icon-shape,#mermaid-q0vva9z3gy .image-shape{background-color:#ffffff;text-align:center;}#mermaid-q0vva9z3gy .icon-shape p,#mermaid-q0vva9z3gy .image-shape p{background-color:#ffffff;padding:2px;}#mermaid-q0vva9z3gy .icon-shape rect,#mermaid-q0vva9z3gy .image-shape rect{opacity:0.5;background-color:#ffffff;fill:#ffffff;}#mermaid-q0vva9z3gy :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}
+ </style>
+ <g>
+  <marker class="marker flowchart-v2" id="mermaid-q0vva9z3gy_flowchart-v2-pointEnd" markerheight="8" markerunits="userSpaceOnUse" markerwidth="8" orient="auto" refx="5" refy="5" viewbox="0 0 10 10">
+   <path class="arrowMarkerPath" d="M 0 0 L 10 5 L 0 10 z" style="stroke-width: 1; stroke-dasharray: 1, 0;"/>
+  </marker>
+  <marker class="marker flowchart-v2" id="mermaid-q0vva9z3gy_flowchart-v2-pointStart" markerheight="8" markerunits="userSpaceOnUse" markerwidth="8" orient="auto" refx="4.5" refy="5" viewbox="0 0 10 10">
+   <path class="arrowMarkerPath" d="M 0 5 L 10 10 L 10 0 z" style="stroke-width: 1; stroke-dasharray: 1, 0;"/>
+  </marker>
+  <marker class="marker flowchart-v2" id="mermaid-q0vva9z3gy_flowchart-v2-circleEnd" markerheight="11" markerunits="userSpaceOnUse" markerwidth="11" orient="auto" refx="11" refy="5" viewbox="0 0 10 10">
+   <circle class="arrowMarkerPath" cx="5" cy="5" r="5" style="stroke-width: 1; stroke-dasharray: 1, 0;"/>
+  </marker>
+  <marker class="marker flowchart-v2" id="mermaid-q0vva9z3gy_flowchart-v2-circleStart" markerheight="11" markerunits="userSpaceOnUse" markerwidth="11" orient="auto" refx="-1" refy="5" viewbox="0 0 10 10">
+   <circle class="arrowMarkerPath" cx="5" cy="5" r="5" style="stroke-width: 1; stroke-dasharray: 1, 0;"/>
+  </marker>
+  <marker class="marker cross flowchart-v2" id="mermaid-q0vva9z3gy_flowchart-v2-crossEnd" markerheight="11" markerunits="userSpaceOnUse" markerwidth="11" orient="auto" refx="12" refy="5.2" viewbox="0 0 11 11">
+   <path class="arrowMarkerPath" d="M 1,1 l 9,9 M 10,1 l -9,9" style="stroke-width: 2; stroke-dasharray: 1, 0;"/>
+  </marker>
+  <marker class="marker cross flowchart-v2" id="mermaid-q0vva9z3gy_flowchart-v2-crossStart" markerheight="11" markerunits="userSpaceOnUse" markerwidth="11" orient="auto" refx="-1" refy="5.2" viewbox="0 0 11 11">
+   <path class="arrowMarkerPath" d="M 1,1 l 9,9 M 10,1 l -9,9" style="stroke-width: 2; stroke-dasharray: 1, 0;"/>
+  </marker>
+  <g class="root">
+   <g class="clusters"/>
+   <g class="edgePaths"/>
+   <g class="edgeLabels"/>
+   <g class="nodes">
+    <g class="root" transform="translate(0, 0)">
+     <g class="clusters">
+      <g class="cluster" data-look="classic" id="subGraph0">
+       <rect height="306" style="" width="1190.0625" x="8" y="8"/>
+       <g class="cluster-label" transform="translate(503.03125, 8)">
+        <foreignObject height="48" width="200">
+         <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+          <span class="nodeLabel" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+            LangChain Value Proposition
+           </p>
+          </span>
+         </div>
+        </foreignObject>
+       </g>
+      </g>
+     </g>
+     <g class="edgePaths">
+      <path class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" d="M160.867,111.5L160.867,119.75C160.867,128,160.867,144.5,214.021,161.729C267.175,178.958,373.483,196.916,426.636,205.895L479.79,214.874" id="L_A_D_0" marker-end="url(#mermaid-q0vva9z3gy_flowchart-v2-pointEnd)" style=""/>
+      <path class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" d="M458.734,123.5L458.734,129.75C458.734,136,458.734,148.5,470.8,160.705C482.866,172.91,506.997,184.82,519.062,190.775L531.128,196.73" id="L_B_D_0" marker-end="url(#mermaid-q0vva9z3gy_flowchart-v2-pointEnd)" style=""/>
+      <path class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" d="M768.734,123.5L768.734,129.75C768.734,136,768.734,148.5,756.669,160.705C744.603,172.91,720.472,184.82,708.406,190.775L696.341,196.73" id="L_C_D_0" marker-end="url(#mermaid-q0vva9z3gy_flowchart-v2-pointEnd)" style=""/>
+      <path class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" d="M1055.898,111.5L1055.898,119.75C1055.898,128,1055.898,144.5,1004.528,161.638C953.158,178.775,850.417,196.551,799.046,205.439L747.676,214.326" id="L_E_D_0" marker-end="url(#mermaid-q0vva9z3gy_flowchart-v2-pointEnd)" style=""/>
+     </g>
+     <g class="edgeLabels">
+      <g class="edgeLabel">
+       <g class="label" transform="translate(0, 0)">
+        <foreignObject height="1000" width="100%">
+         <div class="labelBkg" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+          <span class="edgeLabel" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;"/>
+         </div>
+        </foreignObject>
+       </g>
+      </g>
+      <g class="edgeLabel">
+       <g class="label" transform="translate(0, 0)">
+        <foreignObject height="1000" width="100%">
+         <div class="labelBkg" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+          <span class="edgeLabel" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;"/>
+         </div>
+        </foreignObject>
+       </g>
+      </g>
+      <g class="edgeLabel">
+       <g class="label" transform="translate(0, 0)">
+        <foreignObject height="1000" width="100%">
+         <div class="labelBkg" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+          <span class="edgeLabel" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;"/>
+         </div>
+        </foreignObject>
+       </g>
+      </g>
+      <g class="edgeLabel">
+       <g class="label" transform="translate(0, 0)">
+        <foreignObject height="1000" width="100%">
+         <div class="labelBkg" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+          <span class="edgeLabel" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;"/>
+         </div>
+        </foreignObject>
+       </g>
+      </g>
+     </g>
+     <g class="nodes">
+      <g class="node default" id="flowchart-A-0" transform="translate(160.8671875, 84.5)">
+       <rect class="basic label-container" height="54" style="" width="235.734375" x="-117.8671875" y="-27"/>
+       <g class="label" style="" transform="translate(-87.8671875, -12)">
+        <rect/>
+        <foreignObject height="24" width="175.734375">
+         <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+          <span class="nodeLabel" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+            Model Interoperability
+           </p>
+          </span>
+         </div>
+        </foreignObject>
+       </g>
+      </g>
+      <g class="node default" id="flowchart-D-1" transform="translate(613.734375, 237.5)">
+       <rect class="basic label-container" height="78" style="" width="260" x="-130" y="-39"/>
+       <g class="label" style="" transform="translate(-100, -24)">
+        <rect/>
+        <foreignObject height="48" width="200">
+         <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+          <span class="nodeLabel" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+            Simplify Application Development
+           </p>
+          </span>
+         </div>
+        </foreignObject>
+       </g>
+      </g>
+      <g class="node default" id="flowchart-B-2" transform="translate(458.734375, 84.5)">
+       <rect class="basic label-container" height="78" style="" width="260" x="-130" y="-39"/>
+       <g class="label" style="" transform="translate(-100, -24)">
+        <rect/>
+        <foreignObject height="48" width="200">
+         <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+          <span class="nodeLabel" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+            Component Composability
+           </p>
+          </span>
+         </div>
+        </foreignObject>
+       </g>
+      </g>
+      <g class="node default" id="flowchart-C-4" transform="translate(768.734375, 84.5)">
+       <rect class="basic label-container" height="78" style="" width="260" x="-130" y="-39"/>
+       <g class="label" style="" transform="translate(-100, -24)">
+        <rect/>
+        <foreignObject height="48" width="200">
+         <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+          <span class="nodeLabel" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+            Data Source Connections
+           </p>
+          </span>
+         </div>
+        </foreignObject>
+       </g>
+      </g>
+      <g class="node default" id="flowchart-E-6" transform="translate(1055.8984375, 84.5)">
+       <rect class="basic label-container" height="54" style="" width="214.328125" x="-107.1640625" y="-27"/>
+       <g class="label" style="" transform="translate(-77.1640625, -12)">
+        <rect/>
+        <foreignObject height="24" width="154.328125">
+         <div style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;" xmlns="http://www.w3.org/1999/xhtml">
+          <span class="nodeLabel" style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+           <p style="color: #202020 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 14px !important; background-color: transparent !important; visibility: visible !important; opacity: 1 !important; display: inline !important; margin: 0 !important; padding: 0 !important; border: none !important;">
+            Agent Construction
+           </p>
+          </span>
+         </div>
+        </foreignObject>
+       </g>
+      </g>
+     </g>
+    </g>
+   </g>
+  </g>
+ </g>
+</svg>

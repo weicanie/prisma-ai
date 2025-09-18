@@ -1,0 +1,9 @@
+services:
+  deepwiki-to-md:
+    # docker build -f ./Dockerfile -t deepwiki-to-md .
+    image: deepwiki-to-md
+    container_name: deepwiki-to-md
+    volumes:
+      # docker run -v 需要处理windows兼容性
+      - ./output:/output
+    command: wiki https://deepwiki.com/weicanie/prisma-ai -o /output
