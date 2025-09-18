@@ -1,1 +1,1 @@
-基于https://github.com/JOYCEQL/magic-resume的简历编辑器。
+基于 https://github.com/JOYCEQL/magic-resume 的简历编辑器。
