@@ -1,8 +1,8 @@
-import { KnowledgeTypeEnum, type CreateKnowledgeDto } from '@prisma-ai/shared';
+import { ProjectKnowledgeTypeEnum, type CreateProjectKnowledgeDto } from '@prisma-ai/shared';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 interface KnowledgeState {
-	data: CreateKnowledgeDto;
+	data: CreateProjectKnowledgeDto;
 }
 
 const initialState: KnowledgeState = {
@@ -10,7 +10,7 @@ const initialState: KnowledgeState = {
 		name: '',
 		fileType: 'txt',
 		tag: [],
-		type: KnowledgeTypeEnum.other,
+		type: ProjectKnowledgeTypeEnum.other,
 		content: ''
 	}
 };
@@ -19,12 +19,12 @@ const knowledgeSlice = createSlice({
 	name: 'knowledge',
 	initialState,
 	reducers: {
-		setKnowledgeDataFromDto: (state, { payload }: PayloadAction<CreateKnowledgeDto>) => {
+		setKnowledgeDataFromDto: (state, { payload }: PayloadAction<CreateProjectKnowledgeDto>) => {
 			state.data = payload;
 		},
 		updateKnowledgeField: (
 			state,
-			{ payload }: PayloadAction<{ field: keyof CreateKnowledgeDto; value: any }>
+			{ payload }: PayloadAction<{ field: keyof CreateProjectKnowledgeDto; value: any }>
 		) => {
 			const { field, value } = payload;
 			(state.data as any)[field] = value;

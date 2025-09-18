@@ -11,7 +11,7 @@ const ProjectUpdate: React.FC<ProjectUpdateProps> = ({ id }) => {
 	const dialogContent = (
 		<>
 			<div className="w-full p-7  overflow-y-auto max-h-[min(80vh,800px)] scb-thin">
-				<Suspense fallback={<div>Loading...</div>}>
+				<Suspense fallback={<div></div>}>
 					<ProjectForm id={id} isUseMdEditor={false} setIsUseMdEditor={() => {}} />
 				</Suspense>
 			</div>

@@ -6,12 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import type { CreateResumeDto, ProjectVo, SkillItem } from '@prisma-ai/shared';
@@ -68,7 +68,7 @@ const ResumeForm: React.FC<ResumeFormProps> = memo(({ onSubmit }) => {
 	);
 
 	if (projectStatus === 'pending' || skillStatus === 'pending') {
-		return <div>Loading...</div>;
+		return <div></div>;
 	}
 
 	if (projectStatus === 'error' || skillStatus === 'error') {

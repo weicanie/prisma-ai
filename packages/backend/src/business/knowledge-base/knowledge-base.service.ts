@@ -118,6 +118,7 @@ export class KnowledgebaseService {
 				({
 					id: (kn._id as Types.ObjectId).toString(),
 					name: kn.name,
+					projectName: kn.projectName,
 					type: kn.type,
 					fileType: kn.fileType,
 					tag: kn.tag,
@@ -147,6 +148,7 @@ export class KnowledgebaseService {
 		return {
 			id: (kn._id as Types.ObjectId).toString(),
 			name: kn.name,
+			projectName: kn.projectName,
 			type: kn.type,
 			fileType: kn.fileType,
 			tag: kn.tag,
@@ -176,6 +178,7 @@ export class KnowledgebaseService {
 		return {
 			id: (existingkn._id as Types.ObjectId).toString(),
 			name: existingkn.name,
+			projectName: existingkn.projectName,
 			type: existingkn.type,
 			fileType: existingkn.fileType,
 			tag: existingkn.tag,

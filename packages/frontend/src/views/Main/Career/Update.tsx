@@ -11,7 +11,7 @@ const CareerUpdate: React.FC<CareerUpdateProps> = ({ id }) => {
 	const dialogContent = (
 		<>
 			<div className="w-full p-7  overflow-y-auto max-h-[min(80vh,800px)] scb-thin">
-				<Suspense fallback={<div>Loading...</div>}>
+				<Suspense fallback={<div></div>}>
 					<CareerForm id={id} />
 				</Suspense>
 			</div>

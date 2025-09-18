@@ -24,7 +24,7 @@ const ResumeRead: React.FC<ResumeReadProps> = () => {
 	const isDark = resolvedTheme === 'dark';
 
 	if (status === 'pending') {
-		return <div>Loading...</div>;
+		return <div></div>;
 	}
 	if (status === 'error') {
 		return <div>错误:{data?.message}</div>;

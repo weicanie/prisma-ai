@@ -57,7 +57,7 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 		const selectedJobId = selectedIds?.jobId;
 
 		if (status === 'pending' || resumeMatchedStatus === 'pending') {
-			return <div>Loading...</div>;
+			return <div></div>;
 		}
 		if (status === 'error' || resumeMatchedStatus === 'error') {
 			return <div>错误:{data?.message}</div>;

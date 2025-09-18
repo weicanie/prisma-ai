@@ -47,7 +47,7 @@ const Educations: React.FC<EducationsProps<EducationVO>> = ({
 
 	const navigate = useNavigate();
 
-	if (status === 'pending') return <div>Loading...</div>;
+	if (status === 'pending') return <div></div>;
 	if (status === 'error') return <div>错误:{data?.message}</div>;
 
 	const eduData = data.data;
@@ -93,11 +93,13 @@ const Educations: React.FC<EducationsProps<EducationVO>> = ({
 				},
 				{
 					accessorKey: 'major',
-					header: ({ column }) => <DataTableColumnHeader column={column} title="专业" />
+					header: ({ column }) => <DataTableColumnHeader column={column} title="专业" />,
+					enableSorting: false
 				},
 				{
 					accessorKey: 'degree',
-					header: ({ column }) => <DataTableColumnHeader column={column} title="学历" />
+					header: ({ column }) => <DataTableColumnHeader column={column} title="学历" />,
+					enableSorting: false
 				},
 				{
 					accessorKey: 'startDate',

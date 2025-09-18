@@ -46,7 +46,7 @@ const Skills: React.FC<SkillsProps<SkillVo>> = ({
 	});
 
 	if (status === 'pending') {
-		return <div>Loading...</div>;
+		return <div></div>;
 	}
 	if (status === 'error') {
 		return <div>错误:{data?.message}</div>;
@@ -117,7 +117,8 @@ const Skills: React.FC<SkillsProps<SkillVo>> = ({
 								)}
 							</div>
 						);
-					}
+					},
+					enableSorting: false
 				},
 				{
 					accessorKey: 'count',

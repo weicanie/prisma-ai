@@ -70,7 +70,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 		],
 		navMain: [
 			{
-				title: '知识库',
+				title: '项目知识库',
 				icon: LibraryBig,
 				url: '/main/knowledge',
 				groupLabel: '知识库'
@@ -78,13 +78,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			{
 				title: '职业技能',
 				icon: ListChecks,
-				url: '/main/skills',
-				groupLabel: '简历优化'
+				url: '/main/skills'
 			},
 			{
 				title: '项目经验',
 				icon: Sparkles,
-				url: '/main/projects'
+				url: '/main/projects',
+				groupLabel: '简历优化'
+
 			},
 
 			{

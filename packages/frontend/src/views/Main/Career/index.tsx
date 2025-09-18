@@ -45,7 +45,7 @@ const Careers: React.FC<CareersProps<CareerVO>> = ({
 
 	const navigate = useNavigate();
 
-	if (status === 'pending') return <div>Loading...</div>;
+	if (status === 'pending') return <div></div>;
 	if (status === 'error') return <div>错误:{data?.message}</div>;
 
 	const careerData = data.data;
@@ -91,7 +91,8 @@ const Careers: React.FC<CareersProps<CareerVO>> = ({
 				},
 				{
 					accessorKey: 'position',
-					header: ({ column }) => <DataTableColumnHeader column={column} title="职位" />
+					header: ({ column }) => <DataTableColumnHeader column={column} title="职位" />,
+					enableSorting: false
 				},
 				{
 					accessorKey: 'startDate',

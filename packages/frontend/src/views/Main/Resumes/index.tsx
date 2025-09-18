@@ -69,7 +69,7 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 	}, []);
 
 	if (status === 'pending') {
-		return <div>Loading...</div>;
+		return <div></div>;
 	}
 	if (status === 'error') {
 		return <div>错误:{data?.message}</div>;

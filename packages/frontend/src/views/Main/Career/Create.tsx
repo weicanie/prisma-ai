@@ -10,7 +10,7 @@ const CareerCreate: React.FC<CareerCreateProps> = () => {
 	const dialogContent = (
 		<>
 			<div className="w-full p-7  overflow-y-auto max-h-[min(80vh,800px)] scb-thin">
-				<Suspense fallback={<div>Loading...</div>}>
+				<Suspense fallback={<div></div>}>
 					<CareerForm />
 				</Suspense>
 			</div>

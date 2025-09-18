@@ -1,5 +1,5 @@
 import { Checkbox } from '@/components/ui/checkbox';
-import { type_content_Map, type KnowledgeVo } from '@prisma-ai/shared';
+import { project_knowledge_type_label, type ProjectKnowledgeVo } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Row, Table } from '@tanstack/react-table';
 import { AlignLeft, Link } from 'lucide-react';
@@ -21,7 +21,7 @@ interface KnowledgesProps<TData> {
 	selectionHandler?: (rows: TData[]) => void;
 }
 
-const Knowledges: React.FC<KnowledgesProps<KnowledgeVo>> = ({
+const Knowledges: React.FC<KnowledgesProps<ProjectKnowledgeVo>> = ({
 	selectColShow,
 	selectionHandler
 }) => {
@@ -41,7 +41,7 @@ const Knowledges: React.FC<KnowledgesProps<KnowledgeVo>> = ({
 	});
 
 	if (status === 'pending') {
-		return <div>Loading...</div>;
+		return <div></div>;
 	}
 	if (status === 'error') {
 		return <div>错误:{data?.message}</div>;
@@ -53,7 +53,7 @@ const Knowledges: React.FC<KnowledgesProps<KnowledgeVo>> = ({
 		? [
 				{
 					id: '_select' as const,
-					header: ({ table }: { table: Table<KnowledgeVo> }) => (
+					header: ({ table }: { table: Table<ProjectKnowledgeVo> }) => (
 						<Checkbox
 							checked={
 								table.getIsAllPageRowsSelected() ||
@@ -64,7 +64,7 @@ const Knowledges: React.FC<KnowledgesProps<KnowledgeVo>> = ({
 							className="translate-y-[2px]"
 						/>
 					),
-					cell: ({ row }: { row: Row<KnowledgeVo> }) => (
+					cell: ({ row }: { row: Row<ProjectKnowledgeVo> }) => (
 						<Checkbox
 							checked={row.getIsSelected()}
 							onCheckedChange={value => row.toggleSelected(!!value)}
@@ -78,7 +78,7 @@ const Knowledges: React.FC<KnowledgesProps<KnowledgeVo>> = ({
 			]
 		: [];
 
-	const dataTableConfig: DataTableConfig<KnowledgeVo> = {
+	const dataTableConfig: DataTableConfig<ProjectKnowledgeVo> = {
 		columns: {
 			dataCols: [
 				{
@@ -107,10 +107,11 @@ const Knowledges: React.FC<KnowledgesProps<KnowledgeVo>> = ({
 					cell: ({ row }) => {
 						return (
 							<div className="w-[120px]">
-								{type_content_Map[row.original.type] || row.original.type}
+								{project_knowledge_type_label[row.original.type] || row.original.type}
 							</div>
 						);
-					}
+					},
+					enableSorting: false
 				},
 				{
 					accessorKey: 'tag',
@@ -129,7 +130,28 @@ const Knowledges: React.FC<KnowledgesProps<KnowledgeVo>> = ({
 								))}
 							</div>
 						);
-					}
+					},
+					enableSorting: false
+				},
+				{
+					accessorKey: 'projectName',
+					header: ({ column }) => <DataTableColumnHeader column={column} title="所属项目" />,
+					cell: ({ row }) => {
+						const projectName = row.original.projectName??'无';
+						return (
+							<div className="flex flex-wrap gap-1">
+								{[projectName].map((projectName: string, index: number) => (
+									<span
+										key={index}
+										className="px-2 py-1 text-xs rounded-full bg-blue-600  dark:bg-blue-800 text-zinc-100"
+									>
+										{projectName}
+									</span>
+								))}
+							</div>
+						);
+					},
+					enableSorting: false
 				},
 				{
 					accessorKey: 'createdAt',
@@ -166,13 +188,13 @@ const Knowledges: React.FC<KnowledgesProps<KnowledgeVo>> = ({
 		options: {
 			toolbar: {
 				enable: true,
-				searchColIds: ['name']
+				searchColIds: ['name','projectName','tag','type']
 			},
 			pagination: {
 				enable: knowledgeData.length > 10
 			}
 		},
-		onRowClick: (rowData: KnowledgeVo) => {
+		onRowClick: (rowData: ProjectKnowledgeVo) => {
 			return () => {
 				navigate(`/main/knowledge/detail/${rowData.id}`, {
 					state: { param: rowData.id }
@@ -186,8 +208,8 @@ const Knowledges: React.FC<KnowledgesProps<KnowledgeVo>> = ({
 	return (
 		<>
 			<PageHeader
-				title="知识库"
-				description="上传信息来和 Prisma 共享, Prisma 在思考时会使用这些信息, 这很重要 "
+				title="项目知识库"
+				description="上传项目相关信息来和 Prisma 共享, Prisma 在思考时会使用这些信息, 这很重要 "
 			></PageHeader>
 			<div className="pl-10 pr-10">
 				<ConfigDataTable dataTableConfig={dataTableConfig} data={knowledgeData} />

@@ -45,7 +45,7 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 	});
 	const navigate = useNavigate();
 	if (status === 'pending') {
-		return <div>Loading...</div>;
+		return <div></div>;
 	}
 	if (status === 'error') {
 		return <div>错误:{data?.message}</div>;
@@ -103,25 +103,27 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 									row.original.info.desc.contribute}
 							</span>
 						</div>
-					)
-				},
-				{
-					accessorKey: 'status',
-					header: ({ column }) => <DataTableColumnHeader column={column} title="状态" />,
-					cell: ({ row }) => (
-						<div className="flex space-x-2">
-							<Badge variant="default">{row.original.status}</Badge>
-						</div>
 					),
-					filterFn: (row, id, value) => value.includes(row.getValue(id)),
-					columnId: 'status',
-					title: '状态',
-					options: [
-						{ label: 'Low', value: 'low' },
-						{ label: 'Medium', value: 'medium' },
-						{ label: 'High', value: 'high' }
-					]
+					enableSorting: false
 				},
+				// {
+				// 	accessorKey: 'status',
+				// 	header: ({ column }) => <DataTableColumnHeader column={column} title="状态" />,
+				// 	cell: ({ row }) => (
+				// 		<div className="flex space-x-2">
+				// 			<Badge variant="default">{row.original.status}</Badge>
+				// 		</div>
+				// 	),
+				// 	filterFn: (row, id, value) => value.includes(row.getValue(id)),
+				// 	columnId: 'status',
+				// 	title: '状态',
+				// 	options: [
+				// 		{ label: 'Low', value: 'low' },
+				// 		{ label: 'Medium', value: 'medium' },
+				// 		{ label: 'High', value: 'high' }
+				// 	],
+				// 	enableSorting: false
+				// },
 				{
 					accessorKey: 'score',
 					header: ({ column }) => <DataTableColumnHeader column={column} title="评分" />,
@@ -129,7 +131,8 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 						<div className="flex space-x-2">
 							<Badge variant="secondary">{row.original.lookupResult?.score ?? '待分析'}</Badge>
 						</div>
-					)
+					),
+					enableSorting: false
 				}
 			],
 

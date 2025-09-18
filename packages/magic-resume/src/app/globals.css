@@ -4,6 +4,7 @@
 
 /* 隐藏数字输入框自带的上下箭头 */
 @layer utilities {
+
   .no-spinner::-webkit-inner-spin-button,
   .no-spinner::-webkit-outer-spin-button {
     -webkit-appearance: none;
@@ -17,7 +18,8 @@
 
 @layer base {
   :root {
-    --background: 300 50% 100%;
+    /* 背景色（hsl） */
+    --background: 210 24% 98%;
     --foreground: 224 71.4% 4.1%;
     --card: 0 0% 100%;
     --card-foreground: 224 71.4% 4.1%;
@@ -53,6 +55,7 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   /* 通用滚动条样式 */
   ::-webkit-scrollbar {
     width: 8px;
@@ -110,7 +113,8 @@
       background: rgba(102, 102, 102, 0.8);
     }
 
-    --background: 340 0% 4%;
+    /* 背景色（hsl） */
+    --background: 221 42% 11%;
     --foreground: 210 20% 98%;
     --card: 224 71.4% 4.1%;
     --card-foreground: 210 20% 98%;
@@ -150,6 +154,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -173,26 +178,32 @@
   0% {
     transform: translate(0px, 0px) scale(1);
   }
+
   33% {
     transform: translate(30px, -50px) scale(1.1);
   }
+
   66% {
     transform: translate(-20px, 20px) scale(0.9);
   }
+
   100% {
     transform: translate(0px, 0px) scale(1);
   }
 }
 
 @keyframes tilt {
+
   0%,
   50%,
   100% {
     transform: rotate(0deg);
   }
+
   25% {
     transform: rotate(0.5deg);
   }
+
   75% {
     transform: rotate(-0.5deg);
   }
@@ -202,9 +213,11 @@
   0% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
+
   100% {
     background-position: 0% 50%;
   }
@@ -271,6 +284,7 @@
   p {
     display: inline;
   }
+
   /* 次级需要特殊处理 */
   .custom-list-ordered {
     padding: 0 1.2rem;

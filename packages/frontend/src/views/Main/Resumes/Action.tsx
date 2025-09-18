@@ -1,11 +1,11 @@
 import { useTheme } from '@/utils/theme';
 import {
-	jsonMd_obj,
-	ResumeStatus,
-	type JobVo,
-	type MatchJobDto,
-	type ResumeMatchedDto,
-	type ResumeVo
+    jsonMd_obj,
+    ResumeStatus,
+    type JobVo,
+    type MatchJobDto,
+    type ResumeMatchedDto,
+    type ResumeVo
 } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
@@ -77,7 +77,7 @@ const ResumeActions: React.FC<ResumeActionsProps> = () => {
 	}, [done]);
 
 	if (status === 'pending' || jobStatus === 'pending') {
-		return <div className="flex justify-center items-center h-64">Loading...</div>;
+		return <div className="flex justify-center items-center h-64"></div>;
 	}
 
 	if (status === 'error' || jobStatus === 'error') {
