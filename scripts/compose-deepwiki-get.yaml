@@ -1,0 +1,8 @@
+services:
+  deepwiki-get:
+    image: docker.1ms.run/onlyie/prisma-ai-deepwiki-get:latest
+    container_name: deepwiki-get
+    volumes:
+      # docker run -v 需要处理windows兼容性
+      - ../project_wikis:/output
+    command: wiki https://deepwiki.com/weicanie/prisma-ai -o /output

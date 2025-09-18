@@ -33,6 +33,7 @@ services:
       - ./packages/backend/prisma_agent_config.json:/app/packages/backend/prisma_agent_config.json
       - ./projects:/app/projects
       - ./models:/app/models
+      - ./project_wikis:/app/project_wikis
   magic-resume-container:
     build:
       context: .
@@ -73,7 +74,7 @@ services:
       MYSQL_ROOT_HOST: '%'
     restart: unless-stopped
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      test: [ 'CMD', 'mysqladmin', 'ping', '-h', 'localhost' ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -85,7 +86,7 @@ services:
       - ./docker-data/redis:/data
     restart: unless-stopped
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: [ 'CMD', 'redis-cli', 'ping' ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -97,7 +98,7 @@ services:
       - ./docker-data/mongo:/data/db
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -111,7 +112,7 @@ services:
     restart: unless-stopped
     user: root
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -121,6 +122,4 @@ services:
       MINIO_DEFAULT_BUCKETS: prisma-ai
     command: server /bitnami/minio/data --console-address :9001
 
-
-    
 #使用默认桥接网络

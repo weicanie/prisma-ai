@@ -45,6 +45,7 @@ services:
       - ./projects:/app/projects
       - ./models:/app/models
       - ./resumes:/app/resumes
+      - ./project_wikis:/app/project_wikis
   magic-resume-container:
     image: docker.1ms.run/onlyie/prisma-ai-resume-editor:4.1.7
     # build:
