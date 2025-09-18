@@ -421,7 +421,6 @@ export class HjmService implements OnModuleInit {
 		resumeVector: number[],
 		k: number
 	): Promise<Document[]> {
-		console.log('🚀  ~ findSimilarJobs:', resumeVector);
 		try {
 			const indexName = JobIndex.JOBS;
 			const index = this.vectorStoreService.pinecone.Index(indexName);
