@@ -52,7 +52,7 @@ export class KnowledgebaseService {
 			userInfo
 		});
 		const saved = await createdKnowledgebase.save();
-		
+
 		const embedKnowledgeDto = {
 			id: (saved._id as Types.ObjectId).toString(),
 			name: saved.name,
@@ -65,14 +65,16 @@ export class KnowledgebaseService {
 			updatedAt: saved.updatedAt
 		};
 
-		if (
-			createKnowledgeDto.type === ProjectKnowledgeTypeEnum.userProjectCode 
-		) {
+		if (createKnowledgeDto.type === ProjectKnowledgeTypeEnum.userProjectCode) {
 			//代码库
 			this.storeCodeToVDB(createKnowledgeDto.content, userInfo);
 		} else {
 			//文档库
-			this.knowledgeVDBService.storeKnowledgeToVDB(embedKnowledgeDto, userInfo);
+			const vectorIds = await this.knowledgeVDBService.storeKnowledgeToVDB(
+				embedKnowledgeDto,
+				userInfo
+			);
+			await this.knowledgebaseModel.findByIdAndUpdate(saved._id, { vectorIds });
 		}
 
 		return embedKnowledgeDto as ProjectKnowledgeVo;
@@ -158,37 +160,22 @@ export class KnowledgebaseService {
 		} as ProjectKnowledgeVo;
 	}
 
-	//TODO 实现知识库中相关知识的更新
-	//更新：储存向量数据库中的ID，删除、新增
 	async update(
 		id: string,
 		updateKnowledgeDto: UpdateProjectKnowledgeDto,
 		userInfo: UserInfoFromToken
 	): Promise<ProjectKnowledgeVo> {
+		await this.remove(id, userInfo);
+		return this.create(updateKnowledgeDto, userInfo);
+	}
+
+	async remove(id: string, userInfo: UserInfoFromToken): Promise<void> {
 		const existingkn = await this.knowledgebaseModel
-			.findOneAndUpdate(
-				{ _id: new Types.ObjectId(id), 'userInfo.userId': userInfo.userId },
-				updateKnowledgeDto,
-				{ new: true }
-			)
+			.findOne({ _id: new Types.ObjectId(id), 'userInfo.userId': userInfo.userId })
 			.exec();
 		if (!existingkn) {
 			throw new NotFoundException(`Knowledgebase with ID "${id}" not found`);
 		}
-		return {
-			id: (existingkn._id as Types.ObjectId).toString(),
-			name: existingkn.name,
-			projectName: existingkn.projectName,
-			type: existingkn.type,
-			fileType: existingkn.fileType,
-			tag: existingkn.tag,
-			content: existingkn.content,
-			createdAt: existingkn.createdAt,
-			updatedAt: existingkn.updatedAt
-		} as ProjectKnowledgeVo;
-	}
-
-	async remove(id: string, userInfo: UserInfoFromToken): Promise<void> {
 		const result = await this.knowledgebaseModel
 			.deleteOne({
 				_id: new Types.ObjectId(id),
@@ -198,5 +185,11 @@ export class KnowledgebaseService {
 		if (result.deletedCount === 0) {
 			throw new NotFoundException(`Knowledgebase with ID "${id}" not found`);
 		}
+		await this.knowledgeVDBService.deleteKnowledgeFromVDB(
+			existingkn.vectorIds ?? [],
+			existingkn.type,
+			userInfo,
+			existingkn.projectName
+		);
 	}
 }

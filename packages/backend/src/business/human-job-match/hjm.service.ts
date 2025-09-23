@@ -368,7 +368,6 @@ export class HjmService implements OnModuleInit {
 			};
 		}) as RankedJob[];
 
-		//FIXME recall数组没有内容,不影响业务但还是看看
 		// 10. 将结果存入数据库
 		finalJobs.forEach(job => {
 			const recallItem = {
@@ -473,5 +472,12 @@ export class HjmService implements OnModuleInit {
 			default:
 				throw new Error(`不支持的命名空间: ${namespace}`);
 		}
+	}
+
+	/**
+	 * 返回数据库中的岗位数量
+	 */
+	async getJobCount(): Promise<number> {
+		return await this.jobModel.countDocuments();
 	}
 }

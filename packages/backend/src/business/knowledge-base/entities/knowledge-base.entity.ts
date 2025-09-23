@@ -1,5 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { FileTypeEnum, ProjectKnowledgeTypeEnum, ProjectKnowledgeVo, type UserInfoFromToken } from '@prisma-ai/shared';
+import {
+	FileTypeEnum,
+	ProjectKnowledgeTypeEnum,
+	ProjectKnowledgeVo,
+	type UserInfoFromToken
+} from '@prisma-ai/shared';
 import { Document } from 'mongoose';
 import { UserInfo } from '../../project/entities/project.entity';
 
@@ -9,7 +14,7 @@ export class Knowledgebase implements Omit<ProjectKnowledgeVo, 'id' | 'createdAt
 	name: string;
 
 	@Prop({ required: true })
-	projectName: string;//项目名称（用于划分项目知识库、关联项目经验）
+	projectName: string; //项目名称（用于划分项目知识库、关联项目经验）
 
 	@Prop({ type: String, enum: FileTypeEnum, required: true })
 	fileType: FileTypeEnum;
@@ -47,6 +52,9 @@ export class Knowledgebase implements Omit<ProjectKnowledgeVo, 'id' | 'createdAt
 
 	@Prop({ type: UserInfo })
 	userInfo: UserInfoFromToken;
+
+	@Prop([String])
+	vectorIds?: string[]; //关联的向量id数组
 }
 export type KnowledgebaseDocument = Knowledgebase &
 	Document & {

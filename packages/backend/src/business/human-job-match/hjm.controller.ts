@@ -45,6 +45,15 @@ export class HjmController {
 	}
 
 	/**
+	 * 返回数据库中的岗位数量
+	 * @returns 岗位数量
+	 */
+	@Get('job-count')
+	async getJobCount() {
+		return this.hjmService.getJobCount();
+	}
+
+	/**
 	 * 获取任务状态和结果
 	 * @description 根据任务ID查询任务状态，如果任务已完成，同时返回结果。
 	 * @param taskId - 任务ID
