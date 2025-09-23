@@ -1,4 +1,3 @@
-
 /* 项目知识库 */
 export const project_knowledge_type_label: Record<string, string> = {
 	userProjectDoc: '项目文档',
@@ -12,13 +11,14 @@ export enum ProjectKnowledgeTypeEnum {
 	userProjectCode = 'userProjectCode', //项目代码仓库
 	techDoc = 'techDoc', //项目相关技术文档
 	other = 'other', //项目相关的其他信息
+	userProjectDeepWiki = 'userProjectDeepWiki' //项目deepwiki文档
 
 	//项目相关面试题
-	// interviewQuestion = 'interviewQuestion', 
+	// interviewQuestion = 'interviewQuestion',
 	//开源项目文档
-	// openSourceProjectDoc = 'openSourceProjectDoc', 
+	// openSourceProjectDoc = 'openSourceProjectDoc',
 	//开源项目github仓库地址
-	// openSourceProjectRepo = 'openSourceProjectRepo', 
+	// openSourceProjectRepo = 'openSourceProjectRepo',
 }
 export enum FileTypeEnum {
 	txt = 'txt', //txt
@@ -48,7 +48,18 @@ export interface CreateProjectKnowledgeDto {
 	content: string; //知识内容
 }
 
-export type UpdateProjectKnowledgeDto = Partial<CreateProjectKnowledgeDto>;
+export interface DeepWikiKnowledgeDto {
+	wikiUrl: string; //项目deepwiki站点地址
+}
+
+export interface CreateProjectDeepWikiKnowledgeDto {
+	name: string; //知识名称
+	projectName: string; //项目名称（用于划分项目知识库、关联项目经验）
+	type: ProjectKnowledgeTypeEnum.userProjectDeepWiki;
+	wikiUrl: string; //项目deepwiki站点地址
+}
+
+export type UpdateProjectKnowledgeDto = CreateProjectKnowledgeDto;
 
 export interface ProjectKnowledgeVo {
 	id: string;

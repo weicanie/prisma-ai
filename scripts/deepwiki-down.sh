@@ -14,7 +14,17 @@ chmod 777 ./project_wikis
 echo "✅ 验证目录"
 echo "📥 目标URL: $WIKI_URL"
 
+echo "🔧 更新 Docker Compose 配置..."
+
+# 创建新的command行
+NEW_COMMAND="    command: wiki $WIKI_URL -o /output"
+
+# 使用sed替换yaml文件中的command行
+# 在Windows Git Bash中，需要使用双引号和适当的转义
+sed -i "s|^[[:space:]]*command:.*|$NEW_COMMAND|" ./scripts/compose-deepwiki-down.yaml
+
+echo "✅ 配置已更新，目标URL: $WIKI_URL"
 echo "启动 Docker 服务..."
 
-# 使用 docker compose run 覆盖 command，--rm 表示运行完成后自动删除容器
-docker compose -f ./scripts/compose-deepwiki-get.yaml up --build
+# 使用更新后的compose文件启动服务
+docker compose -f ./scripts/compose-deepwiki-down.yaml up --build
