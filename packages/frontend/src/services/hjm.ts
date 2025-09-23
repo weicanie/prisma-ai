@@ -61,3 +61,12 @@ export async function becomeUserJob(jobId: string) {
 	const res = await instance.get<SDF<JobVo>>(`/job/become/${jobId}`);
 	return res.data;
 }
+
+/**
+ * 返回数据库中的岗位数量
+ * @returns 岗位数量
+ */
+export async function getJobCount() {
+	const res = await instance.get<SDF<number>>('/hjm/job-count');
+	return res.data;
+}

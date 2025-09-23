@@ -12,7 +12,8 @@ export enum ResumeQueryKey {
 	ResumeMatched = 'resumeMatched'
 }
 export enum JobQueryKey {
-	Jobs = 'jobs'
+	Jobs = 'jobs',
+	JobCount = 'jobCount'
 }
 
 export enum KnowledgeQueryKey {
