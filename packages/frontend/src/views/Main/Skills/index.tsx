@@ -179,7 +179,7 @@ const Skills: React.FC<SkillsProps<SkillVo>> = ({
 		},
 		onRowClick: (rowData: SkillVo) => {
 			return () => {
-				navigate(`/main/skills/detail/${rowData.id}`, {
+				navigate(`skill-detail/${rowData.id}`, {
 					state: { param: rowData.id }
 				});
 			};

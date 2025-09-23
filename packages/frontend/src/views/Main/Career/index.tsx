@@ -131,7 +131,7 @@ const Careers: React.FC<CareersProps<CareerVO>> = ({
 			pagination: { enable: careerData.length > 10 }
 		},
 		onRowClick: (rowData: CareerVO) => () => {
-			navigate(`/main/career/detail/${rowData?.id}`, {
+			navigate(`career-detail/${rowData?.id}`, {
 				state: { param: rowData.id }
 			});
 		},

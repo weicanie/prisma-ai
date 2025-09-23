@@ -1,8 +1,10 @@
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { ResumeVo } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Row, Table } from '@tanstack/react-table';
+import { Briefcase, GraduationCap, ListChecks } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -224,7 +226,7 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 		},
 		onRowClick: (rowData: ResumeVo) => {
 			return () => {
-				navigate(`/main/resumes/detail/${rowData.id}`, {
+				navigate(`resume-detail/${rowData.id}`, {
 					state: { param: rowData.id }
 				});
 			};
@@ -289,7 +291,34 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 			<PageHeader
 				title={title ?? '简历'}
 				description={description ?? '组装您的简历并导出到简历编辑器进行编辑'}
-			></PageHeader>
+			>
+				<div className="flex flex-wrap gap-3">
+					<Button
+						variant="outline"
+						onClick={() => navigate('/main/resumes/skills')}
+						className="flex items-center gap-2"
+					>
+						<ListChecks className="h-4 w-4" />
+						职业技能
+					</Button>
+					<Button
+						variant="outline"
+						onClick={() => navigate('/main/resumes/career')}
+						className="flex items-center gap-2"
+					>
+						<Briefcase className="h-4 w-4" />
+						工作经历
+					</Button>
+					<Button
+						variant="outline"
+						onClick={() => navigate('/main/resumes/education')}
+						className="flex items-center gap-2"
+					>
+						<GraduationCap className="h-4 w-4" />
+						教育经历
+					</Button>
+				</div>
+			</PageHeader>
 			<div className="pl-10 pr-10">
 				<ConfigDataTable dataTableConfig={dataTableConfig} data={resumeDatas} />
 			</div>

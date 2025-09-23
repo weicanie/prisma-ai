@@ -14,6 +14,7 @@ interface SkillReadProps {
 
 const SkillRead: React.FC<SkillReadProps> = () => {
 	const { skillId } = useParams();
+	console.log('skillId', skillId);
 	const { data, status } = useCustomQuery([SkillQueryKey.Skills], findAllUserSkills);
 
 	const { resolvedTheme } = useTheme();

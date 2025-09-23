@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import type { JobVo, ResumeMatchedVo, ResumeVo } from '@prisma-ai/shared';
+import type { JobVo, ResumeVo } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Row, Table } from '@tanstack/react-table';
 import React, { memo } from 'react';
@@ -8,9 +8,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useCustomMutation, useCustomQuery } from '../../../query/config';
-import { JobQueryKey, ResumeQueryKey } from '../../../query/keys';
+import { JobQueryKey } from '../../../query/keys';
 import { findAllUserJobs, removeJob } from '../../../services/job';
-import { findAllResumeMatched } from '../../../services/resume';
 import { selectResumeData, setResumeData } from '../../../store/resume';
 import { ConfigDataTable } from '../components/config-data-table';
 import type { DataTableConfig } from '../components/config-data-table/config.type';
@@ -35,10 +34,6 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 
 		const { data, status } = useCustomQuery([JobQueryKey.Jobs], () => findAllUserJobs(1, 1000));
 
-		const { data: resumeMatchedData, status: resumeMatchedStatus } = useCustomQuery(
-			[ResumeQueryKey.ResumeMatched, 1, 1000],
-			() => findAllResumeMatched(1, 1000)
-		);
 		const queryClient = useQueryClient();
 
 		const removeMutation = useCustomMutation(removeJob, {
@@ -56,14 +51,13 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 		const selectedResumeId = selectedIds?.resumeId;
 		const selectedJobId = selectedIds?.jobId;
 
-		if (status === 'pending' || resumeMatchedStatus === 'pending') {
+		if (status === 'pending') {
 			return <div></div>;
 		}
-		if (status === 'error' || resumeMatchedStatus === 'error') {
+		if (status === 'error') {
 			return <div>错误:{data?.message}</div>;
 		}
 		const jobDatas = data.data?.data || [];
-		const resumeMatchedDatas = resumeMatchedData.data?.data || [];
 
 		const selectCol = selectColShow
 			? [
@@ -190,7 +184,7 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 			},
 			onRowClick: (rowData: JobVo) => {
 				return () => {
-					navigate(`/main/job/detail/${rowData.id}`, {
+					navigate(`job-detail/${rowData.id}`, {
 						state: { param: rowData.id }
 					});
 				};
@@ -198,7 +192,7 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 			createBtn: <JobCreate />,
 			actionBtns: [
 				{
-					label: '定制岗位专用简历',
+					label: '定制简历',
 					onClick: handleMatchClick
 				}
 			],
@@ -220,113 +214,6 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 			description: '选择要匹配的简历',
 			mainTable: false
 		};
-		const dataTableConfigResumeMatched: DataTableConfig<ResumeMatchedVo> = {
-			columns: {
-				dataCols: [
-					{
-						accessorKey: 'name',
-						header: ({ column }) => <DataTableColumnHeader column={column} title="简历名称" />,
-						cell: ({ row }) => {
-							return <div className="w-[200px] font-medium">{row.original.name}</div>;
-						},
-						enableHiding: false,
-						enableSorting: true
-					},
-					{
-						accessorKey: 'skill',
-						header: ({ column }) => <DataTableColumnHeader column={column} title="职业技能" />,
-						cell: ({ row }) => {
-							const skill = row.original.skill;
-							if (!skill?.content?.length) {
-								return <div className="text-gray-500">未关联技能</div>;
-							}
-							const displaySkill = skill.content.slice(0, 2);
-							const remainingCount = skill.content.length - 2;
-							return (
-								<div className="flex flex-wrap gap-1 max-w-[300px]">
-									{displaySkill.map((skill, index) => (
-										<Badge key={skill.type || index} variant="secondary" className="text-xs">
-											{skill.type || '未分类'}
-										</Badge>
-									))}
-									{remainingCount > 0 && (
-										<Badge variant="default" className="text-xs">
-											+{remainingCount}个技能
-										</Badge>
-									)}
-								</div>
-							);
-						},
-						enableHiding: false,
-						enableSorting: false
-					},
-					{
-						accessorKey: 'projects',
-						header: ({ column }) => <DataTableColumnHeader column={column} title="项目经验" />,
-						cell: ({ row }) => {
-							const projects = row.original.projects || [];
-							if (projects.length === 0) {
-								return <div className="text-gray-500">无项目经验</div>;
-							}
-							const displayProjects = projects.slice(0, 2);
-							const remainingCount = projects.length - 2;
-
-							return (
-								<div className="flex flex-wrap gap-1 max-w-[300px]">
-									{displayProjects.map((project, index) => (
-										<Badge key={project.id || index} variant="secondary" className="text-xs">
-											{project.name || project.info?.name || '未命名项目'}
-										</Badge>
-									))}
-									{remainingCount > 0 && (
-										<Badge variant="default" className="text-xs">
-											+{remainingCount}个项目
-										</Badge>
-									)}
-								</div>
-							);
-						}
-					},
-					{
-						accessorKey: 'updatedAt',
-						header: ({ column }) => <DataTableColumnHeader column={column} title="更新时间" />,
-						cell: ({ row }) => {
-							const date = row.original.updatedAt
-								? new Date(row.original.updatedAt).toLocaleDateString()
-								: '未知';
-							return <div className="text-sm text-gray-500">{date}</div>;
-						}
-					}
-				],
-
-				selectCol: [],
-
-				rowActionsCol: [
-					{
-						id: 'actions',
-						cell: ({ row }) => <DataTableRowActions row={row} />
-					}
-				]
-			},
-
-			options: {
-				toolbar: {
-					enable: true,
-					searchColIds: ['name']
-				},
-				pagination: {
-					enable: resumeMatchedDatas.length > 10
-				}
-			},
-			onRowClick: (rowData: ResumeMatchedVo) => {
-				return () => {
-					navigate(`/main/job/resumeMatched/${rowData.id}`, {
-						state: { param: rowData.id }
-					});
-				};
-			},
-			mainTable: false
-		};
 
 		return (
 			<>
@@ -338,16 +225,6 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 					<ConfigDataTable dataTableConfig={dataTableConfig} data={jobDatas} />
 				</div>
 				<Resumes {...ResumeProps}></Resumes>
-				<PageHeader
-					title={'岗位专用简历'}
-					description={'已定制的契合、匹配岗位的专用简历'}
-				></PageHeader>
-				<div className="pl-10 pr-10">
-					<ConfigDataTable
-						dataTableConfig={dataTableConfigResumeMatched}
-						data={resumeMatchedDatas}
-					/>
-				</div>
 			</>
 		);
 	}

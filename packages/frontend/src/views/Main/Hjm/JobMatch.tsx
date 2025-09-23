@@ -10,10 +10,15 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { HjmMatchDto, MatchedJobVo, ResumeVo } from '@prisma-ai/shared';
+import { Database } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { getTaskResult, startMatchJobs } from '../../../services/hjm';
+import { Badge } from '../../../components/ui/badge';
+import { useCustomQuery } from '../../../query/config';
+import { JobQueryKey } from '../../../query/keys';
+import { getJobCount, getTaskResult, startMatchJobs } from '../../../services/hjm';
 import { selectResumeData, setResumeData } from '../../../store/resume';
 import { PageHeader } from '../components/PageHeader';
 import JobCard from '../Jobs/JobCard';
@@ -65,6 +70,7 @@ function useTaskPolling(taskId: string | null) {
 
 export function JobMatch() {
 	const dispatch = useDispatch();
+	const navigate = useNavigate();
 
 	const selectedResume = useSelector(selectResumeData);
 	const resumeIdToMatch = selectedResume?.resuemIdToMatch;
@@ -120,12 +126,37 @@ export function JobMatch() {
 		mainTable: false
 	};
 
+	//获取数据库中的岗位数量
+	const { data: jobCountData, status: jobCountStatus } = useCustomQuery(
+		[JobQueryKey.JobCount],
+		() => getJobCount()
+	);
+	if (jobCountStatus === 'pending') {
+		return <div>Loading...</div>;
+	}
+	if (jobCountStatus === 'error') {
+		return <div>Error: {jobCountData?.message}</div>;
+	}
+
+	const jobCount = jobCountData?.data;
+
 	return (
 		<>
 			<PageHeader
 				title={'简历匹配岗位'}
 				description={'通过相似性检索，将您的简历与岗位数据进行匹配'}
-			></PageHeader>
+			>
+				<div className="flex flex-wrap gap-3">
+					<Button
+						variant="outline"
+						onClick={() => navigate('/main/hjm/job/get-jobs')}
+						className="flex items-center gap-2"
+					>
+						<Database className="h-4 w-4" />
+						获取岗位数据
+					</Button>
+				</div>
+			</PageHeader>
 			<div className="space-y-6 p-4 md:p-10 pb-16">
 				<Card className="bg-background/50">
 					<CardHeader>
@@ -195,6 +226,14 @@ export function JobMatch() {
 						</CardContent>
 					</Card>
 				)}
+
+				<Card className="bg-background/50">
+					<CardHeader>
+						<CardTitle>
+							数据库中的岗位数量 = <Badge variant={'outline'}>{jobCount}</Badge>
+						</CardTitle>
+					</CardHeader>
+				</Card>
 			</div>
 
 			<Resumes {...ResumeProps}></Resumes>

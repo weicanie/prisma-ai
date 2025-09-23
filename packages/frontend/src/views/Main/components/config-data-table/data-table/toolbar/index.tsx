@@ -33,7 +33,7 @@ export function DataTableToolbar<TData>({
 		//当为移动端时，筛选按钮和操作按钮都放到一个Popover下拉列表中，点击后弹出
 		return (
 			<>
-				<div className="flex items-center justify-between">
+				<div className="flex items-center justify-between gap-x-1">
 					<div className="flex flex-1 items-center space-x-2">
 						{/* 搜索栏 */}
 						<Input
@@ -104,7 +104,7 @@ export function DataTableToolbar<TData>({
 		);
 	}
 	return (
-		<div className="flex items-center justify-between">
+		<div className="flex items-center justify-between gap-x-3">
 			<div className="flex flex-1 items-center space-x-2">
 				{/* 搜索栏 */}
 				<Input

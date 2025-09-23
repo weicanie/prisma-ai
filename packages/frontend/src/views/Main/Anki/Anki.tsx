@@ -19,7 +19,7 @@ import {
 	startCrawlQuestions,
 	startGenerateMindmap,
 	startUploadToAnki
-} from '../../../services/question';
+} from '../../../services/anki';
 import { PageHeader } from '../components/PageHeader';
 import { browserlessUrl } from '../Hjm/DataCrawl';
 

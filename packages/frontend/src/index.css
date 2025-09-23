@@ -313,34 +313,3 @@ scrollbar-default:隐藏后显示滚动条 用于断点
 .milkdown {
   @apply h-full w-full;
 }
-
-/* copilotkit */
-p.poweredBy,
-.copilotKitVersionInfo {
-  @apply hidden !;
-}
-
-.copilotKitInput {
-  @apply mb-4 !;
-}
-
-.copilotKitDevConsole.copilotKitDevConsoleWarnOutdated {
-  @apply bg-[var(--copilot-kit-contrast-color)] !;
-}
-
-/* 登录注册表单动画 */
-.form-transition-enter {
-  @apply opacity-0;
-}
-
-.form-transition-enter-active {
-  @apply opacity-100 transition-opacity duration-500;
-}
-
-.form-transition-exit {
-  @apply opacity-100;
-}
-
-.form-transition-exit-active {
-  @apply opacity-0 transition-opacity duration-500;
-}

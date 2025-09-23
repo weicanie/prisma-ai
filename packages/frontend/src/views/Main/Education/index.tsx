@@ -138,7 +138,7 @@ const Educations: React.FC<EducationsProps<EducationVO>> = ({
 			pagination: { enable: eduData.length > 10 }
 		},
 		onRowClick: (rowData: EducationVO) => () => {
-			navigate(`/main/education/detail/${rowData?.id}`, {
+			navigate(`education-detail/${rowData?.id}`, {
 				state: { param: rowData.id }
 			});
 		},

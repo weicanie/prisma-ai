@@ -1,12 +1,8 @@
 import {
 	Book,
-	Briefcase,
-	CircleDollarSign,
 	FileText,
-	GraduationCap,
 	LayoutList,
 	LibraryBig,
-	ListChecks,
 	Pyramid,
 	Sparkles,
 	SquarePen,
@@ -76,61 +72,39 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				groupLabel: '知识库'
 			},
 			{
-				title: '职业技能',
-				icon: ListChecks,
-				url: '/main/skills'
-			},
-			{
-				title: '项目经验',
+				title: '项目优化',
 				icon: Sparkles,
 				url: '/main/projects',
 				groupLabel: '简历优化'
-
 			},
-
 			{
-				title: '岗位数据获取',
-				icon: CircleDollarSign,
-				url: '/main/hjm/get-jobs',
+				title: '匹配岗位',
+				icon: Target,
+				url: '/main/hjm/job',
 				groupLabel: '人岗匹配'
 			},
 			{
-				title: '简历匹配岗位',
-				icon: Target,
-				url: '/main/hjm/match-jobs'
-			},
-			{
-				title: '岗位定制简历',
+				title: '定制简历',
 				icon: FileText,
-				url: '/main/job'
+				url: '/main/hjm/resume'
 			},
 			{
-				title: '集成面试题库和 anki',
+				title: '题库和 anki',
 				icon: Book,
 				url: '/main/offer/anki',
 				groupLabel: '面向offer学习'
 			},
 			{
-				title: '教育经历',
-				icon: GraduationCap,
-				url: '/main/education',
-				groupLabel: '简历编辑'
-			},
-			{
-				title: '工作经历',
-				icon: Briefcase,
-				url: '/main/career'
-			},
-			{
 				title: '简历组装、导出',
 				icon: LayoutList,
-				url: '/main/resumes'
+				url: '/main/resumes',
+				groupLabel: '简历编辑'
 			},
 			{
 				title: '简历编辑器',
 				icon: SquarePen,
 				url: '/main/resume-editor'
-			},
+			}
 		]
 	};
 	// const { state, open, setOpen, openMobile, setOpenMobile, isMobile, toggleSidebar } = useSidebar();

@@ -1,8 +1,9 @@
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { project_knowledge_type_label, type ProjectKnowledgeVo } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Row, Table } from '@tanstack/react-table';
-import { AlignLeft, Link } from 'lucide-react';
+import { AlignLeft, Database, Link, ListChecks } from 'lucide-react';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -137,7 +138,7 @@ const Knowledges: React.FC<KnowledgesProps<ProjectKnowledgeVo>> = ({
 					accessorKey: 'projectName',
 					header: ({ column }) => <DataTableColumnHeader column={column} title="所属项目" />,
 					cell: ({ row }) => {
-						const projectName = row.original.projectName??'无';
+						const projectName = row.original.projectName ?? '无';
 						return (
 							<div className="flex flex-wrap gap-1">
 								{[projectName].map((projectName: string, index: number) => (
@@ -188,7 +189,7 @@ const Knowledges: React.FC<KnowledgesProps<ProjectKnowledgeVo>> = ({
 		options: {
 			toolbar: {
 				enable: true,
-				searchColIds: ['name','projectName','tag','type']
+				searchColIds: ['name', 'projectName', 'tag', 'type']
 			},
 			pagination: {
 				enable: knowledgeData.length > 10
@@ -196,7 +197,7 @@ const Knowledges: React.FC<KnowledgesProps<ProjectKnowledgeVo>> = ({
 		},
 		onRowClick: (rowData: ProjectKnowledgeVo) => {
 			return () => {
-				navigate(`/main/knowledge/detail/${rowData.id}`, {
+				navigate(`knowledge-detail/${rowData.id}`, {
 					state: { param: rowData.id }
 				});
 			};
@@ -210,8 +211,31 @@ const Knowledges: React.FC<KnowledgesProps<ProjectKnowledgeVo>> = ({
 			<PageHeader
 				title="项目知识库"
 				description="上传项目相关信息来和 Prisma 共享, Prisma 在思考时会使用这些信息, 这很重要 "
-			></PageHeader>
-			<div className="pl-10 pr-10">
+			>
+				{' '}
+				<div className="flex flex-wrap gap-3">
+					<Button
+						variant="outline"
+						onClick={() => navigate('/main/knowledge/deepwiki')}
+						className="flex items-center gap-2"
+					>
+						<Database className="h-4 w-4" />
+						DeepWiki 集成
+					</Button>
+				</div>
+				<div className="flex flex-wrap gap-3">
+					<Button
+						variant="outline"
+						onClick={() => navigate('/main/knowledge/skills')}
+						className="flex items-center gap-2"
+					>
+						<ListChecks className="h-4 w-4" />
+						职业技能
+					</Button>
+				</div>
+			</PageHeader>
+
+			<div className="pl-10 pr-10 max-h-[calc(100vh-9)] overflow-y-scroll scb-thin">
 				<ConfigDataTable dataTableConfig={dataTableConfig} data={knowledgeData} />
 			</div>
 		</>

@@ -9,12 +9,20 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import type { PersistentTaskVo, StartCrawlDto } from '@prisma-ai/shared';
+import { useQueryClient } from '@tanstack/react-query';
 import { ExternalLink, Play, Square } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { getTaskResult, startCrawl, startSyncJobsToVectorDB } from '../../../services/hjm';
+import { Badge } from '../../../components/ui/badge';
+import { useCustomQuery } from '../../../query/config';
+import { JobQueryKey } from '../../../query/keys';
+import {
+	getJobCount,
+	getTaskResult,
+	startCrawl,
+	startSyncJobsToVectorDB
+} from '../../../services/hjm';
 import { PageHeader } from '../components/PageHeader';
 
 // Define a specific type for the task data
@@ -76,9 +84,11 @@ export function DataCrawl() {
 	const [crawlTaskId, setCrawlTaskId] = useState<string | null>(null);
 	const [syncTaskId, setSyncTaskId] = useState<string | null>(null);
 
+	const queryClient = useQueryClient();
 	const crawlTaskData = useTaskPolling(crawlTaskId, () => {
 		setIsCrawlRunning(false);
 		setCrawlTaskId(null);
+		queryClient.invalidateQueries({ queryKey: [JobQueryKey.JobCount] });
 	});
 	const syncTaskData = useTaskPolling(syncTaskId);
 
@@ -148,6 +158,20 @@ export function DataCrawl() {
 	const isTaskRunning =
 		(crawlTaskId && crawlTaskData && !['completed', 'failed'].includes(crawlTaskData.status)) ||
 		getIsCrawlRunning();
+
+	//获取数据库中的岗位数量
+	const { data: jobCountData, status: jobCountStatus } = useCustomQuery(
+		[JobQueryKey.JobCount],
+		() => getJobCount()
+	);
+	if (jobCountStatus === 'pending') {
+		return <div>Loading...</div>;
+	}
+	if (jobCountStatus === 'error') {
+		return <div>Error: {jobCountData?.message}</div>;
+	}
+
+	const jobCount = jobCountData?.data;
 
 	return (
 		<>
@@ -227,8 +251,6 @@ export function DataCrawl() {
 					)}
 				</Card>
 
-				<Separator />
-
 				{getIsCrawlRunning() && (
 					<Card className="bg-background/50">
 						<CardHeader>
@@ -245,8 +267,6 @@ export function DataCrawl() {
 						</CardContent>
 					</Card>
 				)}
-
-				<Separator />
 
 				<Card className="bg-background/50">
 					<CardHeader>
@@ -282,6 +302,14 @@ export function DataCrawl() {
 							)}
 						</CardContent>
 					)}
+				</Card>
+
+				<Card className="bg-background/50">
+					<CardHeader>
+						<CardTitle>
+							数据库中的岗位数量 = <Badge variant={'outline'}>{jobCount}</Badge>
+						</CardTitle>
+					</CardHeader>
 				</Card>
 			</div>
 		</>
