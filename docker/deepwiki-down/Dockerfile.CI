@@ -24,9 +24,11 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 COPY ./packages/deepwiki-down/src/ /app/src/
 COPY ./packages/deepwiki-down/pyproject.toml /app/
 
+# 设置Python脚本的执行权限
+RUN chmod +x /app/src/application/interface/cli.py
 
 ENV PYTHONPATH=/app
 
-ENTRYPOINT ["src/application/interface/cli.py"]
+ENTRYPOINT ["python3", "/app/src/application/interface/cli.py"]
 
 CMD ["--help"]
