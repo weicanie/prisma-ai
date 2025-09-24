@@ -73,6 +73,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/packages/magic-resume/.next/BUILD
 COPY --from=production-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=production-deps --chown=nextjs:nodejs /app/packages/magic-resume/node_modules ./packages/magic-resume/node_modules
 
+# 版权信息
+COPY --from=builder --chown=nextjs:nodejs /app/packages/magic-resume/LICENSE ./packages/magic-resume/LICENSE
+COPY --from=builder --chown=nextjs:nodejs /app/packages/magic-resume/README.md ./packages/magic-resume/README.md
+
 USER nextjs
 
 EXPOSE 3009

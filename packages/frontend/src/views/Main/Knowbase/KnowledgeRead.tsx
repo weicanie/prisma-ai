@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTheme } from '@/utils/theme';
-import { type_content_Map } from '@prisma-ai/shared';
+import { project_knowledge_type_label } from '@prisma-ai/shared';
 import { BookOpen, Calendar, Edit, ExternalLink } from 'lucide-react';
 import React from 'react';
 import { useParams } from 'react-router-dom';
@@ -22,7 +22,7 @@ const KnowledgeRead: React.FC<KnowledgeReadProps> = () => {
 	const isDark = resolvedTheme === 'dark';
 
 	if (status === 'pending') {
-		return <div>Loading...</div>;
+		return <div></div>;
 	}
 	if (status === 'error') {
 		return <div>错误:{data?.message}</div>;
@@ -79,7 +79,7 @@ const KnowledgeRead: React.FC<KnowledgeReadProps> = () => {
 								{knowledgeData.fileType}
 							</span>
 							<p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} leading-relaxed`}>
-								{type_content_Map[knowledgeData.type] ?? '未知类型'}
+								{project_knowledge_type_label[knowledgeData.type] ?? '未知类型'}
 							</p>
 						</CardContent>
 					</Card>

@@ -10,7 +10,7 @@ createRoot(document.getElementById('root')!).render(
 	<BrowserRouter>
 		<Provider store={store}>
 			<ThemeProviderDiy>
-				<Suspense fallback={<div>Loading...</div>}>
+				<Suspense fallback={<div></div>}>
 					<APP></APP>
 				</Suspense>
 			</ThemeProviderDiy>

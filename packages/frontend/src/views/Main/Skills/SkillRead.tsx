@@ -14,13 +14,14 @@ interface SkillReadProps {
 
 const SkillRead: React.FC<SkillReadProps> = () => {
 	const { skillId } = useParams();
+	console.log('skillId', skillId);
 	const { data, status } = useCustomQuery([SkillQueryKey.Skills], findAllUserSkills);
 
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
 
 	if (status === 'pending') {
-		return <div>Loading...</div>;
+		return <div></div>;
 	}
 	if (status === 'error') {
 		return <div>错误:{data?.message}</div>;

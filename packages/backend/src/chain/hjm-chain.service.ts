@@ -3,9 +3,9 @@ import { RunnableSequence } from '@langchain/core/runnables';
 import { Injectable, Logger } from '@nestjs/common';
 import {
 	JobVo,
-	SelectedLLM,
 	resumeMatchedSchema,
 	ResumeVo,
+	SelectedLLM,
 	UserFeedback,
 	UserInfoFromToken
 } from '@prisma-ai/shared';
@@ -49,9 +49,7 @@ export class HjmChainService {
 	async _createProcessChain(
 		promptGetter: () => Promise<ChatPromptTemplate>,
 		outputSchema: z.Schema,
-		inputSchema: z.Schema | undefined,
 		stream: boolean,
-		business: BusinessEnum,
 		model: SelectedLLM
 	) {
 		const businessPrompt = await promptGetter();
@@ -88,59 +86,6 @@ export class HjmChainService {
 					JSON.stringify({ resume: i.resume, job: i.job }),
 				chat_history: () => '', // 暂不处理多轮对话历史
 				instructions: () => outputParser.getFormatInstructions(),
-				instructions_mid: () => {
-					const inputParser =
-						inputSchema && RubustStructuredOutputParser.fromZodSchema(inputSchema);
-					return inputParser ? inputParser.getFormatInstructions() : '';
-				},
-				// 知识库集成：检索相关代码和文档
-				retrievedProjectCodes: async (i: ResumeMatchJobProcessingInput) => {
-					try {
-						let codeQuery = '';
-						switch (business) {
-							case BusinessEnum.matchJob:
-								return '无相关项目代码'; //定制简历先不提供项目代码
-							default:
-								this.logger.warn(
-									`_createProcessChain ~ retrievedProjectCodes: 不支持的业务类型:${business}`
-								);
-								return '无相关项目代码';
-						}
-						// return await this.projectCodeVDBService.retrieveCodeChunks(
-						// 	codeQuery,
-						// 	5,
-						// 	i.userInfo.userId,
-						// 	i.project.info.name
-						// );
-					} catch (e) {
-						return '项目代码库未找到或检索失败';
-					}
-				},
-				//TODO 检索太大块
-				retrievedDomainDocs: async (i: ResumeMatchJobProcessingInput) => {
-					try {
-						let docsQuery = '';
-						switch (business) {
-							case BusinessEnum.matchJob:
-								docsQuery = `岗位: ${i.job}, 简历: ${JSON.stringify(i.resume)}`;
-								break;
-							default:
-								this.logger.warn(
-									`_createProcessChain ~ retrievedDomainDocs: 不支持的业务类型:${business}`
-								);
-								return '无相关文档';
-						}
-						// 使用 CRAG 版本的检索可以获得更高质量的知识
-						return await this.knowledgeVDBService.retrieveKonwbase(
-							docsQuery,
-							5, // topK
-							i.userInfo.userId
-						);
-					} catch (e) {
-						return '相关文档库检索失败';
-					}
-				},
-
 				// 2. 反思逻辑：如果用户要求，则生成反思内容
 				reflection: async (i: ResumeMatchJobProcessingInput) => {
 					if (i.userFeedback.reflect && i.userFeedback.content) {
@@ -181,9 +126,7 @@ export class HjmChainService {
 		const chain = await this._createProcessChain(
 			() => Promise.resolve(prompt),
 			schema,
-			void 0,
 			stream,
-			BusinessEnum.matchJob,
 			model
 		);
 		if (stream) {

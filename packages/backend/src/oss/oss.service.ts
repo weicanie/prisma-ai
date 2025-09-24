@@ -43,7 +43,7 @@ export class OssService {
 	 * @param bucketName 桶名
 	 * @returns 文件内容的Buffer
 	 */
-	async getObject(objectName: string, bucketName = 'prisma-ai'): Promise<Buffer> {
+	async getObject(objectName: string, bucketName = 'prisma-ai'){
 		try {
 			const dataStream = await this.ossClient.getObject(bucketName, objectName);
 			const chunks: Buffer[] = [];

@@ -9,7 +9,7 @@ import {
 	Query,
 	ValidationPipe
 } from '@nestjs/common';
-import { UserInfoFromToken } from '@prisma-ai/shared';
+import { type UserInfoFromToken } from '@prisma-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { CrawlJobService } from './crawl-job.service';
 import { CreateJobDto } from './dto/create-job.dto';

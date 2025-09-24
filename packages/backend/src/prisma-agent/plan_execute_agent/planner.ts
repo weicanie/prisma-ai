@@ -99,9 +99,10 @@ export async function retrieveNode(
 			? knowledgeVDBService.retrieveKonwbase_CRAG(
 					lightSpot,
 					agentConfig.topK.plan.knowledge,
-					userId
+					userId,
+					projectName
 				)
-			: knowledgeVDBService.retrieveKonwbase(lightSpot, agentConfig.topK.plan.knowledge, userId)
+			: knowledgeVDBService.retrieveKnowbase(lightSpot, agentConfig.topK.plan.knowledge, userId, projectName)
 	]);
 
 	config.configurable.logger.log(

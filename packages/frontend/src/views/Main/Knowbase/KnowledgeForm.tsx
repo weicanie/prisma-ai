@@ -22,13 +22,16 @@ import {
 	SelectValue
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { KnowledgeTypeEnum, type_content_Map, type CreateKnowledgeDto } from '@prisma-ai/shared';
+import {
+	ProjectKnowledgeTypeEnum,
+	project_knowledge_type_label,
+	type CreateProjectKnowledgeDto
+} from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { throttle } from 'lodash';
 import { X } from 'lucide-react';
-import { memo, useEffect, useState } from 'react';
+import { lazy, memo, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { UploadModal } from '../../../components/FileUploadModel';
 import { useCustomMutation } from '../../../query/config';
 import { KnowledgeQueryKey } from '../../../query/keys';
 import { createKnowledge } from '../../../services/knowbase';
@@ -37,22 +40,22 @@ import {
 	selectKnowledgeData,
 	setKnowledgeDataFromDto
 } from '../../../store/knowbase';
-//TODO 知识库功能测试：github仓库和静态页面
+
+const UploadModal = lazy(() => import('../../../components/FileUploadModel'));
+
 const knowledgeFormSchema = z.object({
 	name: z.string().min(1, '知识名称不能为空').max(100, '知识名称不能超过100个字符'),
+	projectName: z.string().min(1, '项目名称不能为空').max(100, '项目名称不能超过100个字符'),
 	fileType: z.enum(['txt', 'url', 'doc', 'md'], {
 		required_error: '请选择文件类型'
 	}),
 	tag: z.array(z.string()).min(1, '至少需要添加一个标签'),
 	type: z.enum(
 		[
-			KnowledgeTypeEnum.userProjectDoc,
-			KnowledgeTypeEnum.userProjectCode,
-			KnowledgeTypeEnum.openSourceProjectDoc,
-			KnowledgeTypeEnum.openSourceProjectRepo,
-			KnowledgeTypeEnum.techDoc,
-			KnowledgeTypeEnum.interviewQuestion,
-			KnowledgeTypeEnum.other
+			ProjectKnowledgeTypeEnum.userProjectDoc,
+			ProjectKnowledgeTypeEnum.userProjectCode,
+			ProjectKnowledgeTypeEnum.techDoc,
+			ProjectKnowledgeTypeEnum.other
 		],
 		{
 			required_error: '请选择知识类型'
@@ -70,9 +73,14 @@ export const KnowledgeForm = memo(() => {
 		resolver: zodResolver(knowledgeFormSchema),
 		defaultValues: {
 			name: knowledgeData.name || '',
+			projectName: knowledgeData.projectName || '',
 			fileType: knowledgeData.fileType || 'txt',
 			tag: knowledgeData.tag || [],
-			type: knowledgeData.type as KnowledgeTypeEnum,
+			type: knowledgeData.type as
+				| ProjectKnowledgeTypeEnum.userProjectDoc
+				| ProjectKnowledgeTypeEnum.userProjectCode
+				| ProjectKnowledgeTypeEnum.techDoc
+				| ProjectKnowledgeTypeEnum.other,
 			content: knowledgeData.content || ''
 		}
 	});
@@ -83,7 +91,7 @@ export const KnowledgeForm = memo(() => {
 
 	const dispatch = useDispatch();
 	const onChange = throttle((formData: KnowledgeFormData) => {
-		const knowledgeData: CreateKnowledgeDto = {
+		const knowledgeData: CreateProjectKnowledgeDto = {
 			...values,
 			name: formData.name,
 			content: formData.content
@@ -168,6 +176,22 @@ export const KnowledgeForm = memo(() => {
 						)}
 					/>
 
+					{/* 项目名称 */}
+					<FormField
+						control={form.control}
+						name="projectName"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>所属项目名称</FormLabel>
+								<FormControl>
+									<Input placeholder="请输入项目名称" {...field} />
+								</FormControl>
+								<FormDescription>项目名称必须与项目经验中的名称相同</FormDescription>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
 					{/* 文件类型 */}
 					<FormField
 						control={form.control}
@@ -210,7 +234,7 @@ export const KnowledgeForm = memo(() => {
 										</SelectTrigger>
 									</FormControl>
 									<SelectContent>
-										{Object.entries(type_content_Map).map(([key, label]) => (
+										{Object.entries(project_knowledge_type_label).map(([key, label]) => (
 											<SelectItem key={key} value={key}>
 												{label}
 											</SelectItem>

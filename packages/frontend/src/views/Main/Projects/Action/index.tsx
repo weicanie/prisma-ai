@@ -103,7 +103,7 @@ const Action: React.FC<ActionProps> = () => {
 	const ImplementRequest = useCustomMutation(implementProject);
 
 	if (status === 'pending') {
-		return <div className="flex justify-center items-center h-64">Loading...</div>;
+		return <div className="flex justify-center items-center h-64"></div>;
 	}
 
 	if (status === 'error') {

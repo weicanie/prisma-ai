@@ -473,7 +473,7 @@ export class ResumeService implements WithFuncPool, OnModuleInit {
 		}
 	}
 
-	async remove(id: string, userInfo: UserInfoFromToken): Promise<{ message: string }> {
+	async remove(id: string, userInfo: UserInfoFromToken) {
 		if (!Types.ObjectId.isValid(id)) {
 			throw new NotFoundException(`Invalid ID format: "${id}"`);
 		}
@@ -486,6 +486,20 @@ export class ResumeService implements WithFuncPool, OnModuleInit {
 		if (result.deletedCount === 0) {
 			throw new NotFoundException(`Resume with ID "${id}" not found or access denied`);
 		}
-		return { message: `Resume with ID "${id}" deleted successfully` };
+	}
+
+	async removeResumeMatched(id: string, userInfo: UserInfoFromToken) {
+		if (!Types.ObjectId.isValid(id)) {
+			throw new NotFoundException(`Invalid ID format: "${id}"`);
+		}
+		const result = await this.resumeMatchedModel
+			.deleteOne({
+				_id: new Types.ObjectId(id),
+				'userInfo.userId': userInfo.userId
+			})
+			.exec();
+		if (result.deletedCount === 0) {
+			throw new NotFoundException(`Resume matched with ID "${id}" not found or access denied`);
+		}
 	}
 }

@@ -15,7 +15,7 @@ const EducationRead: React.FC = () => {
 		}
 	);
 
-	if (status === 'pending') return <div>Loading...</div>;
+	if (status === 'pending') return <div></div>;
 	if (status === 'error') return <div>错误:{data?.message}</div>;
 	const edu = data.data;
 

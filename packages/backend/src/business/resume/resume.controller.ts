@@ -128,6 +128,12 @@ export class ResumeController {
 	}
 
 	@RequireLogin()
+	@Delete('matched/:id')
+	removeResumeMatched(@Param('id') id: string, @UserInfo() userInfo: UserInfoFromToken) {
+		return this.resumeService.removeResumeMatched(id, userInfo);
+	}
+
+	@RequireLogin()
 	@Get('export/:id')
 	exportResume(@Param('id') id: string, @UserInfo() userInfo: UserInfoFromToken) {
 		return this.resumeJsonService.exportResume(id, userInfo);

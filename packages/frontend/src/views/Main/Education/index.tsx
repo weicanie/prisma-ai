@@ -22,6 +22,7 @@ interface EducationsProps<TData> {
 	title?: string; // 页面标题
 	description?: string; // 页面描述
 	mainTable?: boolean; // 是否为主表格
+	collapsible?: boolean; // 是否为折叠组件
 }
 
 const Educations: React.FC<EducationsProps<EducationVO>> = ({
@@ -29,7 +30,8 @@ const Educations: React.FC<EducationsProps<EducationVO>> = ({
 	selectionHandler,
 	title,
 	description,
-	mainTable = true
+	mainTable = true,
+	collapsible = false
 }) => {
 	const { data, status } = useCustomQuery([EducationQueryKey.Educations], () =>
 		findAllEducations()
@@ -47,7 +49,7 @@ const Educations: React.FC<EducationsProps<EducationVO>> = ({
 
 	const navigate = useNavigate();
 
-	if (status === 'pending') return <div>Loading...</div>;
+	if (status === 'pending') return <div></div>;
 	if (status === 'error') return <div>错误:{data?.message}</div>;
 
 	const eduData = data.data;
@@ -93,11 +95,13 @@ const Educations: React.FC<EducationsProps<EducationVO>> = ({
 				},
 				{
 					accessorKey: 'major',
-					header: ({ column }) => <DataTableColumnHeader column={column} title="专业" />
+					header: ({ column }) => <DataTableColumnHeader column={column} title="专业" />,
+					enableSorting: false
 				},
 				{
 					accessorKey: 'degree',
-					header: ({ column }) => <DataTableColumnHeader column={column} title="学历" />
+					header: ({ column }) => <DataTableColumnHeader column={column} title="学历" />,
+					enableSorting: false
 				},
 				{
 					accessorKey: 'startDate',
@@ -136,7 +140,7 @@ const Educations: React.FC<EducationsProps<EducationVO>> = ({
 			pagination: { enable: eduData.length > 10 }
 		},
 		onRowClick: (rowData: EducationVO) => () => {
-			navigate(`/main/education/detail/${rowData?.id}`, {
+			navigate(`education-detail/${rowData?.id}`, {
 				state: { param: rowData.id }
 			});
 		},
@@ -147,7 +151,9 @@ const Educations: React.FC<EducationsProps<EducationVO>> = ({
 
 	return (
 		<>
-			<PageHeader title={title ?? '教育经历'} description={description ?? '管理你的教育经历'} />
+			{!collapsible && (
+				<PageHeader title={title ?? '教育经历'} description={description ?? '管理你的教育经历'} />
+			)}
 			<div className="pl-10 pr-10">
 				<ConfigDataTable dataTableConfig={dataTableConfig} data={eduData} />
 			</div>

@@ -14,12 +14,25 @@ import {
 	FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import type { CreateResumeDto, ProjectVo, SkillItem } from '@prisma-ai/shared';
-import { Code, FileText, Sparkles } from 'lucide-react';
+import type {
+	CareerVO,
+	CreateResumeDto,
+	EducationVO,
+	ProjectVo,
+	SkillItem
+} from '@prisma-ai/shared';
+import { Briefcase, Code, FileText, GraduationCap, Sparkles } from 'lucide-react';
 import React, { memo } from 'react';
 import { useSelector } from 'react-redux';
 import { useCustomQuery } from '../../../query/config';
-import { ProjectQueryKey, SkillQueryKey } from '../../../query/keys';
+import {
+	CareerQueryKey,
+	EducationQueryKey,
+	ProjectQueryKey,
+	SkillQueryKey
+} from '../../../query/keys';
+import { findAllCareers } from '../../../services/career';
+import { findAllEducations } from '../../../services/education';
 import { findAllProjects } from '../../../services/project';
 import { findAllUserSkills } from '../../../services/skill';
 import { selectResumeData } from '../../../store/resume';
@@ -53,10 +66,12 @@ const ResumeForm: React.FC<ResumeFormProps> = memo(({ onSubmit }) => {
 		}
 	});
 
-	// 从store获取选中的技能和项目
+	// 从store获取选中的技能、项目、工作经历和教育经历
 	const selectedIds = useSelector(selectResumeData);
 	const selectedSkillId = selectedIds?.skill;
 	const selectedProjectIds = selectedIds?.projects;
+	const selectedCareerIds = selectedIds?.careers;
+	const selectedEducationIds = selectedIds?.educations;
 
 	const { data: projectData, status: projectStatus } = useCustomQuery(
 		[ProjectQueryKey.Projects],
@@ -67,15 +82,46 @@ const ResumeForm: React.FC<ResumeFormProps> = memo(({ onSubmit }) => {
 		findAllUserSkills
 	);
 
-	if (projectStatus === 'pending' || skillStatus === 'pending') {
-		return <div>Loading...</div>;
+	const { data: careerData, status: careerStatus } = useCustomQuery(
+		[CareerQueryKey.Careers],
+		findAllCareers
+	);
+	const { data: educationData, status: educationStatus } = useCustomQuery(
+		[EducationQueryKey.Educations],
+		findAllEducations
+	);
+
+	if (
+		projectStatus === 'pending' ||
+		skillStatus === 'pending' ||
+		careerStatus === 'pending' ||
+		educationStatus === 'pending'
+	) {
+		return <div></div>;
 	}
 
-	if (projectStatus === 'error' || skillStatus === 'error') {
-		return <div>错误: {projectData?.message || skillData?.message}</div>;
+	if (
+		projectStatus === 'error' ||
+		skillStatus === 'error' ||
+		careerStatus === 'error' ||
+		educationStatus === 'error'
+	) {
+		return (
+			<div>
+				错误:{' '}
+				{projectData?.message ||
+					skillData?.message ||
+					careerData?.message ||
+					educationData?.message}
+			</div>
+		);
 	}
 
 	const selectedSkill = skillData.data.find(skill => skill.id === selectedSkillId);
+	const selectedCareers = careerData.data.filter(career => selectedCareerIds?.includes(career.id!));
+	const selectedEducations = educationData.data.filter(education =>
+		selectedEducationIds?.includes(education.id!)
+	);
 
 	const selectedProjects = projectData.data.filter(project =>
 		selectedProjectIds?.includes(project.id!)
@@ -85,7 +131,9 @@ const ResumeForm: React.FC<ResumeFormProps> = memo(({ onSubmit }) => {
 		const resumeData: CreateResumeDto = {
 			name: data.name,
 			skill: selectedSkill?.id,
-			projects: selectedProjects?.map((project: ProjectVo): string => project.id!) || []
+			projects: selectedProjects?.map((project: ProjectVo): string => project.id!) || [],
+			careers: selectedCareers?.map((career: CareerVO): string => career.id!) || [],
+			educations: selectedEducations?.map((education: EducationVO): string => education.id!) || []
 		};
 
 		console.log('提交的简历数据:', resumeData);
@@ -226,6 +274,71 @@ const ResumeForm: React.FC<ResumeFormProps> = memo(({ onSubmit }) => {
 													)}
 												</div>
 											)}
+										</div>
+									))}
+								</div>
+							</CardContent>
+						</Card>
+					)}
+
+					{/* 选中的工作经历展示 */}
+					{selectedCareers && selectedCareers.length > 0 && (
+						<Card>
+							<CardHeader>
+								<CardTitle className="flex items-center gap-2 text-base">
+									<Briefcase className="w-4 h-4" />
+									已选择的工作经历
+								</CardTitle>
+								<CardDescription>
+									以下{selectedCareers.length}个工作经历将包含在简历中
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<div className="space-y-3">
+									{selectedCareers.map((career: CareerVO, index: number) => (
+										<div key={index}>
+											<h5 className="font-medium text-sm mb-2">
+												{career.company} - {career.position}
+											</h5>
+											<p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+												{career.startDate.slice(0, 10)} - {career.endDate?.slice(0, 10) || '至今'}
+											</p>
+											{career.details && (
+												<p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+													{career.details}
+												</p>
+											)}
+										</div>
+									))}
+								</div>
+							</CardContent>
+						</Card>
+					)}
+
+					{/* 选中的教育经历展示 */}
+					{selectedEducations && selectedEducations.length > 0 && (
+						<Card>
+							<CardHeader>
+								<CardTitle className="flex items-center gap-2 text-base">
+									<GraduationCap className="w-4 h-4" />
+									已选择的教育经历
+								</CardTitle>
+								<CardDescription>
+									以下{selectedEducations.length}个教育经历将包含在简历中
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<div className="space-y-3">
+									{selectedEducations.map((education: EducationVO, index: number) => (
+										<div key={index}>
+											<h5 className="font-medium text-sm mb-2">
+												{education.school} - {education.major}
+											</h5>
+											<p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+												{/* 只取年月日 */}
+												{education.startDate.slice(0, 10)} -{' '}
+												{education.endDate?.slice(0, 10) || '至今'}
+											</p>
 										</div>
 									))}
 								</div>

@@ -140,10 +140,11 @@ export class ProjectChainService {
 								break;
 						}
 						// 使用 CRAG 版本的检索可以获得更高质量的知识
-						return await this.knowledgeVDBService.retrieveKonwbase(
+						return await this.knowledgeVDBService.retrieveKnowbase(
 							docsQuery,
 							5, // topK
-							i.userInfo.userId
+							i.userInfo.userId,
+							i.project.info.name
 						);
 					} catch (e) {
 						return '相关文档库检索失败';

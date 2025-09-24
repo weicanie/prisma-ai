@@ -26,7 +26,7 @@ export async function retrieveNode(
 ): Promise<Partial<typeof GraphState.State>> {
 	config.configurable.logger.log('---节点: 检索知识---');
 	config.configurable.logger.log('stepResult', state.stepResult);
-	const { stepResult, userId } = state;
+	const { stepResult, userId, projectInfo } = state;
 	const { knowledgeVDBService } = config.configurable;
 
 	if (!stepResult?.output.userFeedback) {
@@ -37,18 +37,22 @@ export async function retrieveNode(
 		throw new Error('KnowledgeVDBService not found in configurable');
 	}
 	if (!userId) throw new Error('User ID is not set');
+	if (!projectInfo) throw new Error('Project info is not set');
+	const { name: projectName } = projectInfo.info;
 	const agentConfig = await getAgentConfig();
 
 	const retrievedDomainDocs = agentConfig.CRAG
 		? await knowledgeVDBService.retrieveKonwbase_CRAG(
 				stepResult.output.userFeedback,
 				agentConfig.topK.replan.knowledge,
-				userId
+				userId,
+				projectName
 			)
-		: await knowledgeVDBService.retrieveKonwbase(
+		: await knowledgeVDBService.retrieveKnowbase(
 				stepResult.output.userFeedback,
 				agentConfig.topK.replan.knowledge,
-				userId
+				userId,
+				projectName
 			);
 	console.log(`Retrieved ${retrievedDomainDocs.length} domain documents with user feedback`);
 

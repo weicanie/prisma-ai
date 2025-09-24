@@ -85,7 +85,7 @@ scrollbar-default:隐藏后显示滚动条 用于断点
     var(--sidebar-border);
   --color-sidebar-ring:
     var(--sidebar-ring);
- }
+}
 
 :root {
   --radius:
@@ -223,10 +223,12 @@ scrollbar-default:隐藏后显示滚动条 用于断点
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
 }
+
 @layer base {
   :root {
     --sidebar-background: 0 0% 98%;
@@ -255,34 +257,37 @@ scrollbar-default:隐藏后显示滚动条 用于断点
 /* 自定义 */
 
 :root {
-/* md编辑器背景色 */
---editor-bg-color: rgb(253,252,255);
+  /* md编辑器背景色 */
+  --editor-bg-color: rgb(253, 252, 255);
 }
+
 .dark {
---editor-bg-color: rgb(26,26,26);
+  --editor-bg-color: rgb(26, 26, 26);
 
 }
 
 @theme {
---blue-prisma:rgb(28,160,188);
---purple-prisma:rgb(109,90,139);
---green-prisma:rgb(34,179,71);
---yellow-prisma:rgb(247,230,0);
---orange-prisma:rgb(245,101,34);
---red-prisma:rgb(242,30,56);
+  --blue-prisma: rgb(28, 160, 188);
+  --purple-prisma: rgb(109, 90, 139);
+  --green-prisma: rgb(34, 179, 71);
+  --yellow-prisma: rgb(247, 230, 0);
+  --orange-prisma: rgb(245, 101, 34);
+  --red-prisma: rgb(242, 30, 56);
 
---color-primary: var(--sidebar-primary);
---color-secondary: var(--sidebar-secondary);
+  --color-primary: var(--sidebar-primary);
+  --color-secondary: var(--sidebar-secondary);
 
 }
+
 /* 侧边栏自定义 */
 :root {
---sidebar-primary:var(--blue-prisma);
---sidebar-secondary:var(--green-prisma);
+  --sidebar-primary: var(--blue-prisma);
+  --sidebar-secondary: var(--green-prisma);
 }
+
 .dark {
---sidebar-primary:var(--purple-prisma);
---sidebar-secondary:var(--orange-prisma);
+  --sidebar-primary: var(--purple-prisma);
+  --sidebar-secondary: var(--orange-prisma);
 
 }
 
@@ -293,9 +298,10 @@ scrollbar-default:隐藏后显示滚动条 用于断点
 /* 背景色 */
 @utility bg-global {
   @apply bg-gray-50;
+
   @variant dark {
-      @apply bg-gray-900;
-  } 
+    @apply bg-gray-900;
+  }
 }
 
 @utility scb-thin {
@@ -306,27 +312,4 @@ scrollbar-default:隐藏后显示滚动条 用于断点
 /* md编辑器 */
 .milkdown {
   @apply h-full w-full;
-}
-/* copilotkit */
-p.poweredBy,.copilotKitVersionInfo {
-  @apply hidden!;
-}
-.copilotKitInput {
-  @apply mb-4!;
-}
-.copilotKitDevConsole.copilotKitDevConsoleWarnOutdated {
-  @apply bg-[var(--copilot-kit-contrast-color)]!;
-}
-/* 登录注册表单动画 */
-.form-transition-enter {
-  @apply opacity-0;
-}
-.form-transition-enter-active {
-  @apply opacity-100 transition-opacity duration-500;
-}
-.form-transition-exit {
-  @apply opacity-100;
-}
-.form-transition-exit-active {
-  @apply opacity-0 transition-opacity duration-500;
 }

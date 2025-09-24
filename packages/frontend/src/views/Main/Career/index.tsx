@@ -22,6 +22,7 @@ interface CareersProps<TData> {
 	title?: string; // 页面标题
 	description?: string; // 页面描述
 	mainTable?: boolean; // 是否为主表格
+	collapsible?: boolean; // 是否为折叠组件
 }
 
 const Careers: React.FC<CareersProps<CareerVO>> = ({
@@ -29,7 +30,8 @@ const Careers: React.FC<CareersProps<CareerVO>> = ({
 	selectionHandler,
 	title,
 	description,
-	mainTable = true
+	mainTable = true,
+	collapsible = false
 }) => {
 	const { data, status } = useCustomQuery([CareerQueryKey.Careers], () => findAllCareers());
 	const queryClient = useQueryClient();
@@ -45,7 +47,7 @@ const Careers: React.FC<CareersProps<CareerVO>> = ({
 
 	const navigate = useNavigate();
 
-	if (status === 'pending') return <div>Loading...</div>;
+	if (status === 'pending') return <div></div>;
 	if (status === 'error') return <div>错误:{data?.message}</div>;
 
 	const careerData = data.data;
@@ -91,7 +93,8 @@ const Careers: React.FC<CareersProps<CareerVO>> = ({
 				},
 				{
 					accessorKey: 'position',
-					header: ({ column }) => <DataTableColumnHeader column={column} title="职位" />
+					header: ({ column }) => <DataTableColumnHeader column={column} title="职位" />,
+					enableSorting: false
 				},
 				{
 					accessorKey: 'startDate',
@@ -130,7 +133,7 @@ const Careers: React.FC<CareersProps<CareerVO>> = ({
 			pagination: { enable: careerData.length > 10 }
 		},
 		onRowClick: (rowData: CareerVO) => () => {
-			navigate(`/main/career/detail/${rowData?.id}`, {
+			navigate(`career-detail/${rowData?.id}`, {
 				state: { param: rowData.id }
 			});
 		},
@@ -141,7 +144,9 @@ const Careers: React.FC<CareersProps<CareerVO>> = ({
 
 	return (
 		<>
-			<PageHeader title={title ?? '工作经历'} description={description ?? '管理你的工作经历'} />
+			{!collapsible && (
+				<PageHeader title={title ?? '工作经历'} description={description ?? '管理你的工作经历'} />
+			)}
 			<div className="pl-10 pr-10">
 				<ConfigDataTable dataTableConfig={dataTableConfig} data={careerData} />
 			</div>

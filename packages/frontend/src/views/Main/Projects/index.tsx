@@ -23,6 +23,7 @@ interface ProjectsProps<TData> {
 	title?: string; // 页面标题
 	description?: string; // 页面描述
 	mainTable?: boolean; // 是否为主表格
+	collapsible?: boolean; // 是否为折叠组件
 }
 
 const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
@@ -30,7 +31,8 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 	selectionHandler,
 	title,
 	description,
-	mainTable = true
+	mainTable = true,
+	collapsible = false
 }) => {
 	const { data, status } = useCustomQuery([ProjectQueryKey.Projects], findAllProjects);
 	const queryClient = useQueryClient();
@@ -45,7 +47,7 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 	});
 	const navigate = useNavigate();
 	if (status === 'pending') {
-		return <div>Loading...</div>;
+		return <div></div>;
 	}
 	if (status === 'error') {
 		return <div>错误:{data?.message}</div>;
@@ -103,25 +105,27 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 									row.original.info.desc.contribute}
 							</span>
 						</div>
-					)
-				},
-				{
-					accessorKey: 'status',
-					header: ({ column }) => <DataTableColumnHeader column={column} title="状态" />,
-					cell: ({ row }) => (
-						<div className="flex space-x-2">
-							<Badge variant="default">{row.original.status}</Badge>
-						</div>
 					),
-					filterFn: (row, id, value) => value.includes(row.getValue(id)),
-					columnId: 'status',
-					title: '状态',
-					options: [
-						{ label: 'Low', value: 'low' },
-						{ label: 'Medium', value: 'medium' },
-						{ label: 'High', value: 'high' }
-					]
+					enableSorting: false
 				},
+				// {
+				// 	accessorKey: 'status',
+				// 	header: ({ column }) => <DataTableColumnHeader column={column} title="状态" />,
+				// 	cell: ({ row }) => (
+				// 		<div className="flex space-x-2">
+				// 			<Badge variant="default">{row.original.status}</Badge>
+				// 		</div>
+				// 	),
+				// 	filterFn: (row, id, value) => value.includes(row.getValue(id)),
+				// 	columnId: 'status',
+				// 	title: '状态',
+				// 	options: [
+				// 		{ label: 'Low', value: 'low' },
+				// 		{ label: 'Medium', value: 'medium' },
+				// 		{ label: 'High', value: 'high' }
+				// 	],
+				// 	enableSorting: false
+				// },
 				{
 					accessorKey: 'score',
 					header: ({ column }) => <DataTableColumnHeader column={column} title="评分" />,
@@ -129,7 +133,8 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 						<div className="flex space-x-2">
 							<Badge variant="secondary">{row.original.lookupResult?.score ?? '待分析'}</Badge>
 						</div>
-					)
+					),
+					enableSorting: false
 				}
 			],
 
@@ -182,13 +187,15 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 
 	return (
 		<>
-			<PageHeader
-				title={title ?? '项目经验'}
-				description={
-					description ??
-					'项目经验决定面试机会、面试表现。点击项目让 Prisma 深入分析你的项目、彻底优化你的项目经验'
-				}
-			></PageHeader>
+			{!collapsible && (
+				<PageHeader
+					title={title ?? '项目经验'}
+					description={
+						description ??
+						'项目经验决定面试机会、面试表现。点击项目让 Prisma 深入分析你的项目、彻底优化你的项目经验'
+					}
+				></PageHeader>
+			)}
 			<div className="pl-10 pr-10 ">
 				<ConfigDataTable dataTableConfig={dataTableConfig} data={projectDatas}></ConfigDataTable>
 			</div>

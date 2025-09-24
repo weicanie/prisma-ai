@@ -5,7 +5,6 @@ import { useId } from 'react';
 import screenshot1 from '@/assets/images/screenshots/secondary_features_1.webp';
 import screenshot2 from '@/assets/images/screenshots/secondary_features_2.webp';
 import screenshot3 from '@/assets/images/screenshots/secondary_features_3.webp';
-import type { ImageProps } from 'antd';
 import { Container } from './c-cpns/Container';
 import { SwirlyDoodle } from './Pricing';
 
@@ -13,7 +12,7 @@ interface Feature {
 	name: React.ReactNode;
 	summary: string;
 	description: string;
-	image: ImageProps['src'];
+	image: string;
 	icon: React.ComponentType;
 }
 

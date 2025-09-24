@@ -37,8 +37,7 @@ export class CRetrieveAgentService {
 	 * @returns
 	 */
 	async invoke(question: string, retriever: VectorStoreRetriever) {
-		// const retriever = await this.knowledgeVDBService.getRetriever(prefix, userId, topK);
-		const model = this.modelService.getLLMDeepSeekRaw('deepseek-chat') as ChatOpenAI;
+		const model = this.modelService.getLLMDeepSeekRaw('deepseek-chat') as unknown as ChatOpenAI;
 		const result = await this.workflow.invoke(
 			{
 				question

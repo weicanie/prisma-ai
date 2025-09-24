@@ -1,6 +1,8 @@
 import React from 'react';
 
-interface LearnProps {}
+interface LearnProps {
+	_?: never;
+}
 
 export const Learn: React.FC<LearnProps> = () => {
 	return <div></div>;

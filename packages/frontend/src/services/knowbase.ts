@@ -1,9 +1,9 @@
 import type {
-	CreateKnowledgeDto,
-	KnowledgeVo,
-	PaginatedKnsResult,
-	ServerDataFormat as SDF, // Added ServerDataFormat
-	UpdateKnowledgeDto
+    CreateProjectKnowledgeDto,
+    PaginatedProjectKnsResult,
+    ProjectKnowledgeVo,
+    ServerDataFormat as SDF, // Added ServerDataFormat
+    UpdateProjectKnowledgeDto
 } from '@prisma-ai/shared';
 import { instance } from './config';
 
@@ -14,8 +14,8 @@ const BASE_URL = '/knowledge-base';
  * @param data 创建知识库条目所需的数据
  * @returns 返回创建的知识库条目数据
  */
-export async function createKnowledge(data: CreateKnowledgeDto): Promise<SDF<KnowledgeVo>> {
-	const res = await instance.post<CreateKnowledgeDto, SDF<KnowledgeVo>>(`${BASE_URL}`, data);
+export async function createKnowledge(data: CreateProjectKnowledgeDto): Promise<SDF<ProjectKnowledgeVo>> {
+	const res = await instance.post<CreateProjectKnowledgeDto, SDF<ProjectKnowledgeVo>>(`${BASE_URL}`, data);
 	return res.data;
 }
 
@@ -27,8 +27,8 @@ export async function createKnowledge(data: CreateKnowledgeDto): Promise<SDF<Kno
 export async function findAllUserKnowledge(params?: {
 	page?: number;
 	limit?: number;
-}): Promise<SDF<PaginatedKnsResult>> {
-	const res = await instance.get<SDF<PaginatedKnsResult>>(`${BASE_URL}`, { params });
+}): Promise<SDF<PaginatedProjectKnsResult>> {
+	const res = await instance.get<SDF<PaginatedProjectKnsResult>>(`${BASE_URL}`, { params });
 	return res.data;
 }
 
@@ -37,8 +37,8 @@ export async function findAllUserKnowledge(params?: {
  * @param id 知识库条目ID
  * @returns 返回指定的知识库条目数据
  */
-export async function findOneUserKnowledge(id: string): Promise<SDF<KnowledgeVo>> {
-	const res = await instance.get<SDF<KnowledgeVo>>(`${BASE_URL}/${id}`);
+export async function findOneUserKnowledge(id: string): Promise<SDF<ProjectKnowledgeVo>> {
+	const res = await instance.get<SDF<ProjectKnowledgeVo>>(`${BASE_URL}/${id}`);
 	return res.data;
 }
 
@@ -50,9 +50,9 @@ export async function findOneUserKnowledge(id: string): Promise<SDF<KnowledgeVo>
  */
 export async function updateKnowledge(
 	id: string,
-	data: UpdateKnowledgeDto
-): Promise<SDF<KnowledgeVo>> {
-	const res = await instance.patch<UpdateKnowledgeDto, SDF<KnowledgeVo>>(`${BASE_URL}/${id}`, data);
+	data: UpdateProjectKnowledgeDto
+): Promise<SDF<ProjectKnowledgeVo>> {
+	const res = await instance.patch<UpdateProjectKnowledgeDto, SDF<ProjectKnowledgeVo>>(`${BASE_URL}/${id}`, data);
 	return res.data;
 }
 

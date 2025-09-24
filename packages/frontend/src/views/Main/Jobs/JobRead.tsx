@@ -14,7 +14,7 @@ const JobRead: React.FC<JobReadProps> = () => {
 	const { data, status } = useCustomQuery([JobQueryKey.Jobs], () => findAllUserJobs(1, 1000));
 
 	if (status === 'pending') {
-		return <div>Loading...</div>;
+		return <div></div>;
 	}
 	if (status === 'error') {
 		return <div>错误:{data?.message}</div>;
