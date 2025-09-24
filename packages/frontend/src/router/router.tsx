@@ -3,7 +3,6 @@ import { Navigate, Outlet } from 'react-router-dom';
 import EditorContainerPage from '../views/Main/ResumeEditor';
 import PrivateRoute from './PrivateRoute';
 import UpdateBreadRouter from './UpdateBreadRouter';
-const AIChat = lazy(() => import('../components/aichat/AIChat'));
 const LandingPage = lazy(() => import('../views/Saas/LandingPage'));
 const LoginPage = lazy(() => import('../views/LoginRegist/login'));
 const RegisterPage = lazy(() => import('../views/LoginRegist/regist'));
@@ -448,10 +447,6 @@ export const routes = [
 		element: <RegisterPage />
 	},
 	{
-		path: '/aichat',
-		element: <AIChat />
-	},
-	{
 		path: '/main',
 		element: (
 			<PrivateRoute>
@@ -492,6 +487,7 @@ export const path_name: Record<string, string> = {
 	'/main/knowledge/knowledge-detail': '知识详情',
 	'/main/knowledge/deepwiki': 'DeepWiki集成',
 	'/main/knowledge/skills': '职业技能',
+	'/main/knowledge/skills/skill-detail': '详情',
 
 	'/main/projects': '项目经验',
 	'/main/projects/action': 'AI优化',
@@ -510,19 +506,17 @@ export const path_name: Record<string, string> = {
 	'/main/resumes': '简历',
 	'/main/resumes/resume-detail': '简历详情',
 	'/main/resumes/skills': '职业技能',
-	'/main/resumes/skills/skill-detail': '职业技能详情',
+	'/main/resumes/skills/skill-detail': '详情',
 	'/main/resumes/skill-detail': '职业技能详情',
 	'/main/resumes/career': '工作经历',
-	'/main/resumes/career/career-detail': '工作经历详情',
+	'/main/resumes/career/career-detail': '详情',
 	'/main/resumes/career-detail': '工作经历详情',
 	'/main/resumes/education': '教育经历',
-	'/main/resumes/education/education-detail': '教育经历详情',
+	'/main/resumes/education/education-detail': '详情',
 	'/main/resumes/education-detail': '教育经历详情',
 	'/main/resumes/action': 'AI优化',
 
 	'/main/resume-editor': '简历编辑器',
 
-	'/main/offer/anki': '集成面试题库和 anki',
-	'/main/offer/road': '技术学习路线',
-	'/main/offer/questions': '简历延申八股'
+	'/main/offer/anki': '集成面试题库和 anki'
 };

@@ -9,6 +9,7 @@ const initialState: KnowledgeState = {
 	data: {
 		name: '',
 		fileType: 'txt',
+		projectName: '',
 		tag: [],
 		type: ProjectKnowledgeTypeEnum.other,
 		content: ''

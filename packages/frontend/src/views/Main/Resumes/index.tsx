@@ -4,7 +4,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import type { ResumeVo } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Row, Table } from '@tanstack/react-table';
-import { Briefcase, GraduationCap, ListChecks } from 'lucide-react';
+import { Briefcase, GraduationCap, ListChecks, Target } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +14,7 @@ import { ResumeQueryKey } from '../../../query/keys';
 import { exportResumeToEditor, findAllUserResumes, removeResume } from '../../../services/resume';
 import { setResumeData } from '../../../store/resume';
 import Careers from '../Career';
+import ClickCollapsible from '../components/ClickCollapsible';
 import { ConfigDataTable } from '../components/config-data-table';
 import type { DataTableConfig } from '../components/config-data-table/config.type';
 import { DataTableColumnHeader } from '../components/config-data-table/data-table/columns/header';
@@ -65,9 +66,9 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 		}
 	});
 
-	/* 挂载和卸载时重置选中的职业技能和项目经验 */
+	/* 挂载和卸载时重置选中项 */
 	useEffect(() => {
-		dispatch(setResumeData({ skill: '', projects: [] }));
+		dispatch(setResumeData({ skill: '', projects: [], careers: [], educations: [] }));
 	}, []);
 
 	if (status === 'pending') {
@@ -242,8 +243,9 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 			dispatch(setResumeData({ skill: (selectedRows[0] as ResumeVo)?.id }));
 		},
 		title: '',
-		description: '选择一个职业技能',
-		mainTable: false
+		description: '',
+		mainTable: false,
+		collapsible: true
 	};
 	const ProjectsProps = {
 		selectColShow: true,
@@ -256,8 +258,9 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 			);
 		},
 		title: '',
-		description: '选择若干项目经验',
-		mainTable: false
+		description: '',
+		mainTable: false,
+		collapsible: true
 	};
 	const CareersProps = {
 		selectColShow: true,
@@ -269,8 +272,9 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 			);
 		},
 		title: '',
-		description: '选择若干工作经历',
-		mainTable: false
+		description: '',
+		mainTable: false,
+		collapsible: true
 	};
 	const EducationsProps = {
 		selectColShow: true,
@@ -282,12 +286,13 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 			);
 		},
 		title: '',
-		description: '选择若干教育经历',
-		mainTable: false
+		description: '',
+		mainTable: false,
+		collapsible: true
 	};
 
 	return (
-		<>
+		<div className="pb-7">
 			<PageHeader
 				title={title ?? '简历'}
 				description={description ?? '组装您的简历并导出到简历编辑器进行编辑'}
@@ -324,14 +329,42 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 			</div>
 			{/* 作为主表格时，显示专业技能和项目经验表格 */}
 			{mainTable && (
-				<>
-					<Skills {...SkillsProps}></Skills>
-					<Projects {...ProjectsProps}></Projects>
-					<Careers {...CareersProps}></Careers>
-					<Educations {...EducationsProps}></Educations>
-				</>
+				<div className="mt-9 space-y-3 px-4">
+					<ClickCollapsible
+						title={<h2 className="text-base">选择一个职业技能</h2>}
+						icon={<ListChecks className="size-5" />}
+						className="px-6"
+						defaultOpen={false}
+					>
+						<Skills {...SkillsProps}></Skills>
+					</ClickCollapsible>
+					<ClickCollapsible
+						title={<h2 className="text-base">选择若干项目经验</h2>}
+						icon={<Target className="size-5" />}
+						className="px-6"
+						defaultOpen={false}
+					>
+						<Projects {...ProjectsProps}></Projects>
+					</ClickCollapsible>
+					<ClickCollapsible
+						title={<h2 className="text-base">选择若干工作经历</h2>}
+						icon={<Briefcase className="size-5" />}
+						className="px-6"
+						defaultOpen={false}
+					>
+						<Careers {...CareersProps}></Careers>
+					</ClickCollapsible>
+					<ClickCollapsible
+						title={<h2 className="text-base">选择若干教育经历</h2>}
+						icon={<GraduationCap className="size-5" />}
+						className="px-6"
+						defaultOpen={false}
+					>
+						<Educations {...EducationsProps}></Educations>
+					</ClickCollapsible>
+				</div>
 			)}
-		</>
+		</div>
 	);
 };
 
