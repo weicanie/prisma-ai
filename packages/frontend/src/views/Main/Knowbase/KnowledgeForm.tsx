@@ -22,13 +22,16 @@ import {
 	SelectValue
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { ProjectKnowledgeTypeEnum, project_knowledge_type_label, type CreateProjectKnowledgeDto } from '@prisma-ai/shared';
+import {
+	ProjectKnowledgeTypeEnum,
+	project_knowledge_type_label,
+	type CreateProjectKnowledgeDto
+} from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { throttle } from 'lodash';
 import { X } from 'lucide-react';
-import { memo, useEffect, useState } from 'react';
+import { lazy, memo, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { UploadModal } from '../../../components/FileUploadModel';
 import { useCustomMutation } from '../../../query/config';
 import { KnowledgeQueryKey } from '../../../query/keys';
 import { createKnowledge } from '../../../services/knowbase';
@@ -37,6 +40,9 @@ import {
 	selectKnowledgeData,
 	setKnowledgeDataFromDto
 } from '../../../store/knowbase';
+
+const UploadModal = lazy(() => import('../../../components/FileUploadModel'));
+
 const knowledgeFormSchema = z.object({
 	name: z.string().min(1, '知识名称不能为空').max(100, '知识名称不能超过100个字符'),
 	projectName: z.string().min(1, '项目名称不能为空').max(100, '项目名称不能超过100个字符'),
@@ -67,10 +73,14 @@ export const KnowledgeForm = memo(() => {
 		resolver: zodResolver(knowledgeFormSchema),
 		defaultValues: {
 			name: knowledgeData.name || '',
-			projectName: knowledgeData.projectName || '项目名称',
+			projectName: knowledgeData.projectName || '',
 			fileType: knowledgeData.fileType || 'txt',
 			tag: knowledgeData.tag || [],
-			type: knowledgeData.type as ProjectKnowledgeTypeEnum,
+			type: knowledgeData.type as
+				| ProjectKnowledgeTypeEnum.userProjectDoc
+				| ProjectKnowledgeTypeEnum.userProjectCode
+				| ProjectKnowledgeTypeEnum.techDoc
+				| ProjectKnowledgeTypeEnum.other,
 			content: knowledgeData.content || ''
 		}
 	});
@@ -172,7 +182,7 @@ export const KnowledgeForm = memo(() => {
 						name="projectName"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>项目名称</FormLabel>
+								<FormLabel>所属项目名称</FormLabel>
 								<FormControl>
 									<Input placeholder="请输入项目名称" {...field} />
 								</FormControl>

@@ -9,9 +9,8 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import type { PersistentTaskVo, StartCrawlQuestionDto } from '@prisma-ai/shared';
-import { ExternalLink, Play, Square } from 'lucide-react';
+import { Database, ExternalLink, Play, Square } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import {
@@ -190,7 +189,19 @@ export function Anki() {
 			<PageHeader
 				title={'集成面试题库和 anki'}
 				description={'从外部网站获取题库数据，进行处理并上传到 Anki。'}
-			></PageHeader>
+			>
+				{' '}
+				<div className="flex flex-wrap gap-3">
+					<Button
+						variant="outline"
+						onClick={() => window.open('https://pinkprisma.com', '_blank')}
+						className="flex items-center gap-2"
+					>
+						<Database className="h-4 w-4" />
+						PrismaAI Hub
+					</Button>
+				</div>
+			</PageHeader>
 			<div className="space-y-6 p-4">
 				<Card className="bg-background/50">
 					<CardHeader>
@@ -238,8 +249,6 @@ export function Anki() {
 					<TaskProgress title="爬取任务" taskData={crawlTaskData} taskId={crawlTaskId} />
 				</Card>
 
-				<Separator />
-
 				{getIsCrawlRunning() && (
 					<Card className="bg-background/50">
 						<CardHeader>
@@ -256,8 +265,6 @@ export function Anki() {
 						</CardContent>
 					</Card>
 				)}
-
-				<Separator />
 
 				<Card className="bg-background/50">
 					<CardHeader>
@@ -276,8 +283,6 @@ export function Anki() {
 					</CardFooter>
 					<TaskProgress title="思维导图任务" taskData={mindmapTaskData} taskId={mindmapTaskId} />
 				</Card>
-
-				<Separator />
 
 				<Card className="bg-background/50">
 					<CardHeader>

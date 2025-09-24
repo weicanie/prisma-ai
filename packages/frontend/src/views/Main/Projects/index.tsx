@@ -23,6 +23,7 @@ interface ProjectsProps<TData> {
 	title?: string; // 页面标题
 	description?: string; // 页面描述
 	mainTable?: boolean; // 是否为主表格
+	collapsible?: boolean; // 是否为折叠组件
 }
 
 const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
@@ -30,7 +31,8 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 	selectionHandler,
 	title,
 	description,
-	mainTable = true
+	mainTable = true,
+	collapsible = false
 }) => {
 	const { data, status } = useCustomQuery([ProjectQueryKey.Projects], findAllProjects);
 	const queryClient = useQueryClient();
@@ -185,13 +187,15 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 
 	return (
 		<>
-			<PageHeader
-				title={title ?? '项目经验'}
-				description={
-					description ??
-					'项目经验决定面试机会、面试表现。点击项目让 Prisma 深入分析你的项目、彻底优化你的项目经验'
-				}
-			></PageHeader>
+			{!collapsible && (
+				<PageHeader
+					title={title ?? '项目经验'}
+					description={
+						description ??
+						'项目经验决定面试机会、面试表现。点击项目让 Prisma 深入分析你的项目、彻底优化你的项目经验'
+					}
+				></PageHeader>
+			)}
 			<div className="pl-10 pr-10 ">
 				<ConfigDataTable dataTableConfig={dataTableConfig} data={projectDatas}></ConfigDataTable>
 			</div>

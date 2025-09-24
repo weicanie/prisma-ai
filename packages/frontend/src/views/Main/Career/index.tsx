@@ -22,6 +22,7 @@ interface CareersProps<TData> {
 	title?: string; // 页面标题
 	description?: string; // 页面描述
 	mainTable?: boolean; // 是否为主表格
+	collapsible?: boolean; // 是否为折叠组件
 }
 
 const Careers: React.FC<CareersProps<CareerVO>> = ({
@@ -29,7 +30,8 @@ const Careers: React.FC<CareersProps<CareerVO>> = ({
 	selectionHandler,
 	title,
 	description,
-	mainTable = true
+	mainTable = true,
+	collapsible = false
 }) => {
 	const { data, status } = useCustomQuery([CareerQueryKey.Careers], () => findAllCareers());
 	const queryClient = useQueryClient();
@@ -142,7 +144,9 @@ const Careers: React.FC<CareersProps<CareerVO>> = ({
 
 	return (
 		<>
-			<PageHeader title={title ?? '工作经历'} description={description ?? '管理你的工作经历'} />
+			{!collapsible && (
+				<PageHeader title={title ?? '工作经历'} description={description ?? '管理你的工作经历'} />
+			)}
 			<div className="pl-10 pr-10">
 				<ConfigDataTable dataTableConfig={dataTableConfig} data={careerData} />
 			</div>

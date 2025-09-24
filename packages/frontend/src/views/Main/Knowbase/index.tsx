@@ -212,7 +212,6 @@ const Knowledges: React.FC<KnowledgesProps<ProjectKnowledgeVo>> = ({
 				title="项目知识库"
 				description="上传项目相关信息来和 Prisma 共享, Prisma 在思考时会使用这些信息, 这很重要 "
 			>
-				{' '}
 				<div className="flex flex-wrap gap-3">
 					<Button
 						variant="outline"
@@ -222,8 +221,6 @@ const Knowledges: React.FC<KnowledgesProps<ProjectKnowledgeVo>> = ({
 						<Database className="h-4 w-4" />
 						DeepWiki 集成
 					</Button>
-				</div>
-				<div className="flex flex-wrap gap-3">
 					<Button
 						variant="outline"
 						onClick={() => navigate('/main/knowledge/skills')}
@@ -235,7 +232,7 @@ const Knowledges: React.FC<KnowledgesProps<ProjectKnowledgeVo>> = ({
 				</div>
 			</PageHeader>
 
-			<div className="pl-10 pr-10 max-h-[calc(100vh-9)] overflow-y-scroll scb-thin">
+			<div className="pl-10 pr-10">
 				<ConfigDataTable dataTableConfig={dataTableConfig} data={knowledgeData} />
 			</div>
 		</>

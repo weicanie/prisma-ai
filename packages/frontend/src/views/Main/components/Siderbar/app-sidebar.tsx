@@ -89,12 +89,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				url: '/main/hjm/resume'
 			},
 			{
-				title: '题库和 anki',
-				icon: Book,
-				url: '/main/offer/anki',
-				groupLabel: '面向offer学习'
-			},
-			{
 				title: '简历组装、导出',
 				icon: LayoutList,
 				url: '/main/resumes',
@@ -104,6 +98,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				title: '简历编辑器',
 				icon: SquarePen,
 				url: '/main/resume-editor'
+			},
+			{
+				title: '题库和 anki',
+				icon: Book,
+				url: '/main/offer/anki',
+				groupLabel: '面向offer学习'
 			}
 		]
 	};

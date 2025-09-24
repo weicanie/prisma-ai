@@ -141,7 +141,7 @@ export function JobMatch() {
 	const jobCount = jobCountData?.data;
 
 	return (
-		<>
+		<div className="pb-7">
 			<PageHeader
 				title={'简历匹配岗位'}
 				description={'通过相似性检索，将您的简历与岗位数据进行匹配'}
@@ -237,7 +237,7 @@ export function JobMatch() {
 			</div>
 
 			<Resumes {...ResumeProps}></Resumes>
-		</>
+		</div>
 	);
 }
 

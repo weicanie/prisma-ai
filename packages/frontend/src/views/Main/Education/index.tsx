@@ -22,6 +22,7 @@ interface EducationsProps<TData> {
 	title?: string; // 页面标题
 	description?: string; // 页面描述
 	mainTable?: boolean; // 是否为主表格
+	collapsible?: boolean; // 是否为折叠组件
 }
 
 const Educations: React.FC<EducationsProps<EducationVO>> = ({
@@ -29,7 +30,8 @@ const Educations: React.FC<EducationsProps<EducationVO>> = ({
 	selectionHandler,
 	title,
 	description,
-	mainTable = true
+	mainTable = true,
+	collapsible = false
 }) => {
 	const { data, status } = useCustomQuery([EducationQueryKey.Educations], () =>
 		findAllEducations()
@@ -149,7 +151,9 @@ const Educations: React.FC<EducationsProps<EducationVO>> = ({
 
 	return (
 		<>
-			<PageHeader title={title ?? '教育经历'} description={description ?? '管理你的教育经历'} />
+			{!collapsible && (
+				<PageHeader title={title ?? '教育经历'} description={description ?? '管理你的教育经历'} />
+			)}
 			<div className="pl-10 pr-10">
 				<ConfigDataTable dataTableConfig={dataTableConfig} data={eduData} />
 			</div>

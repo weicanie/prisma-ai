@@ -23,6 +23,7 @@ interface SkillsProps<TData> {
 	title?: string; // 页面标题
 	description?: string; // 页面描述
 	mainTable?: boolean; // 是否为主表格
+	collapsible?: boolean; // 是否为折叠组件
 }
 
 const Skills: React.FC<SkillsProps<SkillVo>> = ({
@@ -30,7 +31,8 @@ const Skills: React.FC<SkillsProps<SkillVo>> = ({
 	selectionHandler,
 	title,
 	description,
-	mainTable = true
+	mainTable = true,
+	collapsible = false
 }) => {
 	const navigate = useNavigate();
 	const { data, status } = useCustomQuery([SkillQueryKey.Skills], findAllUserSkills);
@@ -191,12 +193,14 @@ const Skills: React.FC<SkillsProps<SkillVo>> = ({
 
 	return (
 		<>
-			<PageHeader
-				title={title ?? '职业技能'}
-				description={
-					description ?? '上传您的专业技能, Prisma 会在优化您的简历时会着重参考您的专业技能'
-				}
-			></PageHeader>
+			{!collapsible && (
+				<PageHeader
+					title={title ?? '职业技能'}
+					description={
+						description ?? '上传您的专业技能, Prisma 会在优化您的简历时会着重参考您的专业技能'
+					}
+				></PageHeader>
+			)}
 			<div className="pl-10 pr-10">
 				<ConfigDataTable dataTableConfig={dataTableConfig} data={skillDatas} />
 			</div>
