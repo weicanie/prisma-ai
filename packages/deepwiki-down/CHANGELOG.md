@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.2.1](https://github.com/weicanie/prisma-ai/compare/v4.2.0...v4.2.1) (2025-09-24)
+
+**Note:** Version bump only for package deepwiki-down
+
 # [4.2.0](https://github.com/weicanie/prisma-ai/compare/v4.1.7...v4.2.0) (2025-09-24)
 
 ### Bug Fixes
