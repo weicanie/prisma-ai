@@ -20,12 +20,12 @@ on:
         required: true
         type: string
 
-  # workflow_call:
-  #   secrets:
-  #     DOCKERHUB_USERNAME:
-  #       required: true
-  #     DOCKERHUB_TOKEN:
-  #       required: true
+  workflow_call:
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: true
+      DOCKERHUB_TOKEN:
+        required: true
 jobs:
   docker-publish:
     name: Build and Push Docker Image # 任务名称
