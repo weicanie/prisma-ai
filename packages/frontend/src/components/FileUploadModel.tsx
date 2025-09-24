@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { presignedUrl } from '../services/oss/uploadFile';
+import AntdThemeHoc from './AntdThemeHoc';
 
 interface FileUploadProps {
 	value?: string;
@@ -70,28 +71,31 @@ interface UploadModalProps {
 	type: 'image' | 'file';
 }
 
-export function UploadModal(props: UploadModalProps) {
+function UploadModal(props: UploadModalProps) {
 	const [fileUrl, setFileUrl] = useState<string>('');
 
 	return (
-		<Modal
-			title={`上传${props.type === 'image' ? '图片' : '文件'}`}
-			open={props.isOpen}
-			onOk={() => {
-				props.handleClose(fileUrl);
-				setFileUrl('');
-			}}
-			onCancel={() => props.handleClose()}
-			okText={'确认'}
-			cancelText={'取消'}
-		>
-			<FileUpload
-				value={fileUrl}
-				type={props.type}
-				onChange={(value: string) => {
-					setFileUrl(value);
+		<AntdThemeHoc>
+			<Modal
+				title={`上传${props.type === 'image' ? '图片' : '文件'}`}
+				open={props.isOpen}
+				onOk={() => {
+					props.handleClose(fileUrl);
+					setFileUrl('');
 				}}
-			/>
-		</Modal>
+				onCancel={() => props.handleClose()}
+				okText={'确认'}
+				cancelText={'取消'}
+			>
+				<FileUpload
+					value={fileUrl}
+					type={props.type}
+					onChange={(value: string) => {
+						setFileUrl(value);
+					}}
+				/>
+			</Modal>
+		</AntdThemeHoc>
 	);
 }
+export default UploadModal;
