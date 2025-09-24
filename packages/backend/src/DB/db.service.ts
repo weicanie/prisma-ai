@@ -13,6 +13,7 @@ export class DbService extends PrismaClient implements OnModuleInit {
 	// 	});
 	// }
 	private logger = new Logger();
+
 	async onModuleInit() {
 		try {
 			await this.$connect();

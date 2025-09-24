@@ -70,6 +70,10 @@ export class KnowledgebaseService {
 			this.storeCodeToVDB(createKnowledgeDto.content, userInfo);
 		} else {
 			//文档库
+			if (createKnowledgeDto.type === ProjectKnowledgeTypeEnum.userProjectDeepWiki) {
+				// userProjectDeepWiki则已上传过
+				return embedKnowledgeDto as ProjectKnowledgeVo;
+			}
 			const vectorIds = await this.knowledgeVDBService.storeKnowledgeToVDB(
 				embedKnowledgeDto,
 				userInfo

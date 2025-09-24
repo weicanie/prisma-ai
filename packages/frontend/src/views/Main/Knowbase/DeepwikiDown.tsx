@@ -318,8 +318,6 @@ export function Deepwiki() {
 					</CardContent>
 				</Card>
 
-				<Separator />
-
 				{/* 步骤1：下载DeepWiki站点 */}
 				<Card className="bg-background/50">
 					<CardHeader>
@@ -341,8 +339,6 @@ export function Deepwiki() {
 					</CardFooter>
 					<TaskProgress title="下载任务" taskData={downloadTaskData} taskId={downloadTaskId} />
 				</Card>
-
-				<Separator />
 
 				{/* 步骤2：上传到知识库 */}
 				<Card className="bg-background/50">

@@ -3,7 +3,8 @@ export const project_knowledge_type_label: Record<string, string> = {
 	userProjectDoc: '项目文档',
 	userProjectCode: '项目github仓库',
 	techDoc: '项目相关技术文档',
-	other: '项目相关的其他信息'
+	other: '项目相关的其他信息',
+	userProjectDeepWiki: '项目deepwiki文档'
 };
 //上面的作为注释
 export enum ProjectKnowledgeTypeEnum {
