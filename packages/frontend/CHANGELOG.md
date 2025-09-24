@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.2.0](https://github.com/weicanie/prisma-ai/compare/v4.1.7...v4.2.0) (2025-09-24)
+
+### Bug Fixes
+
+- **frontend:** 简历组装的工作经历、教育经历丢失 ([a3a3bee](https://github.com/weicanie/prisma-ai/commit/a3a3bee90d867276ebee70b9e58c482c2840d4cc))
+
+### Features
+
+- 更新前端接口、UI ([d7436ed](https://github.com/weicanie/prisma-ai/commit/d7436edbc41b6880339ae30ccd288a74d71a6e58))
+- 完善deepwiki知识库集成功能 ([489a45b](https://github.com/weicanie/prisma-ai/commit/489a45b4e7c6c86f516c3f53a440902bd72f6510))
+- 优化UI ([a5f9bb3](https://github.com/weicanie/prisma-ai/commit/a5f9bb33f11f283bda9f12234bc22a4aec8e5e06))
+- **frontend:** 优化路由和UI ([5ce5a95](https://github.com/weicanie/prisma-ai/commit/5ce5a95472af36c03a0e81eb81aa2fcd08761b5c))
+- **frontend:** deepwiki站点知识库集成 ([6e3a98d](https://github.com/weicanie/prisma-ai/commit/6e3a98dae28ae8d2b60af9cdc802b830c66d0e92))
+
+### Performance Improvements
+
+- 懒加载antd ([6d46bd9](https://github.com/weicanie/prisma-ai/commit/6d46bd98eaf444a1d6f1105771862f476f3f99bb))
+
 ## [4.1.7](https://github.com/weicanie/prisma-ai/compare/v4.1.6...v4.1.7) (2025-09-17)
 
 ### Bug Fixes

@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.2.0](https://github.com/weicanie/prisma-ai/compare/v4.1.7...v4.2.0) (2025-09-24)
+
+### Bug Fixes
+
+- **backend:** 脚本权限问题 ([8c9658a](https://github.com/weicanie/prisma-ai/commit/8c9658a1c7b8d62a5c8560a21b08d36eb652419b))
+
+### Features
+
+- 更新前端接口、UI ([d7436ed](https://github.com/weicanie/prisma-ai/commit/d7436edbc41b6880339ae30ccd288a74d71a6e58))
+- 完善deepwiki知识库集成功能 ([489a45b](https://github.com/weicanie/prisma-ai/commit/489a45b4e7c6c86f516c3f53a440902bd72f6510))
+- **backend:** deepwiki站点的下载和知识库上传接口 ([1ee6aba](https://github.com/weicanie/prisma-ai/commit/1ee6abae9b33b99e892e62c07810a7c26615370a))
+- **deepwiki-down:** 通过拦截rsc请求来将deepwiki站点转为md文件 ([dc0dfc8](https://github.com/weicanie/prisma-ai/commit/dc0dfc82d40b84e9bc8705d714549b6a7bd0643f))
+
 ## [4.1.6](https://github.com/weicanie/prisma-ai/compare/v4.1.5...v4.1.6) (2025-09-17)
 
 ### Features
