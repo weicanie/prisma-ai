@@ -5,7 +5,6 @@ import os
 
 from src.infrastructure.gateway.file_adapter import FileAdapter
 
-
 class FileRepository:
     """
     Repository for file system operations, using FileAdapter.
