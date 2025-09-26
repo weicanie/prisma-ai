@@ -5,9 +5,10 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as readline from 'readline';
 import { ZodError } from 'zod';
-import { EventBusService } from '../EventBus/event-bus.service';
-import { ModelService } from '../model/model.service';
-import { projectsDirPath } from '../utils/constants';
+
+import { EventBusService } from '../../EventBus/event-bus.service';
+import { ModelService } from '../../model/model.service';
+import { projectsDirPath } from '../../utils/constants';
 import { CRetrieveAgentService } from './c_retrieve_agent/c_retrieve_agent.service';
 import { KnowledgeVDBService } from './data_base/konwledge_vdb.service';
 import { ProjectCodeVDBService } from './data_base/project_code_vdb.service';

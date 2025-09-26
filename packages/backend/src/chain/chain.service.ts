@@ -7,8 +7,6 @@ import { ConfigService } from '@nestjs/config';
 import {
 	autoflowSchema,
 	hjmRerankSchema,
-	InterviewSummaryArticle,
-	interviewSummaryArticleSchema,
 	JobVo,
 	LLMJobDto,
 	llmJobSchema,
@@ -440,68 +438,6 @@ export class ChainService implements WithFormfixChain {
 			prompt,
 			model,
 			parser
-		]);
-		return chain;
-	}
-
-	/**
-	 * 从面经中生成问题清单
-	 */
-	async createInterviewSummaryGenerateChain() {
-		const schema = z.object({
-			questions: z.array(z.string()).describe('标准化后的面试问题列表')
-		});
-		const outputParser = RubustStructuredOutputParser.from<typeof schema>(schema, this);
-		const llm = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
-
-		const prompt = await this.promptService.interviewSummaryGeneratePrompt();
-
-		const chain = RunnableSequence.from<
-			{
-				input: string;
-				job_type: string;
-				company_name?: string;
-				turn?: string;
-				interview_type?: string;
-			},
-			z.infer<typeof schema>
-		>([
-			{
-				input: input => input.input,
-				format_instructions: () => outputParser.getFormatInstructions(),
-				job_type: input => input.job_type,
-				company_name: input => input.company_name ?? '未知',
-				turn: input => input.turn ?? '未知',
-				interview_type: input => input.interview_type ?? '未知'
-			},
-			prompt,
-			llm,
-			outputParser
-		]);
-		return chain;
-	}
-
-	/**
-	 * 将问题清单中的问题转换为结构化面试题
-	 */
-	async createInterviewSummaryTransformChain(contentTypeEnum: { [key: string]: string[] }) {
-		const schema = interviewSummaryArticleSchema;
-		//@ts-ignore
-		const outputParser = RubustStructuredOutputParser.from<typeof schema>(schema, this);
-
-		const llm = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
-		const prompt = await this.promptService.interviewSummaryTransformPrompt();
-
-		const chain = RunnableSequence.from<{ input: string }, InterviewSummaryArticle>([
-			{
-				input: input => input.input,
-				//@ts-ignore
-				format_instructions: () => outputParser.getFormatInstructions(),
-				content_type_enum: () => JSON.stringify(contentTypeEnum)
-			},
-			prompt,
-			llm,
-			outputParser
 		]);
 		return chain;
 	}

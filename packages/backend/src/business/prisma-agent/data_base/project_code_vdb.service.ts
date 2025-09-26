@@ -6,12 +6,12 @@ import * as fs from 'fs';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import * as path from 'path';
 import Parser from 'tree-sitter';
-import { DbService } from '../../DB/db.service';
-import { ModelService } from '../../model/model.service';
-import { TaskQueueService } from '../../task-queue/task-queue.service';
-import { PersistentTask } from '../../type/taskqueue';
-import { projectsDirPath } from '../../utils/constants';
-import { VectorStoreService } from '../../vector-store/vector-store.service';
+import { DbService } from '../../../DB/db.service';
+import { ModelService } from '../../../model/model.service';
+import { TaskQueueService } from '../../../task-queue/task-queue.service';
+import { PersistentTask } from '../../../type/taskqueue';
+import { projectsDirPath } from '../../../utils/constants';
+import { VectorStoreService } from '../../../vector-store/vector-store.service';
 
 /**
  * @description 项目代码向量化任务的元数据接口

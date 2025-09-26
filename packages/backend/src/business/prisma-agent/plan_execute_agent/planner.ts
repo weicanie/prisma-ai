@@ -2,7 +2,7 @@ import { RunnableConfig } from '@langchain/core/runnables';
 import { Command, END, START, StateGraph } from '@langchain/langgraph';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { EventList } from '../../EventBus/event-bus.service';
+import { EventList } from '../../../EventBus/event-bus.service';
 import { waitForHumanReview } from '../human_involve_agent/node';
 import { reflect } from '../reflect_agent/node';
 import { GraphState } from '../state';
@@ -102,7 +102,12 @@ export async function retrieveNode(
 					userId,
 					projectName
 				)
-			: knowledgeVDBService.retrieveKnowbase(lightSpot, agentConfig.topK.plan.knowledge, userId, projectName)
+			: knowledgeVDBService.retrieveKnowbase(
+					lightSpot,
+					agentConfig.topK.plan.knowledge,
+					userId,
+					projectName
+				)
 	]);
 
 	config.configurable.logger.log(

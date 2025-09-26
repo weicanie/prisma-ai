@@ -1,12 +1,13 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { ChainModule } from '../chain/chain.module';
-import { EventBusModule } from '../EventBus/event-bus.module';
-import { ClientModule } from '../mcp-client/mcp-client.module';
-import { ModelModule } from '../model/model.module';
-import { OssModule } from '../oss/oss.module';
-import { PromptModule } from '../prompt/prompt.module';
-import { TaskQueueModule } from '../task-queue/task-queue.module';
-import { VectorStoreModule } from '../vector-store/vector-store.module';
+
+import { ChainModule } from '../../chain/chain.module';
+import { EventBusModule } from '../../EventBus/event-bus.module';
+import { ClientModule } from '../../mcp-client/mcp-client.module';
+import { ModelModule } from '../../model/model.module';
+import { OssModule } from '../../oss/oss.module';
+import { PromptModule } from '../../prompt/prompt.module';
+import { TaskQueueModule } from '../../task-queue/task-queue.module';
+import { VectorStoreModule } from '../../vector-store/vector-store.module';
 import { CRetrieveAgentService } from './c_retrieve_agent/c_retrieve_agent.service';
 import { KnowledgeVDBService } from './data_base/konwledge_vdb.service';
 import { ProjectCodeVDBService } from './data_base/project_code_vdb.service';

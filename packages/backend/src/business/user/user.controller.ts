@@ -1,6 +1,6 @@
 import { BadRequestException, Body, Controller, Get, Inject, Post, Query } from '@nestjs/common';
-import { EmailService } from '../email/email.service';
-import { RedisService } from '../redis/redis.service';
+import { EmailService } from '../../email/email.service';
+import { RedisService } from '../../redis/redis.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { UserService } from './user.service';

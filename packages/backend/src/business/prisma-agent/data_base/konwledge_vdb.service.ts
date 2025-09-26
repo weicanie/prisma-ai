@@ -11,10 +11,11 @@ import {
 	UserInfoFromToken
 } from '@prisma-ai/shared';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
-import { ModelService } from '../../model/model.service';
-import { OssService } from '../../oss/oss.service';
-import { getOssObjectNameFromURL } from '../../utils/getOssObjectNameFromURL';
-import { VectorStoreService } from '../../vector-store/vector-store.service';
+
+import { ModelService } from '../../../model/model.service';
+import { OssService } from '../../../oss/oss.service';
+import { getOssObjectNameFromURL } from '../../../utils/getOssObjectNameFromURL';
+import { VectorStoreService } from '../../../vector-store/vector-store.service';
 import { CRetrieveAgentService } from '../c_retrieve_agent/c_retrieve_agent.service';
 import { ProjectCodeVDBService } from './project_code_vdb.service';
 /**

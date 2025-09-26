@@ -1,10 +1,11 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ErrorCode, RegistResponse } from '@prisma-ai/shared';
-import { DbService } from '../DB/db.service';
-import { RedisService } from '../redis/redis.service';
-import { addLogs, logType } from '../utils/log.utils';
-import { createHashedPassword, verifyPassword } from '../utils/passwordEncrypt';
+
+import { DbService } from '../../DB/db.service';
+import { RedisService } from '../../redis/redis.service';
+import { addLogs, logType } from '../../utils/log.utils';
+import { createHashedPassword, verifyPassword } from '../../utils/passwordEncrypt';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
 type UserInfo = RegistResponse;

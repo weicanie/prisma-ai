@@ -2,7 +2,7 @@ import { type Runnable } from '@langchain/core/runnables';
 import { Logger } from '@nestjs/common';
 import { type ProjectDto } from '@prisma-ai/shared';
 import { z } from 'zod';
-import { type EventBusService } from '../EventBus/event-bus.service';
+import { EventBusService } from '../../EventBus/event-bus.service';
 import { type CRetrieveAgentService } from './c_retrieve_agent/c_retrieve_agent.service';
 import { type KnowledgeVDBService } from './data_base/konwledge_vdb.service';
 import { type ProjectCodeVDBService } from './data_base/project_code_vdb.service';
