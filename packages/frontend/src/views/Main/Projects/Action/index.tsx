@@ -23,9 +23,9 @@ import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import type { z } from 'zod';
-import { OriginalProject } from '../components/OriginalProject';
+import { OriginalProject } from './components/OriginalProject';
 import { ProjectResult } from './components/ProjectResult';
-//TODO 将调用llm、获取sse返回过程封装成一个统一的组件
+import type { ActionHandlers } from './type';
 
 interface ActionProps {
 	_?: string;
@@ -232,15 +232,19 @@ const Action: React.FC<ActionProps> = () => {
 		navigate('#reasoning');
 	};
 
+	const actionHandlers: ActionHandlers = {
+		lookup: handleLookup,
+		polish: handlePolish,
+		mine: handleMine,
+		collaborate: handleCollaborate
+	};
+
 	const ProjectResultProps = {
 		resultData,
 		mergedData,
 		actionType,
 		availableActions,
-		handleLookup,
-		handlePolish,
-		handleMine,
-		handleCollaborate,
+		actionHandlers,
 		handleMerge,
 		handleFeedback,
 		content,
@@ -252,16 +256,12 @@ const Action: React.FC<ActionProps> = () => {
 	return (
 		<div className={`min-h-screen transition-colors duration-200 bg-global`}>
 			<div className="container mx-auto px-4 py-8">
-				{/* 页面标题 */}
-				{/* <PageHeader title="项目经验优化" description="让 Prisma 深度优化您的项目经验"></PageHeader> */}
-
 				{/* 两栏布局 */}
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 ">
 					{/* 左栏：原始项目信息 */}
 					<div className="overflow-y-auto">
 						<OriginalProject projectData={projectData} isDark={isDark} />
 					</div>
-
 					{/* 右栏：AI行动区域 */}
 					<ProjectResult {...ProjectResultProps} />
 				</div>

@@ -1,53 +1,33 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTheme } from '@/utils/theme';
-import {
-	SelectedLLM,
-	type lookupResultDto,
-	type ProjectDto,
-	type projectLookupedDto,
-	type ProjectMinedDto,
-	type ProjectPolishedDto
-} from '@prisma-ai/shared';
+
+import { type ResumeMatchedDto, type ResumeVo, SelectedLLM } from '@prisma-ai/shared';
 import { Brain, Pyramid, Rocket, Sparkles } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { selectProjectLLM } from '../../../../store/projects';
-import Tabs from '../../components/Tabs';
-import { ProejctPMResultCard } from './ProejctPMResultCard';
-import { ProjectAnalysisResultCard } from './ProjectAnalysisResultCard';
+import { selectJobModel } from '../../../../../store/jobs';
+import Tabs from '../../../components/Tabs';
 import PreflightBtns from './preflightBtns';
-
-export interface ProjectResultProps {
-	resultData: ProjectPolishedDto | ProjectMinedDto | null; //行动结果
-	mergedData: lookupResultDto | projectLookupedDto | ProjectDto | null; //正式合并后的数据
-	actionType: keyof typeof headerMap | null;
-	availableActions: string[];
-	handleLookup: () => void;
-	handlePolish: () => void;
-	handleMine: () => void;
-	handleCollaborate: (content: string, projectPath: string) => void;
-
+import { ResumeMatchResultCard } from './ResumeMatchResultCard';
+export interface ResumeResultProps {
+	resultData: ResumeMatchedDto | null;
+	mergedData: null;
+	resumeData: ResumeVo; //原简历数据,用于展示结果时填充一些其它数据
+	actionType: keyof typeof actionHeaderMap | null;
+	availableActions: readonly string[];
+	handleMatch: () => void;
 	handleMerge?: () => void; //完成优化
 	handleFeedback: (content: string) => void; //用户反馈,反思并重新优化
-
-	content: string; //生成内容-流式
-	reasonContent?: string; //推理内容-流式
-	isReasoning?: boolean; //是否完成推理
-	done?: boolean; //是否完成生成
+	content: string;
+	reasonContent?: string;
+	isReasoning?: boolean;
+	done?: boolean;
 }
 
-export const headerMap = {
-	lookup: {
-		title: 'AI分析结果',
-		desc: 'AI的深度分析结果'
-	},
-	polish: {
-		title: 'AI优化结果',
-		desc: '深度优化后的项目经验'
-	},
-	mine: {
-		title: 'AI挖掘结果',
-		desc: '深度挖掘的项目亮点'
+export const actionHeaderMap = {
+	match: {
+		title: 'AI 智能匹配结果',
+		desc: 'AI 正在分析您的简历并匹配合适的岗位'
 	},
 	collaborate: {
 		title: 'AI协作结果',
@@ -55,15 +35,16 @@ export const headerMap = {
 	}
 };
 
-export const ProjectResult: React.FC<ProjectResultProps> = ({
+/**
+ * 简历操作结果组件
+ * @description 右侧的Tab组件，用于展示操作按钮、思考过程、生成内容和最终结果
+ */
+export const ResumeResult: React.FC<ResumeResultProps> = ({
 	resultData,
-	mergedData,
+	resumeData,
 	actionType,
 	availableActions,
-	handleLookup,
-	handlePolish,
-	handleMine,
-	handleCollaborate,
+	handleMatch,
 	handleMerge,
 	handleFeedback,
 	content,
@@ -74,15 +55,12 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
 
-	// 创建滚动容器的引用
 	const reasoningContentRef = useRef<HTMLDivElement>(null);
 	const streamingContentRef = useRef<HTMLDivElement>(null);
 
-	// 用户是否手动滚动的状态
 	const [userScrolledReasoning, setUserScrolledReasoning] = useState(false);
 	const [userScrolledStreaming, setUserScrolledStreaming] = useState(false);
 
-	// 检测用户是否手动滚动了推理内容
 	const handleReasoningScroll = (e: React.UIEvent<HTMLDivElement>) => {
 		const element = e.currentTarget;
 		const isAtBottom =
@@ -90,7 +68,6 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 		setUserScrolledReasoning(!isAtBottom);
 	};
 
-	// 检测用户是否手动滚动了生成内容
 	const handleStreamingScroll = (e: React.UIEvent<HTMLDivElement>) => {
 		const element = e.currentTarget;
 		const isAtBottom =
@@ -98,18 +75,15 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 		setUserScrolledStreaming(!isAtBottom);
 	};
 
-	// 监听推理内容变化，自动滚动到底部
 	useEffect(() => {
 		if (isReasoning && reasonContent && reasoningContentRef.current && !userScrolledReasoning) {
 			const element = reasoningContentRef.current;
-			// 使用 requestAnimationFrame 确保DOM更新后再滚动
 			requestAnimationFrame(() => {
 				element.scrollTop = element.scrollHeight;
 			});
 		}
 	}, [reasonContent, isReasoning, userScrolledReasoning]);
 
-	// 监听生成内容变化，自动滚动到底部
 	useEffect(() => {
 		if (!done && content && streamingContentRef.current && !userScrolledStreaming) {
 			const element = streamingContentRef.current;
@@ -119,33 +93,21 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 		}
 	}, [content, done, userScrolledStreaming]);
 
-	// 转阶段（推理->生成）、新生成时恢复自动滚动
 	useEffect(() => {
-		// 当开始推理时，重置推理滚动状态
-		if (isReasoning) {
-			setUserScrolledReasoning(false);
-		}
-
-		// 当开始生成内容时，重置生成滚动状态
-		if (!done && content && !isReasoning) {
-			setUserScrolledStreaming(false);
-		}
-
-		// 生成结束时回到顶部查看结果卡片
+		if (isReasoning) setUserScrolledReasoning(false);
+		if (!done && content && !isReasoning) setUserScrolledStreaming(false);
 		if (done) {
 			const element1 = reasoningContentRef.current;
 			const element2 = streamingContentRef.current;
 			requestAnimationFrame(() => {
-				if (element1) {
-					element1.scrollTop = 0;
-				}
-				if (element2) {
-					element2.scrollTop = 0;
-				}
+				if (element1) element1.scrollTop = 0;
+				if (element2) element2.scrollTop = 0;
 			});
 		}
 	}, [isReasoning, done, content]);
-	const selectedllm = useSelector(selectProjectLLM);
+
+	const selectedllm = useSelector(selectJobModel);
+
 	/* 思维链sse展示卡片 */
 	const reasonContentSection = () => (
 		<>
@@ -156,25 +118,24 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-0 h-full">
-				{/* 思维链内容展示 */}
 				<div
 					ref={reasoningContentRef}
 					onScroll={handleReasoningScroll}
-					className={`whitespace-pre-wrap font-mono text-sm p-4 pb-20 rounded-md  max-h-[calc(100vh-200px)] overflow-y-auto scb-thin  ${isDark ? 'bg-gray-900 text-green-400' : 'bg-gray-50 text-gray-800'}`}
-					style={{
-						scrollBehavior: 'smooth'
-					}}
+					className={`whitespace-pre-wrap font-mono text-sm p-4 pb-20 rounded-md  max-h-[calc(100vh-200px)] overflow-y-auto scb-thin  ${
+						isDark ? 'bg-gray-900 text-green-400' : 'bg-gray-50 text-gray-800'
+					}`}
+					style={{ scrollBehavior: 'smooth' }}
 				>
 					{reasonContent ||
 						(selectedllm === SelectedLLM.deepseek_reasoner
 							? 'Prisma 在等待你的指示送达...'
 							: 'Prisma 正在后台动态思考...')}
-					{/* 添加一个闪烁的光标效果 */}
 					<span className="animate-pulse text-blue-400">▋</span>
 				</div>
 			</CardContent>
 		</>
 	);
+
 	/* 生成内容sse展示卡片 */
 	const streamingContentSection = () => (
 		<>
@@ -190,10 +151,10 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 				<div
 					ref={streamingContentRef}
 					onScroll={handleStreamingScroll}
-					className={`whitespace-pre-wrap font-mono text-sm p-4 pb-20 rounded-md  max-h-[calc(100vh-200px)] overflow-y-auto scb-thin  ${isDark ? 'bg-gray-900 text-green-400' : 'bg-gray-50 text-gray-800'}`}
-					style={{
-						scrollBehavior: 'smooth'
-					}}
+					className={`whitespace-pre-wrap font-mono text-sm p-4 pb-20 rounded-md  max-h-[calc(100vh-200px)] overflow-y-auto scb-thin  ${
+						isDark ? 'bg-gray-900 text-green-400' : 'bg-gray-50 text-gray-800'
+					}`}
+					style={{ scrollBehavior: 'smooth' }}
 				>
 					{content || 'Prisma 在等待你的指示送达...'}
 					<span className="animate-pulse text-blue-400">▋</span>
@@ -202,76 +163,52 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 		</>
 	);
 
-	/* 结果卡片-根据行动类型渲染不同格式的结果 */
-	const resultCardProps = {
-		actionType,
-		resultData,
-		mergedData,
-		handleMerge,
-		handleFeedback,
-		done
-	};
-	const proejctResultCard = <ProejctPMResultCard {...resultCardProps} />;
-	const contentMap = {
-		lookup: <ProjectAnalysisResultCard {...resultCardProps} isDark={isDark} />,
-		polish: proejctResultCard,
-		mine: proejctResultCard,
-		collaborate: <div>AI Agent 协作中...</div>
-	};
 	const resultCardSection = () => {
 		if (!resultData || !actionType)
 			return <div className="text-center text-gray-500">暂无结果</div>;
-		return contentMap[actionType];
+		if (actionType === 'match') {
+			return (
+				<ResumeMatchResultCard
+					resultData={resultData}
+					resumeData={resumeData}
+					handleMerge={handleMerge}
+					handleFeedback={handleFeedback}
+				/>
+			);
+		}
+		return null;
 	};
+
 	const tabs = [
 		{ name: '行动', href: '#next-action', icon: Pyramid, current: true },
 		{ name: '思考', href: '#reasoning', icon: Brain, current: false },
 		{ name: '生成', href: '#content', icon: Sparkles, current: false },
 		{ name: '结果', href: '#result', icon: Rocket, current: false }
 	];
-	//根据当前hash值决定渲染的组件
+
 	const hash = window.location.hash;
 
 	const renderComponent = () => {
-		if (hash === '#next-action') {
-			return (
-				<PreflightBtns
-					availableActions={availableActions}
-					handleLookup={handleLookup}
-					handlePolish={handlePolish}
-					handleMine={handleMine}
-					handleCollaborate={handleCollaborate}
-				/>
-			);
+		switch (hash) {
+			case '#next-action':
+				return <PreflightBtns availableActions={availableActions} handleMatch={handleMatch} />;
+			case '#reasoning':
+				return reasonContentSection();
+			case '#content':
+				return streamingContentSection();
+			case '#result':
+				return resultCardSection();
+			default:
+				return <PreflightBtns availableActions={availableActions} handleMatch={handleMatch} />;
 		}
-
-		if (hash === '#reasoning') {
-			return reasonContentSection();
-		}
-		if (hash === '#content') {
-			return streamingContentSection();
-		}
-		if (hash === '#result') {
-			return resultCardSection();
-		}
-		return (
-			<PreflightBtns
-				availableActions={availableActions}
-				handleLookup={handleLookup}
-				handlePolish={handlePolish}
-				handleMine={handleMine}
-				handleCollaborate={handleCollaborate}
-			/>
-		);
 	};
+
 	return (
-		<>
-			<Card
-				className={`h-full overflow-auto scb-thin ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
-			>
-				<Tabs tabs={tabs} />
-				{renderComponent()}
-			</Card>
-		</>
+		<Card
+			className={`overflow-auto scb-thin ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+		>
+			<Tabs tabs={tabs} />
+			{renderComponent()}
+		</Card>
 	);
 };

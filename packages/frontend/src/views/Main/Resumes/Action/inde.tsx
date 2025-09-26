@@ -1,24 +1,25 @@
 import { useTheme } from '@/utils/theme';
 import {
-    jsonMd_obj,
-    ResumeStatus,
-    type JobVo,
-    type MatchJobDto,
-    type ResumeMatchedDto,
-    type ResumeVo
+	jsonMd_obj,
+	ResumeStatus,
+	type JobVo,
+	type MatchJobDto,
+	type ResumeMatchedDto,
+	type ResumeVo
 } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useCustomQuery } from '../../../query/config';
-import { JobQueryKey, ResumeQueryKey } from '../../../query/keys';
-import { findAllUserJobs } from '../../../services/job';
-import { findAllUserResumes } from '../../../services/resume';
-import { useSseAnswer } from '../../../services/sse/useSseAnswer';
-import { selectJobModel } from '../../../store/jobs';
-import JobCard from '../Jobs/JobCard';
+
+import { useCustomQuery } from '../../../../query/config';
+import { JobQueryKey, ResumeQueryKey } from '../../../../query/keys';
+import { findAllUserJobs } from '../../../../services/job';
+import { findAllUserResumes } from '../../../../services/resume';
+import { useSseAnswer } from '../../../../services/sse/useSseAnswer';
+import { selectJobModel } from '../../../../store/jobs';
+import JobCard from '../../Jobs/JobCard';
 import { OriginalResume } from './components/OriginalResume';
 import { ResumeResult } from './components/ResumeResult';
 

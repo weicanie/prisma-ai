@@ -4,24 +4,11 @@ import { useTheme } from '@/utils/theme';
 import { MessageSquare, Sparkles, Target, Wand2, Zap } from 'lucide-react';
 import React, { useState } from 'react';
 import { FreeSession } from '../../../components/FlushSession';
+import type { PreflightBtnsProps } from '../type';
 import { ChangeLLM } from './ChangeLLM';
 import ImplementRequest from './ImplementRequest';
 
-interface PreflightBtnsProps {
-	availableActions: string[];
-	handleLookup: () => void;
-	handlePolish: () => void;
-	handleMine: () => void;
-	handleCollaborate: (content: string, projectPath: string) => void;
-}
-
-const PreflightBtns: React.FC<PreflightBtnsProps> = ({
-	availableActions,
-	handleLookup,
-	handlePolish,
-	handleMine,
-	handleCollaborate
-}) => {
+const PreflightBtns: React.FC<PreflightBtnsProps> = ({ availableActions, actionHandlers }) => {
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
 	const [isImplementRequestOpen, setIsImplementRequestOpen] = useState(false);
@@ -49,7 +36,7 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({
 						>
 							<div className="flex flex-col items-center justify-center text-center">
 								<Button
-									onClick={handleLookup}
+									onClick={actionHandlers['lookup']}
 									size="lg"
 									className={`w-1/2 rounded-full ${
 										isDark ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600'
@@ -82,7 +69,7 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({
 						>
 							<div className="flex flex-col items-center justify-center text-center">
 								<Button
-									onClick={handlePolish}
+									onClick={actionHandlers['polish']}
 									className="w-1/2 rounded-full bg-blue-600 hover:bg-blue-700 text-white"
 									size="lg"
 								>
@@ -114,7 +101,7 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({
 						>
 							<div className="flex flex-col items-center justify-center text-center">
 								<Button
-									onClick={handleMine}
+									onClick={actionHandlers['mine']}
 									variant="outline"
 									className={`w-1/2 rounded-full ${
 										isDark
@@ -181,7 +168,7 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({
 			<ImplementRequest
 				open={isImplementRequestOpen}
 				onOpenChange={setIsImplementRequestOpen}
-				onSubmit={handleCollaborate}
+				onSubmit={actionHandlers['collaborate']}
 			/>
 		</>
 	);

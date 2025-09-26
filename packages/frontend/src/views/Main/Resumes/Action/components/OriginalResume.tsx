@@ -3,9 +3,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import type { ResumeVo } from '@prisma-ai/shared';
 import { Code, FileText } from 'lucide-react';
 import React, { Fragment } from 'react';
+import ClickCollapsible from '../../../components/ClickCollapsible';
+import { StatusBadge } from '../../../components/StatusBadge';
 import { OriginalProject } from '../../Projects/components/OriginalProject';
-import ClickCollapsible from '../../components/ClickCollapsible';
-import { StatusBadge } from '../../components/StatusBadge';
 
 interface OriginalResumeProps {
 	resumeData: ResumeVo;
