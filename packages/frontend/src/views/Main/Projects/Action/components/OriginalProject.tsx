@@ -2,9 +2,10 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { type ProjectVo } from '@prisma-ai/shared';
-import { ArrowRight, Code, Sparkles, Target, Users } from 'lucide-react';
+import { ArrowRight, Code, Lightbulb, Sparkles, Target, Users } from 'lucide-react';
 import React from 'react';
 import ClickCollapsible from '../../../components/ClickCollapsible';
+import MilkdownEditor from '../../../components/Editor';
 import { StatusBadge } from '../../../components/StatusBadge';
 import { ProjectAnalysisResultCard } from './ProjectResult/ProjectLResultCard';
 
@@ -21,7 +22,9 @@ export const OriginalProject: React.FC<OriginalProjectProps> = ({
 }) => {
 	return (
 		<>
-			<Card className={` ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+			<Card
+				className={`max-h-[calc(100vh-150px)] overflow-auto scb-thin  ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+			>
 				<CardHeader>
 					<CardTitle
 						className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
@@ -182,7 +185,7 @@ export const OriginalProject: React.FC<OriginalProjectProps> = ({
 									</div>
 								</div>
 							</ClickCollapsible>
-
+							{/* 项目经验分析结果 */}
 							{projectData.lookupResult && showAnalysis && (
 								<>
 									<Separator />
@@ -193,6 +196,58 @@ export const OriginalProject: React.FC<OriginalProjectProps> = ({
 									/>
 								</>
 							)}
+						</>
+					)}
+
+					{/* 业务分析 */}
+					{projectData.business?.lookup && (
+						<>
+							<Separator />
+							<ClickCollapsible
+								title={
+									<h4
+										className={`font-semibold text-lg mb-3 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
+									>
+										<Lightbulb className="w-5 h-5 text-yellow-500" />
+										业务分析
+									</h4>
+								}
+								defaultOpen={true}
+							>
+								<CardContent className="space-y-6">
+									<MilkdownEditor
+										type="show"
+										isCardMode={true}
+										mdSelector={() => projectData.business?.lookup || ''}
+									/>
+								</CardContent>
+							</ClickCollapsible>
+						</>
+					)}
+
+					{/* 业务文档 */}
+					{projectData.business?.paper && (
+						<>
+							<Separator />
+							<ClickCollapsible
+								title={
+									<h4
+										className={`font-semibold text-lg mb-3 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
+									>
+										<Lightbulb className="w-5 h-5 text-yellow-500" />
+										业务文档
+									</h4>
+								}
+								defaultOpen={true}
+							>
+								<CardContent className="space-y-6">
+									<MilkdownEditor
+										type="show"
+										isCardMode={true}
+										mdSelector={() => projectData.business?.paper || ''}
+									/>
+								</CardContent>
+							</ClickCollapsible>
 						</>
 					)}
 				</CardContent>

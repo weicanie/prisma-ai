@@ -72,7 +72,7 @@ export class SseSessionManagerController {
 		if (!existingSession) return { status: 'notfound' };
 
 		if (!curTaskId) return { status: 'tasknotfound' };
-		//FIXME 有时候done会标记不上
+		// 有时候done会标记不上
 		// if (existingSession.fontendDone && existingSession.done) return { status: 'bothdone' };
 		if (existingSession.fontendDone) return { status: 'bothdone' };
 

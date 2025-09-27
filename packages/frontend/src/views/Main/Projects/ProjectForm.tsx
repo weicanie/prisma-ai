@@ -93,7 +93,7 @@ const ProjectForm: React.FC<PropsType> = ({ setIsUseMdEditor, id }) => {
 		}
 	}, [status]);
 
-	//FIXME 用type="submit"的提交按钮,到第二步时就会提交,此时提交按钮应该才刚渲染(分步表单支持有问题？)
+	//TODO 用type="submit"的提交按钮,到第二步时就会提交,此时提交按钮应该才刚渲染(分步表单支持有问题？)
 	async function onSubmit(values: z.infer<typeof projectSchemaForm>) {
 		// 只有点击了提交按钮才允许提交
 		if (currentStep !== totalSteps) {

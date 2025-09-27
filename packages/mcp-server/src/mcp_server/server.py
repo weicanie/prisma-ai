@@ -1,7 +1,7 @@
 from .state import input_queues, output_storage, output_storage_lock
 from fastmcp import FastMCP
 server = FastMCP()
-# FIXME cursor 解析不出来参数的描述
+# TODO cursor 解析不出来参数的描述
 @server.tool
 async def get_input(session_id: str) -> str:
     """

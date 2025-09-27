@@ -11,9 +11,6 @@ import { Project, ProjectDocument } from './entities/project.entity';
 import { ProjectMined, ProjectMinedDocument } from './entities/projectMined.entity';
 import { ProjectPolished, ProjectPolishedDocument } from './entities/projectPolished.entity';
 
-//FIXME 用validation pipe 结合 zodSchema生成的 dto验证用户上传的数据格式
-// 其它用于验证llm生成的数据格式和指定数据格式
-
 @Injectable()
 export class ProjectService {
 	@InjectModel(Project.name)

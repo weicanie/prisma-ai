@@ -15,6 +15,8 @@ export enum role {
 export class PromptService implements OnModuleInit {
 	private polishT: string;
 	private lookupT: string;
+	private businessLookupT: string;
+	private businessPaperT: string;
 	private matchT: string;
 	private hjmRerankT: string;
 	private hjmTransformT: string;
@@ -33,12 +35,14 @@ export class PromptService implements OnModuleInit {
 	async onModuleInit() {
 		try {
 			const promises = [
-				this._readPromptFile(
-					path.join(process.cwd(), 'data/prompt/project_process/polish-T.md')
-				),
+				this._readPromptFile(path.join(process.cwd(), 'data/prompt/project_process/polish-T.md')),
 				this._readPromptFile(path.join(process.cwd(), 'data/prompt/project_process/mine-T.md')),
+				this._readPromptFile(path.join(process.cwd(), 'data/prompt/project_process/lookup-T.md')),
 				this._readPromptFile(
-					path.join(process.cwd(), 'data/prompt/project_process/lookup-T.md')
+					path.join(process.cwd(), 'data/prompt/project_process/business-lookup-T.md')
+				),
+				this._readPromptFile(
+					path.join(process.cwd(), 'data/prompt/project_process/business-paper-T.md')
 				),
 				this._readPromptFile(
 					path.join(process.cwd(), 'data/prompt/project_process/mine-fewshot.md')
@@ -49,23 +53,21 @@ export class PromptService implements OnModuleInit {
 				this._readPromptFile(path.join(process.cwd(), 'data/prompt/learn/diff_learn-T.md')),
 				this._readPromptFile(path.join(process.cwd(), 'data/prompt/unuse/text_to_json.md')),
 				this._readPromptFile(path.join(process.cwd(), 'data/prompt/unuse/results_to_text.md')),
-				this._readPromptFile(
-					path.join(process.cwd(), 'data/prompt/interview-summary/generate.md')
-				),
+				this._readPromptFile(path.join(process.cwd(), 'data/prompt/interview-summary/generate.md')),
 				this._readPromptFile(
 					path.join(process.cwd(), 'data/prompt/interview-summary/transform.md')
 				),
 				this._readPromptFile(
 					path.join(process.cwd(), 'data/prompt/interview-summary/generate_mindmap.md')
 				),
-				this._readPromptFile(
-					path.join(process.cwd(), 'data/prompt/question/generate_mindmap.md')
-				)
+				this._readPromptFile(path.join(process.cwd(), 'data/prompt/question/generate_mindmap.md'))
 			];
 			const [
 				polishT,
 				mineT,
 				lookupT,
+				businessLookupT,
+				businessPaperT,
 				mineFewShot,
 				matchT,
 				hjmRerankT,
@@ -81,6 +83,8 @@ export class PromptService implements OnModuleInit {
 			this.polishT = polishT as string;
 			this.mineT = mineT as string;
 			this.lookupT = lookupT as string;
+			this.businessLookupT = businessLookupT as string;
+			this.businessPaperT = businessPaperT as string;
 			this.matchT = matchT as string;
 			this.hjmRerankT = hjmRerankT as string;
 			this.hjmTransformT = hjmTransformT as string;
@@ -161,6 +165,29 @@ export class PromptService implements OnModuleInit {
 		const prompt = ChatPromptTemplate.fromMessages([
 			[`${role.SYSTEM}`, this.lookupT],
 			// [`${role.SYSTEM}`, `这是目前为止的聊天记录：{chat_history}`],
+			[`${role.HUMAN}`, '{input}']
+		]);
+		return prompt;
+	}
+	/**
+	 * 对项目经验进行业务分析的prompt
+	 *
+	 */
+	async businessLookupPrompt() {
+		const prompt = ChatPromptTemplate.fromMessages([
+			[`${role.SYSTEM}`, this.businessLookupT],
+			// [`${role.SYSTEM}`, `这是目前为止的聊天记录：{chat_history}`],
+			[`${role.HUMAN}`, '{input}']
+		]);
+		return prompt;
+	}
+	/**
+	 * 生成项目经验面试材料的prompt
+	 *
+	 */
+	async businessPaperPrompt() {
+		const prompt = ChatPromptTemplate.fromMessages([
+			[`${role.SYSTEM}`, this.businessPaperT],
 			[`${role.HUMAN}`, '{input}']
 		]);
 		return prompt;

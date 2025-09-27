@@ -16,9 +16,9 @@ export * from './types/learn.schema';
 export * from './types/login_regist';
 export * from './types/login_regist.schema';
 export * from './types/loginVerify';
-export * from './types/project';
-export * from './types/project.schema';
-export * from './types/project.schema-form';
+export * from './types/project/project';
+export * from './types/project/project.schema';
+export * from './types/project/project.schema-form';
 export * from './types/question';
 export * from './types/resume';
 export * from './types/resume.schema';
@@ -29,4 +29,3 @@ export * from './types/sse';
 export * from './types/task';
 export * from './utils/jsonMd_obj';
 export * from './utils/md_json';
-

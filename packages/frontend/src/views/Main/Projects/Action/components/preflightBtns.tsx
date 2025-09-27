@@ -1,27 +1,14 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTheme } from '@/utils/theme';
-import { MessageSquare, Sparkles, Target, Wand2, Zap } from 'lucide-react';
+import { Briefcase, FileText, MessageSquare, Sparkles, Target, Wand2, Zap } from 'lucide-react';
 import React, { useState } from 'react';
 import { FreeSession } from '../../../components/FlushSession';
+import type { PreflightBtnsProps } from '../type';
 import { ChangeLLM } from './ChangeLLM';
 import ImplementRequest from './ImplementRequest';
 
-interface PreflightBtnsProps {
-	availableActions: string[];
-	handleLookup: () => void;
-	handlePolish: () => void;
-	handleMine: () => void;
-	handleCollaborate: (content: string, projectPath: string) => void;
-}
-
-const PreflightBtns: React.FC<PreflightBtnsProps> = ({
-	availableActions,
-	handleLookup,
-	handlePolish,
-	handleMine,
-	handleCollaborate
-}) => {
+const PreflightBtns: React.FC<PreflightBtnsProps> = ({ availableActions, actionHandlers }) => {
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
 	const [isImplementRequestOpen, setIsImplementRequestOpen] = useState(false);
@@ -49,7 +36,7 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({
 						>
 							<div className="flex flex-col items-center justify-center text-center">
 								<Button
-									onClick={handleLookup}
+									onClick={actionHandlers['lookup']}
 									size="lg"
 									className={`w-1/2 rounded-full ${
 										isDark ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600'
@@ -82,7 +69,7 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({
 						>
 							<div className="flex flex-col items-center justify-center text-center">
 								<Button
-									onClick={handlePolish}
+									onClick={actionHandlers['polish']}
 									className="w-1/2 rounded-full bg-blue-600 hover:bg-blue-700 text-white"
 									size="lg"
 								>
@@ -114,7 +101,7 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({
 						>
 							<div className="flex flex-col items-center justify-center text-center">
 								<Button
-									onClick={handleMine}
+									onClick={actionHandlers['mine']}
 									variant="outline"
 									className={`w-1/2 rounded-full ${
 										isDark
@@ -176,12 +163,83 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({
 							</div>
 						</Card>
 					)}
+
+					{availableActions.includes('businessLookup') && (
+						<Card
+							className={`group text-center p-11 transition-all duration-300 ease-in-out h-32 hover:h-80 ${
+								isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+							}`}
+						>
+							<div className="flex flex-col items-center justify-center text-center">
+								<Button
+									onClick={actionHandlers['businessLookup']}
+									variant="outline"
+									className={`w-1/2 rounded-full ${
+										isDark
+											? 'border-gray-600 text-gray-200 hover:bg-gray-700'
+											: 'border-gray-300 text-purple-700 hover:bg-gray-50'
+									}`}
+									size="lg"
+								>
+									<Briefcase className="w-4 h-4 mr-2" />
+									深挖项目业务
+								</Button>
+							</div>
+							<div className="text-center opacity-0 max-h-0 group-hover:opacity-100 group-hover:max-h-96 overflow-hidden transition-all duration-500 ease-in-out">
+								<Briefcase
+									className={`w-12 h-12 mb-4 mx-auto ${isDark ? 'text-blue-400' : 'text-blue-600'}`}
+								/>
+								<h3
+									className={`text-xl font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
+								>
+									业务深度挖掘
+								</h3>
+								<p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+									让 Prisma 帮助您深挖项目业务。
+								</p>
+							</div>
+						</Card>
+					)}
+
+					{availableActions.includes('businessPaper') && (
+						<Card
+							className={`group text-center p-11 transition-all duration-300 ease-in-out h-32 hover:h-80 ${
+								isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+							}`}
+						>
+							<div className="flex flex-col items-center justify-center text-center">
+								<Button
+									onClick={actionHandlers['businessPaper']}
+									className={`w-1/2 rounded-full ${
+										isDark ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600'
+									} text-white `}
+									size="lg"
+								>
+									<FileText className="w-4 h-4 mr-2" />
+									生成项目业务文档
+								</Button>
+							</div>
+							<div className="text-center opacity-0 max-h-0 group-hover:opacity-100 group-hover:max-h-96 overflow-hidden transition-all duration-500 ease-in-out">
+								<FileText
+									className={`w-12 h-12 mb-4 mx-auto ${isDark ? 'text-blue-400' : 'text-blue-600'}`}
+								/>
+								<h3
+									className={`text-xl font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
+								>
+									业务文档深度生成
+								</h3>
+								<p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+									让 Prisma 帮助您生成项目业务文档。
+								</p>
+							</div>
+						</Card>
+					)}
 				</div>
 			</CardContent>
 			<ImplementRequest
 				open={isImplementRequestOpen}
 				onOpenChange={setIsImplementRequestOpen}
-				onSubmit={handleCollaborate}
+				onSubmit={actionHandlers['collaborate']}
 			/>
 		</>
 	);

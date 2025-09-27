@@ -9,11 +9,11 @@ import {
 import fs from 'fs';
 import { Model } from 'mongoose';
 import path from 'path';
-import { KnowledgeVDBService } from '../../prisma-agent/data_base/konwledge_vdb.service';
 import { TaskQueueService } from '../../task-queue/task-queue.service';
 import { PersistentTask } from '../../type/taskqueue';
 import { deepwikiDownOutputPath, deepwikiDownScriptPath } from '../../utils/constants';
 import { executeShellScript } from '../../utils/execute_shell_script';
+import { KnowledgeVDBService } from '../prisma-agent/data_base/konwledge_vdb.service';
 import { Knowledgebase, KnowledgebaseDocument } from './entities/knowledge-base.entity';
 import { KnowledgebaseService } from './knowledge-base.service';
 

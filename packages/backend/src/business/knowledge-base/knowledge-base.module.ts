@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { OssModule } from '../../oss/oss.module';
-import { PrismaAgentModule } from '../../prisma-agent/prisma-agent.module';
 import { TaskQueueModule } from '../../task-queue/task-queue.module';
+import { PrismaAgentModule } from '../prisma-agent/prisma-agent.module';
 import { Knowledgebase, KnowledgebaseSchema } from './entities/knowledge-base.entity';
 import { KnowledgebaseController } from './knowledge-base.controller';
 import { KnowledgebaseService } from './knowledge-base.service';

@@ -1,0 +1,39 @@
+{
+	"jsc": {
+		"parser": {
+			"syntax": "typescript",
+			"tsx": true,
+			"decorators": true,
+			"dynamicImport": true
+		},
+		"transform": {
+			"legacyDecorator": true,
+			"decoratorMetadata": true,
+			"react": {
+				"runtime": "automatic",
+				"importSource": "react"
+			}
+		},
+		"target": "es2021",
+		"keepClassNames": true,
+		"loose": false,
+		"externalHelpers": false,
+		"preserveAllComments": false,
+		"baseUrl": "./",
+		"paths": {
+			"@/*": ["src/*"]
+		}
+	},
+	"module": {
+		"type": "es6",
+		"strict": false,
+		"strictMode": false,
+		"lazy": false,
+		"noInterop": false,
+		"ignoreDynamic": false
+	},
+	"minify": false,
+	"sourceMaps": true,
+	"inlineSourcesContent": true,
+	"exclude": ["node_modules/**/*"]
+}

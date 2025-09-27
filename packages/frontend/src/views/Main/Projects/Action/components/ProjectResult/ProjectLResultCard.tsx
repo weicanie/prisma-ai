@@ -4,8 +4,8 @@ import { CardContent } from '@/components/ui/card';
 import type { lookupResultDto } from '@prisma-ai/shared';
 import { AlertTriangle, CheckCircle, Lightbulb, Pyramid } from 'lucide-react'; // Assuming lucide-react for icons
 import React, { useEffect, useState } from 'react';
-import type { ProjectResultProps } from '.';
 import ClickCollapsible from '../../../../components/ClickCollapsible';
+import type { ProjectResultProps } from '../../type';
 import FeedBack from '../FeedBack';
 
 type ProjectAnalysisResultCardProps = Pick<
@@ -66,7 +66,6 @@ export const ProjectAnalysisResultCard: React.FC<ProjectAnalysisResultCardProps>
 				}
 				defaultOpen={true}
 			>
-				{' '}
 				<CardContent className="space-y-6">
 					{/* 评分 */}
 					<div className="flex flex-col items-center">

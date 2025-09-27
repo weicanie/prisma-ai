@@ -1,69 +1,23 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTheme } from '@/utils/theme';
-import {
-	SelectedLLM,
-	type lookupResultDto,
-	type ProjectDto,
-	type projectLookupedDto,
-	type ProjectMinedDto,
-	type ProjectPolishedDto
-} from '@prisma-ai/shared';
+import { SelectedLLM } from '@prisma-ai/shared';
 import { Brain, Pyramid, Rocket, Sparkles } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { selectProjectLLM } from '../../../../../../store/projects';
 import Tabs from '../../../../components/Tabs';
+import type { ProjectResultProps } from '../../type';
 import PreflightBtns from '../preflightBtns';
 import { ProejctPMResultCard } from './ProejctPMResultCard';
+import { ProjectBusinessResultCard } from './ProjectBNesultCard.';
 import { ProjectAnalysisResultCard } from './ProjectLResultCard';
-
-export interface ProjectResultProps {
-	resultData: lookupResultDto | ProjectPolishedDto | ProjectMinedDto | null; //行动结果
-	mergedData: projectLookupedDto | ProjectDto | null; //正式合并后的数据
-	actionType: keyof typeof headerMap | null;
-	availableActions: string[];
-	handleLookup: () => void;
-	handlePolish: () => void;
-	handleMine: () => void;
-	handleCollaborate: (content: string, projectPath: string) => void;
-
-	handleMerge?: () => void; //完成优化
-	handleFeedback: (content: string) => void; //用户反馈,反思并重新优化
-
-	content: string; //生成内容-流式
-	reasonContent?: string; //推理内容-流式
-	isReasoning?: boolean; //是否完成推理
-	done?: boolean; //是否完成生成
-}
-
-export const headerMap = {
-	lookup: {
-		title: 'AI分析结果',
-		desc: 'AI的深度分析结果'
-	},
-	polish: {
-		title: 'AI优化结果',
-		desc: '深度优化后的项目经验'
-	},
-	mine: {
-		title: 'AI挖掘结果',
-		desc: '深度挖掘的项目亮点'
-	},
-	collaborate: {
-		title: 'AI协作结果',
-		desc: '与AI Agent协作的结果'
-	}
-};
 
 export const ProjectResult: React.FC<ProjectResultProps> = ({
 	resultData,
 	mergedData,
 	actionType,
 	availableActions,
-	handleLookup,
-	handlePolish,
-	handleMine,
-	handleCollaborate,
+	actionHandlers,
 	handleMerge,
 	handleFeedback,
 	content,
@@ -216,12 +170,14 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 		lookup: <ProjectAnalysisResultCard {...resultCardProps} isDark={isDark} />,
 		polish: proejctResultCard,
 		mine: proejctResultCard,
-		collaborate: <div>AI Agent 协作中...</div>
+		collaborate: <div>AI Agent 协作中...</div>,
+		businessLookup: <ProjectBusinessResultCard {...resultCardProps} isDark={isDark} />,
+		businessPaper: <ProjectBusinessResultCard {...resultCardProps} isDark={isDark} />
 	};
 	const resultCardSection = () => {
 		if (!resultData || !actionType)
 			return <div className="text-center text-gray-500">暂无结果</div>;
-		return contentMap[actionType];
+		return contentMap[actionType as keyof typeof contentMap];
 	};
 	const tabs = [
 		{ name: '行动', href: '#next-action', icon: Pyramid, current: true },
@@ -234,15 +190,7 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 
 	const renderComponent = () => {
 		if (hash === '#next-action') {
-			return (
-				<PreflightBtns
-					availableActions={availableActions}
-					handleLookup={handleLookup}
-					handlePolish={handlePolish}
-					handleMine={handleMine}
-					handleCollaborate={handleCollaborate}
-				/>
-			);
+			return <PreflightBtns availableActions={availableActions} actionHandlers={actionHandlers} />;
 		}
 
 		if (hash === '#reasoning') {
@@ -254,20 +202,12 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 		if (hash === '#result') {
 			return resultCardSection();
 		}
-		return (
-			<PreflightBtns
-				availableActions={availableActions}
-				handleLookup={handleLookup}
-				handlePolish={handlePolish}
-				handleMine={handleMine}
-				handleCollaborate={handleCollaborate}
-			/>
-		);
+		return <PreflightBtns availableActions={availableActions} actionHandlers={actionHandlers} />;
 	};
 	return (
 		<>
 			<Card
-				className={`h-full overflow-auto scb-thin ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+				className={`h-full max-h-[calc(100vh-150px)] overflow-auto scb-thin ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
 			>
 				<Tabs tabs={tabs} />
 				{renderComponent()}

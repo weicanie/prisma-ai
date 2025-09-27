@@ -12,11 +12,11 @@ import {
 import { Model, Types } from 'mongoose';
 import * as path from 'path';
 import { OssService } from '../../oss/oss.service';
-import { KnowledgeVDBService } from '../../prisma-agent/data_base/konwledge_vdb.service';
-import { ProjectCodeVDBService } from '../../prisma-agent/data_base/project_code_vdb.service';
 import { cloneProjectScriptPath, projectsDirPath } from '../../utils/constants';
 import { executeShellScript } from '../../utils/execute_shell_script';
 import { getOssObjectNameFromURL } from '../../utils/getOssObjectNameFromURL';
+import { KnowledgeVDBService } from '../prisma-agent/data_base/konwledge_vdb.service';
+import { ProjectCodeVDBService } from '../prisma-agent/data_base/project_code_vdb.service';
 import { Knowledgebase, KnowledgebaseDocument } from './entities/knowledge-base.entity';
 
 @Injectable()

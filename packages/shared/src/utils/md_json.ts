@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { projectSchemaForm } from '../types/project.schema-form';
+import { projectSchemaForm } from '../types/project/project.schema-form';
 import { type CreateSkillDto, type SkillItem } from '../types/skill';
 /**
  * 将项目的Markdown格式文本转换为符合projectSchemaForm的结构化数据
@@ -51,7 +51,6 @@ export function markdownToProjectSchema(markdown: string): z.infer<typeof projec
 		result.info.desc.bgAndTarget = bgMatch[1].trim();
 	}
 	// 处理技术栈
-	//FIXME 为什么"项目技术栈\s*"会匹配到断言内容,而"项目技术栈\s*?"不会 ???
 	const techStackSection = markdown.match(/#### 1\.3 项目技术栈\s*?\n([\s\S]*?)(?=\n###|$)/);
 	console.log('markdownToProjectSchema ~ techStackSection:', techStackSection);
 	if (techStackSection && techStackSection[1]) {

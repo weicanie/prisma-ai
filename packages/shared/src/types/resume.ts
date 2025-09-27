@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { CareerVO, UpdateCareerDto } from './career/career';
 import { EducationVO, UpdateEducationDto } from './education/education';
 import { JobVo } from './job';
-import { ProjectVo, updateProjectDto } from './project';
+import { ProjectVo, updateProjectDto } from './project/project';
 import { resumeMatchedSchema } from './resume.schema';
 import { SkillVo, UpdateSkillDto } from './skill';
 export enum ResumeStatus {

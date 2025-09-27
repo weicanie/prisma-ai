@@ -60,7 +60,7 @@ export class TaskQueueService {
 		});
 	}
 
-	//FIXME llm生成任务恢复时会重新生成,但redis中的状态存在污染,需要在启动时清空
+	//TODO llm生成任务恢复时会重新生成,但redis中的状态存在污染,需要在启动时清空
 	/**
 	 * 服务初始化，从redis恢复队列状态
 	 */

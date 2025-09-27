@@ -99,6 +99,56 @@ export class ProjectController {
 	}
 
 	/**
+	 * 分析项目业务的领域信息与战略设计
+	 * @param project 原始项目经验数据
+	 * @param userInfo 用户信息
+	 * @returns 返回生成后的项目经验
+	 */
+	@RequireLogin()
+	@Sse('business-lookup')
+	async businessLookupProject(
+		@Query('sessionId') sessionId: string,
+		@Query('recover') recover: boolean,
+		@Query('model') model: SelectedLLM,
+		@UserInfo() userInfo: UserInfoFromToken
+	) {
+		const metadata = {
+			funcKey: this.projectProcessService.funcKeys.businessLookupProject,
+			poolName: this.projectProcessService.poolName,
+			model: model
+		};
+		if (recover) {
+			return this.sseManagerService.handleSseRequestAndResponseRecover(sessionId, userInfo);
+		}
+		return this.sseManagerService.handleSseRequestAndResponse(sessionId, userInfo, metadata);
+	}
+
+	/**
+	 * 生成项目业务的面试用材料
+	 * @param project 原始项目经验数据
+	 * @param userInfo 用户信息
+	 * @returns 返回生成后的项目经验
+	 */
+	@RequireLogin()
+	@Sse('business-paper')
+	async businessPaperProject(
+		@Query('sessionId') sessionId: string,
+		@Query('recover') recover: boolean,
+		@Query('model') model: SelectedLLM,
+		@UserInfo() userInfo: UserInfoFromToken
+	) {
+		const metadata = {
+			funcKey: this.projectProcessService.funcKeys.businessPaperProject,
+			poolName: this.projectProcessService.poolName,
+			model: model
+		};
+		if (recover) {
+			return this.sseManagerService.handleSseRequestAndResponseRecover(sessionId, userInfo);
+		}
+		return this.sseManagerService.handleSseRequestAndResponse(sessionId, userInfo, metadata);
+	}
+
+	/**
 	 * 使用Agent实现亮点
 	 * @param implementDto 实现亮点所需的数据
 	 * @param userInfo 用户信息

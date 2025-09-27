@@ -1,6 +1,8 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
+	businessLookupResultSchema,
+	businessPaperResultSchema,
 	jsonMd_obj,
 	lookupResultSchema,
 	ProjectDto,
@@ -45,7 +47,9 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 	public funcKeys = {
 		polishProject: 'polishProject',
 		mineProject: 'mineProject',
-		lookupProject: 'lookupProject'
+		lookupProject: 'lookupProject',
+		businessLookupProject: 'businessLookupProject',
+		businessPaperProject: 'businessPaperProject'
 	};
 	logger = new Logger(ProjectProcessService.name);
 
@@ -63,25 +67,13 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 		this.funcPool = {
 			polishProject: this.polishProject.bind(this),
 			mineProject: this.mineProject.bind(this),
-			lookupProject: this.lookupProject.bind(this)
+			lookupProject: this.lookupProject.bind(this),
+			businessLookupProject: this.businessLookupProject.bind(this),
+			businessPaperProject: this.businessPaperProject.bind(this)
 		};
 	}
 	onModuleInit() {
 		this.taskManager.registerFuncPool(this);
-	}
-
-	private observableWrapper(observable: Observable<StreamingChunk>): Observable<StreamingChunk> {
-		return new Observable<StreamingChunk>(subscriber => {
-			const subscription = observable.subscribe({
-				next: value => subscriber.next(value),
-				error: err => subscriber.error(err),
-				complete: () => {
-					subscriber.next({ content: 'mine', done: true, isReasoning: false });
-					subscriber.complete();
-				}
-			});
-			return () => subscription.unsubscribe();
-		});
 	}
 
 	/**
@@ -109,7 +101,7 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 			let results: {
 				after: z.infer<typeof projectSchema>;
 				before: z.infer<typeof schema>;
-			} = jsonMd_obj(resultRedis.content); //[合并前,合并后]
+			} = jsonMd_obj(resultRedis.content);
 
 			let result: z.infer<typeof schema> = results?.before || {};
 			const validationResult = schema.safeParse(result);
@@ -269,6 +261,102 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 	}
 
 	/**
+	 * 分析项目业务的领域信息与战略设计
+	 */
+	async businessLookupProject(
+		project: ProjectDto,
+		userInfo: UserInfoFromToken,
+		taskId: string,
+		userFeedback: UserFeedback = { reflect: false, content: '' },
+		model: SelectedLLM
+	): Promise<Observable<StreamingChunk>> {
+		this.eventBusService.once(EventList.taskCompleted, ({ task }) => {
+			if (task.id !== taskId) {
+				return; // 确保只接收当前任务的结果
+			}
+			//取出redis中的结果进行处理
+
+			if (!task.resultKey) {
+				this.logger.error(`${task.id}任务结果redis键不存在,数据获取失败`);
+				return;
+			}
+
+			this.redisService
+				.get(task.resultKey!)
+				.then(redisStoreResult => {
+					if (!redisStoreResult) {
+						throw '任务结果不存在或已过期被清除';
+					}
+					return JSON.parse(redisStoreResult);
+				})
+				.then(result => this._handleBusinessLookupResult(result, userInfo, project))
+				.catch(error => {
+					this.logger.error(`任务${task.resultKey}结果获取失败: ${error}`);
+					throw error;
+				});
+		});
+
+		const chain = await this.projectChainService.businessLookupChain(true, model);
+		const businessLookupStream = await chain.stream({
+			project,
+			userInfo,
+			userFeedback
+		});
+
+		// 业务层不再关心模型细节，直接返回标准化的 StreamingChunk 流
+		return from(businessLookupStream) as Observable<StreamingChunk>;
+	}
+
+	/**
+	 * 生成项目业务的面试用材料
+	 */
+	async businessPaperProject(
+		project: ProjectDto,
+		userInfo: UserInfoFromToken,
+		taskId: string,
+		userFeedback: UserFeedback = { reflect: false, content: '' },
+		model: SelectedLLM
+	): Promise<Observable<StreamingChunk>> {
+		this.eventBusService.once(EventList.taskCompleted, ({ task }) => {
+			if (task.id !== taskId) {
+				return; // 确保只接收当前任务的结果
+			}
+			//取出redis中的结果进行处理
+
+			if (!task.resultKey) {
+				this.logger.error(`${task.id}任务结果redis键不存在,数据获取失败`);
+				return;
+			}
+
+			this.redisService
+				.get(task.resultKey!)
+				.then(redisStoreResult => {
+					if (!redisStoreResult) {
+						throw '任务结果不存在或已过期被清除';
+					}
+					return JSON.parse(redisStoreResult);
+				})
+				.then(result => this._handleBusinessPaperResult(result, userInfo, project))
+				.catch(error => {
+					this.logger.error(`任务${task.resultKey}结果获取失败: ${error}`);
+					throw error;
+				});
+		});
+
+		const chain = await this.projectChainService.businessPaperChain(true, model);
+		const businessPaperStream = await chain.stream({
+			project,
+			userInfo,
+			userFeedback
+		});
+
+		// 业务层不再关心模型细节，直接返回标准化的 StreamingChunk 流
+		return from(businessPaperStream) as Observable<StreamingChunk>;
+	}
+
+	/**
+	 * 在生成任务结束时检查、储存结果到数据库
+	 *
 	 * @param resultRedis SSE任务完成后从redis中取出的结果
 	 * @param userInfo 用户信息
 	 * @param project 用户输入项目信息
@@ -283,7 +371,7 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 			resultRedis.content
 		); // 从markdown代码块中提取json
 
-		let lookupResult = lookupResultData?.after || {};
+		let lookupResult = lookupResultData?.before || {};
 
 		// 2. 使用Zod Schema验证解析出的JSON对象格式
 		const validationResult = lookupResultSchema.safeParse(lookupResult);
@@ -311,6 +399,108 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 		// 5. 更新项目经验
 		const updateOperation = {
 			$set: { status: ProjectStatus.lookuped, lookupResult: lookupResultSave }
+		};
+		const query = {
+			'info.name': project.info.name,
+			'userInfo.userId': userInfo.userId
+		};
+
+		await this.projectModel.updateOne(query, updateOperation);
+	};
+
+	/**
+	 * 在生成任务结束时检查、储存结果到数据库
+	 *
+	 * @param resultRedis SSE任务完成后从redis中取出的结果
+	 * @param userInfo 用户信息
+	 * @param project 用户输入项目信息
+	 */
+	private _handleBusinessLookupResult = async (
+		resultRedis: redisStoreResult,
+		userInfo: UserInfoFromToken,
+		project: ProjectDto
+	) => {
+		// 1. 从Redis结果中解析出LLM的输出内容
+		let lookupResultData: z.infer<typeof businessLookupResultSchema> = resultRedis.content;
+
+		let lookupResult = lookupResultData || '';
+
+		// 2. 使用Zod Schema验证解析出的JSON对象格式
+		const validationResult = businessLookupResultSchema.safeParse(lookupResult);
+
+		// 3. 如果验证失败,尝试使用LLM进行格式修复
+		if (!validationResult.success) {
+			const errorMessage = JSON.stringify(validationResult.error.format()); // 获取详细的Zod验证错误信息
+			// 创建一个格式修复链
+			const fomartFixChain = await this.chainService.fomartFixChain(
+				businessLookupResultSchema,
+				errorMessage
+			);
+			const projectPolishedStr = JSON.stringify(lookupResult);
+			// 调用链来修复格式
+			lookupResult = await fomartFixChain.invoke({ input: projectPolishedStr });
+		}
+
+		// 4. 准备要存入数据库的数据
+		const lookupResultSave = lookupResult;
+
+		// 5. 更新项目经验
+		const updateOperation = {
+			$set: {
+				status: ProjectStatus.businessLookuped,
+				business: { lookup: lookupResultSave, paper: project.business?.paper }
+			}
+		};
+		const query = {
+			'info.name': project.info.name,
+			'userInfo.userId': userInfo.userId
+		};
+
+		await this.projectModel.updateOne(query, updateOperation);
+	};
+
+	/**
+	 * 在生成任务结束时检查、储存结果到数据库
+	 *
+	 * @param resultRedis SSE任务完成后从redis中取出的结果
+	 * @param userInfo 用户信息
+	 * @param project 用户输入项目信息
+	 */
+	private _handleBusinessPaperResult = async (
+		resultRedis: redisStoreResult,
+		userInfo: UserInfoFromToken,
+		project: ProjectDto
+	) => {
+		// 1. 从Redis结果中解析出LLM的输出内容
+		let resultData: z.infer<typeof businessPaperResultSchema> = resultRedis.content;
+
+		let result = resultData || '';
+
+		// 2. 使用Zod Schema验证解析出的JSON对象格式
+		const validationResult = businessPaperResultSchema.safeParse(result);
+
+		// 3. 如果验证失败,尝试使用LLM进行格式修复
+		if (!validationResult.success) {
+			const errorMessage = JSON.stringify(validationResult.error.format()); // 获取详细的Zod验证错误信息
+			// 创建一个格式修复链
+			const fomartFixChain = await this.chainService.fomartFixChain(
+				businessPaperResultSchema,
+				errorMessage
+			);
+			const projectPolishedStr = JSON.stringify(result);
+			// 调用链来修复格式
+			result = await fomartFixChain.invoke({ input: projectPolishedStr });
+		}
+
+		// 4. 准备要存入数据库的数据
+		const resultSave = result;
+
+		// 5. 更新项目经验
+		const updateOperation = {
+			$set: {
+				status: ProjectStatus.businessPagered,
+				business: { paper: resultSave, lookup: project.business?.lookup }
+			}
 		};
 		const query = {
 			'info.name': project.info.name,

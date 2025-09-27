@@ -8,10 +8,12 @@ import { EducationModule } from './business/education/education.module';
 import { HjmModule } from './business/human-job-match/hjm.module';
 import { JobModule } from './business/job/job.module';
 import { KnowledgebaseModule } from './business/knowledge-base/knowledge-base.module';
+import { PrismaAgentModule } from './business/prisma-agent/prisma-agent.module';
 import { ProjectModule } from './business/project/project.module';
 import { QuestionModule } from './business/question/question.module';
 import { ResumeModule } from './business/resume/resume.module';
 import { SkillModule } from './business/skill/skill.module';
+import { UserModule } from './business/user/user.module';
 import { ChainModule } from './chain/chain.module';
 import { CopilotModule } from './copilot/copilot.module';
 import { GlobalInterceptor } from './dataFormat.interceptor';
@@ -21,8 +23,6 @@ import { EventBusModule } from './EventBus/event-bus.module';
 import { IsLoginGuard } from './isLogin.guard';
 import { SseSessionManagerModule } from './manager/sse-session-manager/sse-session-manager.module';
 import { TaskManagerModule } from './manager/task-manager/task-manager.module';
-import { PrismaAgentModule } from './prisma-agent/prisma-agent.module';
-import { UserModule } from './user/user.module';
 @Module({
 	imports: [
 		UserModule,

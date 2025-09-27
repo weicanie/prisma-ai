@@ -1,11 +1,11 @@
 import { ChatDeepSeek } from '@langchain/deepseek';
 import { ChatGoogleGenerativeAI, GoogleGenerativeAIChatInput } from '@langchain/google-genai';
 import {
-    ChatOpenAI,
-    ChatOpenAIFields,
-    ClientOptions,
-    OpenAIEmbeddings,
-    OpenAIEmbeddingsParams
+	ChatOpenAI,
+	ChatOpenAIFields,
+	ClientOptions,
+	OpenAIEmbeddings,
+	OpenAIEmbeddingsParams
 } from '@langchain/openai';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -61,7 +61,7 @@ export class ModelService {
 	};
 
 	//国内代理
-	gemini_config : ChatOpenAIFields = {
+	gemini_config: ChatOpenAIFields = {
 		model: 'gemini-2.5-pro',
 		configuration: {
 			apiKey: this.configService.get('OPENAI_API_KEY'),
@@ -69,15 +69,12 @@ export class ModelService {
 			baseURL: this.configService.get('OPENAI_API_BASE_URL'),
 			maxRetries: 3
 		}
-	}
+	};
 	//google原厂
-	gemini_config_plus : GoogleGenerativeAIChatInput = {
+	gemini_config_plus: GoogleGenerativeAIChatInput = {
 		model: 'gemini-2.5-pro',
-		apiKey: this.configService.get('GOOGLEAI_API_KEY'),
-		//FIXME 难道是gemini本身必须直接设置streaming: true,json: true来支持流式输出和结构化输出???
-		// streaming: true,
-		// json: true
-	}
+		apiKey: this.configService.get('GOOGLEAI_API_KEY')
+	};
 
 	defaultHAConfig = {
 		circuitBreakerConfig: {
@@ -161,32 +158,6 @@ export class ModelService {
 	 * @description 模型实例,具有熔断器和限流器和请求队列等高可用保护。
 	 * @param [config] - 模型配置
 	 * @param [HAConfig={}] - 高可用配置
-	 * @example 
-	 * HAConfig示例:
-	 * ```ts
-	 * {
-	 * 	circuitBreakerConfig: {
-				failureThreshold: 40,
-				resetTimeout: 20000 
-			},
-			rateLimiterConfig: {
-				maxRequestsPerMinute: 60
-			},
-			retryConfig: {
-				maxRetries: 4,
-				initialDelayMs: 1000,
-				maxDelayMs: 15000,
-				factor: 2,
-				retryableErrors: [
-					/429/, // 速率限制错误
-					/503/, // 服务不可用
-					/timeout/i, // 超时错误
-					/ECONNRESET/, // 连接重置
-					/ETIMEDOUT/ // 连接超时
-				]
-			}
-	 * }
-	 * ```
 	 */
 	async getLLMOpenAI(config = this.openai_config, HAConfig = {}) {
 		const configKey = JSON.stringify(config);
@@ -207,32 +178,6 @@ export class ModelService {
 	 * @description 模型实例,具有熔断器和限流器和请求队列等高可用保护。
 	 * @param [config] - 模型配置
 	 * @param [HAConfig={}] - 高可用配置
-	 * @example 
-	 * HAConfig示例:
-	 * ```ts
-	 * {
-	 * 	circuitBreakerConfig: {
-				failureThreshold: 40,
-				resetTimeout: 20000 
-			},
-			rateLimiterConfig: {
-				maxRequestsPerMinute: 60
-			},
-			retryConfig: {
-				maxRetries: 4,
-				initialDelayMs: 1000,
-				maxDelayMs: 15000,
-				factor: 2,
-				retryableErrors: [
-					/429/, // 速率限制错误
-					/503/, // 服务不可用
-					/timeout/i, // 超时错误
-					/ECONNRESET/, // 连接重置
-					/ETIMEDOUT/ // 连接超时
-				]
-			}
-	 * }
-	 * ```
 	 */
 	async getLLMDeepSeek(config = this.deepseek_config, HAConfig = {}) {
 		const configKey = JSON.stringify(config);

@@ -9,8 +9,9 @@ import { SelectedLLM, StreamingChunk } from '@prisma-ai/shared';
 import { z } from 'zod';
 import { DeepSeekStreamChunk } from '../type/sse';
 import { ModelService } from './model.service';
-// FIXME streamEvents + tool方案是可以实现gemini的思考/答案的分离输出，但prompt复杂（比如现在的要求复杂JSON输出）gemini的生成格式就会出错
-// TODO gemini-2.5-pro的思考/答案分离输出（不进行结构化），然后使用deepseek-chat进行结构化输出
+// TODO gemini 思考与回答分离方案
+// streamEvents + tool方案是可以实现gemini的思考/答案的分离输出，但prompt复杂（比如现在的要求复杂JSON输出）gemini的生成格式就会出错
+// gemini-2.5-pro的思考/答案分离输出（不进行结构化），然后使用deepseek-chat进行结构化输出
 // ChatGoogleGenerativeAI的特殊性？json、stream选项
 
 /**
@@ -150,9 +151,8 @@ export class ThoughtModelService {
 	public async *_transformAIMessageStream(
 		stream: AsyncGenerator<AIMessageChunk>
 	): AsyncGenerator<StreamingChunk> {
-		//FIXME 会在第一个chunk产生时才发送，而不是流开始时
-		//可能是gemini的流式输出机制？或者langchain-google-genai的流式输出机制？
-		// 在流开始时立即发送一个默认消息
+		// 会在第一个chunk产生时（此时llm已生成完毕）才发送，而不是llm开始生成时
+		// 可能是gemini的流式输出机制？或者langchain-google-genai的流式输出机制？
 		yield {
 			content: '',
 			reasonContent: 'Gemini 正在后台动态思考...',

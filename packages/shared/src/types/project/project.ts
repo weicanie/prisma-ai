@@ -1,0 +1,75 @@
+import { z } from 'zod';
+import {
+	lookupResultSchema,
+	projectLookupedSchema,
+	projectMinedSchema,
+	projectPolishedSchema,
+	projectSchema
+} from './project.schema';
+
+export enum ProjectStatus {
+	committed = 'committed', //初提交
+	lookuped = 'lookuped', //llm分析完毕
+	businessLookuped = 'businessLookuped', //业务分析（深挖）完毕
+	businessPagered = 'businessPagered', //论文（故事线、细节，参考用）生成完毕
+
+	/* 仅在 ProjectPolishedSchema 中*/
+	polishing = 'polishing', //llm已打磨
+
+	polished = 'polished', //用户已合并打磨
+
+	/* 仅在 ProjectMinedSchema 中*/
+	mining = 'mining', //llm已挖掘
+
+	mined = 'mined', //用户已合并挖掘
+	accepted = 'accepted', //完成
+
+	/* 仅在ResumeMatched中 */
+	matched = 'matched' //已匹配岗位
+}
+export type lookupResultDto = z.infer<typeof lookupResultSchema>;
+/* 含lookupResult的projectDto */
+export type projectLookupedDto = z.infer<typeof projectLookupedSchema>;
+export type ProjectDto = z.infer<typeof projectSchema>;
+export type updateProjectDto = Partial<ProjectDto>;
+export type ProjectPolishedDto = z.infer<typeof projectPolishedSchema>;
+export type ProjectMinedDto = z.infer<typeof projectMinedSchema>;
+
+export interface ProjectVo extends z.infer<typeof projectSchema> {
+	id: string; // 数据库中的ID
+	name?: string; //项目名称
+	status: ProjectStatus; //项目状态
+
+	createdAt: string;
+	updatedAt: string;
+
+	//分析结果
+	lookupResult?: z.infer<typeof lookupResultSchema>;
+}
+
+export interface ProjectPolishedVo extends z.infer<typeof projectPolishedSchema> {
+	reasonContent?: string; // 推理内容
+}
+
+export interface ProjectMineddVo extends z.infer<typeof projectMinedSchema> {
+	reasonContent?: string; // 推理内容
+}
+
+/**
+ * 亮点实现前端上传的Dto
+ */
+export interface ImplementDto {
+	projectId: string;
+	lightspot: string;
+	projectPath: string;
+}
+
+/**
+ * 可用的用于处理项目经验的模型
+ */
+export enum SelectedLLM {
+	gemini_2_5_pro = 'gemini-2.5-pro', //google原厂
+	gemini_2_5_pro_proxy = 'gemini-2.5-pro-proxy', //国内代理
+	deepseek_reasoner = 'deepseek-reasoner',
+	gemini_2_5_flash = 'gemini-2.5-flash' //google原厂
+}
