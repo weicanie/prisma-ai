@@ -10,6 +10,8 @@ import {
 export enum ProjectStatus {
 	committed = 'committed', //初提交
 	lookuped = 'lookuped', //llm分析完毕
+	businessLookuped = 'businessLookuped', //业务分析（深挖）完毕
+	businessPagered = 'businessPagered', //论文（故事线、细节，参考用）生成完毕
 
 	/* 仅在 ProjectPolishedSchema 中*/
 	polishing = 'polishing', //llm已打磨

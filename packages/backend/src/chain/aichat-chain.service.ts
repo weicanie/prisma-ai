@@ -39,7 +39,7 @@ export class AichatChainService {
 	 */
 	async createChatChain(prompt = this.chatPrompt) {
 		const chatHistory = this.modelService.getChatHistory('aichat'); //使用自定义的chatHistory
-		//FIXME 使用ConversationSummaryMemory时,会话记录会丢失,是chatHistory的保存逻辑没支持
+		//TODO 使用ConversationSummaryMemory时,会话记录会丢失,是chatHistory的保存逻辑没支持
 		// const memory = new ConversationSummaryMemory({
 		// 	chatHistory: chatHistory,
 		// 	memoryKey: 'history',

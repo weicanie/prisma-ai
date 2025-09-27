@@ -1,5 +1,5 @@
 import { UserInfoFromToken } from './loginVerify';
-import { ProjectDto } from './project';
+import { ProjectDto } from './project/project';
 
 /* chunk的标准格式,其它observable返回的chunk都需要转换为该格式
  	用于流式数据的sse传输和存储

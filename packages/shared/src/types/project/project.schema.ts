@@ -26,9 +26,20 @@ export function getLightspotSchema<T extends z.ZodTypeAny = z.ZodType<string>>(i
 		.describe('项目亮点的结构化描述');
 }
 
+const businessLookupResultSchema = z.string().describe('业务分析结果');
+
+const businessPaperResultSchema = z.string().describe('面试材料生成结果');
+
 const projectSchema = z.object({
 	info: infoSchema,
-	lightspot: getLightspotSchema(z.string())
+	lightspot: getLightspotSchema(z.string()),
+	business: z
+		.object({
+			lookup: businessLookupResultSchema,
+			paper: businessPaperResultSchema
+		})
+		.optional()
+		.describe('业务分析结果和业务优化结果')
 });
 
 const projectPolishedSchema = z.object({
@@ -135,6 +146,8 @@ const projectMinResultSchma = z
 	.describe('after字段:新增亮点的项目经验。before字段:新增亮点前的项目经验。');
 
 export {
+	businessLookupResultSchema,
+	businessPaperResultSchema,
 	lookupResultSchema,
 	projectLookupedSchema,
 	projectLookupResultSchema,

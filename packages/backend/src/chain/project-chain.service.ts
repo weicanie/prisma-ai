@@ -2,6 +2,8 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { RunnableSequence } from '@langchain/core/runnables';
 import { Injectable } from '@nestjs/common';
 import {
+	businessLookupResultSchema,
+	businessPaperResultSchema,
 	lookupResultSchema,
 	ProjectDto,
 	projectLookupResultSchema,
@@ -16,12 +18,12 @@ import {
 import { z } from 'zod';
 import { ModelService } from '../model/model.service';
 import { ThoughtModelService } from '../model/thought-model.service';
-import { KnowledgeVDBService } from '../prisma-agent/data_base/konwledge_vdb.service';
-import { ProjectCodeVDBService } from '../prisma-agent/data_base/project_code_vdb.service';
-import { ReflectAgentService } from '../prisma-agent/reflect_agent/reflect_agent.service';
+
+import { ReflectAgentService } from '../business/prisma-agent/reflect_agent/reflect_agent.service';
 import { PromptService } from '../prompt/prompt.service';
 import { RubustStructuredOutputParser } from '../utils/RubustStructuredOutputParser';
 import { ChainService } from './chain.service';
+import { ProjectKonwbaseRetrieveService } from './project-konwbase-retrieve.service';
 
 /**
  * @description 项目处理链的统一输入接口
@@ -35,7 +37,9 @@ export interface ProjectProcessingInput {
 export enum BusinessEnum {
 	lookup = 'lookup',
 	polish = 'polish',
-	mine = 'mine'
+	mine = 'mine',
+	businessLookup = 'businessLookup',
+	businessPaper = 'businessPaper'
 }
 
 @Injectable()
@@ -44,10 +48,9 @@ export class ProjectChainService {
 		public modelService: ModelService,
 		public promptService: PromptService,
 		public chainService: ChainService,
-		private readonly knowledgeVDBService: KnowledgeVDBService,
-		private readonly projectCodeVDBService: ProjectCodeVDBService,
 		private readonly reflectAgentService: ReflectAgentService,
-		public thoughtModelService: ThoughtModelService
+		public thoughtModelService: ThoughtModelService,
+		private readonly projectKonwbaseRetrieveService: ProjectKonwbaseRetrieveService
 	) {}
 
 	/**
@@ -98,57 +101,12 @@ export class ProjectChainService {
 				chat_history: () => '', // 暂不处理多轮对话历史
 				instructions: () => outputParser.getFormatInstructions(),
 
-				//TODO 多轮检索, 比如每个亮点分别检索并标注其属于哪个亮点
-				//TODO 使用SRAG降低幻觉,提高相关性
-				//TODO 使用CRAG进行精炼、网络搜索（使用google的api：https://js.langchain.com/docs/integrations/chat/google_generativeai/#built-in-google-search-retrieval、serpapi）
 				// 知识库集成：检索相关代码和文档
 				retrievedProjectCodes: async (i: ProjectProcessingInput) => {
-					try {
-						let codeQuery = '';
-						switch (business) {
-							case BusinessEnum.lookup:
-								return '无相关项目代码';
-							case BusinessEnum.polish:
-								codeQuery = `项目介绍: ${JSON.stringify(i.project.info.desc)} 项目亮点：${JSON.stringify(i.project.lightspot)}`;
-								break;
-							case BusinessEnum.mine:
-								codeQuery = `项目介绍: ${JSON.stringify(i.project.info.desc)} 项目亮点：${JSON.stringify(i.project.lightspot)}`;
-								break;
-						}
-						return await this.projectCodeVDBService.retrieveCodeChunks(
-							codeQuery,
-							5,
-							i.userInfo.userId,
-							i.project.info.name
-						);
-					} catch (e) {
-						return '项目代码库未找到或检索失败';
-					}
+					return await this.projectKonwbaseRetrieveService.retrievedProjectCodes(i, business);
 				},
 				retrievedDomainDocs: async (i: ProjectProcessingInput) => {
-					try {
-						let docsQuery = '';
-						switch (business) {
-							case BusinessEnum.lookup:
-								docsQuery = `项目名称: ${i.project.info.name}, 项目介绍: ${JSON.stringify(i.project.info.desc)}`;
-								break;
-							case BusinessEnum.polish:
-								docsQuery = `项目名称: ${i.project.info.name}, 技术栈: ${i.project.info.techStack.join(',')}, 项目介绍: ${JSON.stringify(i.project.info.desc)} 项目亮点：${JSON.stringify(i.project.lightspot)}`;
-								break;
-							case BusinessEnum.mine:
-								docsQuery = `项目名称: ${i.project.info.name}, 技术栈: ${i.project.info.techStack.join(',')}, 项目介绍: ${JSON.stringify(i.project.info.desc)} 项目亮点：${JSON.stringify(i.project.lightspot)}`;
-								break;
-						}
-						// 使用 CRAG 版本的检索可以获得更高质量的知识
-						return await this.knowledgeVDBService.retrieveKnowbase(
-							docsQuery,
-							5, // topK
-							i.userInfo.userId,
-							i.project.info.name
-						);
-					} catch (e) {
-						return '相关文档库检索失败';
-					}
+					return await this.projectKonwbaseRetrieveService.retrievedDomainDocs(i, business);
 				},
 
 				// 2. 反思逻辑：如果用户要求，则生成反思内容
@@ -207,6 +165,56 @@ export class ProjectChainService {
 		return chain;
 	}
 
+	async businessLookupChain(
+		stream: true,
+		model: SelectedLLM
+	): Promise<RunnableSequence<ProjectProcessingInput, StreamingChunk>>; //流式返回时输出类型是指单个chunk的类型
+	async businessLookupChain(
+		stream: false,
+		model: SelectedLLM
+	): Promise<RunnableSequence<ProjectProcessingInput, string>>;
+
+	/**
+	 * 项目经验业务分析
+	 */
+	async businessLookupChain(stream: boolean, model: SelectedLLM) {
+		const schema = businessLookupResultSchema;
+		return this._createProcessChain(
+			() => this.promptService.businessLookupPrompt(),
+			schema,
+			stream,
+			BusinessEnum.businessLookup,
+			model
+		);
+	}
+
+	async businessPaperChain(
+		stream: true,
+		model: SelectedLLM
+	): Promise<RunnableSequence<ProjectProcessingInput, StreamingChunk>>;
+	async businessPaperChain(
+		stream: false,
+		model: SelectedLLM
+	): Promise<RunnableSequence<ProjectProcessingInput, z.infer<typeof businessPaperResultSchema>>>;
+
+	/**
+	 * 生成项目经验面试材料
+	 */
+	async businessPaperChain(stream: boolean, model: SelectedLLM) {
+		const schema = businessPaperResultSchema;
+		const chain = await this._createProcessChain(
+			() => this.promptService.businessPaperPrompt(),
+			schema,
+			stream,
+			BusinessEnum.businessPaper,
+			model
+		);
+		return chain;
+	}
+
+	/**
+	 * 项目经验优化
+	 */
 	async polishChain(
 		stream: true,
 		model: SelectedLLM
