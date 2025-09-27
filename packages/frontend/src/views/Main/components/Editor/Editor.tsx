@@ -23,6 +23,9 @@ export interface EditorProps {
 	/* 在`新建`弹窗中控制使用表单还是md */
 	isUseMdEditor?: boolean;
 	setIsUseMdEditor?: React.Dispatch<React.SetStateAction<boolean>>;
+
+	/* 在结果卡片中展示md */
+	isCardMode?: boolean;
 }
 
 export const Editor: FC<EditorProps> = ({
@@ -30,7 +33,8 @@ export const Editor: FC<EditorProps> = ({
 	updateAction,
 	submitHandler,
 	mdSelector,
-	setIsUseMdEditor
+	setIsUseMdEditor,
+	isCardMode
 }) => {
 	const isShwoMode = type === 'show';
 	const md = useSelector(mdSelector ? mdSelector : selectProjectMd); //获取编辑器内容，默认为项目经验的md
@@ -106,6 +110,7 @@ export const Editor: FC<EditorProps> = ({
 			className={cn(
 				resolvedTheme === 'dark' ? 'theme-frame-dark' : 'theme-nord',
 				isShwoMode ? 'editor-small' : '',
+				isCardMode ? 'editor-card' : '',
 				'w-full'
 			)}
 		>

@@ -24,7 +24,6 @@ const Wall: React.FC<WallAProps> = ({ play, duration = 1500, delay = 1000, class
 	}, []); */
 
 	// 行数和列数都取偶数
-	//FIXME 为什么有一个为奇数就显示异常
 	const getEvenRows = () => {
 		return rows % 2 === 0 ? rows : rows - 1;
 	};

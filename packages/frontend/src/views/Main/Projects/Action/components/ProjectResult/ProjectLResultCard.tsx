@@ -66,7 +66,6 @@ export const ProjectAnalysisResultCard: React.FC<ProjectAnalysisResultCardProps>
 				}
 				defaultOpen={true}
 			>
-				{' '}
 				<CardContent className="space-y-6">
 					{/* 评分 */}
 					<div className="flex flex-col items-center">

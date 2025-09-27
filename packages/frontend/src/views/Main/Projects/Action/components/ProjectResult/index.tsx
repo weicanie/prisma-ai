@@ -9,6 +9,7 @@ import Tabs from '../../../../components/Tabs';
 import type { ProjectResultProps } from '../../type';
 import PreflightBtns from '../preflightBtns';
 import { ProejctPMResultCard } from './ProejctPMResultCard';
+import { ProjectBusinessResultCard } from './ProjectBNesultCard.';
 import { ProjectAnalysisResultCard } from './ProjectLResultCard';
 
 export const ProjectResult: React.FC<ProjectResultProps> = ({
@@ -169,12 +170,14 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 		lookup: <ProjectAnalysisResultCard {...resultCardProps} isDark={isDark} />,
 		polish: proejctResultCard,
 		mine: proejctResultCard,
-		collaborate: <div>AI Agent 协作中...</div>
+		collaborate: <div>AI Agent 协作中...</div>,
+		businessLookup: <ProjectBusinessResultCard {...resultCardProps} isDark={isDark} />,
+		businessPaper: <ProjectBusinessResultCard {...resultCardProps} isDark={isDark} />
 	};
 	const resultCardSection = () => {
 		if (!resultData || !actionType)
 			return <div className="text-center text-gray-500">暂无结果</div>;
-		return contentMap[actionType];
+		return contentMap[actionType as keyof typeof contentMap];
 	};
 	const tabs = [
 		{ name: '行动', href: '#next-action', icon: Pyramid, current: true },
@@ -204,7 +207,7 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 	return (
 		<>
 			<Card
-				className={`h-full overflow-auto scb-thin ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+				className={`h-full max-h-[calc(100vh-150px)] overflow-auto scb-thin ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
 			>
 				<Tabs tabs={tabs} />
 				{renderComponent()}

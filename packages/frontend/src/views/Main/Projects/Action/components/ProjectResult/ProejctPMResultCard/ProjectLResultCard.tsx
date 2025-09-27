@@ -4,8 +4,8 @@ import { CardContent } from '@/components/ui/card';
 import type { lookupResultDto } from '@prisma-ai/shared';
 import { AlertTriangle, CheckCircle, Lightbulb, Pyramid } from 'lucide-react'; // Assuming lucide-react for icons
 import React, { useEffect, useState } from 'react';
-import type { ProjectResultProps } from '..';
 import ClickCollapsible from '../../../../../components/ClickCollapsible';
+import type { ProjectResultProps } from '../../../type';
 import FeedBack from '../../FeedBack';
 
 type ProjectAnalysisResultCardProps = Pick<

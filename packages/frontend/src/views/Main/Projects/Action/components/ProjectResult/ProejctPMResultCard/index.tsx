@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import type { ProjectMinedDto, ProjectPolishedDto } from '@prisma-ai/shared';
 import { Code, Lightbulb, Pyramid, Sparkles, Zap } from 'lucide-react';
 import React, { useState } from 'react';
-import { actionHeaderMap, type ProjectResultProps } from '..';
+import { actionHeaderMap, type ProjectResultProps } from '../../../type';
 import FeedBack from '../../FeedBack';
 import { MinedPolishedLightspotSection } from './MinedLightspotSection';
 import { PolishedLightspotSection } from './PolishedLightspotSection';
@@ -43,7 +43,9 @@ export const ProejctPMResultCard: React.FC<ProejctPMResultCardProps> = ({
 						<Lightbulb className="w-5 h-5" />
 						新增亮点
 					</h4>
-					<MinedPolishedLightspotSection lightspotAdded={resultData.lightspotAdded} />
+					<MinedPolishedLightspotSection
+						lightspotAdded={(resultData as ProjectMinedDto).lightspotAdded}
+					/>
 				</div>
 			</>
 		);

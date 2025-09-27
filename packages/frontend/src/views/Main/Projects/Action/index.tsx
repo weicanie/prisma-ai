@@ -25,17 +25,10 @@ import { toast } from 'sonner';
 import type { z } from 'zod';
 import { OriginalProject } from './components/OriginalProject';
 import { ProjectResult } from './components/ProjectResult';
-import type { ActionHandlers } from './type';
+import { type ActionHandlers, ActionType } from './type';
 
 interface ActionProps {
 	_?: string;
-}
-
-enum ActionType {
-	lookup = 'lookup',
-	polish = 'polish',
-	mine = 'mine',
-	collaborate = 'collaborate'
 }
 
 const Action: React.FC<ActionProps> = () => {
@@ -52,7 +45,7 @@ const Action: React.FC<ActionProps> = () => {
 	 * 流式传输结束时string转为的JSON格式对象数据-原结果
 	 */
 	const [resultData, setResultData] = useState<
-		lookupResultDto | ProjectMinedDto | ProjectPolishedDto | null
+		lookupResultDto | ProjectMinedDto | ProjectPolishedDto | string | null
 	>(null);
 	/**
 	 * 流式传输结束时string转为的JSON格式对象数据-合并后的结果
@@ -63,6 +56,11 @@ const Action: React.FC<ActionProps> = () => {
 
 	const model = useSelector(selectProjectLLM);
 
+	/**
+	 * 用户所选操作
+	 */
+	const [actionType, setActionType] = useState<ActionType>(ActionType.lookup);
+
 	/* 自动切换tab */
 	useEffect(() => {
 		if (content) {
@@ -72,17 +70,27 @@ const Action: React.FC<ActionProps> = () => {
 
 	useEffect(() => {
 		if (done) {
-			try {
-				const result: {
-					after: z.infer<typeof projectSchema>;
-					before: z.infer<typeof projectPolishedSchema> | z.infer<typeof projectMinedSchema>;
-				} = jsonMd_obj(content);
-				setResultData(result.before);
-				setMergedData(result.after);
-				console.log('sse 最终结果：', result);
-			} catch (error) {
-				toast.error('结果解析错误，请稍后重试生成');
-				console.error('jsonMd_obj error', error);
+			if (actionType === ActionType.businessLookup || actionType === ActionType.businessPaper) {
+				setResultData(content);
+			} else {
+				try {
+					const result: {
+						after: z.infer<typeof projectSchema>;
+						before: z.infer<typeof projectPolishedSchema> | z.infer<typeof projectMinedSchema>;
+					} = jsonMd_obj(content);
+					setResultData(result.before);
+					setMergedData(result.after);
+					console.log('sse 最终结果：', result);
+				} catch (error) {
+					//! 续传的情况，actionType是初始值，因此需要尝试解析为字符串
+					if (content.search(/[{}]/gm) === -1) {
+						//不是json格式，则认为是字符串
+						setResultData(content);
+					} else {
+						toast.error('结果解析错误，请稍后重试生成');
+						console.error('jsonMd_obj error', error);
+					}
+				}
 			}
 			//setState异步, 需要等待setState执行完再执行navigate
 			setTimeout(() => {
@@ -90,15 +98,6 @@ const Action: React.FC<ActionProps> = () => {
 			}, 0);
 		}
 	}, [done]);
-
-	/**
-	 * llm生成结果对应的操作类型，影响结果的展示和反思重做的调用
-	 * 1. 如果项目状态为lookuped，则操作类型为lookup
-	 * 2. 如果项目状态为polished，则操作类型为polish
-	 * 3. 如果项目状态为mined，则操作类型为mine
-	 * 4. 否则为collaborate
-	 */
-	const [actionType, setActionType] = useState<ActionType>(ActionType.lookup);
 
 	const ImplementRequest = useCustomMutation(implementProject);
 
@@ -119,7 +118,7 @@ const Action: React.FC<ActionProps> = () => {
 
 	// 根据项目状态确定可用操作
 	const getAvailableActions = (status: ProjectStatus) => {
-		const availableActions = ['mine', 'collaborate'];
+		const availableActions = ['mine', 'collaborate', 'businessLookup', 'businessPaper'];
 		if (status === ProjectStatus.lookuped) {
 			availableActions.push('polish');
 		} else {
@@ -226,9 +225,35 @@ const Action: React.FC<ActionProps> = () => {
 					model
 				});
 				break;
+			case 'businessLookup':
+				start({
+					path: '/project/business-lookup',
+					input: { input: projectData, userFeedback: { reflect: true, content } },
+					model
+				});
+				break;
+			case 'businessPaper':
+				start({
+					path: '/project/business-paper',
+					input: { input: projectData, userFeedback: { reflect: true, content } },
+					model
+				});
+				break;
 			default:
 				break;
 		}
+		navigate('#reasoning');
+	};
+
+	const handleBusinessLookup = () => {
+		start({ path: '/project/business-lookup', input: { input: projectData }, model });
+		setActionType(ActionType.businessLookup);
+		navigate('#reasoning');
+	};
+
+	const handleBusinessPaper = () => {
+		start({ path: '/project/business-paper', input: { input: projectData }, model });
+		setActionType(ActionType.businessPaper);
 		navigate('#reasoning');
 	};
 
@@ -236,7 +261,9 @@ const Action: React.FC<ActionProps> = () => {
 		lookup: handleLookup,
 		polish: handlePolish,
 		mine: handleMine,
-		collaborate: handleCollaborate
+		collaborate: handleCollaborate,
+		businessLookup: handleBusinessLookup,
+		businessPaper: handleBusinessPaper
 	};
 
 	const ProjectResultProps = {
@@ -254,14 +281,12 @@ const Action: React.FC<ActionProps> = () => {
 	};
 
 	return (
-		<div className={`min-h-screen transition-colors duration-200 bg-global`}>
+		<div className={`transition-colors duration-200 bg-global`}>
 			<div className="container mx-auto px-4 py-8">
 				{/* 两栏布局 */}
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 ">
 					{/* 左栏：原始项目信息 */}
-					<div className="overflow-y-auto">
-						<OriginalProject projectData={projectData} isDark={isDark} />
-					</div>
+					<OriginalProject projectData={projectData} isDark={isDark} />
 					{/* 右栏：AI行动区域 */}
 					<ProjectResult {...ProjectResultProps} />
 				</div>

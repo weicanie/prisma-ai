@@ -22,14 +22,33 @@ const actionHeaderMap = {
 	collaborate: {
 		title: 'AI协作结果',
 		desc: '与AI Agent协作的结果'
+	},
+	businessLookup: {
+		title: 'AI业务分析结果',
+		desc: 'AI的业务分析结果'
+	},
+	businessPaper: {
+		title: 'AI业务生成结果',
+		desc: 'AI的业务生成结果'
 	}
 };
+
+enum ActionType {
+	lookup = 'lookup',
+	polish = 'polish',
+	mine = 'mine',
+	collaborate = 'collaborate',
+	businessLookup = 'businessLookup',
+	businessPaper = 'businessPaper'
+}
 
 interface ActionHandlers extends Record<keyof typeof actionHeaderMap, (...args: any[]) => void> {
 	lookup: () => void;
 	polish: () => void;
 	mine: () => void;
 	collaborate: (content: string, projectPath: string) => void;
+	businessLookup: () => void;
+	businessPaper: () => void;
 }
 
 interface PreflightBtnsProps {
@@ -38,7 +57,7 @@ interface PreflightBtnsProps {
 }
 
 interface ProjectResultProps {
-	resultData: lookupResultDto | ProjectPolishedDto | ProjectMinedDto | null; //行动结果
+	resultData: lookupResultDto | ProjectPolishedDto | ProjectMinedDto | string | null; //行动结果
 	mergedData: projectLookupedDto | ProjectDto | null; //正式合并后的数据
 	actionType: keyof typeof actionHeaderMap | null;
 	availableActions: string[];
@@ -54,4 +73,10 @@ interface ProjectResultProps {
 	done?: boolean; //是否完成生成
 }
 
-export type { ActionHandlers, actionHeaderMap, PreflightBtnsProps, ProjectResultProps };
+export {
+	actionHeaderMap,
+	ActionType,
+	type ActionHandlers,
+	type PreflightBtnsProps,
+	type ProjectResultProps
+};
