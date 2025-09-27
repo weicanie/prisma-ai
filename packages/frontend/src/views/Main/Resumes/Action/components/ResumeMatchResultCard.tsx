@@ -6,7 +6,7 @@ import type { ResumeResultProps } from './ResumeResult';
 
 import { Button } from '@/components/ui/button';
 import { Pyramid } from 'lucide-react';
-import FeedBack from '../../Projects/components/FeedBack';
+import FeedBack from '../../../Projects/Action/components/FeedBack';
 type ResumeMatchResultCardProps = Pick<
 	ResumeResultProps,
 	'resultData' | 'resumeData' | 'handleMerge' | 'handleFeedback'

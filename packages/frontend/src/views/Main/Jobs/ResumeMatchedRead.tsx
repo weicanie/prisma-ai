@@ -7,7 +7,7 @@ import { useParams } from 'react-router-dom';
 import { useCustomQuery } from '../../../query/config';
 import { ResumeQueryKey } from '../../../query/keys';
 import { findAllResumeMatched } from '../../../services/resume';
-import { OriginalProject } from '../Projects/components/OriginalProject';
+import { OriginalProject } from '../Projects/Action/components/OriginalProject';
 import JobCard from './JobCard';
 
 interface ResumeMatchedReadProps {
