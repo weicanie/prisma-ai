@@ -77,6 +77,15 @@ export class LookupResult {
 }
 
 @Schema({ timestamps: true })
+export class Business {
+	@Prop()
+	lookup?: string;
+
+	@Prop()
+	paper?: string;
+}
+
+@Schema({ timestamps: true })
 export class Project {
 	@Prop({ type: ProjectInfo, required: true })
 	info: ProjectInfo; //项目信息
@@ -92,6 +101,9 @@ export class Project {
 	//分析结果（lookup后具有）
 	@Prop({ type: LookupResult })
 	lookupResult?: LookupResult;
+
+	@Prop({ type: Business })
+	business?: Business;
 }
 
 export type ProjectDocument = HydratedDocument<Project> & {

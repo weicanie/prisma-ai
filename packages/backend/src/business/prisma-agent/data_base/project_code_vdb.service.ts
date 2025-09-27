@@ -557,7 +557,7 @@ export class ProjectCodeVDBService implements OnModuleInit {
 			this.logger.log(`tree-sitter 切分成功,共 ${chunks.length} 个代码块`);
 			return chunks;
 		} catch (error) {
-			//FIXME 修正Query的错误, Error: Query error of type TSQueryErrorNodeType
+			//TODO 修正Query的错误, Error: Query error of type TSQueryErrorNodeType
 
 			const lcLang = this._mapToLangchainLang(lang);
 			let splitter: RecursiveCharacterTextSplitter;

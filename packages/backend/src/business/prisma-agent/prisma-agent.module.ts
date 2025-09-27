@@ -15,7 +15,10 @@ import { PlanExecuteAgentService } from './plan_execute_agent/plan_execute_agent
 import { PlanStepAgentService } from './plan_step_agent/plan_step_agent.service';
 import { PrismaAgentService } from './prisma-agent.service';
 import { ReflectAgentService } from './reflect_agent/reflect_agent.service';
-
+/**
+ * 1、项目亮点实现 agent
+ * 2、项目代码知识库、项目文档知识库
+ */
 @Module({
 	controllers: [],
 	providers: [

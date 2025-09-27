@@ -22,12 +22,10 @@ import { ProjectCodeVDBService } from './project_code_vdb.service';
  * 知识库向量索引的前缀枚举
  */
 export enum KnowledgeNamespace {
-	PROJECT_DOC_USER = 'project-doc-user', //用户项目文档
-	PROJECT_DOC_OPEN = 'project-doc-open', //开源项目文档
-	TECH_DOC = 'tech-doc', //技术文档
-	INTERVIEW_QUESTION = 'interview-question', //面试题
-	OTHER = 'other', //其它
-	USER_PROJECT_DEEPWIKI = 'project-deepwiki' //用户项目deepwiki文档
+	PROJECT_DOC_USER = 'project-doc-user', //项目文档
+	TECH_DOC = 'tech-doc', //项目相关的技术文档
+	OTHER = 'other', //项目相关的其他信息
+	USER_PROJECT_DEEPWIKI = 'project-deepwiki' //项目deepwiki文档
 }
 
 export enum KnowledgeIndex {
@@ -205,11 +203,9 @@ export class KnowledgeVDBService implements OnModuleInit {
 		userId: string,
 		projectName: string
 	): Promise<string> {
-		let namespaces = [
-			KnowledgeNamespace.PROJECT_DOC_USER,
-			KnowledgeNamespace.PROJECT_DOC_OPEN,
-			KnowledgeNamespace.TECH_DOC
-		].map(namespace => this._getUserProjectNamespace(namespace, userId, projectName));
+		let namespaces = [KnowledgeNamespace.PROJECT_DOC_USER, KnowledgeNamespace.TECH_DOC].map(
+			namespace => this._getUserProjectNamespace(namespace, userId, projectName)
+		);
 		//过滤掉不存在的索引
 
 		const retrievers = await Promise.all(
@@ -229,6 +225,42 @@ export class KnowledgeVDBService implements OnModuleInit {
 		`;
 		return text;
 	}
+
+	/**
+	 * 从代码、文档索引召回topK个文档(每个索引topK个),并分类组装为文本,返回所选命名空间匹配的文档文本
+	 * @param query - 用户的查询字符串
+	 * @param topK - 需要返回的文档数量
+	 * @param userId - 当前用户的ID
+	 * @param projectName - 项目名称
+	 * @param knowledgeNamespaces - 所选命名空间
+	 * @returns {Promise<Record<KnowledgeNamespace, string>>} - 各个命名空间匹配的文档文本
+	 */
+	async retrieveKnowbaseFromNamespace(
+		query: string,
+		topK: number,
+		userId: string,
+		projectName: string,
+		knowledgeNamespaces: KnowledgeNamespace[]
+	) {
+		let namespaces = knowledgeNamespaces.map(namespace =>
+			this._getUserProjectNamespace(namespace, userId, projectName)
+		);
+
+		const retrievers = await Promise.all(
+			namespaces.map(namespace =>
+				this.getRetriever(KnowledgeIndex.KNOWLEDGEBASE, namespace, userId, topK)
+			)
+		);
+		const docs = await Promise.all(retrievers.map(retriever => retriever.invoke(query)));
+		const texts = docs.map(doc => doc.map(doc => doc.pageContent).join('\n\n'));
+
+		const result: Record<KnowledgeNamespace, string> = {} as Record<KnowledgeNamespace, string>;
+		for (let i = 0; i < knowledgeNamespaces.length; i++) {
+			result[knowledgeNamespaces[i]] = texts[i];
+		}
+		return result;
+	}
+
 	/**
 	 * retrieveCodeAndDoc的CRAG检索版本
 	 */
@@ -238,11 +270,9 @@ export class KnowledgeVDBService implements OnModuleInit {
 		userId: string,
 		projectName: string
 	): Promise<string> {
-		let namespaces = [
-			KnowledgeNamespace.PROJECT_DOC_USER,
-			KnowledgeNamespace.PROJECT_DOC_OPEN,
-			KnowledgeNamespace.TECH_DOC
-		].map(namespace => this._getUserProjectNamespace(namespace, userId, projectName));
+		let namespaces = [KnowledgeNamespace.PROJECT_DOC_USER, KnowledgeNamespace.TECH_DOC].map(
+			namespace => this._getUserProjectNamespace(namespace, userId, projectName)
+		);
 
 		const retrievers = await Promise.all(
 			namespaces.map(namespace =>

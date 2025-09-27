@@ -111,7 +111,7 @@ export class SseManagerService implements OnModuleInit {
 				.pipe(
 					mergeMap(async (chunk: LLMStreamingChunk) => {
 						if (chunk) {
-							this.logger.log(`SSE任务${taskId}生成chunk: ${chunk.content}`);
+							// this.logger.log(`SSE任务${taskId}生成chunk: ${chunk.content}`);
 							/* 储存到redis、发送chunk抵达事件 */
 							await this.saveSseEventData(taskId, chunk);
 						}
@@ -278,7 +278,7 @@ export class SseManagerService implements OnModuleInit {
 		}
 		/* 2、检查会话任务是否已存在 */
 		const curTaskId = await this.taskQueueService.getSessionTaskId(sessionId);
-		//FIXME 任务完成但结果缓存已清理的情况,当二者过期时间不一致时
+		//TODO 任务完成但结果缓存已清理的情况,当二者过期时间不一致时
 		if (curTaskId) {
 			const taskCheck = await this.taskQueueService.getTask(curTaskId);
 			if (
