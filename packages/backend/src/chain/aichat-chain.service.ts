@@ -4,7 +4,7 @@ import { PromptTemplate } from '@langchain/core/prompts';
 import { RunnableLambda, RunnablePassthrough, RunnableSequence } from '@langchain/core/runnables';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AIChatLLM, UserMemory, UserModelConfig, userMemorySchema } from '@prisma-ai/shared';
+import { AIChatLLM, UserMemoryT, UserModelConfig, userMemorySchema } from '@prisma-ai/shared';
 import { BufferMemory } from 'langchain/memory';
 import { ModelService } from '../model/model.service';
 import { PromptService } from '../prompt/prompt.service';
@@ -96,6 +96,7 @@ export class AichatChainService {
 	}
 
 	async createUserMemoryChain(modelConfig: UserModelConfig<AIChatLLM>) {
+		console.log('createUserMemoryChain');
 		let llm: BaseChatModel;
 		switch (modelConfig.llm_type) {
 			case AIChatLLM.v3:
@@ -155,7 +156,7 @@ export class AichatChainService {
 
 		const chain = RunnableSequence.from([
 			{
-				input: (i: { existing_memory: UserMemory; new_info: string }) => JSON.stringify(i),
+				input: (i: { existing_memory: UserMemoryT; new_info: string }) => JSON.stringify(i),
 				format_instructions: () => outputParser.getFormatInstructions()
 			},
 			prompt,

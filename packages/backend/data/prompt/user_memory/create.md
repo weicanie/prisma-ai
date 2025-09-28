@@ -36,48 +36,48 @@
 # 输入示例
 
 ```json
-{
+{{
 	"skill": "熟悉 TypeScript、JavaScript、Node.js；熟悉 React、Vue 全家桶...",
 	"project": "在XX项目中，我负责前端架构设计，使用 React 和 TypeScript...",
 	"work": "在ABC公司担任前端开发工程师，工作3年...",
 	"education": "XX大学，计算机科学与技术，本科...",
 	"job_target": "希望在杭州找一份电商行业的web前端高级工程师工作，目标公司是阿里巴巴。"
-}
+}}
 ```
 
 # 输出示例
 
 ```json
-{
-	"userProfile": {
-		"qualifications": {
+{{
+	"userProfile": {{
+		"qualifications": {{
 			"experience_level": ["3年", "中级"],
 			"education_degree": ["本科"],
 			"education_majors": ["计算机科学与技术"],
 			"language_proficiencies": [],
 			"certifications": []
-		},
-		"skills_matrix": {
+		}},
+		"skills_matrix": {{
 			"domain_knowledge": ["电商"],
 			"programming_languages": ["TypeScript", "JavaScript", "Node.js"],
 			"frameworks_and_libraries": ["React", "Vue"],
 			"tools_and_platforms": [],
 			"soft_skills": []
-		},
-		"responsibilities": {
+		}},
+		"responsibilities": {{
 			"primary_duties": ["前端架构设计"],
 			"work_methodologies": [],
 			"scope_and_impact": []
-		}
-	},
-	"jobSeekDestination": {
+		}}
+	}},
+	"jobSeekDestination": {{
 		"jobType": ["前端"],
 		"jobName": ["web前端高级工程师"],
 		"industry": ["电商"],
 		"company": ["阿里巴巴"],
 		"city": ["杭州"]
-	}
-}
+	}}
+}}
 ```
 
 现在，请根据以下输入，生成 `UserMemory` JSON 对象。

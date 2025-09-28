@@ -34,32 +34,32 @@
 # 输入示例
 
 ```json
-{
-	"existing_memory": {
-		"userProfile": {
-			"qualifications": { "experience_level": ["3年"] },
-			"skills_matrix": { "programming_languages": ["JavaScript"] }
-		},
-		"jobSeekDestination": {
+{{
+	"existing_memory": {{
+		"userProfile": {{
+			"qualifications": {{ "experience_level": ["3年"] }},
+			"skills_matrix": {{ "programming_languages": ["JavaScript"] }}
+		}},
+		"jobSeekDestination": {{
 			"city": ["杭州"]
-		}
-	},
+		}}
+	}},
 	"new_info": "我最近刚学习了 TypeScript，另外我更倾向于去上海发展。"
-}
+}}
 ```
 
 # 输出示例 (更新后的完整对象)
 
 ```json
-{
-	"userProfile": {
-		"qualifications": { "experience_level": ["3年"] },
-		"skills_matrix": { "programming_languages": ["JavaScript", "TypeScript"] }
-	},
-	"jobSeekDestination": {
+{{
+	"userProfile": {{
+		"qualifications": {{ "experience_level": ["3年"] }},
+		"skills_matrix": {{ "programming_languages": ["JavaScript", "TypeScript"] }}
+	}},
+	"jobSeekDestination": {{
 		"city": ["上海"]
-	}
-}
+	}}
+}}
 ```
 
 现在，请根据以下输入，生成更新后的 `UserMemory` JSON 对象。

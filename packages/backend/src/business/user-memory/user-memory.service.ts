@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { AIChatLLM, UserMemoryAction, UserMemory as UserMemoryShared } from '@prisma-ai/shared';
+import { AIChatLLM, UserMemoryAction, UserMemoryT } from '@prisma-ai/shared';
 import { Model } from 'mongoose';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { AichatChainService } from '../../chain/aichat-chain.service';
@@ -30,7 +30,7 @@ export class UserMemoryService implements OnModuleInit {
 
 			const new_info = this.formatNewInfo(input);
 
-			const updatedMemory: UserMemoryShared = await chain.invoke({
+			const updatedMemory: UserMemoryT = await chain.invoke({
 				existing_memory: {
 					userProfile: existingMemory.userProfile,
 					jobSeekDestination: existingMemory.jobSeekDestination
@@ -53,7 +53,7 @@ export class UserMemoryService implements OnModuleInit {
 				llm_type: AIChatLLM.gemini_2_5_flash // 默认使用性价比高的模型
 			});
 			const payload = this.formatCreationPayload(input);
-			const newMemory: UserMemoryShared = await chain.invoke(payload);
+			const newMemory: UserMemoryT = await chain.invoke(payload);
 
 			await this.userMemoryModel.create({
 				...newMemory,
