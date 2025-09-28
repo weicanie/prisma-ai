@@ -8,12 +8,14 @@ import { Logo } from '@/views/Saas/components/c-cpns/Logo';
 import { SlimLayout } from '@/views/Saas/components/c-cpns/SlimLayout';
 import { loginformSchema, type LoginFormType, type LoginResponse } from '@prisma-ai/shared';
 import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import Prism from '../../components/Prism';
 import Wall from '../../components/Wall';
 import { useCustomMutation } from '../../query/config';
 import { login } from '../../services/login_regist';
+import { loginSuccess, selectIsAutoFill, selectPassword, selectUsername } from '../../store/login';
 import { eventBusService, EventList } from '../../utils/EventBus/event-bus.service';
 import { useTheme } from '../../utils/theme';
 import { TextField } from '../Saas/components/c-cpns/Fields';
@@ -26,7 +28,9 @@ export default function Login() {
 		}
 	});
 
+	const dispatch = useDispatch();
 	const navigate = useNavigate();
+
 	const loginMutation = useCustomMutation<LoginResponse, LoginFormType>(login, {
 		onSuccess: async res => {
 			toast.success('登录成功');
@@ -35,9 +39,22 @@ export default function Login() {
 			localStorage.setItem('userInfo', JSON.stringify(res.data));
 			//发送token更新事件，以便微应用更新token
 			eventBusService.emit(EventList.tokenUpdated);
+			// 登录成功后清除自动填写信息
+			dispatch(loginSuccess());
 			navigate('/main');
 		}
 	});
+
+	// 自动填写表单
+	const username = useSelector(selectUsername);
+	const password = useSelector(selectPassword);
+	const isAutoFill = useSelector(selectIsAutoFill);
+	useEffect(() => {
+		if (isAutoFill && username && password) {
+			form.setValue('username', username);
+			form.setValue('password', password);
+		}
+	}, [isAutoFill, username, password, form]);
 
 	async function onSubmit(values: LoginFormType) {
 		loginMutation.mutate({ username: values.username, password: values.password });

@@ -29,11 +29,6 @@ export type user_article = $Result.DefaultSelection<Prisma.$user_articlePayload>
  */
 export type article = $Result.DefaultSelection<Prisma.$articlePayload>
 /**
- * Model interview_summary
- * 
- */
-export type interview_summary = $Result.DefaultSelection<Prisma.$interview_summaryPayload>
-/**
  * Model user_project
  * 
  */
@@ -208,16 +203,6 @@ export class PrismaClient<
     * ```
     */
   get article(): Prisma.articleDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.interview_summary`: Exposes CRUD operations for the **interview_summary** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more Interview_summaries
-    * const interview_summaries = await prisma.interview_summary.findMany()
-    * ```
-    */
-  get interview_summary(): Prisma.interview_summaryDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.user_project`: Exposes CRUD operations for the **user_project** model.
@@ -701,7 +686,6 @@ export namespace Prisma {
     user: 'user',
     user_article: 'user_article',
     article: 'article',
-    interview_summary: 'interview_summary',
     user_project: 'user_project',
     project_file: 'project_file',
     project_file_chunk: 'project_file_chunk',
@@ -724,7 +708,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "user_article" | "article" | "interview_summary" | "user_project" | "project_file" | "project_file_chunk" | "ai_conversation"
+      modelProps: "user" | "user_article" | "article" | "user_project" | "project_file" | "project_file_chunk" | "ai_conversation"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -923,72 +907,6 @@ export namespace Prisma {
           count: {
             args: Prisma.articleCountArgs<ExtArgs>
             result: $Utils.Optional<ArticleCountAggregateOutputType> | number
-          }
-        }
-      }
-      interview_summary: {
-        payload: Prisma.$interview_summaryPayload<ExtArgs>
-        fields: Prisma.interview_summaryFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.interview_summaryFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$interview_summaryPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.interview_summaryFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$interview_summaryPayload>
-          }
-          findFirst: {
-            args: Prisma.interview_summaryFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$interview_summaryPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.interview_summaryFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$interview_summaryPayload>
-          }
-          findMany: {
-            args: Prisma.interview_summaryFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$interview_summaryPayload>[]
-          }
-          create: {
-            args: Prisma.interview_summaryCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$interview_summaryPayload>
-          }
-          createMany: {
-            args: Prisma.interview_summaryCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          delete: {
-            args: Prisma.interview_summaryDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$interview_summaryPayload>
-          }
-          update: {
-            args: Prisma.interview_summaryUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$interview_summaryPayload>
-          }
-          deleteMany: {
-            args: Prisma.interview_summaryDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.interview_summaryUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          upsert: {
-            args: Prisma.interview_summaryUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$interview_summaryPayload>
-          }
-          aggregate: {
-            args: Prisma.Interview_summaryAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateInterview_summary>
-          }
-          groupBy: {
-            args: Prisma.interview_summaryGroupByArgs<ExtArgs>
-            result: $Utils.Optional<Interview_summaryGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.interview_summaryCountArgs<ExtArgs>
-            result: $Utils.Optional<Interview_summaryCountAggregateOutputType> | number
           }
         }
       }
@@ -1343,7 +1261,6 @@ export namespace Prisma {
     user?: userOmit
     user_article?: user_articleOmit
     article?: articleOmit
-    interview_summary?: interview_summaryOmit
     user_project?: user_projectOmit
     project_file?: project_fileOmit
     project_file_chunk?: project_file_chunkOmit
@@ -1445,14 +1362,12 @@ export namespace Prisma {
     user_articles: number
     ai_conversation: number
     user_project: number
-    interview_summary: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user_articles?: boolean | UserCountOutputTypeCountUser_articlesArgs
     ai_conversation?: boolean | UserCountOutputTypeCountAi_conversationArgs
     user_project?: boolean | UserCountOutputTypeCountUser_projectArgs
-    interview_summary?: boolean | UserCountOutputTypeCountInterview_summaryArgs
   }
 
   // Custom InputTypes
@@ -1485,13 +1400,6 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountUser_projectArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: user_projectWhereInput
-  }
-
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeCountInterview_summaryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: interview_summaryWhereInput
   }
 
 
@@ -1801,7 +1709,6 @@ export namespace Prisma {
     user_articles?: boolean | user$user_articlesArgs<ExtArgs>
     ai_conversation?: boolean | user$ai_conversationArgs<ExtArgs>
     user_project?: boolean | user$user_projectArgs<ExtArgs>
-    interview_summary?: boolean | user$interview_summaryArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -1821,7 +1728,6 @@ export namespace Prisma {
     user_articles?: boolean | user$user_articlesArgs<ExtArgs>
     ai_conversation?: boolean | user$ai_conversationArgs<ExtArgs>
     user_project?: boolean | user$user_projectArgs<ExtArgs>
-    interview_summary?: boolean | user$interview_summaryArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
 
@@ -1831,7 +1737,6 @@ export namespace Prisma {
       user_articles: Prisma.$user_articlePayload<ExtArgs>[]
       ai_conversation: Prisma.$ai_conversationPayload<ExtArgs>[]
       user_project: Prisma.$user_projectPayload<ExtArgs>[]
-      interview_summary: Prisma.$interview_summaryPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -2183,7 +2088,6 @@ export namespace Prisma {
     user_articles<T extends user$user_articlesArgs<ExtArgs> = {}>(args?: Subset<T, user$user_articlesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_articlePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     ai_conversation<T extends user$ai_conversationArgs<ExtArgs> = {}>(args?: Subset<T, user$ai_conversationArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ai_conversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     user_project<T extends user$user_projectArgs<ExtArgs> = {}>(args?: Subset<T, user$user_projectArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_projectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    interview_summary<T extends user$interview_summaryArgs<ExtArgs> = {}>(args?: Subset<T, user$interview_summaryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$interview_summaryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2631,30 +2535,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: User_projectScalarFieldEnum | User_projectScalarFieldEnum[]
-  }
-
-  /**
-   * user.interview_summary
-   */
-  export type user$interview_summaryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the interview_summary
-     */
-    select?: interview_summarySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the interview_summary
-     */
-    omit?: interview_summaryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: interview_summaryInclude<ExtArgs> | null
-    where?: interview_summaryWhereInput
-    orderBy?: interview_summaryOrderByWithRelationInput | interview_summaryOrderByWithRelationInput[]
-    cursor?: interview_summaryWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: Interview_summaryScalarFieldEnum | Interview_summaryScalarFieldEnum[]
   }
 
   /**
@@ -3644,13 +3524,11 @@ export namespace Prisma {
   export type ArticleAvgAggregateOutputType = {
     id: number | null
     anki_note_id: number | null
-    interview_summary_id: number | null
   }
 
   export type ArticleSumAggregateOutputType = {
     id: number | null
     anki_note_id: bigint | null
-    interview_summary_id: number | null
   }
 
   export type ArticleMinAggregateOutputType = {
@@ -3670,7 +3548,6 @@ export namespace Prisma {
     anki_note_id: bigint | null
     time_create: Date | null
     time_update: Date | null
-    interview_summary_id: number | null
   }
 
   export type ArticleMaxAggregateOutputType = {
@@ -3690,7 +3567,6 @@ export namespace Prisma {
     anki_note_id: bigint | null
     time_create: Date | null
     time_update: Date | null
-    interview_summary_id: number | null
   }
 
   export type ArticleCountAggregateOutputType = {
@@ -3710,7 +3586,6 @@ export namespace Prisma {
     anki_note_id: number
     time_create: number
     time_update: number
-    interview_summary_id: number
     _all: number
   }
 
@@ -3718,13 +3593,11 @@ export namespace Prisma {
   export type ArticleAvgAggregateInputType = {
     id?: true
     anki_note_id?: true
-    interview_summary_id?: true
   }
 
   export type ArticleSumAggregateInputType = {
     id?: true
     anki_note_id?: true
-    interview_summary_id?: true
   }
 
   export type ArticleMinAggregateInputType = {
@@ -3744,7 +3617,6 @@ export namespace Prisma {
     anki_note_id?: true
     time_create?: true
     time_update?: true
-    interview_summary_id?: true
   }
 
   export type ArticleMaxAggregateInputType = {
@@ -3764,7 +3636,6 @@ export namespace Prisma {
     anki_note_id?: true
     time_create?: true
     time_update?: true
-    interview_summary_id?: true
   }
 
   export type ArticleCountAggregateInputType = {
@@ -3784,7 +3655,6 @@ export namespace Prisma {
     anki_note_id?: true
     time_create?: true
     time_update?: true
-    interview_summary_id?: true
     _all?: true
   }
 
@@ -3891,7 +3761,6 @@ export namespace Prisma {
     anki_note_id: bigint | null
     time_create: Date | null
     time_update: Date | null
-    interview_summary_id: number | null
     _count: ArticleCountAggregateOutputType | null
     _avg: ArticleAvgAggregateOutputType | null
     _sum: ArticleSumAggregateOutputType | null
@@ -3930,7 +3799,6 @@ export namespace Prisma {
     anki_note_id?: boolean
     time_create?: boolean
     time_update?: boolean
-    interview_summary_id?: boolean
     user_articles?: boolean | article$user_articlesArgs<ExtArgs>
     _count?: boolean | ArticleCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["article"]>
@@ -3954,10 +3822,9 @@ export namespace Prisma {
     anki_note_id?: boolean
     time_create?: boolean
     time_update?: boolean
-    interview_summary_id?: boolean
   }
 
-  export type articleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "link" | "create_at" | "update_at" | "title" | "quiz_type" | "content" | "content_mindmap" | "user_note" | "gist" | "content_type" | "job_type" | "hard" | "anki_note_id" | "time_create" | "time_update" | "interview_summary_id", ExtArgs["result"]["article"]>
+  export type articleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "link" | "create_at" | "update_at" | "title" | "quiz_type" | "content" | "content_mindmap" | "user_note" | "gist" | "content_type" | "job_type" | "hard" | "anki_note_id" | "time_create" | "time_update", ExtArgs["result"]["article"]>
   export type articleInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user_articles?: boolean | article$user_articlesArgs<ExtArgs>
     _count?: boolean | ArticleCountOutputTypeDefaultArgs<ExtArgs>
@@ -3985,7 +3852,6 @@ export namespace Prisma {
       anki_note_id: bigint | null
       time_create: Date | null
       time_update: Date | null
-      interview_summary_id: number | null
     }, ExtArgs["result"]["article"]>
     composites: {}
   }
@@ -4372,7 +4238,6 @@ export namespace Prisma {
     readonly anki_note_id: FieldRef<"article", 'BigInt'>
     readonly time_create: FieldRef<"article", 'DateTime'>
     readonly time_update: FieldRef<"article", 'DateTime'>
-    readonly interview_summary_id: FieldRef<"article", 'Int'>
   }
     
 
@@ -4755,1083 +4620,6 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: articleInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model interview_summary
-   */
-
-  export type AggregateInterview_summary = {
-    _count: Interview_summaryCountAggregateOutputType | null
-    _avg: Interview_summaryAvgAggregateOutputType | null
-    _sum: Interview_summarySumAggregateOutputType | null
-    _min: Interview_summaryMinAggregateOutputType | null
-    _max: Interview_summaryMaxAggregateOutputType | null
-  }
-
-  export type Interview_summaryAvgAggregateOutputType = {
-    id: number | null
-    user_id: number | null
-  }
-
-  export type Interview_summarySumAggregateOutputType = {
-    id: number | null
-    user_id: number | null
-  }
-
-  export type Interview_summaryMinAggregateOutputType = {
-    id: number | null
-    post_link: string | null
-    content_hash: string | null
-    interview_type: string | null
-    turn: string | null
-    company_name: string | null
-    company_scale: string | null
-    job_type: string | null
-    job_name: string | null
-    job_link: string | null
-    content: string | null
-    own: boolean | null
-    user_id: number | null
-    create_at: Date | null
-    update_at: Date | null
-  }
-
-  export type Interview_summaryMaxAggregateOutputType = {
-    id: number | null
-    post_link: string | null
-    content_hash: string | null
-    interview_type: string | null
-    turn: string | null
-    company_name: string | null
-    company_scale: string | null
-    job_type: string | null
-    job_name: string | null
-    job_link: string | null
-    content: string | null
-    own: boolean | null
-    user_id: number | null
-    create_at: Date | null
-    update_at: Date | null
-  }
-
-  export type Interview_summaryCountAggregateOutputType = {
-    id: number
-    post_link: number
-    content_hash: number
-    interview_type: number
-    turn: number
-    company_name: number
-    company_scale: number
-    job_type: number
-    job_name: number
-    job_link: number
-    content: number
-    own: number
-    user_id: number
-    create_at: number
-    update_at: number
-    _all: number
-  }
-
-
-  export type Interview_summaryAvgAggregateInputType = {
-    id?: true
-    user_id?: true
-  }
-
-  export type Interview_summarySumAggregateInputType = {
-    id?: true
-    user_id?: true
-  }
-
-  export type Interview_summaryMinAggregateInputType = {
-    id?: true
-    post_link?: true
-    content_hash?: true
-    interview_type?: true
-    turn?: true
-    company_name?: true
-    company_scale?: true
-    job_type?: true
-    job_name?: true
-    job_link?: true
-    content?: true
-    own?: true
-    user_id?: true
-    create_at?: true
-    update_at?: true
-  }
-
-  export type Interview_summaryMaxAggregateInputType = {
-    id?: true
-    post_link?: true
-    content_hash?: true
-    interview_type?: true
-    turn?: true
-    company_name?: true
-    company_scale?: true
-    job_type?: true
-    job_name?: true
-    job_link?: true
-    content?: true
-    own?: true
-    user_id?: true
-    create_at?: true
-    update_at?: true
-  }
-
-  export type Interview_summaryCountAggregateInputType = {
-    id?: true
-    post_link?: true
-    content_hash?: true
-    interview_type?: true
-    turn?: true
-    company_name?: true
-    company_scale?: true
-    job_type?: true
-    job_name?: true
-    job_link?: true
-    content?: true
-    own?: true
-    user_id?: true
-    create_at?: true
-    update_at?: true
-    _all?: true
-  }
-
-  export type Interview_summaryAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which interview_summary to aggregate.
-     */
-    where?: interview_summaryWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of interview_summaries to fetch.
-     */
-    orderBy?: interview_summaryOrderByWithRelationInput | interview_summaryOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: interview_summaryWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` interview_summaries from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` interview_summaries.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned interview_summaries
-    **/
-    _count?: true | Interview_summaryCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: Interview_summaryAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: Interview_summarySumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: Interview_summaryMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: Interview_summaryMaxAggregateInputType
-  }
-
-  export type GetInterview_summaryAggregateType<T extends Interview_summaryAggregateArgs> = {
-        [P in keyof T & keyof AggregateInterview_summary]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateInterview_summary[P]>
-      : GetScalarType<T[P], AggregateInterview_summary[P]>
-  }
-
-
-
-
-  export type interview_summaryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: interview_summaryWhereInput
-    orderBy?: interview_summaryOrderByWithAggregationInput | interview_summaryOrderByWithAggregationInput[]
-    by: Interview_summaryScalarFieldEnum[] | Interview_summaryScalarFieldEnum
-    having?: interview_summaryScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: Interview_summaryCountAggregateInputType | true
-    _avg?: Interview_summaryAvgAggregateInputType
-    _sum?: Interview_summarySumAggregateInputType
-    _min?: Interview_summaryMinAggregateInputType
-    _max?: Interview_summaryMaxAggregateInputType
-  }
-
-  export type Interview_summaryGroupByOutputType = {
-    id: number
-    post_link: string | null
-    content_hash: string
-    interview_type: string | null
-    turn: string | null
-    company_name: string | null
-    company_scale: string | null
-    job_type: string
-    job_name: string | null
-    job_link: string | null
-    content: string
-    own: boolean
-    user_id: number
-    create_at: Date | null
-    update_at: Date | null
-    _count: Interview_summaryCountAggregateOutputType | null
-    _avg: Interview_summaryAvgAggregateOutputType | null
-    _sum: Interview_summarySumAggregateOutputType | null
-    _min: Interview_summaryMinAggregateOutputType | null
-    _max: Interview_summaryMaxAggregateOutputType | null
-  }
-
-  type GetInterview_summaryGroupByPayload<T extends interview_summaryGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<Interview_summaryGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof Interview_summaryGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], Interview_summaryGroupByOutputType[P]>
-            : GetScalarType<T[P], Interview_summaryGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type interview_summarySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    post_link?: boolean
-    content_hash?: boolean
-    interview_type?: boolean
-    turn?: boolean
-    company_name?: boolean
-    company_scale?: boolean
-    job_type?: boolean
-    job_name?: boolean
-    job_link?: boolean
-    content?: boolean
-    own?: boolean
-    user_id?: boolean
-    create_at?: boolean
-    update_at?: boolean
-    user?: boolean | userDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["interview_summary"]>
-
-
-
-  export type interview_summarySelectScalar = {
-    id?: boolean
-    post_link?: boolean
-    content_hash?: boolean
-    interview_type?: boolean
-    turn?: boolean
-    company_name?: boolean
-    company_scale?: boolean
-    job_type?: boolean
-    job_name?: boolean
-    job_link?: boolean
-    content?: boolean
-    own?: boolean
-    user_id?: boolean
-    create_at?: boolean
-    update_at?: boolean
-  }
-
-  export type interview_summaryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "post_link" | "content_hash" | "interview_type" | "turn" | "company_name" | "company_scale" | "job_type" | "job_name" | "job_link" | "content" | "own" | "user_id" | "create_at" | "update_at", ExtArgs["result"]["interview_summary"]>
-  export type interview_summaryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | userDefaultArgs<ExtArgs>
-  }
-
-  export type $interview_summaryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "interview_summary"
-    objects: {
-      user: Prisma.$userPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: number
-      post_link: string | null
-      content_hash: string
-      interview_type: string | null
-      turn: string | null
-      company_name: string | null
-      company_scale: string | null
-      job_type: string
-      job_name: string | null
-      job_link: string | null
-      content: string
-      own: boolean
-      user_id: number
-      create_at: Date | null
-      update_at: Date | null
-    }, ExtArgs["result"]["interview_summary"]>
-    composites: {}
-  }
-
-  type interview_summaryGetPayload<S extends boolean | null | undefined | interview_summaryDefaultArgs> = $Result.GetResult<Prisma.$interview_summaryPayload, S>
-
-  type interview_summaryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<interview_summaryFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: Interview_summaryCountAggregateInputType | true
-    }
-
-  export interface interview_summaryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['interview_summary'], meta: { name: 'interview_summary' } }
-    /**
-     * Find zero or one Interview_summary that matches the filter.
-     * @param {interview_summaryFindUniqueArgs} args - Arguments to find a Interview_summary
-     * @example
-     * // Get one Interview_summary
-     * const interview_summary = await prisma.interview_summary.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends interview_summaryFindUniqueArgs>(args: SelectSubset<T, interview_summaryFindUniqueArgs<ExtArgs>>): Prisma__interview_summaryClient<$Result.GetResult<Prisma.$interview_summaryPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one Interview_summary that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {interview_summaryFindUniqueOrThrowArgs} args - Arguments to find a Interview_summary
-     * @example
-     * // Get one Interview_summary
-     * const interview_summary = await prisma.interview_summary.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends interview_summaryFindUniqueOrThrowArgs>(args: SelectSubset<T, interview_summaryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__interview_summaryClient<$Result.GetResult<Prisma.$interview_summaryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first Interview_summary that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {interview_summaryFindFirstArgs} args - Arguments to find a Interview_summary
-     * @example
-     * // Get one Interview_summary
-     * const interview_summary = await prisma.interview_summary.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends interview_summaryFindFirstArgs>(args?: SelectSubset<T, interview_summaryFindFirstArgs<ExtArgs>>): Prisma__interview_summaryClient<$Result.GetResult<Prisma.$interview_summaryPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first Interview_summary that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {interview_summaryFindFirstOrThrowArgs} args - Arguments to find a Interview_summary
-     * @example
-     * // Get one Interview_summary
-     * const interview_summary = await prisma.interview_summary.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends interview_summaryFindFirstOrThrowArgs>(args?: SelectSubset<T, interview_summaryFindFirstOrThrowArgs<ExtArgs>>): Prisma__interview_summaryClient<$Result.GetResult<Prisma.$interview_summaryPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more Interview_summaries that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {interview_summaryFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all Interview_summaries
-     * const interview_summaries = await prisma.interview_summary.findMany()
-     * 
-     * // Get first 10 Interview_summaries
-     * const interview_summaries = await prisma.interview_summary.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const interview_summaryWithIdOnly = await prisma.interview_summary.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends interview_summaryFindManyArgs>(args?: SelectSubset<T, interview_summaryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$interview_summaryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a Interview_summary.
-     * @param {interview_summaryCreateArgs} args - Arguments to create a Interview_summary.
-     * @example
-     * // Create one Interview_summary
-     * const Interview_summary = await prisma.interview_summary.create({
-     *   data: {
-     *     // ... data to create a Interview_summary
-     *   }
-     * })
-     * 
-     */
-    create<T extends interview_summaryCreateArgs>(args: SelectSubset<T, interview_summaryCreateArgs<ExtArgs>>): Prisma__interview_summaryClient<$Result.GetResult<Prisma.$interview_summaryPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many Interview_summaries.
-     * @param {interview_summaryCreateManyArgs} args - Arguments to create many Interview_summaries.
-     * @example
-     * // Create many Interview_summaries
-     * const interview_summary = await prisma.interview_summary.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends interview_summaryCreateManyArgs>(args?: SelectSubset<T, interview_summaryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Delete a Interview_summary.
-     * @param {interview_summaryDeleteArgs} args - Arguments to delete one Interview_summary.
-     * @example
-     * // Delete one Interview_summary
-     * const Interview_summary = await prisma.interview_summary.delete({
-     *   where: {
-     *     // ... filter to delete one Interview_summary
-     *   }
-     * })
-     * 
-     */
-    delete<T extends interview_summaryDeleteArgs>(args: SelectSubset<T, interview_summaryDeleteArgs<ExtArgs>>): Prisma__interview_summaryClient<$Result.GetResult<Prisma.$interview_summaryPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one Interview_summary.
-     * @param {interview_summaryUpdateArgs} args - Arguments to update one Interview_summary.
-     * @example
-     * // Update one Interview_summary
-     * const interview_summary = await prisma.interview_summary.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends interview_summaryUpdateArgs>(args: SelectSubset<T, interview_summaryUpdateArgs<ExtArgs>>): Prisma__interview_summaryClient<$Result.GetResult<Prisma.$interview_summaryPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more Interview_summaries.
-     * @param {interview_summaryDeleteManyArgs} args - Arguments to filter Interview_summaries to delete.
-     * @example
-     * // Delete a few Interview_summaries
-     * const { count } = await prisma.interview_summary.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends interview_summaryDeleteManyArgs>(args?: SelectSubset<T, interview_summaryDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Interview_summaries.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {interview_summaryUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many Interview_summaries
-     * const interview_summary = await prisma.interview_summary.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends interview_summaryUpdateManyArgs>(args: SelectSubset<T, interview_summaryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create or update one Interview_summary.
-     * @param {interview_summaryUpsertArgs} args - Arguments to update or create a Interview_summary.
-     * @example
-     * // Update or create a Interview_summary
-     * const interview_summary = await prisma.interview_summary.upsert({
-     *   create: {
-     *     // ... data to create a Interview_summary
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the Interview_summary we want to update
-     *   }
-     * })
-     */
-    upsert<T extends interview_summaryUpsertArgs>(args: SelectSubset<T, interview_summaryUpsertArgs<ExtArgs>>): Prisma__interview_summaryClient<$Result.GetResult<Prisma.$interview_summaryPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of Interview_summaries.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {interview_summaryCountArgs} args - Arguments to filter Interview_summaries to count.
-     * @example
-     * // Count the number of Interview_summaries
-     * const count = await prisma.interview_summary.count({
-     *   where: {
-     *     // ... the filter for the Interview_summaries we want to count
-     *   }
-     * })
-    **/
-    count<T extends interview_summaryCountArgs>(
-      args?: Subset<T, interview_summaryCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], Interview_summaryCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a Interview_summary.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {Interview_summaryAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends Interview_summaryAggregateArgs>(args: Subset<T, Interview_summaryAggregateArgs>): Prisma.PrismaPromise<GetInterview_summaryAggregateType<T>>
-
-    /**
-     * Group by Interview_summary.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {interview_summaryGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends interview_summaryGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: interview_summaryGroupByArgs['orderBy'] }
-        : { orderBy?: interview_summaryGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, interview_summaryGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetInterview_summaryGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the interview_summary model
-   */
-  readonly fields: interview_summaryFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for interview_summary.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__interview_summaryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the interview_summary model
-   */
-  interface interview_summaryFieldRefs {
-    readonly id: FieldRef<"interview_summary", 'Int'>
-    readonly post_link: FieldRef<"interview_summary", 'String'>
-    readonly content_hash: FieldRef<"interview_summary", 'String'>
-    readonly interview_type: FieldRef<"interview_summary", 'String'>
-    readonly turn: FieldRef<"interview_summary", 'String'>
-    readonly company_name: FieldRef<"interview_summary", 'String'>
-    readonly company_scale: FieldRef<"interview_summary", 'String'>
-    readonly job_type: FieldRef<"interview_summary", 'String'>
-    readonly job_name: FieldRef<"interview_summary", 'String'>
-    readonly job_link: FieldRef<"interview_summary", 'String'>
-    readonly content: FieldRef<"interview_summary", 'String'>
-    readonly own: FieldRef<"interview_summary", 'Boolean'>
-    readonly user_id: FieldRef<"interview_summary", 'Int'>
-    readonly create_at: FieldRef<"interview_summary", 'DateTime'>
-    readonly update_at: FieldRef<"interview_summary", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * interview_summary findUnique
-   */
-  export type interview_summaryFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the interview_summary
-     */
-    select?: interview_summarySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the interview_summary
-     */
-    omit?: interview_summaryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: interview_summaryInclude<ExtArgs> | null
-    /**
-     * Filter, which interview_summary to fetch.
-     */
-    where: interview_summaryWhereUniqueInput
-  }
-
-  /**
-   * interview_summary findUniqueOrThrow
-   */
-  export type interview_summaryFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the interview_summary
-     */
-    select?: interview_summarySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the interview_summary
-     */
-    omit?: interview_summaryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: interview_summaryInclude<ExtArgs> | null
-    /**
-     * Filter, which interview_summary to fetch.
-     */
-    where: interview_summaryWhereUniqueInput
-  }
-
-  /**
-   * interview_summary findFirst
-   */
-  export type interview_summaryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the interview_summary
-     */
-    select?: interview_summarySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the interview_summary
-     */
-    omit?: interview_summaryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: interview_summaryInclude<ExtArgs> | null
-    /**
-     * Filter, which interview_summary to fetch.
-     */
-    where?: interview_summaryWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of interview_summaries to fetch.
-     */
-    orderBy?: interview_summaryOrderByWithRelationInput | interview_summaryOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for interview_summaries.
-     */
-    cursor?: interview_summaryWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` interview_summaries from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` interview_summaries.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of interview_summaries.
-     */
-    distinct?: Interview_summaryScalarFieldEnum | Interview_summaryScalarFieldEnum[]
-  }
-
-  /**
-   * interview_summary findFirstOrThrow
-   */
-  export type interview_summaryFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the interview_summary
-     */
-    select?: interview_summarySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the interview_summary
-     */
-    omit?: interview_summaryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: interview_summaryInclude<ExtArgs> | null
-    /**
-     * Filter, which interview_summary to fetch.
-     */
-    where?: interview_summaryWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of interview_summaries to fetch.
-     */
-    orderBy?: interview_summaryOrderByWithRelationInput | interview_summaryOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for interview_summaries.
-     */
-    cursor?: interview_summaryWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` interview_summaries from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` interview_summaries.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of interview_summaries.
-     */
-    distinct?: Interview_summaryScalarFieldEnum | Interview_summaryScalarFieldEnum[]
-  }
-
-  /**
-   * interview_summary findMany
-   */
-  export type interview_summaryFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the interview_summary
-     */
-    select?: interview_summarySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the interview_summary
-     */
-    omit?: interview_summaryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: interview_summaryInclude<ExtArgs> | null
-    /**
-     * Filter, which interview_summaries to fetch.
-     */
-    where?: interview_summaryWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of interview_summaries to fetch.
-     */
-    orderBy?: interview_summaryOrderByWithRelationInput | interview_summaryOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing interview_summaries.
-     */
-    cursor?: interview_summaryWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` interview_summaries from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` interview_summaries.
-     */
-    skip?: number
-    distinct?: Interview_summaryScalarFieldEnum | Interview_summaryScalarFieldEnum[]
-  }
-
-  /**
-   * interview_summary create
-   */
-  export type interview_summaryCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the interview_summary
-     */
-    select?: interview_summarySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the interview_summary
-     */
-    omit?: interview_summaryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: interview_summaryInclude<ExtArgs> | null
-    /**
-     * The data needed to create a interview_summary.
-     */
-    data: XOR<interview_summaryCreateInput, interview_summaryUncheckedCreateInput>
-  }
-
-  /**
-   * interview_summary createMany
-   */
-  export type interview_summaryCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many interview_summaries.
-     */
-    data: interview_summaryCreateManyInput | interview_summaryCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * interview_summary update
-   */
-  export type interview_summaryUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the interview_summary
-     */
-    select?: interview_summarySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the interview_summary
-     */
-    omit?: interview_summaryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: interview_summaryInclude<ExtArgs> | null
-    /**
-     * The data needed to update a interview_summary.
-     */
-    data: XOR<interview_summaryUpdateInput, interview_summaryUncheckedUpdateInput>
-    /**
-     * Choose, which interview_summary to update.
-     */
-    where: interview_summaryWhereUniqueInput
-  }
-
-  /**
-   * interview_summary updateMany
-   */
-  export type interview_summaryUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update interview_summaries.
-     */
-    data: XOR<interview_summaryUpdateManyMutationInput, interview_summaryUncheckedUpdateManyInput>
-    /**
-     * Filter which interview_summaries to update
-     */
-    where?: interview_summaryWhereInput
-    /**
-     * Limit how many interview_summaries to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * interview_summary upsert
-   */
-  export type interview_summaryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the interview_summary
-     */
-    select?: interview_summarySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the interview_summary
-     */
-    omit?: interview_summaryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: interview_summaryInclude<ExtArgs> | null
-    /**
-     * The filter to search for the interview_summary to update in case it exists.
-     */
-    where: interview_summaryWhereUniqueInput
-    /**
-     * In case the interview_summary found by the `where` argument doesn't exist, create a new interview_summary with this data.
-     */
-    create: XOR<interview_summaryCreateInput, interview_summaryUncheckedCreateInput>
-    /**
-     * In case the interview_summary was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<interview_summaryUpdateInput, interview_summaryUncheckedUpdateInput>
-  }
-
-  /**
-   * interview_summary delete
-   */
-  export type interview_summaryDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the interview_summary
-     */
-    select?: interview_summarySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the interview_summary
-     */
-    omit?: interview_summaryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: interview_summaryInclude<ExtArgs> | null
-    /**
-     * Filter which interview_summary to delete.
-     */
-    where: interview_summaryWhereUniqueInput
-  }
-
-  /**
-   * interview_summary deleteMany
-   */
-  export type interview_summaryDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which interview_summaries to delete
-     */
-    where?: interview_summaryWhereInput
-    /**
-     * Limit how many interview_summaries to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * interview_summary without action
-   */
-  export type interview_summaryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the interview_summary
-     */
-    select?: interview_summarySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the interview_summary
-     */
-    omit?: interview_summaryOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: interview_summaryInclude<ExtArgs> | null
   }
 
 
@@ -8765,6 +7553,7 @@ export namespace Prisma {
 
   export type Ai_conversationMinAggregateOutputType = {
     id: number | null
+    project_id: string | null
     keyname: string | null
     label: string | null
     user_id: number | null
@@ -8774,6 +7563,7 @@ export namespace Prisma {
 
   export type Ai_conversationMaxAggregateOutputType = {
     id: number | null
+    project_id: string | null
     keyname: string | null
     label: string | null
     user_id: number | null
@@ -8783,9 +7573,11 @@ export namespace Prisma {
 
   export type Ai_conversationCountAggregateOutputType = {
     id: number
+    project_id: number
     keyname: number
     label: number
     content: number
+    history: number
     user_id: number
     create_at: number
     update_at: number
@@ -8805,6 +7597,7 @@ export namespace Prisma {
 
   export type Ai_conversationMinAggregateInputType = {
     id?: true
+    project_id?: true
     keyname?: true
     label?: true
     user_id?: true
@@ -8814,6 +7607,7 @@ export namespace Prisma {
 
   export type Ai_conversationMaxAggregateInputType = {
     id?: true
+    project_id?: true
     keyname?: true
     label?: true
     user_id?: true
@@ -8823,9 +7617,11 @@ export namespace Prisma {
 
   export type Ai_conversationCountAggregateInputType = {
     id?: true
+    project_id?: true
     keyname?: true
     label?: true
     content?: true
+    history?: true
     user_id?: true
     create_at?: true
     update_at?: true
@@ -8920,9 +7716,11 @@ export namespace Prisma {
 
   export type Ai_conversationGroupByOutputType = {
     id: number
+    project_id: string
     keyname: string
     label: string
     content: JsonValue | null
+    history: JsonValue | null
     user_id: number
     create_at: Date | null
     update_at: Date | null
@@ -8949,9 +7747,11 @@ export namespace Prisma {
 
   export type ai_conversationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    project_id?: boolean
     keyname?: boolean
     label?: boolean
     content?: boolean
+    history?: boolean
     user_id?: boolean
     create_at?: boolean
     update_at?: boolean
@@ -8962,15 +7762,17 @@ export namespace Prisma {
 
   export type ai_conversationSelectScalar = {
     id?: boolean
+    project_id?: boolean
     keyname?: boolean
     label?: boolean
     content?: boolean
+    history?: boolean
     user_id?: boolean
     create_at?: boolean
     update_at?: boolean
   }
 
-  export type ai_conversationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "keyname" | "label" | "content" | "user_id" | "create_at" | "update_at", ExtArgs["result"]["ai_conversation"]>
+  export type ai_conversationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "project_id" | "keyname" | "label" | "content" | "history" | "user_id" | "create_at" | "update_at", ExtArgs["result"]["ai_conversation"]>
   export type ai_conversationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | userDefaultArgs<ExtArgs>
   }
@@ -8982,9 +7784,11 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      project_id: string
       keyname: string
       label: string
       content: Prisma.JsonValue | null
+      history: Prisma.JsonValue | null
       user_id: number
       create_at: Date | null
       update_at: Date | null
@@ -9359,9 +8163,11 @@ export namespace Prisma {
    */
   interface ai_conversationFieldRefs {
     readonly id: FieldRef<"ai_conversation", 'Int'>
+    readonly project_id: FieldRef<"ai_conversation", 'String'>
     readonly keyname: FieldRef<"ai_conversation", 'String'>
     readonly label: FieldRef<"ai_conversation", 'String'>
     readonly content: FieldRef<"ai_conversation", 'Json'>
+    readonly history: FieldRef<"ai_conversation", 'Json'>
     readonly user_id: FieldRef<"ai_conversation", 'Int'>
     readonly create_at: FieldRef<"ai_conversation", 'DateTime'>
     readonly update_at: FieldRef<"ai_conversation", 'DateTime'>
@@ -9777,32 +8583,10 @@ export namespace Prisma {
     hard: 'hard',
     anki_note_id: 'anki_note_id',
     time_create: 'time_create',
-    time_update: 'time_update',
-    interview_summary_id: 'interview_summary_id'
+    time_update: 'time_update'
   };
 
   export type ArticleScalarFieldEnum = (typeof ArticleScalarFieldEnum)[keyof typeof ArticleScalarFieldEnum]
-
-
-  export const Interview_summaryScalarFieldEnum: {
-    id: 'id',
-    post_link: 'post_link',
-    content_hash: 'content_hash',
-    interview_type: 'interview_type',
-    turn: 'turn',
-    company_name: 'company_name',
-    company_scale: 'company_scale',
-    job_type: 'job_type',
-    job_name: 'job_name',
-    job_link: 'job_link',
-    content: 'content',
-    own: 'own',
-    user_id: 'user_id',
-    create_at: 'create_at',
-    update_at: 'update_at'
-  };
-
-  export type Interview_summaryScalarFieldEnum = (typeof Interview_summaryScalarFieldEnum)[keyof typeof Interview_summaryScalarFieldEnum]
 
 
   export const User_projectScalarFieldEnum: {
@@ -9835,9 +8619,11 @@ export namespace Prisma {
 
   export const Ai_conversationScalarFieldEnum: {
     id: 'id',
+    project_id: 'project_id',
     keyname: 'keyname',
     label: 'label',
     content: 'content',
+    history: 'history',
     user_id: 'user_id',
     create_at: 'create_at',
     update_at: 'update_at'
@@ -9895,22 +8681,6 @@ export namespace Prisma {
   export type articleOrderByRelevanceFieldEnum = (typeof articleOrderByRelevanceFieldEnum)[keyof typeof articleOrderByRelevanceFieldEnum]
 
 
-  export const interview_summaryOrderByRelevanceFieldEnum: {
-    post_link: 'post_link',
-    content_hash: 'content_hash',
-    interview_type: 'interview_type',
-    turn: 'turn',
-    company_name: 'company_name',
-    company_scale: 'company_scale',
-    job_type: 'job_type',
-    job_name: 'job_name',
-    job_link: 'job_link',
-    content: 'content'
-  };
-
-  export type interview_summaryOrderByRelevanceFieldEnum = (typeof interview_summaryOrderByRelevanceFieldEnum)[keyof typeof interview_summaryOrderByRelevanceFieldEnum]
-
-
   export const user_projectOrderByRelevanceFieldEnum: {
     project_name: 'project_name'
   };
@@ -9951,6 +8721,7 @@ export namespace Prisma {
 
 
   export const ai_conversationOrderByRelevanceFieldEnum: {
+    project_id: 'project_id',
     keyname: 'keyname',
     label: 'label'
   };
@@ -9992,13 +8763,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Boolean'
-   */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
-    
-
-
-  /**
    * Reference to a field of type 'Json'
    */
   export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -10035,7 +8799,6 @@ export namespace Prisma {
     user_articles?: User_articleListRelationFilter
     ai_conversation?: Ai_conversationListRelationFilter
     user_project?: User_projectListRelationFilter
-    interview_summary?: Interview_summaryListRelationFilter
   }
 
   export type userOrderByWithRelationInput = {
@@ -10048,7 +8811,6 @@ export namespace Prisma {
     user_articles?: user_articleOrderByRelationAggregateInput
     ai_conversation?: ai_conversationOrderByRelationAggregateInput
     user_project?: user_projectOrderByRelationAggregateInput
-    interview_summary?: interview_summaryOrderByRelationAggregateInput
     _relevance?: userOrderByRelevanceInput
   }
 
@@ -10065,7 +8827,6 @@ export namespace Prisma {
     user_articles?: User_articleListRelationFilter
     ai_conversation?: Ai_conversationListRelationFilter
     user_project?: User_projectListRelationFilter
-    interview_summary?: Interview_summaryListRelationFilter
   }, "id" | "username">
 
   export type userOrderByWithAggregationInput = {
@@ -10165,7 +8926,6 @@ export namespace Prisma {
     anki_note_id?: BigIntNullableFilter<"article"> | bigint | number | null
     time_create?: DateTimeNullableFilter<"article"> | Date | string | null
     time_update?: DateTimeNullableFilter<"article"> | Date | string | null
-    interview_summary_id?: IntNullableFilter<"article"> | number | null
     user_articles?: User_articleListRelationFilter
   }
 
@@ -10186,7 +8946,6 @@ export namespace Prisma {
     anki_note_id?: SortOrderInput | SortOrder
     time_create?: SortOrderInput | SortOrder
     time_update?: SortOrderInput | SortOrder
-    interview_summary_id?: SortOrderInput | SortOrder
     user_articles?: user_articleOrderByRelationAggregateInput
     _relevance?: articleOrderByRelevanceInput
   }
@@ -10211,7 +8970,6 @@ export namespace Prisma {
     anki_note_id?: BigIntNullableFilter<"article"> | bigint | number | null
     time_create?: DateTimeNullableFilter<"article"> | Date | string | null
     time_update?: DateTimeNullableFilter<"article"> | Date | string | null
-    interview_summary_id?: IntNullableFilter<"article"> | number | null
     user_articles?: User_articleListRelationFilter
   }, "id" | "link">
 
@@ -10232,7 +8990,6 @@ export namespace Prisma {
     anki_note_id?: SortOrderInput | SortOrder
     time_create?: SortOrderInput | SortOrder
     time_update?: SortOrderInput | SortOrder
-    interview_summary_id?: SortOrderInput | SortOrder
     _count?: articleCountOrderByAggregateInput
     _avg?: articleAvgOrderByAggregateInput
     _max?: articleMaxOrderByAggregateInput
@@ -10260,115 +9017,6 @@ export namespace Prisma {
     anki_note_id?: BigIntNullableWithAggregatesFilter<"article"> | bigint | number | null
     time_create?: DateTimeNullableWithAggregatesFilter<"article"> | Date | string | null
     time_update?: DateTimeNullableWithAggregatesFilter<"article"> | Date | string | null
-    interview_summary_id?: IntNullableWithAggregatesFilter<"article"> | number | null
-  }
-
-  export type interview_summaryWhereInput = {
-    AND?: interview_summaryWhereInput | interview_summaryWhereInput[]
-    OR?: interview_summaryWhereInput[]
-    NOT?: interview_summaryWhereInput | interview_summaryWhereInput[]
-    id?: IntFilter<"interview_summary"> | number
-    post_link?: StringNullableFilter<"interview_summary"> | string | null
-    content_hash?: StringFilter<"interview_summary"> | string
-    interview_type?: StringNullableFilter<"interview_summary"> | string | null
-    turn?: StringNullableFilter<"interview_summary"> | string | null
-    company_name?: StringNullableFilter<"interview_summary"> | string | null
-    company_scale?: StringNullableFilter<"interview_summary"> | string | null
-    job_type?: StringFilter<"interview_summary"> | string
-    job_name?: StringNullableFilter<"interview_summary"> | string | null
-    job_link?: StringNullableFilter<"interview_summary"> | string | null
-    content?: StringFilter<"interview_summary"> | string
-    own?: BoolFilter<"interview_summary"> | boolean
-    user_id?: IntFilter<"interview_summary"> | number
-    create_at?: DateTimeNullableFilter<"interview_summary"> | Date | string | null
-    update_at?: DateTimeNullableFilter<"interview_summary"> | Date | string | null
-    user?: XOR<UserScalarRelationFilter, userWhereInput>
-  }
-
-  export type interview_summaryOrderByWithRelationInput = {
-    id?: SortOrder
-    post_link?: SortOrderInput | SortOrder
-    content_hash?: SortOrder
-    interview_type?: SortOrderInput | SortOrder
-    turn?: SortOrderInput | SortOrder
-    company_name?: SortOrderInput | SortOrder
-    company_scale?: SortOrderInput | SortOrder
-    job_type?: SortOrder
-    job_name?: SortOrderInput | SortOrder
-    job_link?: SortOrderInput | SortOrder
-    content?: SortOrder
-    own?: SortOrder
-    user_id?: SortOrder
-    create_at?: SortOrderInput | SortOrder
-    update_at?: SortOrderInput | SortOrder
-    user?: userOrderByWithRelationInput
-    _relevance?: interview_summaryOrderByRelevanceInput
-  }
-
-  export type interview_summaryWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
-    post_link?: string
-    content_hash?: string
-    AND?: interview_summaryWhereInput | interview_summaryWhereInput[]
-    OR?: interview_summaryWhereInput[]
-    NOT?: interview_summaryWhereInput | interview_summaryWhereInput[]
-    interview_type?: StringNullableFilter<"interview_summary"> | string | null
-    turn?: StringNullableFilter<"interview_summary"> | string | null
-    company_name?: StringNullableFilter<"interview_summary"> | string | null
-    company_scale?: StringNullableFilter<"interview_summary"> | string | null
-    job_type?: StringFilter<"interview_summary"> | string
-    job_name?: StringNullableFilter<"interview_summary"> | string | null
-    job_link?: StringNullableFilter<"interview_summary"> | string | null
-    content?: StringFilter<"interview_summary"> | string
-    own?: BoolFilter<"interview_summary"> | boolean
-    user_id?: IntFilter<"interview_summary"> | number
-    create_at?: DateTimeNullableFilter<"interview_summary"> | Date | string | null
-    update_at?: DateTimeNullableFilter<"interview_summary"> | Date | string | null
-    user?: XOR<UserScalarRelationFilter, userWhereInput>
-  }, "id" | "post_link" | "content_hash">
-
-  export type interview_summaryOrderByWithAggregationInput = {
-    id?: SortOrder
-    post_link?: SortOrderInput | SortOrder
-    content_hash?: SortOrder
-    interview_type?: SortOrderInput | SortOrder
-    turn?: SortOrderInput | SortOrder
-    company_name?: SortOrderInput | SortOrder
-    company_scale?: SortOrderInput | SortOrder
-    job_type?: SortOrder
-    job_name?: SortOrderInput | SortOrder
-    job_link?: SortOrderInput | SortOrder
-    content?: SortOrder
-    own?: SortOrder
-    user_id?: SortOrder
-    create_at?: SortOrderInput | SortOrder
-    update_at?: SortOrderInput | SortOrder
-    _count?: interview_summaryCountOrderByAggregateInput
-    _avg?: interview_summaryAvgOrderByAggregateInput
-    _max?: interview_summaryMaxOrderByAggregateInput
-    _min?: interview_summaryMinOrderByAggregateInput
-    _sum?: interview_summarySumOrderByAggregateInput
-  }
-
-  export type interview_summaryScalarWhereWithAggregatesInput = {
-    AND?: interview_summaryScalarWhereWithAggregatesInput | interview_summaryScalarWhereWithAggregatesInput[]
-    OR?: interview_summaryScalarWhereWithAggregatesInput[]
-    NOT?: interview_summaryScalarWhereWithAggregatesInput | interview_summaryScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"interview_summary"> | number
-    post_link?: StringNullableWithAggregatesFilter<"interview_summary"> | string | null
-    content_hash?: StringWithAggregatesFilter<"interview_summary"> | string
-    interview_type?: StringNullableWithAggregatesFilter<"interview_summary"> | string | null
-    turn?: StringNullableWithAggregatesFilter<"interview_summary"> | string | null
-    company_name?: StringNullableWithAggregatesFilter<"interview_summary"> | string | null
-    company_scale?: StringNullableWithAggregatesFilter<"interview_summary"> | string | null
-    job_type?: StringWithAggregatesFilter<"interview_summary"> | string
-    job_name?: StringNullableWithAggregatesFilter<"interview_summary"> | string | null
-    job_link?: StringNullableWithAggregatesFilter<"interview_summary"> | string | null
-    content?: StringWithAggregatesFilter<"interview_summary"> | string
-    own?: BoolWithAggregatesFilter<"interview_summary"> | boolean
-    user_id?: IntWithAggregatesFilter<"interview_summary"> | number
-    create_at?: DateTimeNullableWithAggregatesFilter<"interview_summary"> | Date | string | null
-    update_at?: DateTimeNullableWithAggregatesFilter<"interview_summary"> | Date | string | null
   }
 
   export type user_projectWhereInput = {
@@ -10533,9 +9181,11 @@ export namespace Prisma {
     OR?: ai_conversationWhereInput[]
     NOT?: ai_conversationWhereInput | ai_conversationWhereInput[]
     id?: IntFilter<"ai_conversation"> | number
+    project_id?: StringFilter<"ai_conversation"> | string
     keyname?: StringFilter<"ai_conversation"> | string
     label?: StringFilter<"ai_conversation"> | string
     content?: JsonNullableFilter<"ai_conversation">
+    history?: JsonNullableFilter<"ai_conversation">
     user_id?: IntFilter<"ai_conversation"> | number
     create_at?: DateTimeNullableFilter<"ai_conversation"> | Date | string | null
     update_at?: DateTimeNullableFilter<"ai_conversation"> | Date | string | null
@@ -10544,9 +9194,11 @@ export namespace Prisma {
 
   export type ai_conversationOrderByWithRelationInput = {
     id?: SortOrder
+    project_id?: SortOrder
     keyname?: SortOrder
     label?: SortOrder
     content?: SortOrderInput | SortOrder
+    history?: SortOrderInput | SortOrder
     user_id?: SortOrder
     create_at?: SortOrderInput | SortOrder
     update_at?: SortOrderInput | SortOrder
@@ -10556,23 +9208,27 @@ export namespace Prisma {
 
   export type ai_conversationWhereUniqueInput = Prisma.AtLeast<{
     id?: number
+    keyname?: string
     AND?: ai_conversationWhereInput | ai_conversationWhereInput[]
     OR?: ai_conversationWhereInput[]
     NOT?: ai_conversationWhereInput | ai_conversationWhereInput[]
-    keyname?: StringFilter<"ai_conversation"> | string
+    project_id?: StringFilter<"ai_conversation"> | string
     label?: StringFilter<"ai_conversation"> | string
     content?: JsonNullableFilter<"ai_conversation">
+    history?: JsonNullableFilter<"ai_conversation">
     user_id?: IntFilter<"ai_conversation"> | number
     create_at?: DateTimeNullableFilter<"ai_conversation"> | Date | string | null
     update_at?: DateTimeNullableFilter<"ai_conversation"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, userWhereInput>
-  }, "id">
+  }, "id" | "keyname">
 
   export type ai_conversationOrderByWithAggregationInput = {
     id?: SortOrder
+    project_id?: SortOrder
     keyname?: SortOrder
     label?: SortOrder
     content?: SortOrderInput | SortOrder
+    history?: SortOrderInput | SortOrder
     user_id?: SortOrder
     create_at?: SortOrderInput | SortOrder
     update_at?: SortOrderInput | SortOrder
@@ -10588,9 +9244,11 @@ export namespace Prisma {
     OR?: ai_conversationScalarWhereWithAggregatesInput[]
     NOT?: ai_conversationScalarWhereWithAggregatesInput | ai_conversationScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"ai_conversation"> | number
+    project_id?: StringWithAggregatesFilter<"ai_conversation"> | string
     keyname?: StringWithAggregatesFilter<"ai_conversation"> | string
     label?: StringWithAggregatesFilter<"ai_conversation"> | string
     content?: JsonNullableWithAggregatesFilter<"ai_conversation">
+    history?: JsonNullableWithAggregatesFilter<"ai_conversation">
     user_id?: IntWithAggregatesFilter<"ai_conversation"> | number
     create_at?: DateTimeNullableWithAggregatesFilter<"ai_conversation"> | Date | string | null
     update_at?: DateTimeNullableWithAggregatesFilter<"ai_conversation"> | Date | string | null
@@ -10605,7 +9263,6 @@ export namespace Prisma {
     user_articles?: user_articleCreateNestedManyWithoutUserInput
     ai_conversation?: ai_conversationCreateNestedManyWithoutUserInput
     user_project?: user_projectCreateNestedManyWithoutUserInput
-    interview_summary?: interview_summaryCreateNestedManyWithoutUserInput
   }
 
   export type userUncheckedCreateInput = {
@@ -10618,7 +9275,6 @@ export namespace Prisma {
     user_articles?: user_articleUncheckedCreateNestedManyWithoutUserInput
     ai_conversation?: ai_conversationUncheckedCreateNestedManyWithoutUserInput
     user_project?: user_projectUncheckedCreateNestedManyWithoutUserInput
-    interview_summary?: interview_summaryUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type userUpdateInput = {
@@ -10630,7 +9286,6 @@ export namespace Prisma {
     user_articles?: user_articleUpdateManyWithoutUserNestedInput
     ai_conversation?: ai_conversationUpdateManyWithoutUserNestedInput
     user_project?: user_projectUpdateManyWithoutUserNestedInput
-    interview_summary?: interview_summaryUpdateManyWithoutUserNestedInput
   }
 
   export type userUncheckedUpdateInput = {
@@ -10643,7 +9298,6 @@ export namespace Prisma {
     user_articles?: user_articleUncheckedUpdateManyWithoutUserNestedInput
     ai_conversation?: ai_conversationUncheckedUpdateManyWithoutUserNestedInput
     user_project?: user_projectUncheckedUpdateManyWithoutUserNestedInput
-    interview_summary?: interview_summaryUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type userCreateManyInput = {
@@ -10726,7 +9380,6 @@ export namespace Prisma {
     anki_note_id?: bigint | number | null
     time_create?: Date | string | null
     time_update?: Date | string | null
-    interview_summary_id?: number | null
     user_articles?: user_articleCreateNestedManyWithoutArticleInput
   }
 
@@ -10747,7 +9400,6 @@ export namespace Prisma {
     anki_note_id?: bigint | number | null
     time_create?: Date | string | null
     time_update?: Date | string | null
-    interview_summary_id?: number | null
     user_articles?: user_articleUncheckedCreateNestedManyWithoutArticleInput
   }
 
@@ -10767,7 +9419,6 @@ export namespace Prisma {
     anki_note_id?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     time_create?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     time_update?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    interview_summary_id?: NullableIntFieldUpdateOperationsInput | number | null
     user_articles?: user_articleUpdateManyWithoutArticleNestedInput
   }
 
@@ -10788,7 +9439,6 @@ export namespace Prisma {
     anki_note_id?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     time_create?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     time_update?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    interview_summary_id?: NullableIntFieldUpdateOperationsInput | number | null
     user_articles?: user_articleUncheckedUpdateManyWithoutArticleNestedInput
   }
 
@@ -10809,7 +9459,6 @@ export namespace Prisma {
     anki_note_id?: bigint | number | null
     time_create?: Date | string | null
     time_update?: Date | string | null
-    interview_summary_id?: number | null
   }
 
   export type articleUpdateManyMutationInput = {
@@ -10828,7 +9477,6 @@ export namespace Prisma {
     anki_note_id?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     time_create?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     time_update?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    interview_summary_id?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type articleUncheckedUpdateManyInput = {
@@ -10848,129 +9496,6 @@ export namespace Prisma {
     anki_note_id?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     time_create?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     time_update?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    interview_summary_id?: NullableIntFieldUpdateOperationsInput | number | null
-  }
-
-  export type interview_summaryCreateInput = {
-    post_link?: string | null
-    content_hash: string
-    interview_type?: string | null
-    turn?: string | null
-    company_name?: string | null
-    company_scale?: string | null
-    job_type: string
-    job_name?: string | null
-    job_link?: string | null
-    content: string
-    own?: boolean
-    create_at?: Date | string | null
-    update_at?: Date | string | null
-    user: userCreateNestedOneWithoutInterview_summaryInput
-  }
-
-  export type interview_summaryUncheckedCreateInput = {
-    id?: number
-    post_link?: string | null
-    content_hash: string
-    interview_type?: string | null
-    turn?: string | null
-    company_name?: string | null
-    company_scale?: string | null
-    job_type: string
-    job_name?: string | null
-    job_link?: string | null
-    content: string
-    own?: boolean
-    user_id: number
-    create_at?: Date | string | null
-    update_at?: Date | string | null
-  }
-
-  export type interview_summaryUpdateInput = {
-    post_link?: NullableStringFieldUpdateOperationsInput | string | null
-    content_hash?: StringFieldUpdateOperationsInput | string
-    interview_type?: NullableStringFieldUpdateOperationsInput | string | null
-    turn?: NullableStringFieldUpdateOperationsInput | string | null
-    company_name?: NullableStringFieldUpdateOperationsInput | string | null
-    company_scale?: NullableStringFieldUpdateOperationsInput | string | null
-    job_type?: StringFieldUpdateOperationsInput | string
-    job_name?: NullableStringFieldUpdateOperationsInput | string | null
-    job_link?: NullableStringFieldUpdateOperationsInput | string | null
-    content?: StringFieldUpdateOperationsInput | string
-    own?: BoolFieldUpdateOperationsInput | boolean
-    create_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    update_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    user?: userUpdateOneRequiredWithoutInterview_summaryNestedInput
-  }
-
-  export type interview_summaryUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    post_link?: NullableStringFieldUpdateOperationsInput | string | null
-    content_hash?: StringFieldUpdateOperationsInput | string
-    interview_type?: NullableStringFieldUpdateOperationsInput | string | null
-    turn?: NullableStringFieldUpdateOperationsInput | string | null
-    company_name?: NullableStringFieldUpdateOperationsInput | string | null
-    company_scale?: NullableStringFieldUpdateOperationsInput | string | null
-    job_type?: StringFieldUpdateOperationsInput | string
-    job_name?: NullableStringFieldUpdateOperationsInput | string | null
-    job_link?: NullableStringFieldUpdateOperationsInput | string | null
-    content?: StringFieldUpdateOperationsInput | string
-    own?: BoolFieldUpdateOperationsInput | boolean
-    user_id?: IntFieldUpdateOperationsInput | number
-    create_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    update_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type interview_summaryCreateManyInput = {
-    id?: number
-    post_link?: string | null
-    content_hash: string
-    interview_type?: string | null
-    turn?: string | null
-    company_name?: string | null
-    company_scale?: string | null
-    job_type: string
-    job_name?: string | null
-    job_link?: string | null
-    content: string
-    own?: boolean
-    user_id: number
-    create_at?: Date | string | null
-    update_at?: Date | string | null
-  }
-
-  export type interview_summaryUpdateManyMutationInput = {
-    post_link?: NullableStringFieldUpdateOperationsInput | string | null
-    content_hash?: StringFieldUpdateOperationsInput | string
-    interview_type?: NullableStringFieldUpdateOperationsInput | string | null
-    turn?: NullableStringFieldUpdateOperationsInput | string | null
-    company_name?: NullableStringFieldUpdateOperationsInput | string | null
-    company_scale?: NullableStringFieldUpdateOperationsInput | string | null
-    job_type?: StringFieldUpdateOperationsInput | string
-    job_name?: NullableStringFieldUpdateOperationsInput | string | null
-    job_link?: NullableStringFieldUpdateOperationsInput | string | null
-    content?: StringFieldUpdateOperationsInput | string
-    own?: BoolFieldUpdateOperationsInput | boolean
-    create_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    update_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type interview_summaryUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    post_link?: NullableStringFieldUpdateOperationsInput | string | null
-    content_hash?: StringFieldUpdateOperationsInput | string
-    interview_type?: NullableStringFieldUpdateOperationsInput | string | null
-    turn?: NullableStringFieldUpdateOperationsInput | string | null
-    company_name?: NullableStringFieldUpdateOperationsInput | string | null
-    company_scale?: NullableStringFieldUpdateOperationsInput | string | null
-    job_type?: StringFieldUpdateOperationsInput | string
-    job_name?: NullableStringFieldUpdateOperationsInput | string | null
-    job_link?: NullableStringFieldUpdateOperationsInput | string | null
-    content?: StringFieldUpdateOperationsInput | string
-    own?: BoolFieldUpdateOperationsInput | boolean
-    user_id?: IntFieldUpdateOperationsInput | number
-    create_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    update_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type user_projectCreateInput = {
@@ -11103,9 +9628,11 @@ export namespace Prisma {
   }
 
   export type ai_conversationCreateInput = {
+    project_id: string
     keyname: string
     label: string
     content?: NullableJsonNullValueInput | InputJsonValue
+    history?: NullableJsonNullValueInput | InputJsonValue
     create_at?: Date | string | null
     update_at?: Date | string | null
     user: userCreateNestedOneWithoutAi_conversationInput
@@ -11113,18 +9640,22 @@ export namespace Prisma {
 
   export type ai_conversationUncheckedCreateInput = {
     id?: number
+    project_id: string
     keyname: string
     label: string
     content?: NullableJsonNullValueInput | InputJsonValue
+    history?: NullableJsonNullValueInput | InputJsonValue
     user_id: number
     create_at?: Date | string | null
     update_at?: Date | string | null
   }
 
   export type ai_conversationUpdateInput = {
+    project_id?: StringFieldUpdateOperationsInput | string
     keyname?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     content?: NullableJsonNullValueInput | InputJsonValue
+    history?: NullableJsonNullValueInput | InputJsonValue
     create_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     update_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: userUpdateOneRequiredWithoutAi_conversationNestedInput
@@ -11132,9 +9663,11 @@ export namespace Prisma {
 
   export type ai_conversationUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
+    project_id?: StringFieldUpdateOperationsInput | string
     keyname?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     content?: NullableJsonNullValueInput | InputJsonValue
+    history?: NullableJsonNullValueInput | InputJsonValue
     user_id?: IntFieldUpdateOperationsInput | number
     create_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     update_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -11142,27 +9675,33 @@ export namespace Prisma {
 
   export type ai_conversationCreateManyInput = {
     id?: number
+    project_id: string
     keyname: string
     label: string
     content?: NullableJsonNullValueInput | InputJsonValue
+    history?: NullableJsonNullValueInput | InputJsonValue
     user_id: number
     create_at?: Date | string | null
     update_at?: Date | string | null
   }
 
   export type ai_conversationUpdateManyMutationInput = {
+    project_id?: StringFieldUpdateOperationsInput | string
     keyname?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     content?: NullableJsonNullValueInput | InputJsonValue
+    history?: NullableJsonNullValueInput | InputJsonValue
     create_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     update_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type ai_conversationUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
+    project_id?: StringFieldUpdateOperationsInput | string
     keyname?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     content?: NullableJsonNullValueInput | InputJsonValue
+    history?: NullableJsonNullValueInput | InputJsonValue
     user_id?: IntFieldUpdateOperationsInput | number
     create_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     update_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -11223,12 +9762,6 @@ export namespace Prisma {
     none?: user_projectWhereInput
   }
 
-  export type Interview_summaryListRelationFilter = {
-    every?: interview_summaryWhereInput
-    some?: interview_summaryWhereInput
-    none?: interview_summaryWhereInput
-  }
-
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -11243,10 +9776,6 @@ export namespace Prisma {
   }
 
   export type user_projectOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type interview_summaryOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -11410,17 +9939,6 @@ export namespace Prisma {
     not?: NestedBigIntNullableFilter<$PrismaModel> | bigint | number | null
   }
 
-  export type IntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
   export type articleOrderByRelevanceInput = {
     fields: articleOrderByRelevanceFieldEnum | articleOrderByRelevanceFieldEnum[]
     sort: SortOrder
@@ -11444,13 +9962,11 @@ export namespace Prisma {
     anki_note_id?: SortOrder
     time_create?: SortOrder
     time_update?: SortOrder
-    interview_summary_id?: SortOrder
   }
 
   export type articleAvgOrderByAggregateInput = {
     id?: SortOrder
     anki_note_id?: SortOrder
-    interview_summary_id?: SortOrder
   }
 
   export type articleMaxOrderByAggregateInput = {
@@ -11470,7 +9986,6 @@ export namespace Prisma {
     anki_note_id?: SortOrder
     time_create?: SortOrder
     time_update?: SortOrder
-    interview_summary_id?: SortOrder
   }
 
   export type articleMinOrderByAggregateInput = {
@@ -11490,13 +10005,11 @@ export namespace Prisma {
     anki_note_id?: SortOrder
     time_create?: SortOrder
     time_update?: SortOrder
-    interview_summary_id?: SortOrder
   }
 
   export type articleSumOrderByAggregateInput = {
     id?: SortOrder
     anki_note_id?: SortOrder
-    interview_summary_id?: SortOrder
   }
 
   export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -11531,105 +10044,6 @@ export namespace Prisma {
     _sum?: NestedBigIntNullableFilter<$PrismaModel>
     _min?: NestedBigIntNullableFilter<$PrismaModel>
     _max?: NestedBigIntNullableFilter<$PrismaModel>
-  }
-
-  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
-  }
-
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
-  export type interview_summaryOrderByRelevanceInput = {
-    fields: interview_summaryOrderByRelevanceFieldEnum | interview_summaryOrderByRelevanceFieldEnum[]
-    sort: SortOrder
-    search: string
-  }
-
-  export type interview_summaryCountOrderByAggregateInput = {
-    id?: SortOrder
-    post_link?: SortOrder
-    content_hash?: SortOrder
-    interview_type?: SortOrder
-    turn?: SortOrder
-    company_name?: SortOrder
-    company_scale?: SortOrder
-    job_type?: SortOrder
-    job_name?: SortOrder
-    job_link?: SortOrder
-    content?: SortOrder
-    own?: SortOrder
-    user_id?: SortOrder
-    create_at?: SortOrder
-    update_at?: SortOrder
-  }
-
-  export type interview_summaryAvgOrderByAggregateInput = {
-    id?: SortOrder
-    user_id?: SortOrder
-  }
-
-  export type interview_summaryMaxOrderByAggregateInput = {
-    id?: SortOrder
-    post_link?: SortOrder
-    content_hash?: SortOrder
-    interview_type?: SortOrder
-    turn?: SortOrder
-    company_name?: SortOrder
-    company_scale?: SortOrder
-    job_type?: SortOrder
-    job_name?: SortOrder
-    job_link?: SortOrder
-    content?: SortOrder
-    own?: SortOrder
-    user_id?: SortOrder
-    create_at?: SortOrder
-    update_at?: SortOrder
-  }
-
-  export type interview_summaryMinOrderByAggregateInput = {
-    id?: SortOrder
-    post_link?: SortOrder
-    content_hash?: SortOrder
-    interview_type?: SortOrder
-    turn?: SortOrder
-    company_name?: SortOrder
-    company_scale?: SortOrder
-    job_type?: SortOrder
-    job_name?: SortOrder
-    job_link?: SortOrder
-    content?: SortOrder
-    own?: SortOrder
-    user_id?: SortOrder
-    create_at?: SortOrder
-    update_at?: SortOrder
-  }
-
-  export type interview_summarySumOrderByAggregateInput = {
-    id?: SortOrder
-    user_id?: SortOrder
-  }
-
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type Project_fileListRelationFilter = {
@@ -11808,9 +10222,11 @@ export namespace Prisma {
 
   export type ai_conversationCountOrderByAggregateInput = {
     id?: SortOrder
+    project_id?: SortOrder
     keyname?: SortOrder
     label?: SortOrder
     content?: SortOrder
+    history?: SortOrder
     user_id?: SortOrder
     create_at?: SortOrder
     update_at?: SortOrder
@@ -11823,6 +10239,7 @@ export namespace Prisma {
 
   export type ai_conversationMaxOrderByAggregateInput = {
     id?: SortOrder
+    project_id?: SortOrder
     keyname?: SortOrder
     label?: SortOrder
     user_id?: SortOrder
@@ -11832,6 +10249,7 @@ export namespace Prisma {
 
   export type ai_conversationMinOrderByAggregateInput = {
     id?: SortOrder
+    project_id?: SortOrder
     keyname?: SortOrder
     label?: SortOrder
     user_id?: SortOrder
@@ -11891,13 +10309,6 @@ export namespace Prisma {
     connect?: user_projectWhereUniqueInput | user_projectWhereUniqueInput[]
   }
 
-  export type interview_summaryCreateNestedManyWithoutUserInput = {
-    create?: XOR<interview_summaryCreateWithoutUserInput, interview_summaryUncheckedCreateWithoutUserInput> | interview_summaryCreateWithoutUserInput[] | interview_summaryUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: interview_summaryCreateOrConnectWithoutUserInput | interview_summaryCreateOrConnectWithoutUserInput[]
-    createMany?: interview_summaryCreateManyUserInputEnvelope
-    connect?: interview_summaryWhereUniqueInput | interview_summaryWhereUniqueInput[]
-  }
-
   export type user_articleUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<user_articleCreateWithoutUserInput, user_articleUncheckedCreateWithoutUserInput> | user_articleCreateWithoutUserInput[] | user_articleUncheckedCreateWithoutUserInput[]
     connectOrCreate?: user_articleCreateOrConnectWithoutUserInput | user_articleCreateOrConnectWithoutUserInput[]
@@ -11917,13 +10328,6 @@ export namespace Prisma {
     connectOrCreate?: user_projectCreateOrConnectWithoutUserInput | user_projectCreateOrConnectWithoutUserInput[]
     createMany?: user_projectCreateManyUserInputEnvelope
     connect?: user_projectWhereUniqueInput | user_projectWhereUniqueInput[]
-  }
-
-  export type interview_summaryUncheckedCreateNestedManyWithoutUserInput = {
-    create?: XOR<interview_summaryCreateWithoutUserInput, interview_summaryUncheckedCreateWithoutUserInput> | interview_summaryCreateWithoutUserInput[] | interview_summaryUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: interview_summaryCreateOrConnectWithoutUserInput | interview_summaryCreateOrConnectWithoutUserInput[]
-    createMany?: interview_summaryCreateManyUserInputEnvelope
-    connect?: interview_summaryWhereUniqueInput | interview_summaryWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -11976,20 +10380,6 @@ export namespace Prisma {
     deleteMany?: user_projectScalarWhereInput | user_projectScalarWhereInput[]
   }
 
-  export type interview_summaryUpdateManyWithoutUserNestedInput = {
-    create?: XOR<interview_summaryCreateWithoutUserInput, interview_summaryUncheckedCreateWithoutUserInput> | interview_summaryCreateWithoutUserInput[] | interview_summaryUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: interview_summaryCreateOrConnectWithoutUserInput | interview_summaryCreateOrConnectWithoutUserInput[]
-    upsert?: interview_summaryUpsertWithWhereUniqueWithoutUserInput | interview_summaryUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: interview_summaryCreateManyUserInputEnvelope
-    set?: interview_summaryWhereUniqueInput | interview_summaryWhereUniqueInput[]
-    disconnect?: interview_summaryWhereUniqueInput | interview_summaryWhereUniqueInput[]
-    delete?: interview_summaryWhereUniqueInput | interview_summaryWhereUniqueInput[]
-    connect?: interview_summaryWhereUniqueInput | interview_summaryWhereUniqueInput[]
-    update?: interview_summaryUpdateWithWhereUniqueWithoutUserInput | interview_summaryUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: interview_summaryUpdateManyWithWhereWithoutUserInput | interview_summaryUpdateManyWithWhereWithoutUserInput[]
-    deleteMany?: interview_summaryScalarWhereInput | interview_summaryScalarWhereInput[]
-  }
-
   export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -12038,20 +10428,6 @@ export namespace Prisma {
     update?: user_projectUpdateWithWhereUniqueWithoutUserInput | user_projectUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: user_projectUpdateManyWithWhereWithoutUserInput | user_projectUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: user_projectScalarWhereInput | user_projectScalarWhereInput[]
-  }
-
-  export type interview_summaryUncheckedUpdateManyWithoutUserNestedInput = {
-    create?: XOR<interview_summaryCreateWithoutUserInput, interview_summaryUncheckedCreateWithoutUserInput> | interview_summaryCreateWithoutUserInput[] | interview_summaryUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: interview_summaryCreateOrConnectWithoutUserInput | interview_summaryCreateOrConnectWithoutUserInput[]
-    upsert?: interview_summaryUpsertWithWhereUniqueWithoutUserInput | interview_summaryUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: interview_summaryCreateManyUserInputEnvelope
-    set?: interview_summaryWhereUniqueInput | interview_summaryWhereUniqueInput[]
-    disconnect?: interview_summaryWhereUniqueInput | interview_summaryWhereUniqueInput[]
-    delete?: interview_summaryWhereUniqueInput | interview_summaryWhereUniqueInput[]
-    connect?: interview_summaryWhereUniqueInput | interview_summaryWhereUniqueInput[]
-    update?: interview_summaryUpdateWithWhereUniqueWithoutUserInput | interview_summaryUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: interview_summaryUpdateManyWithWhereWithoutUserInput | interview_summaryUpdateManyWithWhereWithoutUserInput[]
-    deleteMany?: interview_summaryScalarWhereInput | interview_summaryScalarWhereInput[]
   }
 
   export type userCreateNestedOneWithoutUser_articlesInput = {
@@ -12108,14 +10484,6 @@ export namespace Prisma {
     divide?: bigint | number
   }
 
-  export type NullableIntFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
-  }
-
   export type user_articleUpdateManyWithoutArticleNestedInput = {
     create?: XOR<user_articleCreateWithoutArticleInput, user_articleUncheckedCreateWithoutArticleInput> | user_articleCreateWithoutArticleInput[] | user_articleUncheckedCreateWithoutArticleInput[]
     connectOrCreate?: user_articleCreateOrConnectWithoutArticleInput | user_articleCreateOrConnectWithoutArticleInput[]
@@ -12142,24 +10510,6 @@ export namespace Prisma {
     update?: user_articleUpdateWithWhereUniqueWithoutArticleInput | user_articleUpdateWithWhereUniqueWithoutArticleInput[]
     updateMany?: user_articleUpdateManyWithWhereWithoutArticleInput | user_articleUpdateManyWithWhereWithoutArticleInput[]
     deleteMany?: user_articleScalarWhereInput | user_articleScalarWhereInput[]
-  }
-
-  export type userCreateNestedOneWithoutInterview_summaryInput = {
-    create?: XOR<userCreateWithoutInterview_summaryInput, userUncheckedCreateWithoutInterview_summaryInput>
-    connectOrCreate?: userCreateOrConnectWithoutInterview_summaryInput
-    connect?: userWhereUniqueInput
-  }
-
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
-  }
-
-  export type userUpdateOneRequiredWithoutInterview_summaryNestedInput = {
-    create?: XOR<userCreateWithoutInterview_summaryInput, userUncheckedCreateWithoutInterview_summaryInput>
-    connectOrCreate?: userCreateOrConnectWithoutInterview_summaryInput
-    upsert?: userUpsertWithoutInterview_summaryInput
-    connect?: userWhereUniqueInput
-    update?: XOR<XOR<userUpdateToOneWithWhereWithoutInterview_summaryInput, userUpdateWithoutInterview_summaryInput>, userUncheckedUpdateWithoutInterview_summaryInput>
   }
 
   export type project_fileCreateNestedManyWithoutUser_projectInput = {
@@ -12479,35 +10829,6 @@ export namespace Prisma {
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
-
-  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
-  }
-
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
-  }
   export type NestedJsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
@@ -12552,18 +10873,22 @@ export namespace Prisma {
   }
 
   export type ai_conversationCreateWithoutUserInput = {
+    project_id: string
     keyname: string
     label: string
     content?: NullableJsonNullValueInput | InputJsonValue
+    history?: NullableJsonNullValueInput | InputJsonValue
     create_at?: Date | string | null
     update_at?: Date | string | null
   }
 
   export type ai_conversationUncheckedCreateWithoutUserInput = {
     id?: number
+    project_id: string
     keyname: string
     label: string
     content?: NullableJsonNullValueInput | InputJsonValue
+    history?: NullableJsonNullValueInput | InputJsonValue
     create_at?: Date | string | null
     update_at?: Date | string | null
   }
@@ -12596,49 +10921,6 @@ export namespace Prisma {
 
   export type user_projectCreateManyUserInputEnvelope = {
     data: user_projectCreateManyUserInput | user_projectCreateManyUserInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type interview_summaryCreateWithoutUserInput = {
-    post_link?: string | null
-    content_hash: string
-    interview_type?: string | null
-    turn?: string | null
-    company_name?: string | null
-    company_scale?: string | null
-    job_type: string
-    job_name?: string | null
-    job_link?: string | null
-    content: string
-    own?: boolean
-    create_at?: Date | string | null
-    update_at?: Date | string | null
-  }
-
-  export type interview_summaryUncheckedCreateWithoutUserInput = {
-    id?: number
-    post_link?: string | null
-    content_hash: string
-    interview_type?: string | null
-    turn?: string | null
-    company_name?: string | null
-    company_scale?: string | null
-    job_type: string
-    job_name?: string | null
-    job_link?: string | null
-    content: string
-    own?: boolean
-    create_at?: Date | string | null
-    update_at?: Date | string | null
-  }
-
-  export type interview_summaryCreateOrConnectWithoutUserInput = {
-    where: interview_summaryWhereUniqueInput
-    create: XOR<interview_summaryCreateWithoutUserInput, interview_summaryUncheckedCreateWithoutUserInput>
-  }
-
-  export type interview_summaryCreateManyUserInputEnvelope = {
-    data: interview_summaryCreateManyUserInput | interview_summaryCreateManyUserInput[]
     skipDuplicates?: boolean
   }
 
@@ -12688,9 +10970,11 @@ export namespace Prisma {
     OR?: ai_conversationScalarWhereInput[]
     NOT?: ai_conversationScalarWhereInput | ai_conversationScalarWhereInput[]
     id?: IntFilter<"ai_conversation"> | number
+    project_id?: StringFilter<"ai_conversation"> | string
     keyname?: StringFilter<"ai_conversation"> | string
     label?: StringFilter<"ai_conversation"> | string
     content?: JsonNullableFilter<"ai_conversation">
+    history?: JsonNullableFilter<"ai_conversation">
     user_id?: IntFilter<"ai_conversation"> | number
     create_at?: DateTimeNullableFilter<"ai_conversation"> | Date | string | null
     update_at?: DateTimeNullableFilter<"ai_conversation"> | Date | string | null
@@ -12721,43 +11005,6 @@ export namespace Prisma {
     project_name?: StringFilter<"user_project"> | string
   }
 
-  export type interview_summaryUpsertWithWhereUniqueWithoutUserInput = {
-    where: interview_summaryWhereUniqueInput
-    update: XOR<interview_summaryUpdateWithoutUserInput, interview_summaryUncheckedUpdateWithoutUserInput>
-    create: XOR<interview_summaryCreateWithoutUserInput, interview_summaryUncheckedCreateWithoutUserInput>
-  }
-
-  export type interview_summaryUpdateWithWhereUniqueWithoutUserInput = {
-    where: interview_summaryWhereUniqueInput
-    data: XOR<interview_summaryUpdateWithoutUserInput, interview_summaryUncheckedUpdateWithoutUserInput>
-  }
-
-  export type interview_summaryUpdateManyWithWhereWithoutUserInput = {
-    where: interview_summaryScalarWhereInput
-    data: XOR<interview_summaryUpdateManyMutationInput, interview_summaryUncheckedUpdateManyWithoutUserInput>
-  }
-
-  export type interview_summaryScalarWhereInput = {
-    AND?: interview_summaryScalarWhereInput | interview_summaryScalarWhereInput[]
-    OR?: interview_summaryScalarWhereInput[]
-    NOT?: interview_summaryScalarWhereInput | interview_summaryScalarWhereInput[]
-    id?: IntFilter<"interview_summary"> | number
-    post_link?: StringNullableFilter<"interview_summary"> | string | null
-    content_hash?: StringFilter<"interview_summary"> | string
-    interview_type?: StringNullableFilter<"interview_summary"> | string | null
-    turn?: StringNullableFilter<"interview_summary"> | string | null
-    company_name?: StringNullableFilter<"interview_summary"> | string | null
-    company_scale?: StringNullableFilter<"interview_summary"> | string | null
-    job_type?: StringFilter<"interview_summary"> | string
-    job_name?: StringNullableFilter<"interview_summary"> | string | null
-    job_link?: StringNullableFilter<"interview_summary"> | string | null
-    content?: StringFilter<"interview_summary"> | string
-    own?: BoolFilter<"interview_summary"> | boolean
-    user_id?: IntFilter<"interview_summary"> | number
-    create_at?: DateTimeNullableFilter<"interview_summary"> | Date | string | null
-    update_at?: DateTimeNullableFilter<"interview_summary"> | Date | string | null
-  }
-
   export type userCreateWithoutUser_articlesInput = {
     username: string
     password: string
@@ -12766,7 +11013,6 @@ export namespace Prisma {
     email: string
     ai_conversation?: ai_conversationCreateNestedManyWithoutUserInput
     user_project?: user_projectCreateNestedManyWithoutUserInput
-    interview_summary?: interview_summaryCreateNestedManyWithoutUserInput
   }
 
   export type userUncheckedCreateWithoutUser_articlesInput = {
@@ -12778,7 +11024,6 @@ export namespace Prisma {
     email: string
     ai_conversation?: ai_conversationUncheckedCreateNestedManyWithoutUserInput
     user_project?: user_projectUncheckedCreateNestedManyWithoutUserInput
-    interview_summary?: interview_summaryUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type userCreateOrConnectWithoutUser_articlesInput = {
@@ -12802,7 +11047,6 @@ export namespace Prisma {
     anki_note_id?: bigint | number | null
     time_create?: Date | string | null
     time_update?: Date | string | null
-    interview_summary_id?: number | null
   }
 
   export type articleUncheckedCreateWithoutUser_articlesInput = {
@@ -12822,7 +11066,6 @@ export namespace Prisma {
     anki_note_id?: bigint | number | null
     time_create?: Date | string | null
     time_update?: Date | string | null
-    interview_summary_id?: number | null
   }
 
   export type articleCreateOrConnectWithoutUser_articlesInput = {
@@ -12849,7 +11092,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     ai_conversation?: ai_conversationUpdateManyWithoutUserNestedInput
     user_project?: user_projectUpdateManyWithoutUserNestedInput
-    interview_summary?: interview_summaryUpdateManyWithoutUserNestedInput
   }
 
   export type userUncheckedUpdateWithoutUser_articlesInput = {
@@ -12861,7 +11103,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     ai_conversation?: ai_conversationUncheckedUpdateManyWithoutUserNestedInput
     user_project?: user_projectUncheckedUpdateManyWithoutUserNestedInput
-    interview_summary?: interview_summaryUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type articleUpsertWithoutUser_articlesInput = {
@@ -12891,7 +11132,6 @@ export namespace Prisma {
     anki_note_id?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     time_create?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     time_update?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    interview_summary_id?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type articleUncheckedUpdateWithoutUser_articlesInput = {
@@ -12911,7 +11151,6 @@ export namespace Prisma {
     anki_note_id?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     time_create?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     time_update?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    interview_summary_id?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type user_articleCreateWithoutArticleInput = {
@@ -12949,68 +11188,6 @@ export namespace Prisma {
     data: XOR<user_articleUpdateManyMutationInput, user_articleUncheckedUpdateManyWithoutArticleInput>
   }
 
-  export type userCreateWithoutInterview_summaryInput = {
-    username: string
-    password: string
-    create_at?: Date | string | null
-    update_at?: Date | string | null
-    email: string
-    user_articles?: user_articleCreateNestedManyWithoutUserInput
-    ai_conversation?: ai_conversationCreateNestedManyWithoutUserInput
-    user_project?: user_projectCreateNestedManyWithoutUserInput
-  }
-
-  export type userUncheckedCreateWithoutInterview_summaryInput = {
-    id?: number
-    username: string
-    password: string
-    create_at?: Date | string | null
-    update_at?: Date | string | null
-    email: string
-    user_articles?: user_articleUncheckedCreateNestedManyWithoutUserInput
-    ai_conversation?: ai_conversationUncheckedCreateNestedManyWithoutUserInput
-    user_project?: user_projectUncheckedCreateNestedManyWithoutUserInput
-  }
-
-  export type userCreateOrConnectWithoutInterview_summaryInput = {
-    where: userWhereUniqueInput
-    create: XOR<userCreateWithoutInterview_summaryInput, userUncheckedCreateWithoutInterview_summaryInput>
-  }
-
-  export type userUpsertWithoutInterview_summaryInput = {
-    update: XOR<userUpdateWithoutInterview_summaryInput, userUncheckedUpdateWithoutInterview_summaryInput>
-    create: XOR<userCreateWithoutInterview_summaryInput, userUncheckedCreateWithoutInterview_summaryInput>
-    where?: userWhereInput
-  }
-
-  export type userUpdateToOneWithWhereWithoutInterview_summaryInput = {
-    where?: userWhereInput
-    data: XOR<userUpdateWithoutInterview_summaryInput, userUncheckedUpdateWithoutInterview_summaryInput>
-  }
-
-  export type userUpdateWithoutInterview_summaryInput = {
-    username?: StringFieldUpdateOperationsInput | string
-    password?: StringFieldUpdateOperationsInput | string
-    create_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    update_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    email?: StringFieldUpdateOperationsInput | string
-    user_articles?: user_articleUpdateManyWithoutUserNestedInput
-    ai_conversation?: ai_conversationUpdateManyWithoutUserNestedInput
-    user_project?: user_projectUpdateManyWithoutUserNestedInput
-  }
-
-  export type userUncheckedUpdateWithoutInterview_summaryInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    username?: StringFieldUpdateOperationsInput | string
-    password?: StringFieldUpdateOperationsInput | string
-    create_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    update_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    email?: StringFieldUpdateOperationsInput | string
-    user_articles?: user_articleUncheckedUpdateManyWithoutUserNestedInput
-    ai_conversation?: ai_conversationUncheckedUpdateManyWithoutUserNestedInput
-    user_project?: user_projectUncheckedUpdateManyWithoutUserNestedInput
-  }
-
   export type project_fileCreateWithoutUser_projectInput = {
     file_path: string
     hash: string
@@ -13042,7 +11219,6 @@ export namespace Prisma {
     email: string
     user_articles?: user_articleCreateNestedManyWithoutUserInput
     ai_conversation?: ai_conversationCreateNestedManyWithoutUserInput
-    interview_summary?: interview_summaryCreateNestedManyWithoutUserInput
   }
 
   export type userUncheckedCreateWithoutUser_projectInput = {
@@ -13054,7 +11230,6 @@ export namespace Prisma {
     email: string
     user_articles?: user_articleUncheckedCreateNestedManyWithoutUserInput
     ai_conversation?: ai_conversationUncheckedCreateNestedManyWithoutUserInput
-    interview_summary?: interview_summaryUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type userCreateOrConnectWithoutUser_projectInput = {
@@ -13107,7 +11282,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     user_articles?: user_articleUpdateManyWithoutUserNestedInput
     ai_conversation?: ai_conversationUpdateManyWithoutUserNestedInput
-    interview_summary?: interview_summaryUpdateManyWithoutUserNestedInput
   }
 
   export type userUncheckedUpdateWithoutUser_projectInput = {
@@ -13119,7 +11293,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     user_articles?: user_articleUncheckedUpdateManyWithoutUserNestedInput
     ai_conversation?: ai_conversationUncheckedUpdateManyWithoutUserNestedInput
-    interview_summary?: interview_summaryUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type user_projectCreateWithoutProject_fileInput = {
@@ -13254,7 +11427,6 @@ export namespace Prisma {
     email: string
     user_articles?: user_articleCreateNestedManyWithoutUserInput
     user_project?: user_projectCreateNestedManyWithoutUserInput
-    interview_summary?: interview_summaryCreateNestedManyWithoutUserInput
   }
 
   export type userUncheckedCreateWithoutAi_conversationInput = {
@@ -13266,7 +11438,6 @@ export namespace Prisma {
     email: string
     user_articles?: user_articleUncheckedCreateNestedManyWithoutUserInput
     user_project?: user_projectUncheckedCreateNestedManyWithoutUserInput
-    interview_summary?: interview_summaryUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type userCreateOrConnectWithoutAi_conversationInput = {
@@ -13293,7 +11464,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     user_articles?: user_articleUpdateManyWithoutUserNestedInput
     user_project?: user_projectUpdateManyWithoutUserNestedInput
-    interview_summary?: interview_summaryUpdateManyWithoutUserNestedInput
   }
 
   export type userUncheckedUpdateWithoutAi_conversationInput = {
@@ -13305,7 +11475,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     user_articles?: user_articleUncheckedUpdateManyWithoutUserNestedInput
     user_project?: user_projectUncheckedUpdateManyWithoutUserNestedInput
-    interview_summary?: interview_summaryUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type user_articleCreateManyUserInput = {
@@ -13315,9 +11484,11 @@ export namespace Prisma {
 
   export type ai_conversationCreateManyUserInput = {
     id?: number
+    project_id: string
     keyname: string
     label: string
     content?: NullableJsonNullValueInput | InputJsonValue
+    history?: NullableJsonNullValueInput | InputJsonValue
     create_at?: Date | string | null
     update_at?: Date | string | null
   }
@@ -13325,23 +11496,6 @@ export namespace Prisma {
   export type user_projectCreateManyUserInput = {
     id?: number
     project_name: string
-  }
-
-  export type interview_summaryCreateManyUserInput = {
-    id?: number
-    post_link?: string | null
-    content_hash: string
-    interview_type?: string | null
-    turn?: string | null
-    company_name?: string | null
-    company_scale?: string | null
-    job_type: string
-    job_name?: string | null
-    job_link?: string | null
-    content: string
-    own?: boolean
-    create_at?: Date | string | null
-    update_at?: Date | string | null
   }
 
   export type user_articleUpdateWithoutUserInput = {
@@ -13359,27 +11513,33 @@ export namespace Prisma {
   }
 
   export type ai_conversationUpdateWithoutUserInput = {
+    project_id?: StringFieldUpdateOperationsInput | string
     keyname?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     content?: NullableJsonNullValueInput | InputJsonValue
+    history?: NullableJsonNullValueInput | InputJsonValue
     create_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     update_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type ai_conversationUncheckedUpdateWithoutUserInput = {
     id?: IntFieldUpdateOperationsInput | number
+    project_id?: StringFieldUpdateOperationsInput | string
     keyname?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     content?: NullableJsonNullValueInput | InputJsonValue
+    history?: NullableJsonNullValueInput | InputJsonValue
     create_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     update_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type ai_conversationUncheckedUpdateManyWithoutUserInput = {
     id?: IntFieldUpdateOperationsInput | number
+    project_id?: StringFieldUpdateOperationsInput | string
     keyname?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     content?: NullableJsonNullValueInput | InputJsonValue
+    history?: NullableJsonNullValueInput | InputJsonValue
     create_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     update_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -13398,56 +11558,6 @@ export namespace Prisma {
   export type user_projectUncheckedUpdateManyWithoutUserInput = {
     id?: IntFieldUpdateOperationsInput | number
     project_name?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type interview_summaryUpdateWithoutUserInput = {
-    post_link?: NullableStringFieldUpdateOperationsInput | string | null
-    content_hash?: StringFieldUpdateOperationsInput | string
-    interview_type?: NullableStringFieldUpdateOperationsInput | string | null
-    turn?: NullableStringFieldUpdateOperationsInput | string | null
-    company_name?: NullableStringFieldUpdateOperationsInput | string | null
-    company_scale?: NullableStringFieldUpdateOperationsInput | string | null
-    job_type?: StringFieldUpdateOperationsInput | string
-    job_name?: NullableStringFieldUpdateOperationsInput | string | null
-    job_link?: NullableStringFieldUpdateOperationsInput | string | null
-    content?: StringFieldUpdateOperationsInput | string
-    own?: BoolFieldUpdateOperationsInput | boolean
-    create_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    update_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type interview_summaryUncheckedUpdateWithoutUserInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    post_link?: NullableStringFieldUpdateOperationsInput | string | null
-    content_hash?: StringFieldUpdateOperationsInput | string
-    interview_type?: NullableStringFieldUpdateOperationsInput | string | null
-    turn?: NullableStringFieldUpdateOperationsInput | string | null
-    company_name?: NullableStringFieldUpdateOperationsInput | string | null
-    company_scale?: NullableStringFieldUpdateOperationsInput | string | null
-    job_type?: StringFieldUpdateOperationsInput | string
-    job_name?: NullableStringFieldUpdateOperationsInput | string | null
-    job_link?: NullableStringFieldUpdateOperationsInput | string | null
-    content?: StringFieldUpdateOperationsInput | string
-    own?: BoolFieldUpdateOperationsInput | boolean
-    create_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    update_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type interview_summaryUncheckedUpdateManyWithoutUserInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    post_link?: NullableStringFieldUpdateOperationsInput | string | null
-    content_hash?: StringFieldUpdateOperationsInput | string
-    interview_type?: NullableStringFieldUpdateOperationsInput | string | null
-    turn?: NullableStringFieldUpdateOperationsInput | string | null
-    company_name?: NullableStringFieldUpdateOperationsInput | string | null
-    company_scale?: NullableStringFieldUpdateOperationsInput | string | null
-    job_type?: StringFieldUpdateOperationsInput | string
-    job_name?: NullableStringFieldUpdateOperationsInput | string | null
-    job_link?: NullableStringFieldUpdateOperationsInput | string | null
-    content?: StringFieldUpdateOperationsInput | string
-    own?: BoolFieldUpdateOperationsInput | boolean
-    create_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    update_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type user_articleCreateManyArticleInput = {

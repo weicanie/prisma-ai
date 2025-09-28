@@ -1,44 +1,104 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-import {
-	ChatMessage,
-	ConversationDto,
-	ConversationSendDto,
-	UserInfoFromToken
-} from '@prisma-ai/shared';
+import { ConversationDto, ConversationSendDto, UserInfoFromToken } from '@prisma-ai/shared';
 import { AichatChainService } from '../../chain/aichat-chain.service';
 import { ChainService } from '../../chain/chain.service';
+import { BusinessEnum } from '../../chain/project-chain.service';
+import { ProjectKonwbaseRetrieveService } from '../../chain/project-konwbase-retrieve.service';
 import { DbService } from '../../DB/db.service';
+import { ProjectService } from '../project/project.service';
+import { UserMemoryService } from '../user-memory/user-memory.service';
+import { MessageSendDto } from './dto/aichat-dto';
 
 @Injectable()
 export class AichatService {
 	constructor(
 		public dbService: DbService,
 		public chainService: ChainService,
-		public aichatChainService: AichatChainService
+		public aichatChainService: AichatChainService,
+		public projectKonwbaseRetrieveService: ProjectKonwbaseRetrieveService,
+		public projectService: ProjectService,
+		public userMemoryService: UserMemoryService
 	) {}
 
 	private logger = new Logger();
 
-	async sendMessageToAI(message: ChatMessage) {
+	async sendMessageToAI(messageDto: MessageSendDto, userInfo: UserInfoFromToken) {
+		const { keyname, message, modelConfig, project_id } = messageDto;
+		// 项目经验数据
+		const project = await this.projectService.findProjectById(project_id, userInfo);
+		// 项目经验相关文档
+		const project_doc = await this.projectKonwbaseRetrieveService.retrievedDomainDocs(
+			{
+				project,
+				userFeedback: { reflect: false, content: '' },
+				userInfo
+			},
+			BusinessEnum.aichat
+		);
+		// 项目经验相关代码
+		const project_code = await this.projectKonwbaseRetrieveService.retrievedProjectCodes(
+			{
+				project,
+				userFeedback: { reflect: false, content: '' },
+				userInfo
+			},
+			BusinessEnum.aichat
+		);
+		// 用户记忆
+		const user_memory = await this.userMemoryService.getUserMemory(userInfo.userId);
+
+		const userInput = message.content;
+
+		const userInput_doc =
+			await this.projectKonwbaseRetrieveService.retrievedDomainDocsFromUserInput(userInput, {
+				project,
+				userFeedback: { reflect: false, content: userInput },
+				userInfo
+			});
+
+		const userInput_code =
+			await this.projectKonwbaseRetrieveService.retrievedProjectCodesFromUserInput(userInput, {
+				project,
+				userFeedback: { reflect: false, content: '' },
+				userInfo
+			});
+
+		const userInput_rag = `
+		<用户输入>
+		${userInput}
+		</用户输入>
+		<相关项目文档参考>
+		${userInput_doc}
+		</相关项目文档参考>
+		<相关项目代码参考>
+		${userInput_code}
+		</相关项目代码参考>
+		`;
+
 		try {
-			const chain = await this.aichatChainService.createChatChain();
-			const answer = await chain.invoke({ input: message.content });
+			const chain = await this.aichatChainService.createChatChain(keyname, modelConfig, {
+				project_data: `${JSON.stringify(project)}`,
+				project_doc,
+				project_code,
+				user_memory: user_memory ? `${JSON.stringify(user_memory)}` : ''
+			});
+			const answer = await chain.invoke({ input: userInput_rag });
 			return answer;
 		} catch (error) {
-			this.logger.error(error, 'AichatService', 'sendMessageToAI');
+			this.logger.error(error.stack);
 			throw error;
 		}
 	}
 
 	async storeConversation(userInfo: UserInfoFromToken, conversationDto: ConversationSendDto) {
 		const { userId } = userInfo;
-		const { key, label } = conversationDto;
-		const content = conversationDto.content;
+		const { keyname, label, content, project_id } = conversationDto;
 		const values = await this.dbService.ai_conversation.findMany({
 			where: {
-				keyname: String(key),
-				user_id: +userId
+				keyname: String(keyname),
+				user_id: +userId,
+				project_id: project_id
 			}
 		});
 
@@ -46,10 +106,11 @@ export class AichatService {
 		if (!values[0]?.content && content.length === 0) {
 			return await this.dbService.ai_conversation.create({
 				data: {
-					keyname: String(key),
+					keyname: String(keyname),
 					label,
 					content: JSON.stringify(content),
-					user_id: +userId
+					user_id: +userId,
+					project_id: project_id
 				}
 			});
 		}
@@ -62,7 +123,7 @@ export class AichatService {
 			//更新
 			return await this.dbService.ai_conversation.updateMany({
 				where: {
-					keyname: String(key),
+					keyname: String(keyname),
 					user_id: +userId
 				},
 				data: {
@@ -73,20 +134,25 @@ export class AichatService {
 			//新增
 			return await this.dbService.ai_conversation.create({
 				data: {
-					keyname: String(key),
+					keyname: String(keyname),
 					label,
 					content: JSON.stringify(content),
-					user_id: +userId
+					user_id: +userId,
+					project_id: project_id
 				}
 			});
 		}
 	}
 
-	async getConversationList(userInfo: UserInfoFromToken): Promise<ConversationDto[]> {
+	async getConversationList(
+		userInfo: UserInfoFromToken,
+		project_id: string
+	): Promise<ConversationDto[]> {
 		const { userId } = userInfo;
 		const values = await this.dbService.ai_conversation.findMany({
 			where: {
-				user_id: +userId
+				user_id: +userId,
+				project_id: project_id
 			}
 		});
 		values.forEach(v => {

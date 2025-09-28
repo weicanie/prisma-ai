@@ -199,6 +199,11 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 		};
 		const newModel = new model(dataToSave);
 		await newModel.save();
+		/* 更新用户记忆 */
+		this.eventBusService.emit(EventList.userMemoryChange, {
+			userinfo: userInfo,
+			project: project
+		});
 		return { ...newModel.toObject() } as Omit<ProjectVo, 'lookupResult'>;
 	}
 

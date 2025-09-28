@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { SkillVo, UserInfoFromToken } from '@prisma-ai/shared';
 import { Model } from 'mongoose';
+import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import { Skill, SkillDocument } from './entities/skill.entity';
@@ -11,14 +12,20 @@ export class SkillService {
 	@InjectModel(Skill.name)
 	private skillModel: Model<SkillDocument>;
 
-	constructor() {}
+	constructor(private readonly eventBusService: EventBusService) {}
 
 	async create(createSkillDto: CreateSkillDto, userInfo: UserInfoFromToken): Promise<SkillVo> {
 		const createdSkill = new this.skillModel({
 			...createSkillDto,
 			userInfo
 		});
-		return createdSkill.save();
+		const savedSkill = await createdSkill.save();
+		/* 更新用户记忆 */
+		this.eventBusService.emit(EventList.userMemoryChange, {
+			userinfo: userInfo,
+			skill: createSkillDto
+		});
+		return savedSkill;
 	}
 
 	async findOne(id: string, userInfo: UserInfoFromToken): Promise<SkillVo> {

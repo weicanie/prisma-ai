@@ -1,7 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
+import { AIChatReducer } from './aichat';
 import { breadRouterReducer } from './bread-router';
 import { JobReducer } from './jobs';
 import { knowledgeReducer } from './knowbase';
+import { loginReducer } from './login';
 import { projectReducer } from './projects';
 import { ResumeReducer } from './resume';
 import { skillReducer } from './skills';
@@ -13,7 +15,9 @@ const store = configureStore({
 		skill: skillReducer,
 		resume: ResumeReducer,
 		job: JobReducer,
-		knowledge: knowledgeReducer
+		knowledge: knowledgeReducer,
+		aichat: AIChatReducer,
+		login: loginReducer
 	}
 });
 

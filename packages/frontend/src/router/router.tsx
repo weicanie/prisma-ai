@@ -29,6 +29,7 @@ const Education = lazy(() => import('../views/Main/Education'));
 const EducationRead = lazy(() => import('../views/Main/Education/Read'));
 const Career = lazy(() => import('../views/Main/Career'));
 const CareerRead = lazy(() => import('../views/Main/Career/Read'));
+const AIChat = lazy(() => import('../views/Main/aichat/AIChat'));
 
 const knowBaseRoute = {
 	path: 'knowledge',
@@ -476,6 +477,15 @@ export const routes = [
 						<EditorContainerPage />
 					</UpdateBreadRouter>
 				)
+			},
+			// 问问 Prisma
+			{
+				path: '/main/aichat',
+				element: (
+					<UpdateBreadRouter>
+						<AIChat />
+					</UpdateBreadRouter>
+				)
 			}
 		]
 	}
@@ -491,6 +501,7 @@ export const path_name: Record<string, string> = {
 
 	'/main/projects': '项目经验',
 	'/main/projects/action': 'AI优化',
+	'/main/aichat': '问问 Prisma',
 
 	'/main/hjm/job': '匹配岗位',
 	'/main/hjm/job/match-jobs': '简历匹配岗位',

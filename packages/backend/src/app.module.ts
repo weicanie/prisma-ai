@@ -13,7 +13,9 @@ import { ProjectModule } from './business/project/project.module';
 import { QuestionModule } from './business/question/question.module';
 import { ResumeModule } from './business/resume/resume.module';
 import { SkillModule } from './business/skill/skill.module';
+import { UserMemoryModule } from './business/user-memory/user-memory.module';
 import { UserModule } from './business/user/user.module';
+import { CacheModule } from './cache/cache.module';
 import { ChainModule } from './chain/chain.module';
 import { CopilotModule } from './copilot/copilot.module';
 import { GlobalInterceptor } from './dataFormat.interceptor';
@@ -30,6 +32,7 @@ import { TaskManagerModule } from './manager/task-manager/task-manager.module';
 		ProjectModule,
 		ChainModule,
 		AichatModule,
+		CacheModule,
 		ConfigModule.forRoot({
 			isGlobal: true,
 			envFilePath: [
@@ -54,7 +57,8 @@ import { TaskManagerModule } from './manager/task-manager/task-manager.module';
 		SseSessionManagerModule,
 		TaskManagerModule,
 		EducationModule,
-		CareerModule
+		CareerModule,
+		UserMemoryModule
 	],
 	providers: [
 		{

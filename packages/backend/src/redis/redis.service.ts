@@ -11,10 +11,11 @@ export class RedisService {
 	}
 
 	async set(key: string, value: string | number, ttl?: number) {
-		await this.redisClient.set(key, value);
-
 		if (ttl) {
-			await this.redisClient.expire(key, ttl);
+			// 使用 'EX' 选项，确保 SET 和 EXPIRE 的原子性
+			await this.redisClient.set(key, value, { EX: ttl });
+		} else {
+			await this.redisClient.set(key, value);
 		}
 	}
 

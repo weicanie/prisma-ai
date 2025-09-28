@@ -1,5 +1,5 @@
 import { Controller, Get, Logger, Query } from '@nestjs/common';
-import { UserInfoFromToken } from '@prisma-ai/shared';
+import { type UserInfoFromToken } from '@prisma-ai/shared';
 import { RequireLogin, UserInfo } from '../decorator';
 import { OssService } from './oss.service';
 @Controller('oss')

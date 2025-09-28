@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { StreamingChunk } from '@prisma-ai/shared';
+import { StreamingChunk, UserMemoryAction } from '@prisma-ai/shared';
 import { PersistentTask } from '../type/taskqueue';
 import { EventBus } from './EventBus';
 /* 事件名列表 */
@@ -10,7 +10,11 @@ export enum EventList {
 	taskAborted = 'taskAborted',
 	/* sse */
 	chunkGenerated = 'chunkGenerated',
-	SBERT_INIT = 'SBERT_INIT'
+	SBERT_INIT = 'SBERT_INIT',
+	/* user memory */
+	userMemoryChange = 'userMemoryChange',
+	/* cache invalidate */
+	cacheProjectRetrievedDocAndCodeInvalidate = 'cacheProjectRetrievedDocAndCodeInvalidate' //项目检索到的文档和代码的缓存失效
 }
 
 /* 事件名到payload类型的映射 */
@@ -28,6 +32,10 @@ export interface Event_Payload {
 		eventData: StreamingChunk;
 	};
 	[EventList.SBERT_INIT]: void;
+	/* user memory */
+	[EventList.userMemoryChange]: UserMemoryAction;
+	/* cache invalidate */
+	[EventList.cacheProjectRetrievedDocAndCodeInvalidate]: { projectName: string };
 }
 
 /**

@@ -155,23 +155,9 @@ export class AnkiUploadService implements OnModuleInit {
 							await this.createDeck(deck);
 						}
 
-						// 查询各个题目关联的面经
-						const interviewSummarys = await Promise.allSettled(
-							userArticleChunk.map(ua => {
-								// 题库中的题目没有关联的面经
-								if (!ua.article.interview_summary_id) return null;
-								const interviewSummary = this.db.interview_summary.findFirst({
-									where: {
-										id: ua.article.interview_summary_id!
-									}
-								});
-								return interviewSummary;
-							})
-						);
-
 						const notesToCheck = userArticleChunk.map((ua, i) => ({
 							articleId: ua.article.id,
-							note: this.buildAnkiNote(ua.article, interviewSummarys.values[i])
+							note: this.buildAnkiNote(ua.article)
 						}));
 
 						const checkResults = await this.canAddNotes(notesToCheck.map(n => n.note));
@@ -254,28 +240,10 @@ export class AnkiUploadService implements OnModuleInit {
 	/**
 	 * @description 构建单条Anki笔记的数据结构
 	 */
-	private buildAnkiNote(qdata: article, interviewSummary: null | { own: boolean }): AnkiNote {
-		/*
-		查询关联的面经，然后划分到对应的大卡组
-		1、没有关联的面经：题库
-		2、关联的面经own为false：公共面经
-		3、关联的面经own为true：我的面经
-		*/
-		let interviewSummaryType = '';
-		switch (interviewSummary?.own) {
-			case true:
-				interviewSummaryType = '我的面经';
-				break;
-			case false:
-				interviewSummaryType = '公共面经';
-				break;
-			default:
-				interviewSummaryType = '题库';
-		}
-
+	private buildAnkiNote(qdata: article): AnkiNote {
 		const deckName = qdata.link.startsWith('https://fe.ecool.fun')
-			? `${interviewSummaryType ?? '题库'}::前端::${qdata.content_type}`
-			: `${interviewSummaryType ?? '题库'}::Java 后端::${qdata.content_type}`;
+			? `题库::前端::${qdata.content_type}`
+			: `题库::Java 后端::${qdata.content_type}`;
 
 		return {
 			deckName,
