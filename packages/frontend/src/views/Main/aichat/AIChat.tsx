@@ -1,0 +1,462 @@
+import {
+	selectAIChatLastConversation,
+	selectAIChatLLM,
+	setAIChatLastConversation,
+	setAIChatLLM
+} from '@/store/aichat';
+import { Bubble, Prompts, Sender } from '@ant-design/x';
+import type { ChatMessage, ConversationDto } from '@prisma-ai/shared';
+import dayjs from 'dayjs';
+import { Trash } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'sonner';
+import AntdThemeHoc from '../../../components/AntdThemeHoc';
+import { useIsMobile } from '../../../hooks/use-mobile';
+import { cn } from '../../../lib/utils';
+import { getConversationList, sendMessageToAI, storeConversation } from '../../../services/aichat';
+import { ChangeLLM } from './components/ChangeLLM';
+import MilkdownEditor from './components/Editor';
+import { MySpin } from './components/MySpin';
+import { DESIGN_GUIDE, HOT_TOPICS } from './config';
+import Conversations from './Conversations';
+import { Logo } from './Logo';
+
+interface AIChatProps {
+	className?: string;
+}
+
+const AIChat: React.FC<AIChatProps> = ({ className }) => {
+	const abortController = useRef<AbortController | null>(null);
+
+	// ==================== State ====================
+	//所有对话的历史记录
+	const [messageHistory, setMessageHistory] = useState<Record<string, ChatMessage[]>>({});
+	const [conversations, setConversations] = useState<ConversationDto[]>([]);
+	const [curConversation, setCurConversation] = useState<string>('');
+
+	const [isFetchingHistory, setIsFetchingHistory] = useState(true);
+
+	const [attachmentsOpen, setAttachmentsOpen] = useState(false);
+	// 文件附件
+	// const [attachedFiles, setAttachedFiles] = useState<GetProp<typeof Attachments, 'items'>>([]);
+
+	const [inputValue, setInputValue] = useState('');
+	const [loading, setLoading] = useState(false);
+	const [messages, setMessages] = useState<ChatMessage[]>([]);
+
+	const dispatch = useDispatch();
+	const lastConversationKeyname = useSelector(selectAIChatLastConversation);
+
+	// ==================== Event ====================
+	const model = useSelector(selectAIChatLLM);
+	const onSubmit = async (val: string) => {
+		if (!val) return;
+		if (loading) {
+			toast.error('消息正在请求中，您可以等待请求完成或立即创建新对话...');
+			return;
+		}
+		setLoading(true);
+		//恢复自动滚动
+		setUserScrolled(false);
+
+		const userMessage: ChatMessage = {
+			id: `user-${Date.now()}`,
+			role: 'user',
+			content: val
+		};
+		const aiMessagePlaceholder: ChatMessage = {
+			id: `assistant-${Date.now()}`,
+			role: 'assistant',
+			content: '',
+			loading: true
+		};
+		const currentHistory = [...messages, userMessage, aiMessagePlaceholder];
+		setMessages(currentHistory);
+
+		try {
+			const res = await sendMessageToAI(userMessage, curConversation, {
+				llm_type: model
+			});
+			const aiMessage: ChatMessage = {
+				id: `assistant-${Date.now()}`,
+				role: 'assistant',
+				content: res.data,
+				create_at: new Date()
+			};
+			currentHistory.pop();
+			setMessages([...currentHistory, aiMessage]);
+		} catch (err) {
+			console.error(err);
+			toast.error('没有得到AI的响应。');
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleNewConversation = useCallback(async () => {
+		if (loading) {
+			toast.error('消息正在请求中，您可以等待请求完成或立即创建新对话...');
+			return;
+		}
+
+		const uuid = crypto.randomUUID();
+		const newConversation: ConversationDto = {
+			keyname: uuid,
+			label: `对话-${uuid}`,
+			id: -1, // Temporary id
+			content: [],
+			user_id: -1,
+			create_at: new Date(),
+			update_at: new Date()
+		};
+
+		// Add to UI immediately for better UX
+		setConversations(prev => [newConversation, ...prev]);
+		setCurConversation(uuid);
+		dispatch(setAIChatLastConversation(curConversation));
+
+		setMessages([]);
+
+		// Save the empty conversation to backend to get a persistent entry
+		try {
+			await storeConversation(newConversation.keyname, newConversation.label, []);
+		} catch {
+			toast.error('创建新对话失败，请稍后重试...');
+			// Revert state if API call fails
+			setConversations(prev => prev.filter(c => c.keyname !== uuid));
+		}
+	}, [loading]);
+
+	// 组件挂载时获取会话列表
+	useEffect(() => {
+		const fetchHistory = async () => {
+			setIsFetchingHistory(true);
+			try {
+				const res = await getConversationList();
+				const historyConversations = res.data;
+				setConversations(historyConversations);
+
+				if (historyConversations.length > 0) {
+					const historyMap = historyConversations.reduce(
+						(acc, curr) => {
+							acc[curr.keyname] = curr.content;
+							return acc;
+						},
+						{} as Record<string, ChatMessage[]>
+					);
+
+					setMessageHistory(historyMap);
+
+					if (!lastConversationKeyname) {
+						handleNewConversation();
+					} else {
+						setCurConversation(lastConversationKeyname);
+						const firstMessages = historyMap[lastConversationKeyname] || [];
+						setMessages(firstMessages);
+					}
+				} else {
+					// If no history, create a new conversation
+					handleNewConversation();
+				}
+			} catch {
+				toast.error('获取对话历史失败，请稍后重试...');
+			} finally {
+				setIsFetchingHistory(false);
+			}
+		};
+		fetchHistory();
+	}, []);
+
+	// 监听消息变化,保存会话到数据库
+	useEffect(() => {
+		const saveConversation = async () => {
+			if (messages.length === 0 || !curConversation || loading) return;
+
+			const currentConversation = conversations.find(c => c.keyname === curConversation);
+			if (currentConversation) {
+				try {
+					await storeConversation(currentConversation.keyname, currentConversation.label, messages);
+					// Update local history
+					setMessageHistory(prev => ({ ...prev, [curConversation]: messages }));
+				} catch {
+					toast.error('保存对话失败，请稍后重试...');
+				}
+			}
+		};
+
+		const debounceSave = setTimeout(saveConversation, 1000); // Debounce to avoid too many requests
+		return () => clearTimeout(debounceSave);
+	}, [messages, curConversation, conversations, loading]);
+
+	// 创建滚动容器的引用
+	const rollContainerRef = useRef<HTMLDivElement>(null);
+	// 用户是否手动滚动的状态
+	const [userScrolled, setUserScrolled] = useState(false);
+
+	// 检测用户是否手动滚动了内容
+	const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+		const element = e.currentTarget;
+		const isAtBottom =
+			Math.abs(element.scrollHeight - element.scrollTop - element.clientHeight) < 35;
+		setUserScrolled(!isAtBottom);
+	};
+
+	// 监听内容变化，自动滚动到底部
+	useEffect(() => {
+		if (messages && rollContainerRef.current && !userScrolled) {
+			const element = rollContainerRef.current;
+			// 使用 requestAnimationFrame 确保DOM更新后再滚动
+			requestAnimationFrame(() => {
+				element.scrollTop = element.scrollHeight;
+			});
+		}
+	}, [messages, userScrolled]);
+
+	//切换到新的会话后自动滚动到底部
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			if (rollContainerRef.current) {
+				rollContainerRef.current.scrollTop = rollContainerRef.current.scrollHeight;
+			}
+		}, 500);
+		return () => clearTimeout(timer);
+	}, [curConversation]);
+
+	// ==================== Nodes ====================
+
+	const isMobile = useIsMobile();
+
+	const chatList = (
+		<div
+			className="overflow-auto h-[calc(100vh-200px)]! w-full scb-thin bg-global"
+			ref={rollContainerRef}
+			onScroll={handleScroll}
+		>
+			{messages?.length ? (
+				/* 消息列表 */
+				<div className={`flex flex-col ${isMobile ? 'px-1' : 'px-10'} gap-5`}>
+					{messages.map((item, index) => {
+						return (
+							<Bubble
+								key={item.id}
+								content={item.content}
+								messageRender={(content: string) => {
+									return <MilkdownEditor text={content} isShwoMode={true} isTypingMode={true} />;
+								}}
+								variant="filled"
+								placement={item.role === 'user' ? 'end' : 'start'}
+								loading={item.loading}
+								typing={
+									index === messages.length - 1 &&
+									item.create_at &&
+									Date.now() - new Date(item.create_at!).getTime() < 10 * 1000
+										? { interval: 25 }
+										: false
+								}
+								avatar={
+									item.role === 'user' ? undefined : (
+										<div
+											className={`flex items-center justify-center ${isMobile ? 'size-7' : 'size-10'}`}
+										>
+											<Logo className={` text-zinc-100 ${isMobile ? 'size-7' : 'size-10'}`} />
+										</div>
+									)
+								}
+								shape="round"
+							></Bubble>
+						);
+					})}
+				</div>
+			) : (
+				<div className="pt-8 w-full flex flex-col sm:flex-row gap-5 sm:justify-center items-center">
+					<Prompts
+						items={[HOT_TOPICS]}
+						styles={{
+							list: { height: '100%' },
+							item: {
+								borderRadius: 12,
+								border: 'none',
+								width: '100%'
+							},
+							subItem: {}
+						}}
+						onItemClick={info => {
+							onSubmit((info.data as any).prompt as string);
+						}}
+						className=""
+					/>
+
+					<Prompts
+						items={[DESIGN_GUIDE]}
+						styles={{
+							item: {
+								borderRadius: 12,
+								border: 'none'
+							},
+							subItem: {}
+						}}
+						onItemClick={info => {
+							onSubmit((info.data as any).prompt as string);
+						}}
+						className=""
+					/>
+				</div>
+			)}
+		</div>
+	);
+	const senderHeader = (
+		<Sender.Header
+			title="Upload File"
+			open={attachmentsOpen}
+			onOpenChange={setAttachmentsOpen}
+			styles={{ content: { padding: 0 } }}
+		>
+			{/* <Attachments
+				beforeUpload={() => false}
+				items={attachedFiles}
+				onChange={info => setAttachedFiles(info.fileList)}
+				placeholder={type =>
+					type === 'drop'
+						? { title: 'Drop file here' }
+						: {
+								icon: <CloudUpload />,
+								title: 'Upload files',
+								description: 'Click or drag files to this area to upload'
+							}
+				}
+			/> */}
+		</Sender.Header>
+	);
+	const chatSender = (
+		<>
+			<div className="w-full flex flex-col justify-center items-center gap-3">
+				{/* 提示词 */}
+				<div className="w-full max-w-[700px] flex justify-end">
+					{/* <Prompts
+					items={SENDER_PROMPTS}
+					onItemClick={info => {
+						onSubmit(info.data.description as string);
+					}}
+					styles={{
+						item: { padding: '6px 12px' }
+					}}
+					className="w-full max-w-[700px]"
+				/> */}
+					<ChangeLLM
+						selector={selectAIChatLLM}
+						setModelAction={setAIChatLLM}
+						className="rounded-[20px] relative top-14 right-15 z-1 dark:text-zinc-300"
+					></ChangeLLM>
+				</div>
+
+				{/* 输入框 */}
+				<Sender
+					value={inputValue}
+					header={senderHeader}
+					onSubmit={() => {
+						onSubmit(inputValue);
+						setInputValue('');
+					}}
+					onChange={setInputValue}
+					onCancel={() => {
+						abortController.current?.abort();
+					}}
+					// prefix={
+					// 	<Button
+					// 		type="text"
+					// 		icon={<PaperClipOutlined style={{ fontSize: 18 }} />}
+					// 		onClick={() => setAttachmentsOpen(!attachmentsOpen)}
+					// 	/>
+					// }
+					loading={loading}
+					className="max-w-[700px]"
+					// allowSpeech
+					actions={(_, info) => {
+						const { SendButton, LoadingButton } = info.components;
+						return (
+							<div className="flex gap-4">
+								{/* <SpeechButton className={styles.speechButton} /> */}
+								{loading ? <LoadingButton type="default" /> : <SendButton type="primary" />}
+							</div>
+						);
+					}}
+					placeholder="问问 Prisma"
+				/>
+			</div>
+			{/* 会话管理 */}
+
+			<div className="bg-global w-full px-3">
+				<Conversations
+					className="relative"
+					handleNewConversation={handleNewConversation}
+					items={conversations.map(c => ({
+						key: c.keyname,
+						label:
+							messageHistory[c.keyname]?.length > 0
+								? messageHistory[c.keyname][0].content.slice(0, 15) + `...`
+								: `新对话 ${
+										dayjs(c.create_at).isSame(dayjs(), 'day')
+											? '今天'
+											: dayjs(c.create_at).format('YYYY-MM-DD')
+									}`,
+						// You might want a 'group' property in your DTO or derive it from create_at
+						group: dayjs(c.create_at).isSame(dayjs(), 'day')
+							? '今天'
+							: dayjs(c.create_at).format('YYYY-MM-DD')
+					}))}
+					activeKey={curConversation}
+					// 会话切换
+					onActiveChange={async val => {
+						if (loading) {
+							abortController.current?.abort();
+						}
+						const newMessages = messageHistory?.[val] || [];
+						setMessages(newMessages);
+						setCurConversation(val);
+						dispatch(setAIChatLastConversation(val));
+					}}
+					menu={conversation => ({
+						items: [
+							{
+								label: '删除',
+								key: 'delete',
+								icon: <Trash className="size-4" />,
+								danger: true,
+								onClick: () => {
+									const newList = conversations.filter(item => item.keyname !== conversation.key);
+									const newKey = newList?.[0]?.keyname;
+									setConversations(newList);
+
+									setTimeout(() => {
+										if (conversation.key === curConversation) {
+											setCurConversation(newKey);
+											dispatch(setAIChatLastConversation(newKey));
+											const newMessages = messageHistory?.[newKey] || [];
+											setMessages(newMessages);
+										}
+									}, 200);
+								}
+							}
+						]
+					})}
+				/>
+			</div>
+		</>
+	);
+
+	// ==================== Render =================
+	return (
+		<AntdThemeHoc>
+			<div className={cn('w-full h-[calc(100vh-100px)]! bg-global font-sans', className)}>
+				{/* {chatSider} */}
+				<div className="h-full w-full flex flex-col justify-center items-center  box-border gap-4 relative">
+					{isFetchingHistory ? <MySpin text="加载对话历史中..." /> : chatList}
+					{chatSender}
+				</div>
+			</div>
+		</AntdThemeHoc>
+	);
+};
+
+export default AIChat;

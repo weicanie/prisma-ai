@@ -29,6 +29,7 @@ const Education = lazy(() => import('../views/Main/Education'));
 const EducationRead = lazy(() => import('../views/Main/Education/Read'));
 const Career = lazy(() => import('../views/Main/Career'));
 const CareerRead = lazy(() => import('../views/Main/Career/Read'));
+const AIChat = lazy(() => import('../views/Main/aichat/AIChat'));
 
 const knowBaseRoute = {
 	path: 'knowledge',
@@ -474,6 +475,15 @@ export const routes = [
 				element: (
 					<UpdateBreadRouter>
 						<EditorContainerPage />
+					</UpdateBreadRouter>
+				)
+			},
+			// 问问 Prisma
+			{
+				path: '/main/aichat',
+				element: (
+					<UpdateBreadRouter>
+						<AIChat />
 					</UpdateBreadRouter>
 				)
 			}

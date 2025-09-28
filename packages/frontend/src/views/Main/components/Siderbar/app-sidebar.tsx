@@ -1,5 +1,6 @@
 import {
 	Book,
+	Bot,
 	FileText,
 	LayoutList,
 	LibraryBig,
@@ -76,6 +77,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				icon: Sparkles,
 				url: '/main/projects',
 				groupLabel: '简历优化'
+			},
+			{
+				title: '问问 Prisma',
+				icon: Bot,
+				url: '/main/aichat'
 			},
 			{
 				title: '匹配岗位',
