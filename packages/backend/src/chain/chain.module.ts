@@ -36,7 +36,8 @@ import { ProjectKonwbaseRetrieveService } from './project-konwbase-retrieve.serv
 		AichatChainService,
 		ProjectChainService,
 		WithFormfixChain,
-		HjmChainService
+		HjmChainService,
+		ProjectKonwbaseRetrieveService
 	]
 })
 export class ChainModule {}

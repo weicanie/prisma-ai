@@ -39,7 +39,8 @@ export enum BusinessEnum {
 	polish = 'polish',
 	mine = 'mine',
 	businessLookup = 'businessLookup',
-	businessPaper = 'businessPaper'
+	businessPaper = 'businessPaper',
+	aichat = 'aichat'
 }
 
 @Injectable()

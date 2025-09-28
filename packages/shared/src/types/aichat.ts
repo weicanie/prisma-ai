@@ -38,6 +38,7 @@ export interface ConversationDto {
 	keyname: string;
 	content: ChatMessage[];
 	user_id: number;
+	project_id: string;
 	create_at: Date | null;
 	update_at: Date | null;
 }
@@ -46,11 +47,12 @@ export interface MessageSendDto<T = AIChatLLM> {
 	message: ChatMessage;
 	keyname: string;
 	modelConfig: UserModelConfig<T>;
+	project_id: string;
 }
 
 export interface ConversationSendDto {
 	keyname: string;
-
+	project_id: string;
 	label: string;
 
 	content: ChatMessage[];

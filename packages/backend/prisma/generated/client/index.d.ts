@@ -7553,6 +7553,7 @@ export namespace Prisma {
 
   export type Ai_conversationMinAggregateOutputType = {
     id: number | null
+    project_id: string | null
     keyname: string | null
     label: string | null
     user_id: number | null
@@ -7562,6 +7563,7 @@ export namespace Prisma {
 
   export type Ai_conversationMaxAggregateOutputType = {
     id: number | null
+    project_id: string | null
     keyname: string | null
     label: string | null
     user_id: number | null
@@ -7571,6 +7573,7 @@ export namespace Prisma {
 
   export type Ai_conversationCountAggregateOutputType = {
     id: number
+    project_id: number
     keyname: number
     label: number
     content: number
@@ -7594,6 +7597,7 @@ export namespace Prisma {
 
   export type Ai_conversationMinAggregateInputType = {
     id?: true
+    project_id?: true
     keyname?: true
     label?: true
     user_id?: true
@@ -7603,6 +7607,7 @@ export namespace Prisma {
 
   export type Ai_conversationMaxAggregateInputType = {
     id?: true
+    project_id?: true
     keyname?: true
     label?: true
     user_id?: true
@@ -7612,6 +7617,7 @@ export namespace Prisma {
 
   export type Ai_conversationCountAggregateInputType = {
     id?: true
+    project_id?: true
     keyname?: true
     label?: true
     content?: true
@@ -7710,6 +7716,7 @@ export namespace Prisma {
 
   export type Ai_conversationGroupByOutputType = {
     id: number
+    project_id: string
     keyname: string
     label: string
     content: JsonValue | null
@@ -7740,6 +7747,7 @@ export namespace Prisma {
 
   export type ai_conversationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    project_id?: boolean
     keyname?: boolean
     label?: boolean
     content?: boolean
@@ -7754,6 +7762,7 @@ export namespace Prisma {
 
   export type ai_conversationSelectScalar = {
     id?: boolean
+    project_id?: boolean
     keyname?: boolean
     label?: boolean
     content?: boolean
@@ -7763,7 +7772,7 @@ export namespace Prisma {
     update_at?: boolean
   }
 
-  export type ai_conversationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "keyname" | "label" | "content" | "history" | "user_id" | "create_at" | "update_at", ExtArgs["result"]["ai_conversation"]>
+  export type ai_conversationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "project_id" | "keyname" | "label" | "content" | "history" | "user_id" | "create_at" | "update_at", ExtArgs["result"]["ai_conversation"]>
   export type ai_conversationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | userDefaultArgs<ExtArgs>
   }
@@ -7775,6 +7784,7 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      project_id: string
       keyname: string
       label: string
       content: Prisma.JsonValue | null
@@ -8153,6 +8163,7 @@ export namespace Prisma {
    */
   interface ai_conversationFieldRefs {
     readonly id: FieldRef<"ai_conversation", 'Int'>
+    readonly project_id: FieldRef<"ai_conversation", 'String'>
     readonly keyname: FieldRef<"ai_conversation", 'String'>
     readonly label: FieldRef<"ai_conversation", 'String'>
     readonly content: FieldRef<"ai_conversation", 'Json'>
@@ -8608,6 +8619,7 @@ export namespace Prisma {
 
   export const Ai_conversationScalarFieldEnum: {
     id: 'id',
+    project_id: 'project_id',
     keyname: 'keyname',
     label: 'label',
     content: 'content',
@@ -8709,6 +8721,7 @@ export namespace Prisma {
 
 
   export const ai_conversationOrderByRelevanceFieldEnum: {
+    project_id: 'project_id',
     keyname: 'keyname',
     label: 'label'
   };
@@ -9168,6 +9181,7 @@ export namespace Prisma {
     OR?: ai_conversationWhereInput[]
     NOT?: ai_conversationWhereInput | ai_conversationWhereInput[]
     id?: IntFilter<"ai_conversation"> | number
+    project_id?: StringFilter<"ai_conversation"> | string
     keyname?: StringFilter<"ai_conversation"> | string
     label?: StringFilter<"ai_conversation"> | string
     content?: JsonNullableFilter<"ai_conversation">
@@ -9180,6 +9194,7 @@ export namespace Prisma {
 
   export type ai_conversationOrderByWithRelationInput = {
     id?: SortOrder
+    project_id?: SortOrder
     keyname?: SortOrder
     label?: SortOrder
     content?: SortOrderInput | SortOrder
@@ -9197,6 +9212,7 @@ export namespace Prisma {
     AND?: ai_conversationWhereInput | ai_conversationWhereInput[]
     OR?: ai_conversationWhereInput[]
     NOT?: ai_conversationWhereInput | ai_conversationWhereInput[]
+    project_id?: StringFilter<"ai_conversation"> | string
     label?: StringFilter<"ai_conversation"> | string
     content?: JsonNullableFilter<"ai_conversation">
     history?: JsonNullableFilter<"ai_conversation">
@@ -9208,6 +9224,7 @@ export namespace Prisma {
 
   export type ai_conversationOrderByWithAggregationInput = {
     id?: SortOrder
+    project_id?: SortOrder
     keyname?: SortOrder
     label?: SortOrder
     content?: SortOrderInput | SortOrder
@@ -9227,6 +9244,7 @@ export namespace Prisma {
     OR?: ai_conversationScalarWhereWithAggregatesInput[]
     NOT?: ai_conversationScalarWhereWithAggregatesInput | ai_conversationScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"ai_conversation"> | number
+    project_id?: StringWithAggregatesFilter<"ai_conversation"> | string
     keyname?: StringWithAggregatesFilter<"ai_conversation"> | string
     label?: StringWithAggregatesFilter<"ai_conversation"> | string
     content?: JsonNullableWithAggregatesFilter<"ai_conversation">
@@ -9610,6 +9628,7 @@ export namespace Prisma {
   }
 
   export type ai_conversationCreateInput = {
+    project_id: string
     keyname: string
     label: string
     content?: NullableJsonNullValueInput | InputJsonValue
@@ -9621,6 +9640,7 @@ export namespace Prisma {
 
   export type ai_conversationUncheckedCreateInput = {
     id?: number
+    project_id: string
     keyname: string
     label: string
     content?: NullableJsonNullValueInput | InputJsonValue
@@ -9631,6 +9651,7 @@ export namespace Prisma {
   }
 
   export type ai_conversationUpdateInput = {
+    project_id?: StringFieldUpdateOperationsInput | string
     keyname?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     content?: NullableJsonNullValueInput | InputJsonValue
@@ -9642,6 +9663,7 @@ export namespace Prisma {
 
   export type ai_conversationUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
+    project_id?: StringFieldUpdateOperationsInput | string
     keyname?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     content?: NullableJsonNullValueInput | InputJsonValue
@@ -9653,6 +9675,7 @@ export namespace Prisma {
 
   export type ai_conversationCreateManyInput = {
     id?: number
+    project_id: string
     keyname: string
     label: string
     content?: NullableJsonNullValueInput | InputJsonValue
@@ -9663,6 +9686,7 @@ export namespace Prisma {
   }
 
   export type ai_conversationUpdateManyMutationInput = {
+    project_id?: StringFieldUpdateOperationsInput | string
     keyname?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     content?: NullableJsonNullValueInput | InputJsonValue
@@ -9673,6 +9697,7 @@ export namespace Prisma {
 
   export type ai_conversationUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
+    project_id?: StringFieldUpdateOperationsInput | string
     keyname?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     content?: NullableJsonNullValueInput | InputJsonValue
@@ -10197,6 +10222,7 @@ export namespace Prisma {
 
   export type ai_conversationCountOrderByAggregateInput = {
     id?: SortOrder
+    project_id?: SortOrder
     keyname?: SortOrder
     label?: SortOrder
     content?: SortOrder
@@ -10213,6 +10239,7 @@ export namespace Prisma {
 
   export type ai_conversationMaxOrderByAggregateInput = {
     id?: SortOrder
+    project_id?: SortOrder
     keyname?: SortOrder
     label?: SortOrder
     user_id?: SortOrder
@@ -10222,6 +10249,7 @@ export namespace Prisma {
 
   export type ai_conversationMinOrderByAggregateInput = {
     id?: SortOrder
+    project_id?: SortOrder
     keyname?: SortOrder
     label?: SortOrder
     user_id?: SortOrder
@@ -10845,6 +10873,7 @@ export namespace Prisma {
   }
 
   export type ai_conversationCreateWithoutUserInput = {
+    project_id: string
     keyname: string
     label: string
     content?: NullableJsonNullValueInput | InputJsonValue
@@ -10855,6 +10884,7 @@ export namespace Prisma {
 
   export type ai_conversationUncheckedCreateWithoutUserInput = {
     id?: number
+    project_id: string
     keyname: string
     label: string
     content?: NullableJsonNullValueInput | InputJsonValue
@@ -10940,6 +10970,7 @@ export namespace Prisma {
     OR?: ai_conversationScalarWhereInput[]
     NOT?: ai_conversationScalarWhereInput | ai_conversationScalarWhereInput[]
     id?: IntFilter<"ai_conversation"> | number
+    project_id?: StringFilter<"ai_conversation"> | string
     keyname?: StringFilter<"ai_conversation"> | string
     label?: StringFilter<"ai_conversation"> | string
     content?: JsonNullableFilter<"ai_conversation">
@@ -11453,6 +11484,7 @@ export namespace Prisma {
 
   export type ai_conversationCreateManyUserInput = {
     id?: number
+    project_id: string
     keyname: string
     label: string
     content?: NullableJsonNullValueInput | InputJsonValue
@@ -11481,6 +11513,7 @@ export namespace Prisma {
   }
 
   export type ai_conversationUpdateWithoutUserInput = {
+    project_id?: StringFieldUpdateOperationsInput | string
     keyname?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     content?: NullableJsonNullValueInput | InputJsonValue
@@ -11491,6 +11524,7 @@ export namespace Prisma {
 
   export type ai_conversationUncheckedUpdateWithoutUserInput = {
     id?: IntFieldUpdateOperationsInput | number
+    project_id?: StringFieldUpdateOperationsInput | string
     keyname?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     content?: NullableJsonNullValueInput | InputJsonValue
@@ -11501,6 +11535,7 @@ export namespace Prisma {
 
   export type ai_conversationUncheckedUpdateManyWithoutUserInput = {
     id?: IntFieldUpdateOperationsInput | number
+    project_id?: StringFieldUpdateOperationsInput | string
     keyname?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     content?: NullableJsonNullValueInput | InputJsonValue

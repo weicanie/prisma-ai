@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import type { ConversationSendDto, MessageSendDto, UserInfoFromToken } from '@prisma-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { AichatService } from './aichat.service';
@@ -9,8 +9,11 @@ export class AichatController {
 
 	@Post()
 	@RequireLogin()
-	async sendMessageToAI(@Body() messageDto: MessageSendDto) {
-		return await this.aichatService.sendMessageToAI(messageDto);
+	async sendMessageToAI(
+		@Body() messageDto: MessageSendDto,
+		@UserInfo() userInfo: UserInfoFromToken
+	) {
+		return await this.aichatService.sendMessageToAI(messageDto, userInfo);
 	}
 
 	@Post('store')
@@ -22,9 +25,15 @@ export class AichatController {
 		return await this.aichatService.storeConversation(userInfo, conversationDto);
 	}
 
-	@Get()
+	/**
+	 * 获取某一项目经验下的对话历史列表
+	 */
+	@Get('/:project_id')
 	@RequireLogin()
-	async getConversationList(@UserInfo() userInfo: UserInfoFromToken) {
-		return await this.aichatService.getConversationList(userInfo);
+	async getConversationList(
+		@UserInfo() userInfo: UserInfoFromToken,
+		@Param('project_id') project_id: string
+	) {
+		return await this.aichatService.getConversationList(userInfo, project_id);
 	}
 }

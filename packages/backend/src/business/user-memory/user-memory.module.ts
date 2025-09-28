@@ -11,6 +11,7 @@ import { UserMemoryService } from './user-memory.service';
 		ChainModule
 	],
 	controllers: [UserMemoryController],
-	providers: [UserMemoryService]
+	providers: [UserMemoryService],
+	exports: [UserMemoryService]
 })
 export class UserMemoryModule {}

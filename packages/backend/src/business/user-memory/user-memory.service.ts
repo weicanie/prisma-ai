@@ -113,4 +113,9 @@ export class UserMemoryService implements OnModuleInit {
 			}\n`;
 		return infoString.trim();
 	}
+
+	async getUserMemory(userId: string) {
+		const userMemory = await this.userMemoryModel.findOne({ 'userInfo.userId': userId }).lean();
+		return userMemory;
+	}
 }

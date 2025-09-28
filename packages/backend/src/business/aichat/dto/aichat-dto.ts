@@ -29,4 +29,8 @@ export class MessageSendDto {
 
 	@IsObject()
 	modelConfig: UserModelConfigDto;
+
+	@IsString()
+	@MaxLength(255)
+	project_id: string;
 }

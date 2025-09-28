@@ -30,6 +30,7 @@ export class PromptService implements OnModuleInit {
 	private generateMindmapT: string;
 	private createUserMemoryT: string;
 	private updateUserMemoryT: string;
+	private aichatSystemT: string;
 	private readonly fewShotMap: Record<string, string> = {};
 
 	constructor() {}
@@ -64,7 +65,8 @@ export class PromptService implements OnModuleInit {
 				),
 				this._readPromptFile(path.join(process.cwd(), 'data/prompt/question/generate_mindmap.md')),
 				this._readPromptFile(path.join(process.cwd(), 'data/prompt/user_memory/create.md')),
-				this._readPromptFile(path.join(process.cwd(), 'data/prompt/user_memory/update.md'))
+				this._readPromptFile(path.join(process.cwd(), 'data/prompt/user_memory/update.md')),
+				this._readPromptFile(path.join(process.cwd(), 'data/prompt/aichat/system.md'))
 			];
 			const [
 				polishT,
@@ -84,7 +86,8 @@ export class PromptService implements OnModuleInit {
 				generateMindmapP,
 				generateMindmapT,
 				createUserMemoryT,
-				updateUserMemoryT
+				updateUserMemoryT,
+				aichatSystemT
 			] = await Promise.all(promises);
 			this.polishT = polishT as string;
 			this.mineT = mineT as string;
@@ -104,6 +107,7 @@ export class PromptService implements OnModuleInit {
 			this.createUserMemoryT = createUserMemoryT as string;
 			this.updateUserMemoryT = updateUserMemoryT as string;
 			this.fewShotMap['mine'] = mineFewShot as string;
+			this.aichatSystemT = aichatSystemT as string;
 		} catch (error) {
 			console.error('Failed to read prompt files', error);
 		}
@@ -333,5 +337,12 @@ export class PromptService implements OnModuleInit {
 			[`${role.HUMAN}`, '{input}']
 		]);
 		return prompt;
+	}
+
+	/**
+	 * rag chat prompt
+	 */
+	async aichatSystemPrompt() {
+		return ChatPromptTemplate.fromTemplate(this.aichatSystemT);
 	}
 }

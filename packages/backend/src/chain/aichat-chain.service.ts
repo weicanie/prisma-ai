@@ -1,6 +1,5 @@
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import { PromptTemplate } from '@langchain/core/prompts';
 import { RunnableLambda, RunnablePassthrough, RunnableSequence } from '@langchain/core/runnables';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -8,6 +7,7 @@ import { AIChatLLM, UserMemoryT, UserModelConfig, userMemorySchema } from '@pris
 import { BufferMemory } from 'langchain/memory';
 import { ModelService } from '../model/model.service';
 import { PromptService } from '../prompt/prompt.service';
+import { AichatChainContext } from '../type/aichat';
 import { RubustStructuredOutputParser } from '../utils/RubustStructuredOutputParser';
 import { ChainService } from './chain.service';
 @Injectable()
@@ -19,13 +19,6 @@ export class AichatChainService {
 		public chainService: ChainService
 	) {}
 
-	chatPrompt = PromptTemplate.fromTemplate(`
-		你是一个乐于助人的助手。尽你所能回答所有问题。
-		{history}
-		Human: {input}
-		AI:
-		`);
-
 	/**
 	 * 用于多轮对话,感知上下文。默认使用 ConversationSummaryMemory
 	 * @param prompt 传递给llm的prompt
@@ -35,8 +28,9 @@ export class AichatChainService {
 	async createChatChain(
 		keyname: string,
 		modelConfig: UserModelConfig<AIChatLLM>,
-		prompt = this.chatPrompt
+		aichatChainContext: AichatChainContext
 	) {
+		const prompt = await this.promptService.aichatSystemPrompt();
 		const chatHistory = this.modelService.getChatHistory(keyname); //使用自定义的chatHistory
 		//FIXME 使用ConversationSummaryMemory时,会话记录会丢失,是chatHistory的保存逻辑没支持
 		// const memory = new ConversationSummaryMemory({
@@ -77,7 +71,11 @@ export class AichatChainService {
 				history: async (input: any, options: any) => {
 					const vars = await memory.loadMemoryVariables({ input }); //EntityMemory需要传入input
 					return vars.history || vars.summary || '';
-				}
+				},
+				project_data: () => aichatChainContext.project_data,
+				project_doc: () => aichatChainContext.project_doc,
+				project_code: () => aichatChainContext.project_code,
+				user_memory: () => aichatChainContext.user_memory
 			},
 			prompt,
 			new RunnablePassthrough({

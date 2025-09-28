@@ -28,6 +28,7 @@ export class ProjectKonwbaseRetrieveService {
 				case BusinessEnum.mine:
 				case BusinessEnum.businessLookup:
 				case BusinessEnum.businessPaper:
+				case BusinessEnum.aichat:
 					return `${await this.retrievedDocsFromProjectInfo(i)}\n\n${await this.retrievedDocsFromLightspot(i)}`;
 			}
 		} catch (e) {
@@ -157,6 +158,7 @@ export class ProjectKonwbaseRetrieveService {
 					return '无';
 				case BusinessEnum.polish:
 				case BusinessEnum.mine:
+				case BusinessEnum.aichat:
 					return this.retrievedCodesFromLightspot(i);
 				case BusinessEnum.businessLookup:
 				case BusinessEnum.businessPaper:

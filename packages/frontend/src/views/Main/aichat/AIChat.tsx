@@ -1,8 +1,10 @@
 import {
 	selectAIChatLastConversation,
 	selectAIChatLLM,
+	selectAIChatProjectId,
 	setAIChatLastConversation,
-	setAIChatLLM
+	setAIChatLLM,
+	setAIChatProjectId
 } from '@/store/aichat';
 import { Bubble, Prompts, Sender } from '@ant-design/x';
 import type { ChatMessage, ConversationDto } from '@prisma-ai/shared';
@@ -14,13 +16,17 @@ import { toast } from 'sonner';
 import AntdThemeHoc from '../../../components/AntdThemeHoc';
 import { useIsMobile } from '../../../hooks/use-mobile';
 import { cn } from '../../../lib/utils';
+import { useCustomQuery } from '../../../query/config';
+import { ProjectQueryKey } from '../../../query/keys';
 import { getConversationList, sendMessageToAI, storeConversation } from '../../../services/aichat';
+import { findAllProjects } from '../../../services/project';
 import { ChangeLLM } from './components/ChangeLLM';
 import MilkdownEditor from './components/Editor';
 import { MySpin } from './components/MySpin';
 import { DESIGN_GUIDE, HOT_TOPICS } from './config';
 import Conversations from './Conversations';
 import { Logo } from './Logo';
+import Projects from './Projects';
 
 interface AIChatProps {
 	className?: string;
@@ -28,6 +34,8 @@ interface AIChatProps {
 
 const AIChat: React.FC<AIChatProps> = ({ className }) => {
 	const abortController = useRef<AbortController | null>(null);
+	const project_id = useSelector(selectAIChatProjectId);
+	const dispatch = useDispatch();
 
 	// ==================== State ====================
 	//所有对话的历史记录
@@ -45,7 +53,6 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 	const [loading, setLoading] = useState(false);
 	const [messages, setMessages] = useState<ChatMessage[]>([]);
 
-	const dispatch = useDispatch();
 	const lastConversationKeyname = useSelector(selectAIChatLastConversation);
 
 	// ==================== Event ====================
@@ -75,9 +82,14 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 		setMessages(currentHistory);
 
 		try {
-			const res = await sendMessageToAI(userMessage, curConversation, {
-				llm_type: model
-			});
+			const res = await sendMessageToAI(
+				userMessage,
+				curConversation,
+				{
+					llm_type: model
+				},
+				project_id
+			);
 			const aiMessage: ChatMessage = {
 				id: `assistant-${Date.now()}`,
 				role: 'assistant',
@@ -108,7 +120,8 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 			content: [],
 			user_id: -1,
 			create_at: new Date(),
-			update_at: new Date()
+			update_at: new Date(),
+			project_id
 		};
 
 		// Add to UI immediately for better UX
@@ -120,53 +133,13 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 
 		// Save the empty conversation to backend to get a persistent entry
 		try {
-			await storeConversation(newConversation.keyname, newConversation.label, []);
+			await storeConversation(newConversation.keyname, newConversation.label, [], project_id);
 		} catch {
 			toast.error('创建新对话失败，请稍后重试...');
 			// Revert state if API call fails
 			setConversations(prev => prev.filter(c => c.keyname !== uuid));
 		}
-	}, [loading]);
-
-	// 组件挂载时获取会话列表
-	useEffect(() => {
-		const fetchHistory = async () => {
-			setIsFetchingHistory(true);
-			try {
-				const res = await getConversationList();
-				const historyConversations = res.data;
-				setConversations(historyConversations);
-
-				if (historyConversations.length > 0) {
-					const historyMap = historyConversations.reduce(
-						(acc, curr) => {
-							acc[curr.keyname] = curr.content;
-							return acc;
-						},
-						{} as Record<string, ChatMessage[]>
-					);
-
-					setMessageHistory(historyMap);
-
-					if (!lastConversationKeyname) {
-						handleNewConversation();
-					} else {
-						setCurConversation(lastConversationKeyname);
-						const firstMessages = historyMap[lastConversationKeyname] || [];
-						setMessages(firstMessages);
-					}
-				} else {
-					// If no history, create a new conversation
-					handleNewConversation();
-				}
-			} catch {
-				toast.error('获取对话历史失败，请稍后重试...');
-			} finally {
-				setIsFetchingHistory(false);
-			}
-		};
-		fetchHistory();
-	}, []);
+	}, [loading, project_id]);
 
 	// 监听消息变化,保存会话到数据库
 	useEffect(() => {
@@ -176,7 +149,12 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 			const currentConversation = conversations.find(c => c.keyname === curConversation);
 			if (currentConversation) {
 				try {
-					await storeConversation(currentConversation.keyname, currentConversation.label, messages);
+					await storeConversation(
+						currentConversation.keyname,
+						currentConversation.label,
+						messages,
+						project_id
+					);
 					// Update local history
 					setMessageHistory(prev => ({ ...prev, [curConversation]: messages }));
 				} catch {
@@ -187,7 +165,7 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 
 		const debounceSave = setTimeout(saveConversation, 1000); // Debounce to avoid too many requests
 		return () => clearTimeout(debounceSave);
-	}, [messages, curConversation, conversations, loading]);
+	}, [messages, curConversation, conversations, loading, project_id]);
 
 	// 创建滚动容器的引用
 	const rollContainerRef = useRef<HTMLDivElement>(null);
@@ -223,9 +201,66 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 		return () => clearTimeout(timer);
 	}, [curConversation]);
 
-	// ==================== Nodes ====================
-
 	const isMobile = useIsMobile();
+
+	// 获取项目经验数据
+	const { data, status } = useCustomQuery([ProjectQueryKey.Projects], findAllProjects);
+
+	// 组件挂载时获取会话列表
+	useEffect(() => {
+		const fetchHistory = async () => {
+			setIsFetchingHistory(true);
+			try {
+				const res = await getConversationList(project_id);
+				const historyConversations = res.data;
+				setConversations(historyConversations);
+
+				if (historyConversations.length > 0) {
+					const historyMap = historyConversations.reduce(
+						(acc, curr) => {
+							acc[curr.keyname] = curr.content;
+							return acc;
+						},
+						{} as Record<string, ChatMessage[]>
+					);
+
+					setMessageHistory(historyMap);
+
+					if (!lastConversationKeyname) {
+						handleNewConversation();
+					} else {
+						setCurConversation(lastConversationKeyname);
+						const firstMessages = historyMap[lastConversationKeyname] || [];
+						setMessages(firstMessages);
+					}
+				} else {
+					// If no history, create a new conversation
+					handleNewConversation();
+				}
+			} catch {
+				toast.error('获取对话历史失败，请稍后重试...');
+			} finally {
+				setIsFetchingHistory(false);
+			}
+		};
+		if (project_id) {
+			fetchHistory();
+		}
+	}, [project_id]);
+
+	// 设置默认选中第一个项目
+	useEffect(() => {
+		const projects = data?.data;
+		if (projects && projects.length > 0) {
+			dispatch(setAIChatProjectId(projects[0].id));
+		}
+	}, [data, dispatch]);
+	if (status === 'pending') return <div></div>;
+	if (status === 'error') return <div>错误:{data?.message}</div>;
+
+	console.log('project_id', project_id);
+
+	// ==================== Nodes ====================
 
 	const chatList = (
 		<div
@@ -331,6 +366,17 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 	const chatSender = (
 		<>
 			<div className="w-full flex flex-col justify-center items-center gap-3">
+				{/* 项目选择组件 */}
+				<div className="w-full max-w-[700px] relative top-12 z-1">
+					<Projects
+						className="relative"
+						onProjectSelect={projectId => {
+							// 项目选择后可以在这里添加额外的逻辑
+							console.log('选中项目:', projectId);
+						}}
+					/>
+				</div>
+
 				{/* 提示词 */}
 				<div className="w-full max-w-[700px] flex justify-end">
 					{/* <Prompts
@@ -390,21 +436,25 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 				<Conversations
 					className="relative"
 					handleNewConversation={handleNewConversation}
-					items={conversations.map(c => ({
-						key: c.keyname,
-						label:
-							messageHistory[c.keyname]?.length > 0
-								? messageHistory[c.keyname][0].content.slice(0, 15) + `...`
-								: `新对话 ${
-										dayjs(c.create_at).isSame(dayjs(), 'day')
-											? '今天'
-											: dayjs(c.create_at).format('YYYY-MM-DD')
-									}`,
-						// You might want a 'group' property in your DTO or derive it from create_at
-						group: dayjs(c.create_at).isSame(dayjs(), 'day')
-							? '今天'
-							: dayjs(c.create_at).format('YYYY-MM-DD')
-					}))}
+					items={
+						conversations
+							? conversations.map(c => ({
+									key: c.keyname,
+									label:
+										messageHistory[c.keyname]?.length > 0
+											? messageHistory[c.keyname][0].content.slice(0, 15) + `...`
+											: `新对话 ${
+													dayjs(c.create_at).isSame(dayjs(), 'day')
+														? '今天'
+														: dayjs(c.create_at).format('YYYY-MM-DD')
+												}`,
+									// You might want a 'group' property in your DTO or derive it from create_at
+									group: dayjs(c.create_at).isSame(dayjs(), 'day')
+										? '今天'
+										: dayjs(c.create_at).format('YYYY-MM-DD')
+								}))
+							: []
+					}
 					activeKey={curConversation}
 					// 会话切换
 					onActiveChange={async val => {

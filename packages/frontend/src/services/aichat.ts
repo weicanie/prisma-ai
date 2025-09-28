@@ -13,8 +13,8 @@ import { instance } from './config';
  * 获取会话列表
  * @returns 会话列表
  */
-export async function getConversationList() {
-	const res = await instance.get<ServerDataFormat<ConversationDto[]>>('/aichat');
+export async function getConversationList(project_id: string) {
+	const res = await instance.get<ServerDataFormat<ConversationDto[]>>(`/aichat/${project_id}`);
 	return res.data;
 }
 
@@ -27,9 +27,10 @@ export async function getConversationList() {
 export async function sendMessageToAI<T = AIChatLLM>(
 	message: ChatMessage,
 	keyname: string,
-	modelConfig: UserModelConfig<T>
+	modelConfig: UserModelConfig<T>,
+	project_id: string
 ) {
-	const body = { message, keyname, modelConfig };
+	const body = { message, keyname, modelConfig, project_id };
 	const res = await instance.post<MessageSendDto<T>, ServerDataFormat<string>>('/aichat', body);
 	return res.data;
 }
@@ -41,8 +42,13 @@ export async function sendMessageToAI<T = AIChatLLM>(
  * @param content 会话内容
  * @returns 会话
  */
-export async function storeConversation(key: string, label: string, content: ChatMessage[]) {
-	const body = { keyname: key, label, content };
+export async function storeConversation(
+	key: string,
+	label: string,
+	content: ChatMessage[],
+	project_id: string
+) {
+	const body = { keyname: key, label, content, project_id };
 	const res = await instance.post<ConversationSendDto, ServerDataFormat<string>>(
 		'/aichat/store',
 		body

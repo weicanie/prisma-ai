@@ -175,6 +175,7 @@ exports.Prisma.Project_file_chunkScalarFieldEnum = {
 
 exports.Prisma.Ai_conversationScalarFieldEnum = {
   id: 'id',
+  project_id: 'project_id',
   keyname: 'keyname',
   label: 'label',
   content: 'content',
@@ -243,6 +244,7 @@ exports.Prisma.QueryMode = {
 };
 
 exports.Prisma.ai_conversationOrderByRelevanceFieldEnum = {
+  project_id: 'project_id',
   keyname: 'keyname',
   label: 'label'
 };
