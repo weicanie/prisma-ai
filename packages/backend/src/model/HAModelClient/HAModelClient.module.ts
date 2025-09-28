@@ -2,8 +2,7 @@ import { Module } from '@nestjs/common';
 import { ChatHistoryService } from '../chat_history.service';
 import { HAModelClientService } from './HAModelClient.service';
 import { CircuitBreakerService } from './services/circuit-breaker.service';
-import { RateLimiterService } from './services/rate-limiter.service';
-import { RequestQueueService } from './services/request-queue.service';
+import { FactoryService } from './services/factory.service';
 import { RetryService } from './services/retry.service';
 @Module({
 	controllers: [],
@@ -12,16 +11,7 @@ import { RetryService } from './services/retry.service';
 		ChatHistoryService,
 		CircuitBreakerService, //熔断器
 		RetryService, //指数退避重试
-		//请求队列
-		{
-			provide: RequestQueueService,
-			useFactory: () => new RequestQueueService(5) //最大并发为5
-		},
-		//限流
-		{
-			provide: RateLimiterService,
-			useFactory: () => new RateLimiterService(60) //默认限制每分钟最多60次请求
-		}
+		FactoryService //限流器和请求队列工厂服务
 	],
 	exports: [HAModelClientService],
 	imports: []

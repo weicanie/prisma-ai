@@ -1,102 +1,108 @@
 import { BaseListChatMessageHistory } from '@langchain/core/chat_history';
 import {
 	BaseMessage,
-	StoredMessage,
 	mapChatMessagesToStoredMessages,
 	mapStoredMessagesToChatMessages
 } from '@langchain/core/messages';
-import { Injectable } from '@nestjs/common';
-import * as fs from 'fs';
-import * as path from 'path';
+import { Injectable, Logger } from '@nestjs/common';
+import { DbService } from '../DB/db.service';
 
-interface JSONChatHistoryInput {
-	sessionId: string;
-	dir: string;
+interface DBChatHistoryInput {
+	keyname: string;
+	dbService: DbService;
 }
-/**
- * 自定义的ChatHistory, 支持BufferMemory、BufferWindowMemory 、ConversationBufferMemory
- * @description langchain 的 memory 内部会维护一个ChatHistory,如果不传入则使用内置的ChatHistory,传入则使用自定义的ChatHistory
- * @description ConversationSummaryBufferMemory、EntityMemory的支持需要更复杂的实现（用ai）
- */
-class JSONChatHistory extends BaseListChatMessageHistory {
+
+class DBChatHistory extends BaseListChatMessageHistory {
 	lc_namespace = ['langchain', 'stores', 'message']; //为了序列化为JSON再反序列化时能匹配之前的类
-
-	sessionId: string;
-	dir: string;
-
-	constructor(fields: JSONChatHistoryInput) {
+	keyname: string;
+	dbService: DbService;
+	constructor(fields: DBChatHistoryInput) {
 		super(fields);
-		this.sessionId = fields.sessionId;
-		this.dir = fields.dir;
+		this.keyname = fields.keyname;
+		this.dbService = fields.dbService;
 	}
-	/* memory调用 */
+
+	/**
+	 * 获取对话历史
+	 * @returns 对话历史
+	 */
 	async getMessages(): Promise<BaseMessage[]> {
-		const filePath = path.join(this.dir, `${this.sessionId}.json`);
-		try {
-			if (!fs.existsSync(filePath)) {
-				this.saveMessagesToFile([]);
-				return [];
+		const data = await this.dbService.ai_conversation.findFirst({
+			where: {
+				keyname: this.keyname
 			}
+		});
 
-			const data = fs.readFileSync(filePath, { encoding: 'utf-8' });
-			const storedMessages = JSON.parse(data) as StoredMessage[];
-			//反序列化
-			return mapStoredMessagesToChatMessages(storedMessages);
-		} catch (error) {
-			console.error(`Failed to read chat history from ${filePath}`, error);
-			return [];
+		let history = data?.history;
+		if (!history) {
+			this.saveMessagesToDB(data?.id!, []);
+			history = '[]';
 		}
+
+		let messagesJSON: any;
+		try {
+			messagesJSON = JSON.parse(history as string);
+		} catch (error) {
+			messagesJSON = [];
+		}
+
+		const messages = mapStoredMessagesToChatMessages(messagesJSON);
+		return messages;
 	}
 
-	/* memory调用 */
+	/**
+	 * 添加对话记录
+	 * @param messages 对话记录
+	 */
 	async addMessages(messages: BaseMessage[]): Promise<void> {
 		const existingMessages = await this.getMessages();
 		const allMessages = existingMessages.concat(messages);
-		await this.saveMessagesToFile(allMessages);
+
+		const data = await this.dbService.ai_conversation.findFirst({
+			where: {
+				keyname: this.keyname
+			}
+		});
+
+		await this.saveMessagesToDB(data?.id!, allMessages);
 	}
 
 	async addMessage(message: BaseMessage): Promise<void> {
 		const messages = await this.getMessages();
+
+		const data = await this.dbService.ai_conversation.findFirst({
+			where: {
+				keyname: this.keyname
+			}
+		});
+
 		messages.push(message);
-		await this.saveMessagesToFile(messages);
+		await this.saveMessagesToDB(data?.id!, messages);
 	}
 
-	async clear(): Promise<void> {
-		const filePath = path.join(this.dir, `${this.sessionId}.json`);
-		try {
-			fs.unlinkSync(filePath);
-		} catch (error) {
-			console.error(`Failed to clear chat history from ${filePath}`, error);
-		}
-	}
-
-	async saveMessagesToFile(messages: BaseMessage[]): Promise<void> {
-		const filePath = path.join(this.dir, `${this.sessionId}.json`);
-		//确保目录存在
-		if (!fs.existsSync(this.dir)) {
-			fs.mkdirSync(this.dir, { recursive: true }); //创建目录
-		}
-		//对 messages 进行序列化，然后用写文件到 json 文件中
-		const serializedMessages = mapChatMessagesToStoredMessages(messages);
-		try {
-			fs.writeFileSync(filePath, JSON.stringify(serializedMessages, null, 2), {
-				encoding: 'utf-8'
-			});
-		} catch (error) {
-			console.error(`Failed to save chat history to ${filePath}`, error);
-		}
+	async saveMessagesToDB(id: number, messages: BaseMessage[]): Promise<void> {
+		const messagesJSON = mapChatMessagesToStoredMessages(messages);
+		await this.dbService.ai_conversation.update({
+			where: { id },
+			data: { history: JSON.stringify(messagesJSON) as any }
+		});
 	}
 }
-//* 文件存储 -> 数据库存储
 @Injectable()
 export class ChatHistoryService {
-	getChatHistory(
-		sessionId = 'json_chat_history',
-		dir = path.join(process.cwd(), 'data/chat_history_data')
-	) {
-		return new JSONChatHistory({
-			sessionId,
-			dir
+	logger = new Logger('ChatHistoryService');
+	keyname: string;
+	constructor(private readonly dbService: DbService) {}
+
+	/**
+	 * 获取对话历史管理器
+	 * @param keyname 对话唯一标识
+	 * @returns 对话历史管理器
+	 */
+	getChatHistory(keyname: string) {
+		return new DBChatHistory({
+			keyname,
+			dbService: this.dbService
 		});
 	}
 }
