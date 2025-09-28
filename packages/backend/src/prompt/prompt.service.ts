@@ -28,6 +28,8 @@ export class PromptService implements OnModuleInit {
 	private interviewSummaryTransformT: string;
 	private generateMindmapP: string;
 	private generateMindmapT: string;
+	private createUserMemoryT: string;
+	private updateUserMemoryT: string;
 	private readonly fewShotMap: Record<string, string> = {};
 
 	constructor() {}
@@ -60,7 +62,9 @@ export class PromptService implements OnModuleInit {
 				this._readPromptFile(
 					path.join(process.cwd(), 'data/prompt/interview-summary/generate_mindmap.md')
 				),
-				this._readPromptFile(path.join(process.cwd(), 'data/prompt/question/generate_mindmap.md'))
+				this._readPromptFile(path.join(process.cwd(), 'data/prompt/question/generate_mindmap.md')),
+				this._readPromptFile(path.join(process.cwd(), 'data/prompt/user_memory/create.md')),
+				this._readPromptFile(path.join(process.cwd(), 'data/prompt/user_memory/update.md'))
 			];
 			const [
 				polishT,
@@ -78,7 +82,9 @@ export class PromptService implements OnModuleInit {
 				interviewSummaryGenerateT,
 				interviewSummaryTransformT,
 				generateMindmapP,
-				generateMindmapT
+				generateMindmapT,
+				createUserMemoryT,
+				updateUserMemoryT
 			] = await Promise.all(promises);
 			this.polishT = polishT as string;
 			this.mineT = mineT as string;
@@ -95,6 +101,8 @@ export class PromptService implements OnModuleInit {
 			this.interviewSummaryTransformT = interviewSummaryTransformT as string;
 			this.generateMindmapT = generateMindmapT as string;
 			this.generateMindmapP = generateMindmapP as string;
+			this.createUserMemoryT = createUserMemoryT as string;
+			this.updateUserMemoryT = updateUserMemoryT as string;
 			this.fewShotMap['mine'] = mineFewShot as string;
 		} catch (error) {
 			console.error('Failed to read prompt files', error);
@@ -301,6 +309,28 @@ export class PromptService implements OnModuleInit {
 {questions}
 \`\`\``
 			]
+		]);
+		return prompt;
+	}
+
+	/**
+	 * 创建用户记忆的prompt
+	 */
+	async createUserMemoryPrompt() {
+		const prompt = ChatPromptTemplate.fromMessages([
+			[`${role.SYSTEM}`, this.createUserMemoryT],
+			[`${role.HUMAN}`, '{input}']
+		]);
+		return prompt;
+	}
+
+	/**
+	 * 更新用户记忆的prompt
+	 */
+	async updateUserMemoryPrompt() {
+		const prompt = ChatPromptTemplate.fromMessages([
+			[`${role.SYSTEM}`, this.updateUserMemoryT],
+			[`${role.HUMAN}`, '{input}']
 		]);
 		return prompt;
 	}

@@ -1,3 +1,4 @@
+import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 import { Injectable } from '@nestjs/common';
 import {
 	KnowledgeNamespace,
@@ -16,6 +17,9 @@ export class ProjectKonwbaseRetrieveService {
 		private readonly projectCodeVDBService: ProjectCodeVDBService
 	) {}
 
+	/**
+	 * 知识库集成：检索项目（projectDto）相关文档
+	 */
 	async retrievedDomainDocs(i: ProjectProcessingInput, business: BusinessEnum) {
 		try {
 			switch (business) {
@@ -210,6 +214,51 @@ export class ProjectKonwbaseRetrieveService {
 		</相关代码>
 		`;
 
+		return code;
+	}
+
+	/**
+	 * 知识库集成：根据用户输入检索相关文档
+	 */
+	async retrievedDomainDocsFromUserInput(input: string, i: ProjectProcessingInput) {
+		const textSplitter = new RecursiveCharacterTextSplitter({
+			chunkSize: 500,
+			chunkOverlap: 150
+		});
+		const inputTetxs = await textSplitter.splitText(input);
+		const namespaces = [
+			KnowledgeNamespace.PROJECT_DOC_USER,
+			KnowledgeNamespace.TECH_DOC,
+			KnowledgeNamespace.OTHER,
+			KnowledgeNamespace.USER_PROJECT_DEEPWIKI
+		];
+		const docs = await asyncMap(inputTetxs, async text => {
+			return await this.queryDoc(text, i, namespaces);
+		});
+		const doc = `
+		<相关文档参考>
+		${docs.join('\n')}
+		</相关文档参考>
+		`;
+		return doc;
+	}
+	/**
+	 * 知识库集成：根据用户输入检索相关代码
+	 */
+	async retrievedProjectCodesFromUserInput(input: string, i: ProjectProcessingInput) {
+		const textSplitter = new RecursiveCharacterTextSplitter({
+			chunkSize: 500,
+			chunkOverlap: 150
+		});
+		const inputTetxs = await textSplitter.splitText(input);
+		const codes = await asyncMap(inputTetxs, async text => {
+			return await this.queryCode(text, i);
+		});
+		const code = `
+		<相关代码参考>
+		${codes.join('\n')}
+		</相关代码参考>
+		`;
 		return code;
 	}
 }

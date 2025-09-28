@@ -151,26 +151,7 @@ exports.Prisma.ArticleScalarFieldEnum = {
   hard: 'hard',
   anki_note_id: 'anki_note_id',
   time_create: 'time_create',
-  time_update: 'time_update',
-  interview_summary_id: 'interview_summary_id'
-};
-
-exports.Prisma.Interview_summaryScalarFieldEnum = {
-  id: 'id',
-  post_link: 'post_link',
-  content_hash: 'content_hash',
-  interview_type: 'interview_type',
-  turn: 'turn',
-  company_name: 'company_name',
-  company_scale: 'company_scale',
-  job_type: 'job_type',
-  job_name: 'job_name',
-  job_link: 'job_link',
-  content: 'content',
-  own: 'own',
-  user_id: 'user_id',
-  create_at: 'create_at',
-  update_at: 'update_at'
+  time_update: 'time_update'
 };
 
 exports.Prisma.User_projectScalarFieldEnum = {
@@ -197,6 +178,7 @@ exports.Prisma.Ai_conversationScalarFieldEnum = {
   keyname: 'keyname',
   label: 'label',
   content: 'content',
+  history: 'history',
   user_id: 'user_id',
   create_at: 'create_at',
   update_at: 'update_at'
@@ -236,19 +218,6 @@ exports.Prisma.articleOrderByRelevanceFieldEnum = {
   hard: 'hard'
 };
 
-exports.Prisma.interview_summaryOrderByRelevanceFieldEnum = {
-  post_link: 'post_link',
-  content_hash: 'content_hash',
-  interview_type: 'interview_type',
-  turn: 'turn',
-  company_name: 'company_name',
-  company_scale: 'company_scale',
-  job_type: 'job_type',
-  job_name: 'job_name',
-  job_link: 'job_link',
-  content: 'content'
-};
-
 exports.Prisma.user_projectOrderByRelevanceFieldEnum = {
   project_name: 'project_name'
 };
@@ -283,7 +252,6 @@ exports.Prisma.ModelName = {
   user: 'user',
   user_article: 'user_article',
   article: 'article',
-  interview_summary: 'interview_summary',
   user_project: 'user_project',
   project_file: 'project_file',
   project_file_chunk: 'project_file_chunk',

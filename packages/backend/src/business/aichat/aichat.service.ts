@@ -1,14 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-import {
-	ChatMessage,
-	ConversationDto,
-	ConversationSendDto,
-	UserInfoFromToken
-} from '@prisma-ai/shared';
+import { ConversationDto, ConversationSendDto, UserInfoFromToken } from '@prisma-ai/shared';
 import { AichatChainService } from '../../chain/aichat-chain.service';
 import { ChainService } from '../../chain/chain.service';
 import { DbService } from '../../DB/db.service';
+import { MessageSendDto } from './dto/aichat-dto';
 
 @Injectable()
 export class AichatService {
@@ -20,24 +16,24 @@ export class AichatService {
 
 	private logger = new Logger();
 
-	async sendMessageToAI(message: ChatMessage) {
+	async sendMessageToAI(messageDto: MessageSendDto) {
+		const { keyname, message, modelConfig } = messageDto;
 		try {
-			const chain = await this.aichatChainService.createChatChain();
+			const chain = await this.aichatChainService.createChatChain(keyname, modelConfig);
 			const answer = await chain.invoke({ input: message.content });
 			return answer;
 		} catch (error) {
-			this.logger.error(error, 'AichatService', 'sendMessageToAI');
+			this.logger.error(error.stack);
 			throw error;
 		}
 	}
 
 	async storeConversation(userInfo: UserInfoFromToken, conversationDto: ConversationSendDto) {
 		const { userId } = userInfo;
-		const { key, label } = conversationDto;
-		const content = conversationDto.content;
+		const { keyname, label, content } = conversationDto;
 		const values = await this.dbService.ai_conversation.findMany({
 			where: {
-				keyname: String(key),
+				keyname: String(keyname),
 				user_id: +userId
 			}
 		});
@@ -46,7 +42,7 @@ export class AichatService {
 		if (!values[0]?.content && content.length === 0) {
 			return await this.dbService.ai_conversation.create({
 				data: {
-					keyname: String(key),
+					keyname: String(keyname),
 					label,
 					content: JSON.stringify(content),
 					user_id: +userId
@@ -62,7 +58,7 @@ export class AichatService {
 			//更新
 			return await this.dbService.ai_conversation.updateMany({
 				where: {
-					keyname: String(key),
+					keyname: String(keyname),
 					user_id: +userId
 				},
 				data: {
@@ -73,7 +69,7 @@ export class AichatService {
 			//新增
 			return await this.dbService.ai_conversation.create({
 				data: {
-					keyname: String(key),
+					keyname: String(keyname),
 					label,
 					content: JSON.stringify(content),
 					user_id: +userId

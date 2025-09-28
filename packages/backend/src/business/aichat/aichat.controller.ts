@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { ConversationSendDto, MessageSendDto, UserInfoFromToken } from '@prisma-ai/shared';
+import type { ConversationSendDto, MessageSendDto, UserInfoFromToken } from '@prisma-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { AichatService } from './aichat.service';
 
@@ -8,9 +8,9 @@ export class AichatController {
 	constructor(private readonly aichatService: AichatService) {}
 
 	@Post()
+	@RequireLogin()
 	async sendMessageToAI(@Body() messageDto: MessageSendDto) {
-		const { message } = messageDto;
-		return await this.aichatService.sendMessageToAI(message);
+		return await this.aichatService.sendMessageToAI(messageDto);
 	}
 
 	@Post('store')

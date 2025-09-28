@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserInfoFromToken } from '@prisma-ai/shared';
 import { Model } from 'mongoose';
+import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { CreateEducationDto } from './dto/create-education.dto';
 import { UpdateEducationDto } from './dto/update-education.dto';
 import { Education, EducationDocument } from './entities/education.entity';
@@ -10,7 +11,8 @@ import { Education, EducationDocument } from './entities/education.entity';
 export class EducationService {
 	constructor(
 		@InjectModel(Education.name)
-		private readonly educationModel: Model<EducationDocument>
+		private readonly educationModel: Model<EducationDocument>,
+		private readonly eventBusService: EventBusService
 	) {}
 
 	// 创建教育经历
@@ -21,6 +23,11 @@ export class EducationService {
 			...rest,
 			startDate: new Date(rest.startDate),
 			endDate: rest.endDate ? new Date(rest.endDate) : undefined
+		});
+		/* 更新用户记忆 */
+		this.eventBusService.emit(EventList.userMemoryChange, {
+			userinfo: userInfo,
+			education: createEducationDto
 		});
 		return created;
 	}

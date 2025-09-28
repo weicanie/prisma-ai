@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { JobStatus, JobVo, MatchedJobVo, UserInfoFromToken } from '@prisma-ai/shared';
 import { Model } from 'mongoose';
+import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { Job, JobDocument } from './entities/job.entity';
@@ -15,14 +16,23 @@ export interface PaginatedJobsResult {
 
 @Injectable()
 export class JobService {
-	constructor(@InjectModel(Job.name) private jobModel: Model<JobDocument>) {}
+	constructor(
+		@InjectModel(Job.name) private jobModel: Model<JobDocument>,
+		private readonly eventBusService: EventBusService
+	) {}
 
 	async create(createJobDto: CreateJobDto, userInfoToken: UserInfoFromToken): Promise<Job> {
 		const createdJob = new this.jobModel({
 			...createJobDto,
 			userInfo: userInfoToken
 		});
-		return createdJob.save();
+		const savedJob = await createdJob.save();
+		/* 更新用户记忆 */
+		this.eventBusService.emit(EventList.userMemoryChange, {
+			userinfo: userInfoToken,
+			job: createJobDto
+		});
+		return savedJob;
 	}
 
 	async findAll(
@@ -63,6 +73,11 @@ export class JobService {
 			throw new NotFoundException(`Job with ID "${jobId}" not found or access denied`);
 		}
 		this.jobModel.updateOne({ _id: jobId }, { $set: { userInfo } }, { new: true }).exec();
+		/* 更新用户记忆 */
+		this.eventBusService.emit(EventList.userMemoryChange, {
+			userinfo: userInfo,
+			job: job.toObject() as CreateJobDto
+		});
 		return job;
 	}
 
