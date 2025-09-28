@@ -12,7 +12,9 @@ export enum EventList {
 	chunkGenerated = 'chunkGenerated',
 	SBERT_INIT = 'SBERT_INIT',
 	/* user memory */
-	userMemoryChange = 'userMemoryChange'
+	userMemoryChange = 'userMemoryChange',
+	/* cache invalidate */
+	cacheProjectRetrievedDocAndCodeInvalidate = 'cacheProjectRetrievedDocAndCodeInvalidate' //项目检索到的文档和代码的缓存失效
 }
 
 /* 事件名到payload类型的映射 */
@@ -32,6 +34,8 @@ export interface Event_Payload {
 	[EventList.SBERT_INIT]: void;
 	/* user memory */
 	[EventList.userMemoryChange]: UserMemoryAction;
+	/* cache invalidate */
+	[EventList.cacheProjectRetrievedDocAndCodeInvalidate]: { projectName: string };
 }
 
 /**

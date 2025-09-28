@@ -11,6 +11,7 @@ import {
 } from '@prisma-ai/shared';
 import { Model, Types } from 'mongoose';
 import * as path from 'path';
+import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { OssService } from '../../oss/oss.service';
 import { cloneProjectScriptPath, projectsDirPath } from '../../utils/constants';
 import { executeShellScript } from '../../utils/execute_shell_script';
@@ -26,7 +27,8 @@ export class KnowledgebaseService {
 	constructor(
 		private ossService: OssService,
 		private knowledgeVDBService: KnowledgeVDBService,
-		private projectCodeVDBService: ProjectCodeVDBService
+		private projectCodeVDBService: ProjectCodeVDBService,
+		private eventBusService: EventBusService
 	) {}
 
 	/**
@@ -81,6 +83,10 @@ export class KnowledgebaseService {
 			await this.knowledgebaseModel.findByIdAndUpdate(saved._id, { vectorIds });
 		}
 
+		// 失效项目检索到的文档和代码的缓存
+		this.eventBusService.emit(EventList.cacheProjectRetrievedDocAndCodeInvalidate, {
+			projectName: createKnowledgeDto.projectName
+		});
 		return embedKnowledgeDto as ProjectKnowledgeVo;
 	}
 
@@ -104,6 +110,10 @@ export class KnowledgebaseService {
 			projectPath,
 			crypto.randomUUID()
 		);
+		// 失效项目检索到的文档和代码的缓存
+		this.eventBusService.emit(EventList.cacheProjectRetrievedDocAndCodeInvalidate, {
+			projectName: projectName
+		});
 	}
 
 	async findAll(
@@ -195,5 +205,9 @@ export class KnowledgebaseService {
 			userInfo,
 			existingkn.projectName
 		);
+		// 失效项目检索到的文档和代码的缓存
+		this.eventBusService.emit(EventList.cacheProjectRetrievedDocAndCodeInvalidate, {
+			projectName: existingkn.projectName
+		});
 	}
 }

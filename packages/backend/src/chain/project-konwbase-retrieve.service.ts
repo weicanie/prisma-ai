@@ -5,6 +5,7 @@ import {
 	KnowledgeVDBService
 } from '../business/prisma-agent/data_base/konwledge_vdb.service';
 import { ProjectCodeVDBService } from '../business/prisma-agent/data_base/project_code_vdb.service';
+import { CacheService, L1_DEFAULT_TTL, L2_DEFAULT_TTL } from '../cache/cache.service';
 import { asyncMap } from '../utils/awaitMap';
 import { BusinessEnum, ProjectProcessingInput } from './project-chain.service';
 /**
@@ -14,13 +15,26 @@ import { BusinessEnum, ProjectProcessingInput } from './project-chain.service';
 export class ProjectKonwbaseRetrieveService {
 	constructor(
 		private readonly knowledgeVDBService: KnowledgeVDBService,
-		private readonly projectCodeVDBService: ProjectCodeVDBService
+		private readonly projectCodeVDBService: ProjectCodeVDBService,
+		private readonly cacheService: CacheService
 	) {}
+
+	async retrievedDomainDocs(i: ProjectProcessingInput, business: BusinessEnum) {
+		const project_doc_cache = await this.cacheService.getOrSet(
+			this.cacheService.getProjectRetrievedDocKey(i.project.info.name),
+			async () => {
+				return await this._retrievedDomainDocs(i, business);
+			},
+			L1_DEFAULT_TTL.LONG,
+			L2_DEFAULT_TTL.LONG
+		);
+		return project_doc_cache;
+	}
 
 	/**
 	 * 知识库集成：检索项目（projectDto）相关文档
 	 */
-	async retrievedDomainDocs(i: ProjectProcessingInput, business: BusinessEnum) {
+	async _retrievedDomainDocs(i: ProjectProcessingInput, business: BusinessEnum) {
 		try {
 			switch (business) {
 				case BusinessEnum.lookup:
@@ -148,10 +162,22 @@ export class ProjectKonwbaseRetrieveService {
 		return doc;
 	}
 
+	async retrievedProjectCodes(i: ProjectProcessingInput, business: BusinessEnum) {
+		const project_code_cache = await this.cacheService.getOrSet(
+			this.cacheService.getProjectRetrievedCodeKey(i.project.info.name),
+			async () => {
+				return await this.retrievedProjectCodes(i, business);
+			},
+			L1_DEFAULT_TTL.LONG,
+			L2_DEFAULT_TTL.LONG
+		);
+		return project_code_cache;
+	}
+
 	/**
 	 * 知识库集成：检索项目（projectDto）相关代码
 	 */
-	async retrievedProjectCodes(i: ProjectProcessingInput, business: BusinessEnum) {
+	async _retrievedProjectCodes(i: ProjectProcessingInput, business: BusinessEnum) {
 		try {
 			switch (business) {
 				case BusinessEnum.lookup:

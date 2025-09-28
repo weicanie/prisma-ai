@@ -9,6 +9,7 @@ import {
 import fs from 'fs';
 import { Model } from 'mongoose';
 import path from 'path';
+import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { TaskQueueService } from '../../task-queue/task-queue.service';
 import { PersistentTask } from '../../type/taskqueue';
 import { deepwikiDownOutputPath, deepwikiDownScriptPath } from '../../utils/constants';
@@ -53,7 +54,8 @@ export class ProjectDeepWikiService implements OnModuleInit {
 	constructor(
 		private readonly knowledgeVDBService: KnowledgeVDBService,
 		private readonly knowledgebaseService: KnowledgebaseService,
-		private readonly taskQueueService: TaskQueueService
+		private readonly taskQueueService: TaskQueueService,
+		private readonly eventBusService: EventBusService
 	) {}
 
 	onModuleInit() {
@@ -136,5 +138,9 @@ export class ProjectDeepWikiService implements OnModuleInit {
 			}
 		};
 		await this.taskQueueService.saveTask(newTask);
+		// 失效项目检索到的文档和代码的缓存
+		this.eventBusService.emit(EventList.cacheProjectRetrievedDocAndCodeInvalidate, {
+			projectName: dto.projectName
+		});
 	}
 }
