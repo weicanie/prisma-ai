@@ -501,6 +501,7 @@ export const path_name: Record<string, string> = {
 
 	'/main/projects': '项目经验',
 	'/main/projects/action': 'AI优化',
+	'/main/aichat': '问问 Prisma',
 
 	'/main/hjm/job': '匹配岗位',
 	'/main/hjm/job/match-jobs': '简历匹配岗位',

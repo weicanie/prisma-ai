@@ -118,11 +118,18 @@ const Action: React.FC<ActionProps> = () => {
 
 	// 根据项目状态确定可用操作
 	const getAvailableActions = (status: ProjectStatus) => {
-		const availableActions = ['mine', 'collaborate', 'businessLookup', 'businessPaper'];
+		const availableActions = ['mine', 'collaborate'];
+		// lookup后才能polish
 		if (status === ProjectStatus.lookuped) {
 			availableActions.push('polish');
 		} else {
 			availableActions.push('lookup');
+		}
+		// 'businessLookup'后才能'businessPaper'
+		if (status === ProjectStatus.businessLookuped) {
+			availableActions.push('businessPaper');
+		} else {
+			availableActions.push('businessLookup');
 		}
 		return availableActions;
 	};

@@ -6,7 +6,7 @@ import {
 	setAIChatLLM,
 	setAIChatProjectId
 } from '@/store/aichat';
-import { Bubble, Prompts, Sender } from '@ant-design/x';
+import { Bubble, Sender } from '@ant-design/x';
 import type { ChatMessage, ConversationDto } from '@prisma-ai/shared';
 import dayjs from 'dayjs';
 import { Trash } from 'lucide-react';
@@ -23,10 +23,11 @@ import { findAllProjects } from '../../../services/project';
 import { ChangeLLM } from './components/ChangeLLM';
 import MilkdownEditor from './components/Editor';
 import { MySpin } from './components/MySpin';
-import { DESIGN_GUIDE, HOT_TOPICS } from './config';
+// import { DESIGN_GUIDE, HOT_TOPICS } from './config'; // 暂时注释掉，未来可能会用到
 import Conversations from './Conversations';
 import { Logo } from './Logo';
 import Projects from './Projects';
+import TipsCard from './TipsCard';
 
 interface AIChatProps {
 	className?: string;
@@ -304,38 +305,8 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 					})}
 				</div>
 			) : (
-				<div className="pt-8 w-full flex flex-col sm:flex-row gap-5 sm:justify-center items-center">
-					<Prompts
-						items={[HOT_TOPICS]}
-						styles={{
-							list: { height: '100%' },
-							item: {
-								borderRadius: 12,
-								border: 'none',
-								width: '100%'
-							},
-							subItem: {}
-						}}
-						onItemClick={info => {
-							onSubmit((info.data as any).prompt as string);
-						}}
-						className=""
-					/>
-
-					<Prompts
-						items={[DESIGN_GUIDE]}
-						styles={{
-							item: {
-								borderRadius: 12,
-								border: 'none'
-							},
-							subItem: {}
-						}}
-						onItemClick={info => {
-							onSubmit((info.data as any).prompt as string);
-						}}
-						className=""
-					/>
+				<div className="w-full flex justify-center items-center">
+					<TipsCard className="w-full max-w-5xl" />
 				</div>
 			)}
 		</div>
