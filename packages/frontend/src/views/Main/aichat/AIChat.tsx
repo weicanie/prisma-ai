@@ -23,7 +23,6 @@ import { findAllProjects } from '../../../services/project';
 import { ChangeLLM } from './components/ChangeLLM';
 import MilkdownEditor from './components/Editor';
 import { MySpin } from './components/MySpin';
-// import { DESIGN_GUIDE, HOT_TOPICS } from './config'; // 暂时注释掉，未来可能会用到
 import Conversations from './Conversations';
 import { Logo } from './Logo';
 import Projects from './Projects';
@@ -207,7 +206,7 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 	// 获取项目经验数据
 	const { data, status } = useCustomQuery([ProjectQueryKey.Projects], findAllProjects);
 
-	// 组件挂载时获取会话列表
+	// 在project_id获取后，获取会话列表
 	useEffect(() => {
 		const fetchHistory = async () => {
 			setIsFetchingHistory(true);
@@ -249,7 +248,7 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 		}
 	}, [project_id]);
 
-	// 设置默认选中第一个项目
+	// 在project_id获取后，设置默认选中第一个项目
 	useEffect(() => {
 		const projects = data?.data;
 		if (projects && projects.length > 0) {
