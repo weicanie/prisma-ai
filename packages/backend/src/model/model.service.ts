@@ -61,13 +61,16 @@ type EmbedOpenAIFields = Partial<OpenAIEmbeddingsParams> & {
 @Injectable()
 export class ModelService {
 	/**
-	 * @description 模型池: config -> HAModelClient模型实例 的哈希表
+	 * 模型池: config -> HAModelClient模型实例 的哈希表
+	 *
 	 * @description config 相同则复用模型实例,否则创建新的模型实例
 	 */
 	private models: Map<string, HAModelClient> = new Map();
 
 	/**
-	 * @description 模型池: config -> ChatOpenAI模型实例 的哈希表
+	 * 模型池: config -> ChatOpenAI模型实例 的哈希表
+	 *
+	 * @description 需要langsmith的完整可观测性时使用（HAModelClient模型实例可观测性支持有限）
 	 * @description config 相同则复用模型实例,否则创建新的模型实例
 	 */
 	private rawModels: Map<string, ChatOpenAI | ChatDeepSeek | ChatGoogleGenerativeAI> = new Map();

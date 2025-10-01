@@ -209,7 +209,7 @@ const Knowledges: React.FC<KnowledgesProps<ProjectKnowledgeVo>> = ({
 	return (
 		<>
 			<PageHeader
-				title="项目知识库"
+				title="知识库"
 				description="上传项目相关信息来和 Prisma 共享, Prisma 在思考时会使用这些信息, 这很重要 "
 			>
 				<div className="flex flex-wrap gap-3">
