@@ -12,11 +12,11 @@ const UserMemory: React.FC<UserMemoryProps> = () => {
 		<>
 			<PageHeader
 				title="用户记忆"
-				description="管理您的个人画像和求职方向，基于MECE原则设计的结构化信息"
+				description="Prisma知道的你: 根据你提供的职业技能、项目经验、工作经历、教育经历以及追踪的岗位等信息，自动生成对你的记忆"
 			>
 				<UserMemoryUpdate />
 			</PageHeader>
-			<div className="pl-10 pr-10">
+			<div className="max-h-[calc(100vh-250px)] overflow-auto scb-thin pl-10 pr-10">
 				<UserMemoryRead />
 			</div>
 		</>

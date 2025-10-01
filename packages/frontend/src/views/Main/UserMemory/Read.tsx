@@ -1,14 +1,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import React, { useState } from 'react';
-import { toast } from 'sonner';
+import React from 'react';
 import { useCustomQuery } from '../../../query/config';
 import { UserMemoryQueryKey } from '../../../query/keys';
 import { getUserMemory } from '../../../services/user_memory';
 
 const UserMemoryRead: React.FC = () => {
-	const [isJsonDialogOpen, setIsJsonDialogOpen] = useState(false);
-
 	const { data, status } = useCustomQuery([UserMemoryQueryKey.UserMemory], getUserMemory);
 
 	if (status === 'pending') return <div className="p-4">加载中...</div>;
@@ -17,18 +14,6 @@ const UserMemoryRead: React.FC = () => {
 	const userMemory = data?.data;
 
 	if (!userMemory) return <div className="text-center text-gray-500 p-4">没有找到用户记忆数据</div>;
-
-	// 复制JSON到剪贴板的函数
-	const copyJsonToClipboard = async () => {
-		try {
-			const jsonString = JSON.stringify(userMemory, null, 2);
-			await navigator.clipboard.writeText(jsonString);
-			toast.success('JSON已复制到剪贴板');
-			setIsJsonDialogOpen(false);
-		} catch (error) {
-			toast.error('复制失败');
-		}
-	};
 
 	// 渲染标签数组的通用组件
 	const renderBadges = (items: string[], emptyText: string = '暂无数据') => (
@@ -52,7 +37,7 @@ const UserMemoryRead: React.FC = () => {
 				<Card>
 					<CardHeader>
 						<CardTitle className="text-lg">资历背景 (Qualifications)</CardTitle>
-						<CardDescription>候选人的可量化、可验证的客观背景信息</CardDescription>
+						<CardDescription>你是谁</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div>
@@ -60,7 +45,7 @@ const UserMemoryRead: React.FC = () => {
 							{renderBadges(userMemory.userProfile.qualifications.experience_level)}
 						</div>
 						<div>
-							<h4 className="font-medium mb-2">学历要求</h4>
+							<h4 className="font-medium mb-2">学历</h4>
 							{renderBadges(userMemory.userProfile.qualifications.education_degree)}
 						</div>
 						<div>
@@ -82,7 +67,7 @@ const UserMemoryRead: React.FC = () => {
 				<Card>
 					<CardHeader>
 						<CardTitle className="text-lg">能力模型 (Skills Matrix)</CardTitle>
-						<CardDescription>候选人完成工作所需掌握的知识和技能集合</CardDescription>
+						<CardDescription>你会什么</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div>
@@ -112,7 +97,7 @@ const UserMemoryRead: React.FC = () => {
 				<Card>
 					<CardHeader>
 						<CardTitle className="text-lg">职责范围 (Responsibilities)</CardTitle>
-						<CardDescription>候选人过往经历中应体现出的工作内容和项目特征</CardDescription>
+						<CardDescription>你做过什么</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div>
@@ -134,7 +119,7 @@ const UserMemoryRead: React.FC = () => {
 				<Card>
 					<CardHeader>
 						<CardTitle className="text-lg">求职偏好 (Job Preferences)</CardTitle>
-						<CardDescription>您的职业发展目标和期望</CardDescription>
+						<CardDescription>你想找什么工作</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div>
