@@ -179,6 +179,34 @@ export class ProjectCodeVDBService implements OnModuleInit {
 	}
 
 	/**
+	 * 从向量数据库中检索代码片段
+	 * @param query - 查询字符串
+	 * @param topK - 返回最匹配的文档数量
+	 * @param userId - 用户ID
+	 * @param projectName - 项目名称
+	 * @returns {Promise<Document[]>} - 匹配的文档片段
+	 */
+	async retrieveCodeChunksWithScoreFilter(
+		query: string,
+		topK: number,
+		userId: string,
+		projectName: string,
+		minScore = 0.6
+	): Promise<string> {
+		const namespace = this._getRepoNamespace(projectName, userId);
+		const embeddings = this.modelService.getEmbedModelOpenAI();
+		const chunks = await this.vectorStoreService.similaritySearchWithScore(
+			ProjectCodeIndex.CODEBASE,
+			embeddings,
+			query,
+			topK,
+			namespace
+		);
+		const chunksFiltered = chunks.filter(chunk => chunk[1] > minScore).map(chunk => chunk[0]);
+		return chunksFiltered.map(doc => `${doc.metadata.source}\n${doc.pageContent}`).join('\n');
+	}
+
+	/**
 	 * 核心：项目代码向量化及增量更新任务的处理器
 	 * @param task - 任务对象
 	 * @private

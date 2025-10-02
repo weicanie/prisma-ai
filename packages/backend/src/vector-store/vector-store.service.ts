@@ -122,6 +122,29 @@ export class VectorStoreService {
 	}
 
 	/**
+	 * 执行相似度搜索并返回分数
+	 * @param indexName 索引名
+	 * @param embeddings 用于向量化的嵌入模型
+	 * @param query 查询字符串
+	 * @param topK 返回结果数量
+	 * @param namespace 命名空间
+	 * @returns 返回一个包含文档和其对应分数的元组 [Document, number][]
+	 */
+	async similaritySearchWithScore(
+		indexName: string,
+		embeddings: Embeddings,
+		query: string,
+		topK: number = 3,
+		namespace?: string
+	): Promise<[Document, number][]> {
+		const index = this.pinecone.Index(indexName);
+		const vectorStore = new PineconeStore(embeddings, { pineconeIndex: index, namespace });
+
+		const results = await vectorStore.similaritySearchWithScore(query, topK);
+		return results;
+	}
+
+	/**
 	 * 从向量索引中删除向量
 	 * @param vectorIds 要删除的向量 ID 列表
 	 * @param indexName 索引名
