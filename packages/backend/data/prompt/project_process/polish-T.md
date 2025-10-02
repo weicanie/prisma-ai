@@ -111,6 +111,11 @@
 
 </example>
 
+## 注意
+
+**根据用户情况（即用户信息标签中的信息）进行亮点的改进、问题的解决与STAR法则的应用！**
+**毕竟项目经验最终用于用户的简历，如果和用户情况不符，用户将会不满意，你会被立即辞退！**
+
 </methodology>
 
 <output_format>
@@ -175,6 +180,11 @@ Node.js/Express, Redis, Docker, Nginx, Elasticsearch, Kibana
 <knowledge>
 
 ## 相关知识
+
+**用户信息:**
+<用户信息>
+{userMemory}
+</用户信息>
 
 **前同事的反思和建议:**
 {reflection}

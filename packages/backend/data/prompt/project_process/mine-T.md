@@ -71,6 +71,11 @@
 
 - 注意：你可以参考用户提供的项目介绍、项目技术栈，但不能修改这些信息。
 
+## 注意
+
+**根据用户情况给出解决方案（即用户信息标签中的信息）！**
+**毕竟项目经验最终用于用户的简历，如果和用户情况不符，用户将会不满意，你会被立即辞退！**
+
 </methodology>
 
 <examples>
@@ -148,6 +153,11 @@ React18, React Router, ReduxToolKit(RTK), axios, AntDesign, MaterialUI, styled-c
 <knowledge>
 
 ## 相关知识
+
+**用户信息:**
+<用户信息>
+{userMemory}
+</用户信息>
 
 **前同事的反思和建议:**
 {reflection}

@@ -7,17 +7,20 @@ import {
 	ResumeVo,
 	SelectedLLM,
 	UserFeedback,
-	UserInfoFromToken
+	UserInfoFromToken,
+	userMemoryJsonToText
 } from '@prisma-ai/shared';
 import { z } from 'zod';
-import { ModelService } from '../model/model.service';
-import { ThoughtModelService } from '../model/thought-model.service';
 import { KnowledgeVDBService } from '../business/prisma-agent/data_base/konwledge_vdb.service';
 import { ProjectCodeVDBService } from '../business/prisma-agent/data_base/project_code_vdb.service';
 import { ReflectAgentService } from '../business/prisma-agent/reflect_agent/reflect_agent.service';
+import { UserMemoryService } from '../business/user-memory/user-memory.service';
+import { ModelService } from '../model/model.service';
+import { ThoughtModelService } from '../model/thought-model.service';
 import { PromptService } from '../prompt/prompt.service';
 import { RubustStructuredOutputParser } from '../utils/RubustStructuredOutputParser';
 import { ChainService } from './chain.service';
+
 export interface ResumeMatchJobProcessingInput {
 	resume: ResumeVo;
 	job: JobVo;
@@ -37,7 +40,8 @@ export class HjmChainService {
 		private readonly knowledgeVDBService: KnowledgeVDBService,
 		private readonly projectCodeVDBService: ProjectCodeVDBService,
 		private readonly reflectAgentService: ReflectAgentService,
-		public thoughtModelService: ThoughtModelService
+		public thoughtModelService: ThoughtModelService,
+		private userMemoryService: UserMemoryService
 	) {}
 	/**
 	 * 创建一个集成了知识库检索和反思功能的项目处理链。
@@ -50,9 +54,14 @@ export class HjmChainService {
 		promptGetter: () => Promise<ChatPromptTemplate>,
 		outputSchema: z.Schema,
 		stream: boolean,
-		model: SelectedLLM
+		model: SelectedLLM,
+		userId: string
 	) {
 		const businessPrompt = await promptGetter();
+
+		const userMemory = await this.userMemoryService.getUserMemory(userId);
+		const userMemoryText = userMemory ? userMemoryJsonToText(userMemory) : '';
+
 		let llm: any;
 		switch (model) {
 			case SelectedLLM.gemini_2_5_pro:
@@ -84,6 +93,7 @@ export class HjmChainService {
 				// 接收 ResumeMatchJobProcessingInput 作为输入，为 Prompt 准备所有插槽变量
 				input: (i: ResumeMatchJobProcessingInput) =>
 					JSON.stringify({ resume: i.resume, job: i.job }),
+				userMemory: userMemoryText,
 				chat_history: () => '', // 暂不处理多轮对话历史
 				instructions: () => outputParser.getFormatInstructions(),
 				// 2. 反思逻辑：如果用户要求，则生成反思内容
@@ -129,9 +139,6 @@ export class HjmChainService {
 			stream,
 			model
 		);
-		if (stream) {
-			return chain;
-		}
 		return chain;
 	}
 }

@@ -5,13 +5,11 @@ import type { ChatOpenAI } from '@langchain/openai';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
-	autoflowSchema,
 	hjmRerankSchema,
 	JobVo,
 	LLMJobDto,
 	llmJobSchema,
 	projectSchema,
-	ResumeVo,
 	RoadFromDiffDto,
 	roadFromDiffSchema
 } from '@prisma-ai/shared';
@@ -195,44 +193,6 @@ export class ChainService implements WithFormfixChain {
 	}
 
 	/**
-	 * 将文本转换为包含技能和项目经验的JSON
-	 */
-	async textToJsonChain() {
-		const outputParser = RubustStructuredOutputParser.fromZodSchema(autoflowSchema);
-		const prompt = await this.promptService.textToJsonPrompt();
-		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-chat');
-
-		const chain = RunnableSequence.from([
-			{
-				input: (input: { input: string }) => input.input,
-				instructions: () => outputParser.getFormatInstructions()
-			},
-			prompt,
-			llm,
-			outputParser
-		]);
-		return chain;
-	}
-
-	/**
-	 * 将所有分析结果整合为一份报告
-	 */
-	async resultsToTextChain() {
-		const prompt = await this.promptService.resultsToTextPrompt();
-		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-chat');
-
-		const chain = RunnableSequence.from([
-			{
-				input: (input: { input: string }) => input.input
-			},
-			prompt,
-			llm
-			// 直接返回llm的string输出
-		]);
-		return chain;
-	}
-
-	/**
 	 * 输入的文本项目经验（单个）转化为JSON
 	 * @description 1、用户导入现有的项目经验,则通过llm转为JSON
 	 * @description 2、用户以表单提交项目经验,则直接就是JSON
@@ -375,9 +335,9 @@ export class ChainService implements WithFormfixChain {
 
 		const chain = RunnableSequence.from([
 			{
-				input: (input: { resume: ResumeVo; jobs: JobVo[] }) => {
+				input: (input: { userMemory: string; jobs: JobVo[] }) => {
 					return JSON.stringify({
-						用户简历: input.resume,
+						用户信息: input.userMemory,
 						岗位列表: input.jobs
 					});
 				},

@@ -1,6 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { AgentModule } from '../agent/agent.module';
 import { PrismaAgentModule } from '../business/prisma-agent/prisma-agent.module';
+import { UserMemoryModule } from '../business/user-memory/user-memory.module';
 import { CacheModule } from '../cache/cache.module';
 import { ClientModule } from '../mcp-client/mcp-client.module';
 import { ModelModule } from '../model/model.module';
@@ -31,6 +32,7 @@ import { ProjectKonwbaseRetrieveService } from './project-konwbase-retrieve.serv
 		PromptModule,
 		ClientModule,
 		CacheModule,
+		UserMemoryModule,
 		forwardRef(() => PrismaAgentModule)
 	],
 	exports: [

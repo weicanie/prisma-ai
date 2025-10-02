@@ -17,7 +17,8 @@ import { HjmService } from './hjm.service';
 		JobModule,
 		ResumeModule,
 		ChainModule,
-		TaskQueueModule
+		TaskQueueModule,
+		UserMemoryModule
 	],
 	controllers: [HjmController],
 	providers: [HjmService],

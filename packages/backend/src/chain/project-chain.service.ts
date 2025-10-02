@@ -13,13 +13,15 @@ import {
 	skillsToMarkdown,
 	StreamingChunk,
 	UserFeedback,
-	UserInfoFromToken
+	UserInfoFromToken,
+	userMemoryJsonToText
 } from '@prisma-ai/shared';
 import { z } from 'zod';
 import { ModelService } from '../model/model.service';
 import { ThoughtModelService } from '../model/thought-model.service';
 
 import { ReflectAgentService } from '../business/prisma-agent/reflect_agent/reflect_agent.service';
+import { UserMemoryService } from '../business/user-memory/user-memory.service';
 import { PromptService } from '../prompt/prompt.service';
 import { RubustStructuredOutputParser } from '../utils/RubustStructuredOutputParser';
 import { ChainService } from './chain.service';
@@ -51,7 +53,8 @@ export class ProjectChainService {
 		public chainService: ChainService,
 		private readonly reflectAgentService: ReflectAgentService,
 		public thoughtModelService: ThoughtModelService,
-		private readonly projectKonwbaseRetrieveService: ProjectKonwbaseRetrieveService
+		private readonly projectKonwbaseRetrieveService: ProjectKonwbaseRetrieveService,
+		private userMemoryService: UserMemoryService
 	) {}
 
 	/**
@@ -66,9 +69,14 @@ export class ProjectChainService {
 		outputSchema: z.Schema,
 		stream: boolean,
 		business: BusinessEnum,
-		model: SelectedLLM
+		model: SelectedLLM,
+		userId: string
 	) {
 		const businessPrompt = await promptGetter();
+
+		const userMemory = await this.userMemoryService.getUserMemory(userId);
+		const userMemoryText = userMemory ? userMemoryJsonToText(userMemory) : '';
+
 		let llm: any;
 		switch (model) {
 			case SelectedLLM.gemini_2_5_pro:
@@ -99,6 +107,7 @@ export class ProjectChainService {
 			{
 				// 接收 ProjectProcessingInput 作为输入，为 Prompt 准备所有插槽变量
 				input: (i: ProjectProcessingInput) => JSON.stringify(i.project),
+				userMemory: userMemoryText,
 				chat_history: () => '', // 暂不处理多轮对话历史
 				instructions: () => outputParser.getFormatInstructions(),
 
@@ -142,18 +151,21 @@ export class ProjectChainService {
 
 	async lookupChain(
 		stream: true,
-		model: SelectedLLM
+		model: SelectedLLM,
+		userInfo: UserInfoFromToken
 	): Promise<RunnableSequence<ProjectProcessingInput, StreamingChunk>>; //流式返回时输出类型是指单个chunk的类型
 	async lookupChain(
 		stream: false,
-		model: SelectedLLM
+		model: SelectedLLM,
+		userInfo: UserInfoFromToken
 	): Promise<RunnableSequence<ProjectProcessingInput, z.infer<typeof lookupResultSchema>>>;
 	/**
 	 * 分析项目经验的问题和解决方案(升级版)
 	 * @description 集成了知识库检索和用户反馈反思功能
 	 * @param stream - 是否以流式模式返回
 	 */
-	async lookupChain(stream = false, model: SelectedLLM) {
+
+	async lookupChain(stream = false, model: SelectedLLM, userInfo: UserInfoFromToken) {
 		const schema = projectLookupResultSchema;
 
 		const chain = await this._createProcessChain(
@@ -161,7 +173,8 @@ export class ProjectChainService {
 			schema,
 			stream,
 			BusinessEnum.lookup,
-			model
+			model,
+			userInfo.userId
 		);
 		return chain;
 	}
@@ -185,30 +198,34 @@ export class ProjectChainService {
 			schema,
 			stream,
 			BusinessEnum.businessLookup,
-			model
+			model,
+			userInfo.userId
 		);
 	}
 
 	async businessPaperChain(
 		stream: true,
-		model: SelectedLLM
+		model: SelectedLLM,
+		userInfo: UserInfoFromToken
 	): Promise<RunnableSequence<ProjectProcessingInput, StreamingChunk>>;
 	async businessPaperChain(
 		stream: false,
-		model: SelectedLLM
+		model: SelectedLLM,
+		userInfo: UserInfoFromToken
 	): Promise<RunnableSequence<ProjectProcessingInput, z.infer<typeof businessPaperResultSchema>>>;
 
 	/**
 	 * 生成项目经验面试材料
 	 */
-	async businessPaperChain(stream: boolean, model: SelectedLLM) {
+	async businessPaperChain(stream: boolean, model: SelectedLLM, userInfo: UserInfoFromToken) {
 		const schema = businessPaperResultSchema;
 		const chain = await this._createProcessChain(
 			() => this.promptService.businessPaperPrompt(),
 			schema,
 			stream,
 			BusinessEnum.businessPaper,
-			model
+			model,
+			userInfo.userId
 		);
 		return chain;
 	}
@@ -218,11 +235,13 @@ export class ProjectChainService {
 	 */
 	async polishChain(
 		stream: true,
-		model: SelectedLLM
+		model: SelectedLLM,
+		userInfo: UserInfoFromToken
 	): Promise<RunnableSequence<ProjectProcessingInput, StreamingChunk>>;
 	async polishChain(
 		stream: false,
-		model: SelectedLLM
+		model: SelectedLLM,
+		userInfo: UserInfoFromToken
 	): Promise<RunnableSequence<ProjectProcessingInput, z.infer<typeof projectPolishResultSchma>>>;
 
 	/**
@@ -230,14 +249,15 @@ export class ProjectChainService {
 	 * @description 集成了知识库检索和用户反馈反思功能
 	 * @param stream - 是否以流式模式返回
 	 */
-	async polishChain(stream = false, model: SelectedLLM) {
+	async polishChain(stream = false, model: SelectedLLM, userInfo: UserInfoFromToken) {
 		const schema = projectPolishResultSchma;
 		const chain = await this._createProcessChain(
 			() => this.promptService.polishPrompt(),
 			schema,
 			stream,
 			BusinessEnum.polish,
-			model
+			model,
+			userInfo.userId
 		);
 		return chain;
 	}
@@ -246,13 +266,15 @@ export class ProjectChainService {
 		stream: true,
 		model: SelectedLLM,
 		userInfo: UserInfoFromToken,
-		skillService: any
+		skillService: any,
+		userInfo: UserInfoFromToken
 	): Promise<RunnableSequence<ProjectProcessingInput, StreamingChunk>>;
 	async mineChain(
 		stream: false,
 		model: SelectedLLM,
 		userInfo: UserInfoFromToken,
-		skillService: any
+		skillService: any,
+		userInfo: UserInfoFromToken
 	): Promise<RunnableSequence<ProjectProcessingInput, z.infer<typeof projectMinResultSchma>>>;
 
 	/**
@@ -264,7 +286,8 @@ export class ProjectChainService {
 		stream = false,
 		model: SelectedLLM,
 		userInfo: UserInfoFromToken,
-		skillService: any
+		skillService: any,
+		userInfo: UserInfoFromToken
 	) {
 		const schema = projectMinResultSchma;
 		//只取第一个用户技能
@@ -284,7 +307,8 @@ export class ProjectChainService {
 			schema,
 			stream,
 			BusinessEnum.mine,
-			model
+			model,
+			userInfo.userId
 		);
 
 		return chain;
