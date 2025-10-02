@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.0.0](https://github.com/weicanie/prisma-ai/compare/v4.2.1...v5.0.0) (2025-10-02)
+
+### Bug Fixes
+
+- prompt ([6903f49](https://github.com/weicanie/prisma-ai/commit/6903f499fd78334172c6b3d7ddca3438ba6d4cdc))
+
+### Features
+
+- 根据用户情况进行简历优化、人岗匹配 ([eea9b1f](https://github.com/weicanie/prisma-ai/commit/eea9b1f15f60df83b74c7a9b67e12307f0c0ddd6))
+- 基本的ai对话功能 ([17c2659](https://github.com/weicanie/prisma-ai/commit/17c2659a22b99ea87bb27b18b34253c38454e559))
+- 基于项目经验、用户memory、RAG的AI助手 ([e27d159](https://github.com/weicanie/prisma-ai/commit/e27d15993762d0af64e8c5ed5c7d7c570c7982fa))
+- **backend:** 完善项目知识库检索功能 ([49dbd6a](https://github.com/weicanie/prisma-ai/commit/49dbd6ac076a419a57a29616e86a1c8f846d5aaa))
+
 # [4.2.0](https://github.com/weicanie/prisma-ai/compare/v4.1.7...v4.2.0) (2025-09-24)
 
 ### Features

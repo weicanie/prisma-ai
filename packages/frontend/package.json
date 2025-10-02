@@ -1,7 +1,7 @@
 {
 	"name": "frontend",
 	"private": true,
-	"version": "4.2.0",
+	"version": "5.0.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite --port 5173",
@@ -80,6 +80,8 @@
 		"tailwindcss": "^4.1.3"
 	},
 	"devDependencies": {
+		"@swc/cli": "^0.7.8",
+		"@swc/core": "^1.12.14",
 		"@types/lodash": "^4.17.1",
 		"@types/react": "^18.3.3",
 		"@types/react-dom": "^18.3.0",
@@ -88,8 +90,6 @@
 		"tailwind-scrollbar": "^4.0.2",
 		"tw-animate-css": "^1.2.9",
 		"typescript": "^5.8.2",
-		"vite": "^6.3.5",
-		"@swc/cli": "^0.7.8",
-		"@swc/core": "^1.12.14"
+		"vite": "^6.3.5"
 	}
 }

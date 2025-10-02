@@ -3,6 +3,32 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.0.0](https://github.com/weicanie/prisma-ai/compare/v4.2.1...v5.0.0) (2025-10-02)
+
+### Bug Fixes
+
+- 导入路径 ([6bde1d8](https://github.com/weicanie/prisma-ai/commit/6bde1d8fba2d268215088ce83629a59681225fb7))
+- prompt ([6903f49](https://github.com/weicanie/prisma-ai/commit/6903f499fd78334172c6b3d7ddca3438ba6d4cdc))
+
+### Features
+
+- 根据用户情况进行简历优化、人岗匹配 ([eea9b1f](https://github.com/weicanie/prisma-ai/commit/eea9b1f15f60df83b74c7a9b67e12307f0c0ddd6))
+- 基本的ai对话功能 ([17c2659](https://github.com/weicanie/prisma-ai/commit/17c2659a22b99ea87bb27b18b34253c38454e559))
+- 基于项目经验、用户memory、RAG的AI助手 ([e27d159](https://github.com/weicanie/prisma-ai/commit/e27d15993762d0af64e8c5ed5c7d7c570c7982fa))
+- 完善高可用模型客户端 ([6ce008d](https://github.com/weicanie/prisma-ai/commit/6ce008d3bbc4958f209ef74cef04166aeacfff95))
+- 完善ai对话功能 ([6b6e020](https://github.com/weicanie/prisma-ai/commit/6b6e020c13ecf6275f5f7e578dea85f23bf1093d))
+- 完善UI ([36d5d91](https://github.com/weicanie/prisma-ai/commit/36d5d9165f4232d15ba0a1810bce48042e5c353c))
+- 完善UI ([f1e0220](https://github.com/weicanie/prisma-ai/commit/f1e02201ec1bd3404ba0529afd69151087f8739e))
+- 完善UI ([86fa696](https://github.com/weicanie/prisma-ai/commit/86fa6961305fdc733f2226148661d4d8d7b1b560))
+- 项目业务的分析与文档生成 ([a4208ac](https://github.com/weicanie/prisma-ai/commit/a4208acd3b8d8df2fe65259b973fdef924397871))
+- 用户记忆的展示与用户手动修改功能 ([ebc0b98](https://github.com/weicanie/prisma-ai/commit/ebc0b989bfa9e8081b41945c74b5f9aea3561e20))
+- 用户输入、项目数据召回到的文档和代码，按相似度分数进行过滤 ([d9a7d04](https://github.com/weicanie/prisma-ai/commit/d9a7d04c85fea5e0608b771f509042cd2dee26c6))
+- 用户memory功能 ([5e71018](https://github.com/weicanie/prisma-ai/commit/5e710187c6c9adf9df5d0d02b45d4e07b37d230f))
+- **backend:** 完善项目知识库检索功能 ([49dbd6a](https://github.com/weicanie/prisma-ai/commit/49dbd6ac076a419a57a29616e86a1c8f846d5aaa))
+- **backend:** 项目知识检索做三级缓存 ([39a9a6a](https://github.com/weicanie/prisma-ai/commit/39a9a6af8bd6d61008604e7d21671eb8afa7ac38))
+- **frontend:** 完善UI ([c1bcac5](https://github.com/weicanie/prisma-ai/commit/c1bcac531c96f04fd519150344caec7d2f3901d7))
+- **frontend:** 完善UI ([8c68f95](https://github.com/weicanie/prisma-ai/commit/8c68f959f89939c833314421faa1ff22d4c012af))
+
 ## [4.2.1](https://github.com/weicanie/prisma-ai/compare/v4.2.0...v4.2.1) (2025-09-24)
 
 ### Bug Fixes
