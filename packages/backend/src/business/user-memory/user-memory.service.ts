@@ -4,18 +4,21 @@ import { AIChatLLM, UserMemoryAction, UserMemoryT } from '@prisma-ai/shared';
 import { Model } from 'mongoose';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { AichatChainService } from '../../chain/aichat-chain.service';
+import { WithGetUserMemory } from '../../utils/abstract';
 import { UserMemory, UserMemoryDocument } from './entities/user-memory.entity';
 
 @Injectable()
-export class UserMemoryService implements OnModuleInit {
+export class UserMemoryService implements OnModuleInit, WithGetUserMemory {
 	constructor(
 		private readonly eventBusService: EventBusService,
 		private readonly aichatChainService: AichatChainService,
 		@InjectModel(UserMemory.name) private userMemoryModel: Model<UserMemoryDocument>
 	) {}
+
 	async onModuleInit() {
 		this.eventBusService.on(EventList.userMemoryChange, this.userMemoryChangeHandler.bind(this));
 	}
+
 	async userMemoryChangeHandler(input: UserMemoryAction) {
 		const { userinfo } = input;
 		const userId = userinfo.userId;
@@ -116,6 +119,38 @@ export class UserMemoryService implements OnModuleInit {
 
 	async getUserMemory(userId: string) {
 		const userMemory = await this.userMemoryModel.findOne({ 'userInfo.userId': userId }).lean();
-		return userMemory;
+		return userMemory as UserMemoryT;
+	}
+
+	/**
+	 * 直接更新用户记忆（不通过AI处理）
+	 * @param userId 用户ID
+	 * @param userMemoryData 用户记忆数据
+	 * @returns 更新后的用户记忆
+	 */
+	async updateUserMemory(userId: string, userMemoryData: UserMemoryT) {
+		// 获取用户信息
+		const existingMemory = await this.userMemoryModel.findOne({ 'userInfo.userId': userId }).lean();
+
+		if (!existingMemory) {
+			throw new Error('用户记忆不存在，无法更新');
+		}
+
+		// 直接更新用户记忆数据
+		const updatedMemory = await this.userMemoryModel.findOneAndUpdate(
+			{ 'userInfo.userId': userId },
+			{
+				userProfile: userMemoryData.userProfile,
+				jobSeekDestination: userMemoryData.jobSeekDestination,
+				// 保持原有的用户信息不变
+				userInfo: existingMemory.userInfo
+			},
+			{
+				new: true, // 返回更新后的文档
+				lean: true // 返回普通对象而不是Mongoose文档
+			}
+		);
+
+		return updatedMemory;
 	}
 }

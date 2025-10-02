@@ -16,6 +16,9 @@ export class AichatController {
 		return await this.aichatService.sendMessageToAI(messageDto, userInfo);
 	}
 
+	/**
+	 * 初始化项目的第一个空会话、更新已有的会话
+	 */
 	@Post('store')
 	@RequireLogin()
 	async storeConversation(
@@ -23,6 +26,18 @@ export class AichatController {
 		@Body() conversationDto: ConversationSendDto
 	) {
 		return await this.aichatService.storeConversation(userInfo, conversationDto);
+	}
+
+	/**
+	 * 给项目新建一个会话
+	 */
+	@Post('store-new')
+	@RequireLogin()
+	async storeNewConversation(
+		@UserInfo() userInfo: UserInfoFromToken,
+		@Body() conversationDto: ConversationSendDto
+	) {
+		return await this.aichatService.storeNewConversation(userInfo, conversationDto);
 	}
 
 	/**

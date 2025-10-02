@@ -114,5 +114,7 @@ interface UserMemoryAction {
 }
 
 type UserMemoryT = z.infer<typeof userMemorySchema>;
+type jobSeekDestinationT = z.infer<typeof jobSeekDestinationSchema>;
+type UserProfileT = z.infer<typeof userProfileSchema>;
 
-export { UserMemoryAction, userMemorySchema, UserMemoryT };
+export { jobSeekDestinationT, UserMemoryAction, userMemorySchema, UserMemoryT, UserProfileT };

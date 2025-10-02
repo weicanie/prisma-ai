@@ -18,12 +18,16 @@ import { useIsMobile } from '../../../hooks/use-mobile';
 import { cn } from '../../../lib/utils';
 import { useCustomQuery } from '../../../query/config';
 import { ProjectQueryKey } from '../../../query/keys';
-import { getConversationList, sendMessageToAI, storeConversation } from '../../../services/aichat';
+import {
+	getConversationList,
+	sendMessageToAI,
+	startNewConversation,
+	storeConversation
+} from '../../../services/aichat';
 import { findAllProjects } from '../../../services/project';
 import { ChangeLLM } from './components/ChangeLLM';
 import MilkdownEditor from './components/Editor';
 import { MySpin } from './components/MySpin';
-// import { DESIGN_GUIDE, HOT_TOPICS } from './config'; // 暂时注释掉，未来可能会用到
 import Conversations from './Conversations';
 import { Logo } from './Logo';
 import Projects from './Projects';
@@ -51,6 +55,7 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 	// const [attachedFiles, setAttachedFiles] = useState<GetProp<typeof Attachments, 'items'>>([]);
 
 	const [inputValue, setInputValue] = useState('');
+	// ai是否正在生成
 	const [loading, setLoading] = useState(false);
 	const [messages, setMessages] = useState<ChatMessage[]>([]);
 
@@ -132,15 +137,15 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 
 		setMessages([]);
 
-		// Save the empty conversation to backend to get a persistent entry
 		try {
-			await storeConversation(newConversation.keyname, newConversation.label, [], project_id);
+			await startNewConversation(newConversation.keyname, newConversation.label, [], project_id);
+			toast.success('创建成功');
 		} catch {
 			toast.error('创建新对话失败，请稍后重试...');
 			// Revert state if API call fails
 			setConversations(prev => prev.filter(c => c.keyname !== uuid));
 		}
-	}, [loading, project_id]);
+	}, [loading, project_id, curConversation, dispatch]);
 
 	// 监听消息变化,保存会话到数据库
 	useEffect(() => {
@@ -207,7 +212,7 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 	// 获取项目经验数据
 	const { data, status } = useCustomQuery([ProjectQueryKey.Projects], findAllProjects);
 
-	// 组件挂载时获取会话列表
+	// 在project_id获取后，获取会话列表
 	useEffect(() => {
 		const fetchHistory = async () => {
 			setIsFetchingHistory(true);
@@ -226,14 +231,9 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 					);
 
 					setMessageHistory(historyMap);
-
-					if (!lastConversationKeyname) {
-						handleNewConversation();
-					} else {
-						setCurConversation(lastConversationKeyname);
-						const firstMessages = historyMap[lastConversationKeyname] || [];
-						setMessages(firstMessages);
-					}
+					setCurConversation(lastConversationKeyname);
+					const firstMessages = historyMap[lastConversationKeyname] || [];
+					setMessages(firstMessages);
 				} else {
 					// If no history, create a new conversation
 					handleNewConversation();
@@ -249,7 +249,7 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 		}
 	}, [project_id]);
 
-	// 设置默认选中第一个项目
+	// 在project_id获取后，设置默认选中第一个项目
 	useEffect(() => {
 		const projects = data?.data;
 		if (projects && projects.length > 0) {

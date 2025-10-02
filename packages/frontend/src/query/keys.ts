@@ -27,3 +27,7 @@ export enum EducationQueryKey {
 export enum CareerQueryKey {
 	Careers = 'careers'
 }
+
+export enum UserMemoryQueryKey {
+	UserMemory = 'userMemory'
+}

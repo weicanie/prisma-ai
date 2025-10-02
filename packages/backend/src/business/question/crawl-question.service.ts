@@ -1,5 +1,4 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as puppeteer from 'puppeteer';

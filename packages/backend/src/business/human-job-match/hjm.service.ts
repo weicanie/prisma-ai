@@ -1,7 +1,14 @@
 import { Document } from '@langchain/core/documents';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { JobStatus, JobVo, LLMJobDto, ResumeVo, UserInfoFromToken } from '@prisma-ai/shared';
+import {
+	JobStatus,
+	JobVo,
+	LLMJobDto,
+	ResumeVo,
+	UserInfoFromToken,
+	userMemoryJsonToText
+} from '@prisma-ai/shared';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { Model } from 'mongoose';
 import { ChainService } from '../../chain/chain.service';
@@ -12,7 +19,7 @@ import { VectorStoreService } from '../../vector-store/vector-store.service';
 import { Job, JobDocument } from '../job/entities/job.entity';
 import { JobService } from '../job/job.service';
 import { ResumeService } from '../resume/resume.service';
-
+import { UserMemoryService } from '../user-memory/user-memory.service';
 export interface RankedJob extends JobVo {
 	reason?: string;
 }
@@ -80,7 +87,8 @@ export class HjmService implements OnModuleInit {
 		private readonly resumeService: ResumeService,
 		private readonly chainService: ChainService,
 		private readonly taskQueueService: TaskQueueService,
-		private readonly redisService: RedisService // 注入RedisService以保存任务结果
+		private readonly redisService: RedisService, // 注入RedisService以保存任务结果
+		private userMemoryService: UserMemoryService
 	) {
 		// 在构造函数中注册任务处理器
 		try {
@@ -351,9 +359,11 @@ export class HjmService implements OnModuleInit {
 		).filter(job => job !== null) as JobVo[];
 
 		// 8. 调用 LLM 进行重排 (Rerank)
+		const userMemory = await this.userMemoryService.getUserMemory(userInfo.userId);
+		const userMemoryText = userMemory ? userMemoryJsonToText(userMemory) : '';
 		const rerankChain = await this.chainService.hjmRerankChain();
 		const rerankResult = await rerankChain.invoke({
-			resume,
+			userMemory: userMemoryText,
 			jobs: candidateJobs
 		});
 

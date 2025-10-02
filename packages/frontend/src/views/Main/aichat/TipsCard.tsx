@@ -26,7 +26,7 @@ const TipsCard: React.FC<TipsCardProps> = ({ className }) => {
 					</h2>
 				</div>
 				<p className={`text-lg ${isDark ? 'text-gray-300' : 'text-gray-600'} max-w-2xl`}>
-					知道你和你的项目
+					懂你和你的项目
 				</p>
 			</div>
 
@@ -41,13 +41,13 @@ const TipsCard: React.FC<TipsCardProps> = ({ className }) => {
 							className={`flex items-center gap-2 text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}
 						>
 							<MessageSquare className="w-5 h-5 text-green-500" />
-							智能问答
+							知识库
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						{/* <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'} text-sm`}>
-							结合您的项目经验，回答技术问题、面试准备、职业规划等相关咨询
-						</p> */}
+						<p className={`${isDark ? 'text-gray-300' : 'text-gray-600'} text-sm`}>
+							Prisma 已通过项目知识库理解你的项目
+						</p>
 					</CardContent>
 				</Card>
 
@@ -60,13 +60,13 @@ const TipsCard: React.FC<TipsCardProps> = ({ className }) => {
 							className={`flex items-center gap-2 text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}
 						>
 							<User className="w-5 h-5 text-purple-500" />
-							个性化建议
+							记忆
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						{/* <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'} text-sm`}>
-							基于您的个人背景和记忆，提供量身定制的职业发展建议
-						</p> */}
+						<p className={`${isDark ? 'text-gray-300' : 'text-gray-600'} text-sm`}>
+							Prisma 已通过用户记忆记住你
+						</p>
 					</CardContent>
 				</Card>
 			</div>

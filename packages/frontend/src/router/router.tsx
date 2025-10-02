@@ -29,6 +29,7 @@ const Education = lazy(() => import('../views/Main/Education'));
 const EducationRead = lazy(() => import('../views/Main/Education/Read'));
 const Career = lazy(() => import('../views/Main/Career'));
 const CareerRead = lazy(() => import('../views/Main/Career/Read'));
+const UserMemory = lazy(() => import('../views/Main/UserMemory'));
 const AIChat = lazy(() => import('../views/Main/aichat/AIChat'));
 
 const knowBaseRoute = {
@@ -486,6 +487,15 @@ export const routes = [
 						<AIChat />
 					</UpdateBreadRouter>
 				)
+			},
+			// 用户记忆
+			{
+				path: '/main/user-memory',
+				element: (
+					<UpdateBreadRouter>
+						<UserMemory />
+					</UpdateBreadRouter>
+				)
 			}
 		]
 	}
@@ -498,6 +508,7 @@ export const path_name: Record<string, string> = {
 	'/main/knowledge/deepwiki': 'DeepWiki集成',
 	'/main/knowledge/skills': '职业技能',
 	'/main/knowledge/skills/skill-detail': '详情',
+	'/main/user-memory': '用户记忆',
 
 	'/main/projects': '项目经验',
 	'/main/projects/action': 'AI优化',

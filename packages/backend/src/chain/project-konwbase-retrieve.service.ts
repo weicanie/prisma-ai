@@ -136,15 +136,19 @@ export class ProjectKonwbaseRetrieveService {
 	private async queryDoc(
 		query: string,
 		i: ProjectProcessingInput,
-		namespaces: KnowledgeNamespace[]
+		namespaces: KnowledgeNamespace[],
+		topK = 5,
+		minScore = 0.6
 	) {
-		const docsQueryResult = await this.knowledgeVDBService.retrieveKnowbaseFromNamespace(
-			query,
-			5,
-			i.userInfo.userId,
-			i.project.info.name,
-			namespaces
-		);
+		const docsQueryResult =
+			await this.knowledgeVDBService.retrieveKnowbaseFromNamespaceWithScoreFilter(
+				query,
+				topK,
+				i.userInfo.userId,
+				i.project.info.name,
+				namespaces,
+				minScore
+			);
 
 		const doc = `
 		<项目文档参考>
@@ -166,7 +170,7 @@ export class ProjectKonwbaseRetrieveService {
 		const project_code_cache = await this.cacheService.getOrSet(
 			this.cacheService.getProjectRetrievedCodeKey(i.project.info.name),
 			async () => {
-				return await this.retrievedProjectCodes(i, business);
+				return await this._retrievedProjectCodes(i, business);
 			},
 			L1_DEFAULT_TTL.LONG,
 			L2_DEFAULT_TTL.LONG
@@ -228,12 +232,13 @@ export class ProjectKonwbaseRetrieveService {
 		return code;
 	}
 
-	private async queryCode(query: string, i: ProjectProcessingInput) {
-		const codeQueryResult = await this.projectCodeVDBService.retrieveCodeChunks(
+	private async queryCode(query: string, i: ProjectProcessingInput, topK = 5, minScore = 0.3) {
+		const codeQueryResult = await this.projectCodeVDBService.retrieveCodeChunksWithScoreFilter(
 			query,
-			5,
+			topK,
 			i.userInfo.userId,
-			i.project.info.name
+			i.project.info.name,
+			minScore
 		);
 
 		const code = `

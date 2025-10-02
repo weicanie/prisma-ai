@@ -384,8 +384,8 @@ const ProjectForm: React.FC<PropsType> = ({ setIsUseMdEditor, id }) => {
 	};
 
 	return (
-		<div className="flex justify-center items-center basis-180 max-w-3xl">
-			<div className=" w-full h-full">
+		<div className="flex justify-center items-center max-w-3xl">
+			<div className="w-full h-full">
 				<Form {...form}>
 					<form
 						onSubmit={e => {

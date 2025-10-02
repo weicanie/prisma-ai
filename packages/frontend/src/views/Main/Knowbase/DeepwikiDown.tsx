@@ -8,7 +8,6 @@ import {
 	CardTitle
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import type {
 	CreateProjectDeepWikiKnowledgeDto,
@@ -280,20 +279,21 @@ export function Deepwiki() {
 		<>
 			<PageHeader
 				title={'DeepWiki 知识库集成'}
-				description={'从DeepWiki网站下载项目文档并导入到知识库中。'}
+				description={
+					'从 DeepWiki 网站下载你的项目文档并导入到知识库中。请先在 Deepwiki 网站生成项目文档。'
+				}
 			></PageHeader>
 			<div className="space-y-6 p-4">
 				{/* URL输入区域 */}
 				<Card className="bg-background/50">
 					<CardHeader>
-						<CardTitle>DeepWiki URL 输入</CardTitle>
+						<CardTitle>输入项目 DeepWiki URL </CardTitle>
 						<CardDescription>
 							请输入DeepWiki项目地址，格式：https://deepwiki.com/organization/repository
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div className="grid w-full max-w-lg items-center gap-1.5">
-							<Label htmlFor="wikiUrl">项目DeepWiki URL</Label>
 							<Input
 								id="wikiUrl"
 								name="wikiUrl"

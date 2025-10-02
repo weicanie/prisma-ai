@@ -1,6 +1,7 @@
 import {
 	Book,
 	Bot,
+	Brain,
 	FileText,
 	LayoutList,
 	LibraryBig,
@@ -67,10 +68,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 		],
 		navMain: [
 			{
-				title: '项目知识库',
+				title: '知识库',
 				icon: LibraryBig,
 				url: '/main/knowledge',
 				groupLabel: '知识库'
+			},
+			{
+				title: '用户记忆',
+				icon: Brain,
+				url: '/main/user-memory'
 			},
 			{
 				title: '项目优化',

@@ -61,7 +61,7 @@ export const Editor: FC<EditorProps> = memo(
 			<div
 				className={cn(
 					resolvedTheme === 'dark' ? 'theme-frame-dark' : 'theme-nord',
-					isShwoMode ? 'editor-small' : '',
+					isShwoMode ? 'editor-small-chat' : '',
 					'w-full',
 					className
 				)}

@@ -245,6 +245,7 @@ export class KnowledgeVDBService implements OnModuleInit {
 		let namespaces = knowledgeNamespaces.map(namespace =>
 			this._getUserProjectNamespace(namespace, userId, projectName)
 		);
+		4;
 
 		const retrievers = await Promise.all(
 			namespaces.map(namespace =>
@@ -257,6 +258,56 @@ export class KnowledgeVDBService implements OnModuleInit {
 		const result: Record<KnowledgeNamespace, string> = {} as Record<KnowledgeNamespace, string>;
 		for (let i = 0; i < knowledgeNamespaces.length; i++) {
 			result[knowledgeNamespaces[i]] = texts[i];
+		}
+		return result;
+	}
+
+	/**
+	 * 从代码、文档索引召回topK个文档(每个索引召回topK个，然后去掉 score<minScore 的),并分类组装为文本,返回所选命名空间匹配的文档文本
+	 * @param query - 用户的查询字符串
+	 * @param topK - 需要返回的文档数量
+	 * @param userId - 当前用户的ID
+	 * @param projectName - 项目名称
+	 * @param knowledgeNamespaces - 所选命名空间
+	 */
+	async retrieveKnowbaseFromNamespaceWithScoreFilter(
+		query: string,
+		topK: number,
+		userId: string,
+		projectName: string,
+		knowledgeNamespaces: KnowledgeNamespace[],
+		minScore = 0.6
+	) {
+		let namespaces = knowledgeNamespaces.map(namespace =>
+			this._getUserProjectNamespace(namespace, userId, projectName)
+		);
+		4;
+
+		const nsDocs = await Promise.all(
+			namespaces.map(ns => {
+				return this.vectorStoreService.similaritySearchWithScore(
+					KnowledgeIndex.KNOWLEDGEBASE,
+					this.embedModel,
+					query,
+					topK,
+					ns
+				);
+			})
+		);
+		// 去掉了相似度<minScore的召回结果
+		const text_filtered = nsDocs.map(nsdoc =>
+			nsdoc
+				.map(doc => ({
+					doc: doc[0].pageContent,
+					score: doc[1]
+				}))
+				.filter(text_score_pair => text_score_pair.score > minScore)
+				.join('\n\n')
+		);
+
+		const result: Record<KnowledgeNamespace, string> = {} as Record<KnowledgeNamespace, string>;
+		for (let i = 0; i < knowledgeNamespaces.length; i++) {
+			result[knowledgeNamespaces[i]] = text_filtered[i];
 		}
 		return result;
 	}

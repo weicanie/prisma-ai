@@ -254,7 +254,7 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 				});
 		});
 
-		const chain = await this.projectChainService.lookupChain(true, model);
+		const chain = await this.projectChainService.lookupChain(true, model, userInfo);
 		const lookupStream = await chain.stream({
 			project,
 			userInfo,
@@ -348,7 +348,7 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 				});
 		});
 
-		const chain = await this.projectChainService.businessPaperChain(true, model);
+		const chain = await this.projectChainService.businessPaperChain(true, model, userInfo);
 		const businessPaperStream = await chain.stream({
 			project,
 			userInfo,
@@ -592,7 +592,7 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 				});
 		});
 
-		const chain = await this.projectChainService.polishChain(true, model);
+		const chain = await this.projectChainService.polishChain(true, model, userInfo);
 		let projectPolished = await chain.stream({
 			project,
 			userInfo,
@@ -672,7 +672,7 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 			true,
 			model,
 			userInfo,
-			this.skillService
+			this.skillService,
 		);
 		let projectMined = await chain.stream({
 			project,

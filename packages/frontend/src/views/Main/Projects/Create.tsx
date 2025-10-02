@@ -55,7 +55,7 @@ const CreateProject: React.FC<CreateProjectProps> = () => {
 		<>
 			<div className="flex gap-2 max-h-[80vh] overflow-y-auto scrollbar-hide">
 				{!isUseMdEditor && (
-					<div className="basis-180 max-w-3xl mt-10">
+					<div className="basis-120 h-full mt-10">
 						<ProjectForm
 							isUseMdEditor={isUseMdEditor}
 							setIsUseMdEditor={setIsUseMdEditor}
@@ -63,10 +63,8 @@ const CreateProject: React.FC<CreateProjectProps> = () => {
 					</div>
 				)}
 				{!isUseMdEditor && (
-					<div className="size-200 flex items-center justify-center bg-[rgb(242,242,242)] dark:bg-black ">
-						<div className="w-9/10 h-9/10 flex-none overflow-y-auto flex items-center justify-center scrollbar-hide">
-							<MilkdownEditor {...editorProps} type="show"></MilkdownEditor>
-						</div>
+					<div className="h-full flex-1 overflow-auto scrollbar-hide bg-[rgb(242,242,242)] dark:bg-black ">
+						<MilkdownEditor {...editorProps} type="show"></MilkdownEditor>
 					</div>
 				)}
 				{isUseMdEditor && (

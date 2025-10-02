@@ -120,7 +120,3 @@ sequenceDiagram
         end
     end
 ```
-
-## 功能完善
-
-防止 cursor mcp client 超时,和 cursor agent 约定'user reset'时重新调用 i_tool

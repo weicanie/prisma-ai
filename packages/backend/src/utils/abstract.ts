@@ -1,4 +1,5 @@
 import { RunnableSequence } from '@langchain/core/runnables';
+import { UserMemoryT } from '@prisma-ai/shared';
 import z from 'zod';
 import { SseFunc } from './type';
 /**
@@ -23,4 +24,11 @@ export abstract class WithFormfixChain {
 			Exclude<T, Error>
 		>
 	>;
+}
+
+/**
+ * 提供用户记忆查询的服务
+ */
+export abstract class WithGetUserMemory {
+	abstract getUserMemory(userId: string): Promise<UserMemoryT>;
 }

@@ -3,7 +3,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { project_knowledge_type_label, type ProjectKnowledgeVo } from '@prisma-ai/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Row, Table } from '@tanstack/react-table';
-import { AlignLeft, Database, Link, ListChecks } from 'lucide-react';
+import { AlignLeft, Briefcase, Database, GraduationCap, Link, ListChecks } from 'lucide-react';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -208,10 +208,7 @@ const Knowledges: React.FC<KnowledgesProps<ProjectKnowledgeVo>> = ({
 
 	return (
 		<>
-			<PageHeader
-				title="项目知识库"
-				description="上传项目相关信息来和 Prisma 共享, Prisma 在思考时会使用这些信息, 这很重要 "
-			>
+			<PageHeader title="项目知识库" description="上传项目相关信息来和 Prisma 共享, 这很重要 ">
 				<div className="flex flex-wrap gap-3">
 					<Button
 						variant="outline"
@@ -228,6 +225,22 @@ const Knowledges: React.FC<KnowledgesProps<ProjectKnowledgeVo>> = ({
 					>
 						<ListChecks className="h-4 w-4" />
 						职业技能
+					</Button>
+					<Button
+						variant="outline"
+						onClick={() => navigate('/main/resumes/career')}
+						className="flex items-center gap-2"
+					>
+						<Briefcase className="h-4 w-4" />
+						工作经历
+					</Button>
+					<Button
+						variant="outline"
+						onClick={() => navigate('/main/resumes/education')}
+						className="flex items-center gap-2"
+					>
+						<GraduationCap className="h-4 w-4" />
+						教育经历
 					</Button>
 				</div>
 			</PageHeader>

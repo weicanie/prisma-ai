@@ -2,7 +2,7 @@ generator client {
   provider      = "prisma-client-js"
   // 提高兼容性
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
-  output        = "./generated/client"
+  output        = "../generated/client"
 }
 
 /**
