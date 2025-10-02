@@ -1,11 +1,11 @@
 import { Document } from '@langchain/core/documents';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { project_file, project_file_chunk } from '@prisma/client';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import * as path from 'path';
 import Parser from 'tree-sitter';
+import { project_file, project_file_chunk } from '../../../../generated/client';
 import { DbService } from '../../../DB/db.service';
 import { ModelService } from '../../../model/model.service';
 import { TaskQueueService } from '../../../task-queue/task-queue.service';
@@ -67,7 +67,7 @@ export class ProjectCodeVDBService implements OnModuleInit {
 		private readonly vectorStoreService: VectorStoreService,
 		private readonly taskQueueService: TaskQueueService,
 		private readonly modelService: ModelService,
-		private readonly prisma: DbService
+		private readonly db: DbService
 	) {
 		this.parser = new Parser();
 		this.taskQueueService.registerTaskHandler(
@@ -207,17 +207,17 @@ export class ProjectCodeVDBService implements OnModuleInit {
 		const namespace = this._getRepoNamespace(projectName, String(userId));
 
 		// 1. 获取数据库中的项目实体，如果不存在则创建
-		let project = await this.prisma.user_project.findFirst({
+		let project = await this.db.user_project.findFirst({
 			where: { AND: [{ user_id: userId }, { project_name: projectName }] }
 		});
 		if (!project) {
-			project = await this.prisma.user_project.create({
+			project = await this.db.user_project.create({
 				data: { user_id: userId, project_name: projectName }
 			});
 		}
 
 		// 2. 从数据库获取当前项目的文件状态
-		const storedFiles = await this.prisma.project_file.findMany({
+		const storedFiles = await this.db.project_file.findMany({
 			where: { user_project_id: project.id },
 			include: { chunks: true }
 		});
@@ -275,7 +275,7 @@ export class ProjectCodeVDBService implements OnModuleInit {
 				);
 			}
 			// 从数据库中删除文件的chunks将通过 onDelete: Cascade 自动完成
-			await this.prisma.project_file.deleteMany({
+			await this.db.project_file.deleteMany({
 				where: { id: { in: filesToDelete.map(f => f.id) } }
 			});
 			this.logger.log(`[Delete] 已从数据库删除 ${filesToDelete.length} 个文件记录。`);
@@ -329,7 +329,7 @@ export class ProjectCodeVDBService implements OnModuleInit {
 					);
 
 					// 在数据库中创建或更新文件记录
-					const existingFile = await this.prisma.project_file.findFirst({
+					const existingFile = await this.db.project_file.findFirst({
 						where: {
 							AND: [{ user_project_id: project.id }, { file_path: fileInfo.filePath }]
 						}
@@ -337,7 +337,7 @@ export class ProjectCodeVDBService implements OnModuleInit {
 
 					if (existingFile) {
 						// 更新
-						await this.prisma.project_file.update({
+						await this.db.project_file.update({
 							where: { id: existingFile.id },
 							data: {
 								hash: fileInfo.hash,
@@ -349,7 +349,7 @@ export class ProjectCodeVDBService implements OnModuleInit {
 						});
 					} else {
 						// 创建
-						await this.prisma.project_file.create({
+						await this.db.project_file.create({
 							data: {
 								user_project_id: project.id,
 								file_path: fileInfo.filePath,

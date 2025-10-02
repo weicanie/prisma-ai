@@ -1,6 +1,6 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { RunnableSequence } from '@langchain/core/runnables';
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
 	JobVo,
 	resumeMatchedSchema,
@@ -14,10 +14,10 @@ import { z } from 'zod';
 import { KnowledgeVDBService } from '../business/prisma-agent/data_base/konwledge_vdb.service';
 import { ProjectCodeVDBService } from '../business/prisma-agent/data_base/project_code_vdb.service';
 import { ReflectAgentService } from '../business/prisma-agent/reflect_agent/reflect_agent.service';
-import { UserMemoryService } from '../business/user-memory/user-memory.service';
 import { ModelService } from '../model/model.service';
 import { ThoughtModelService } from '../model/thought-model.service';
 import { PromptService } from '../prompt/prompt.service';
+import { WithGetUserMemory } from '../utils/abstract';
 import { RubustStructuredOutputParser } from '../utils/RubustStructuredOutputParser';
 import { ChainService } from './chain.service';
 
@@ -41,7 +41,8 @@ export class HjmChainService {
 		private readonly projectCodeVDBService: ProjectCodeVDBService,
 		private readonly reflectAgentService: ReflectAgentService,
 		public thoughtModelService: ThoughtModelService,
-		private userMemoryService: UserMemoryService
+		@Inject(WithGetUserMemory)
+		private readonly userMemoryService: WithGetUserMemory
 	) {}
 	/**
 	 * 创建一个集成了知识库检索和反思功能的项目处理链。
@@ -129,7 +130,7 @@ export class HjmChainService {
 	 * 将项目经验与岗位要求匹配
 	 * @description 项目经验 + 岗位信息 -> 为岗位定制的项目经验
 	 */
-	async matchChain(stream = false, model: SelectedLLM) {
+	async matchChain(stream = false, model: SelectedLLM, userInfo: UserInfoFromToken) {
 		const schema = resumeMatchedSchema;
 		const prompt = await this.promptService.matchPrompt();
 
@@ -137,7 +138,8 @@ export class HjmChainService {
 			() => Promise.resolve(prompt),
 			schema,
 			stream,
-			model
+			model,
+			userInfo.userId
 		);
 		return chain;
 	}

@@ -673,7 +673,6 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 			model,
 			userInfo,
 			this.skillService,
-			userInfo
 		);
 		let projectMined = await chain.stream({
 			project,

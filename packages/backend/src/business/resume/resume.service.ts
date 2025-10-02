@@ -147,7 +147,7 @@ export class ResumeService implements WithFuncPool, OnModuleInit {
 			userInfo
 		};
 
-		const chain = await this.hjmChainService.matchChain(true, model);
+		const chain = await this.hjmChainService.matchChain(true, model, userInfo);
 		const resumeMatched = await chain.stream(chainInput);
 		return from(resumeMatched) as Observable<StreamingChunk>;
 	}

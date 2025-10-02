@@ -4,10 +4,11 @@ import { AIChatLLM, UserMemoryAction, UserMemoryT } from '@prisma-ai/shared';
 import { Model } from 'mongoose';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { AichatChainService } from '../../chain/aichat-chain.service';
+import { WithGetUserMemory } from '../../utils/abstract';
 import { UserMemory, UserMemoryDocument } from './entities/user-memory.entity';
 
 @Injectable()
-export class UserMemoryService implements OnModuleInit {
+export class UserMemoryService implements OnModuleInit, WithGetUserMemory {
 	constructor(
 		private readonly eventBusService: EventBusService,
 		private readonly aichatChainService: AichatChainService,
@@ -118,7 +119,7 @@ export class UserMemoryService implements OnModuleInit {
 
 	async getUserMemory(userId: string) {
 		const userMemory = await this.userMemoryModel.findOne({ 'userInfo.userId': userId }).lean();
-		return userMemory;
+		return userMemory as UserMemoryT;
 	}
 
 	/**

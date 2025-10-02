@@ -32,7 +32,7 @@ import { ProjectKonwbaseRetrieveService } from './project-konwbase-retrieve.serv
 		PromptModule,
 		ClientModule,
 		CacheModule,
-		UserMemoryModule,
+		forwardRef(() => UserMemoryModule),
 		forwardRef(() => PrismaAgentModule)
 	],
 	exports: [

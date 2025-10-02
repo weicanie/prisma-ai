@@ -1,6 +1,6 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { RunnableSequence } from '@langchain/core/runnables';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
 	businessLookupResultSchema,
 	businessPaperResultSchema,
@@ -21,12 +21,11 @@ import { ModelService } from '../model/model.service';
 import { ThoughtModelService } from '../model/thought-model.service';
 
 import { ReflectAgentService } from '../business/prisma-agent/reflect_agent/reflect_agent.service';
-import { UserMemoryService } from '../business/user-memory/user-memory.service';
 import { PromptService } from '../prompt/prompt.service';
+import { WithGetUserMemory } from '../utils/abstract';
 import { RubustStructuredOutputParser } from '../utils/RubustStructuredOutputParser';
 import { ChainService } from './chain.service';
 import { ProjectKonwbaseRetrieveService } from './project-konwbase-retrieve.service';
-
 /**
  * @description 项目处理链的统一输入接口
  */
@@ -54,7 +53,8 @@ export class ProjectChainService {
 		private readonly reflectAgentService: ReflectAgentService,
 		public thoughtModelService: ThoughtModelService,
 		private readonly projectKonwbaseRetrieveService: ProjectKonwbaseRetrieveService,
-		private userMemoryService: UserMemoryService
+		@Inject(WithGetUserMemory)
+		private readonly userMemoryService: WithGetUserMemory
 	) {}
 
 	/**
@@ -199,7 +199,7 @@ export class ProjectChainService {
 			stream,
 			BusinessEnum.businessLookup,
 			model,
-			userInfo.userId
+			'-1'
 		);
 	}
 
@@ -266,15 +266,13 @@ export class ProjectChainService {
 		stream: true,
 		model: SelectedLLM,
 		userInfo: UserInfoFromToken,
-		skillService: any,
-		userInfo: UserInfoFromToken
+		skillService: any
 	): Promise<RunnableSequence<ProjectProcessingInput, StreamingChunk>>;
 	async mineChain(
 		stream: false,
 		model: SelectedLLM,
 		userInfo: UserInfoFromToken,
-		skillService: any,
-		userInfo: UserInfoFromToken
+		skillService: any
 	): Promise<RunnableSequence<ProjectProcessingInput, z.infer<typeof projectMinResultSchma>>>;
 
 	/**
@@ -286,8 +284,7 @@ export class ProjectChainService {
 		stream = false,
 		model: SelectedLLM,
 		userInfo: UserInfoFromToken,
-		skillService: any,
-		userInfo: UserInfoFromToken
+		skillService: any
 	) {
 		const schema = projectMinResultSchma;
 		//只取第一个用户技能
