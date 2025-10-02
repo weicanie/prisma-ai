@@ -102,8 +102,16 @@ export class AichatService {
 			}
 		});
 
-		// 初始化空会话
+		// 用于初始化项目的第一个空会话
 		if (!values[0]?.content && content.length === 0) {
+			// 当项目已存在会话时，不新建会话
+			const projectConversations = await this.dbService.ai_conversation.findMany({
+				where: {
+					project_id: conversationDto.project_id
+				}
+			});
+			if (projectConversations.length > 0) return;
+
 			return await this.dbService.ai_conversation.create({
 				data: {
 					keyname: String(keyname),
@@ -142,6 +150,21 @@ export class AichatService {
 				}
 			});
 		}
+	}
+
+	async storeNewConversation(userInfo: UserInfoFromToken, conversationDto: ConversationSendDto) {
+		const { userId } = userInfo;
+		const { keyname, label, content, project_id } = conversationDto;
+
+		return await this.dbService.ai_conversation.create({
+			data: {
+				keyname: String(keyname),
+				label,
+				content: JSON.stringify(content),
+				user_id: +userId,
+				project_id: project_id
+			}
+		});
 	}
 
 	async getConversationList(

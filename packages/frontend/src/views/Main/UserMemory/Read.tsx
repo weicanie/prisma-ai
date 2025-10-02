@@ -34,7 +34,7 @@ const UserMemoryRead: React.FC = () => {
 		<div className="container mx-auto px-4 pb-8 max-w-6xl">
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 				{/* 资历背景 */}
-				<Card>
+				<Card className="bg-background/50">
 					<CardHeader>
 						<CardTitle className="text-lg">资历背景 (Qualifications)</CardTitle>
 						<CardDescription>你是谁</CardDescription>
@@ -64,7 +64,7 @@ const UserMemoryRead: React.FC = () => {
 				</Card>
 
 				{/* 能力模型 */}
-				<Card>
+				<Card className="bg-background/50">
 					<CardHeader>
 						<CardTitle className="text-lg">能力模型 (Skills Matrix)</CardTitle>
 						<CardDescription>你会什么</CardDescription>
@@ -94,7 +94,7 @@ const UserMemoryRead: React.FC = () => {
 				</Card>
 
 				{/* 职责范围 */}
-				<Card>
+				<Card className="bg-background/50">
 					<CardHeader>
 						<CardTitle className="text-lg">职责范围 (Responsibilities)</CardTitle>
 						<CardDescription>你做过什么</CardDescription>
@@ -116,7 +116,7 @@ const UserMemoryRead: React.FC = () => {
 				</Card>
 				{/* 求职方向部分 */}
 
-				<Card>
+				<Card className="bg-background/50">
 					<CardHeader>
 						<CardTitle className="text-lg">求职偏好 (Job Preferences)</CardTitle>
 						<CardDescription>你想找什么工作</CardDescription>

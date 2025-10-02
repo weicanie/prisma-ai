@@ -36,7 +36,7 @@ export async function sendMessageToAI<T = AIChatLLM>(
 }
 
 /**
- * 保存会话
+ * 初始化项目的第一个空会话、更新已有的会话
  * @param key 会话key
  * @param label 会话label
  * @param content 会话内容
@@ -51,6 +51,27 @@ export async function storeConversation(
 	const body = { keyname: key, label, content, project_id };
 	const res = await instance.post<ConversationSendDto, ServerDataFormat<string>>(
 		'/aichat/store',
+		body
+	);
+	return res.data;
+}
+
+/**
+ * 给项目新建一个会话
+ * @param key 会话key
+ * @param label 会话label
+ * @param content 会话内容
+ * @returns 会话
+ */
+export async function startNewConversation(
+	key: string,
+	label: string,
+	content: ChatMessage[],
+	project_id: string
+) {
+	const body = { keyname: key, label, content, project_id };
+	const res = await instance.post<ConversationSendDto, ServerDataFormat<string>>(
+		'/aichat/store-new',
 		body
 	);
 	return res.data;

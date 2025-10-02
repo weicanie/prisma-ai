@@ -18,7 +18,12 @@ import { useIsMobile } from '../../../hooks/use-mobile';
 import { cn } from '../../../lib/utils';
 import { useCustomQuery } from '../../../query/config';
 import { ProjectQueryKey } from '../../../query/keys';
-import { getConversationList, sendMessageToAI, storeConversation } from '../../../services/aichat';
+import {
+	getConversationList,
+	sendMessageToAI,
+	startNewConversation,
+	storeConversation
+} from '../../../services/aichat';
 import { findAllProjects } from '../../../services/project';
 import { ChangeLLM } from './components/ChangeLLM';
 import MilkdownEditor from './components/Editor';
@@ -50,6 +55,7 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 	// const [attachedFiles, setAttachedFiles] = useState<GetProp<typeof Attachments, 'items'>>([]);
 
 	const [inputValue, setInputValue] = useState('');
+	// ai是否正在生成
 	const [loading, setLoading] = useState(false);
 	const [messages, setMessages] = useState<ChatMessage[]>([]);
 
@@ -131,15 +137,15 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 
 		setMessages([]);
 
-		// Save the empty conversation to backend to get a persistent entry
 		try {
-			await storeConversation(newConversation.keyname, newConversation.label, [], project_id);
+			await startNewConversation(newConversation.keyname, newConversation.label, [], project_id);
+			toast.success('创建成功');
 		} catch {
 			toast.error('创建新对话失败，请稍后重试...');
 			// Revert state if API call fails
 			setConversations(prev => prev.filter(c => c.keyname !== uuid));
 		}
-	}, [loading, project_id]);
+	}, [loading, project_id, curConversation, dispatch]);
 
 	// 监听消息变化,保存会话到数据库
 	useEffect(() => {
