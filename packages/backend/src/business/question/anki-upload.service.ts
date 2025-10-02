@@ -1,10 +1,10 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { article } from '@prisma/client';
 import { AxiosRequestConfig } from 'axios';
 import * as http from 'http';
 import { chunk } from 'lodash';
 import { firstValueFrom } from 'rxjs';
+import { article } from '../../../generated/client';
 import { DbService } from '../../DB/db.service';
 import { TaskQueueService } from '../../task-queue/task-queue.service';
 import { PersistentTask } from '../../type/taskqueue';
