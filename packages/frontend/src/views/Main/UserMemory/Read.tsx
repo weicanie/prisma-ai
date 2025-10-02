@@ -41,11 +41,11 @@ const UserMemoryRead: React.FC = () => {
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div>
-							<h4 className="font-medium mb-2">工作经验水平</h4>
+							<h4 className="font-medium mb-2">工作经验</h4>
 							{renderBadges(userMemory.userProfile.qualifications.experience_level)}
 						</div>
 						<div>
-							<h4 className="font-medium mb-2">学历</h4>
+							<h4 className="font-medium mb-2">教育经历</h4>
 							{renderBadges(userMemory.userProfile.qualifications.education_degree)}
 						</div>
 						<div>

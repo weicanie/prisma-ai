@@ -166,7 +166,7 @@ export class ProjectKonwbaseRetrieveService {
 		const project_code_cache = await this.cacheService.getOrSet(
 			this.cacheService.getProjectRetrievedCodeKey(i.project.info.name),
 			async () => {
-				return await this.retrievedProjectCodes(i, business);
+				return await this._retrievedProjectCodes(i, business);
 			},
 			L1_DEFAULT_TTL.LONG,
 			L2_DEFAULT_TTL.LONG

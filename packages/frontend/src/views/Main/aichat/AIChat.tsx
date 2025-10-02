@@ -231,14 +231,9 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 					);
 
 					setMessageHistory(historyMap);
-
-					if (!lastConversationKeyname) {
-						handleNewConversation();
-					} else {
-						setCurConversation(lastConversationKeyname);
-						const firstMessages = historyMap[lastConversationKeyname] || [];
-						setMessages(firstMessages);
-					}
+					setCurConversation(lastConversationKeyname);
+					const firstMessages = historyMap[lastConversationKeyname] || [];
+					setMessages(firstMessages);
 				} else {
 					// If no history, create a new conversation
 					handleNewConversation();
