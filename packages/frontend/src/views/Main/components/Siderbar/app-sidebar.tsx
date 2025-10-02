@@ -68,7 +68,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 		],
 		navMain: [
 			{
-				title: '项目知识库',
+				title: '知识库',
 				icon: LibraryBig,
 				url: '/main/knowledge',
 				groupLabel: '知识库'
