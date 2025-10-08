@@ -91,11 +91,11 @@ export type JobDocument = HydratedDocument<Job> & {
 export const JobSchema = SchemaFactory.createForClass(Job);
 
 JobSchema.pre('save', async function (this: JobDocument) {
-	if (this.status && this.status !== 'open' && this.status !== 'closed') {
+	if (this.job_status && this.job_status !== 'open' && this.job_status !== 'closed') {
 		throw new Error('Invalid status value. Must be "open" or "closed".');
 	}
-	if (!this.status) {
-		this.status = 'open';
+	if (!this.job_status) {
+		this.job_status = 'open';
 	}
 });
 
