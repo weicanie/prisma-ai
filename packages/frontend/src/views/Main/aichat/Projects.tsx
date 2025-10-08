@@ -8,8 +8,10 @@ import { findAllProjects } from '@/services/project';
 import { selectAIChatProjectId, setAIChatProjectId } from '@/store/aichat';
 import { AnimatePresence, motion } from 'framer-motion';
 import { EllipsisVertical, FolderOpen, Plus } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import ClickCollapsible from '../components/ClickCollapsible';
 
 export type Project = {
@@ -41,6 +43,7 @@ export type ProjectsProps = {
  */
 export default function Projects({ className, menu, onProjectSelect }: ProjectsProps) {
 	const dispatch = useDispatch();
+	const navigate = useNavigate();
 	const activeProjectId = useSelector(selectAIChatProjectId);
 
 	// 控制悬浮卡片的显示和隐藏
@@ -86,12 +89,22 @@ export default function Projects({ className, menu, onProjectSelect }: ProjectsP
 		});
 	}, [groupedProjects]);
 
+	const timerRef = useRef<number>();
 	// 设置默认选中第一个项目
 	useEffect(() => {
 		if (projects.length > 0 && !activeProjectId) {
 			const firstProject = projects[0];
 			dispatch(setAIChatProjectId(firstProject.key));
 			onProjectSelect?.(firstProject.key);
+		} else if (projects && projects.length === 0) {
+			//用户当前没有项目时，跳转创建项目经验页面
+			if (timerRef.current) {
+				clearTimeout(timerRef.current);
+			}
+			timerRef.current = setTimeout(() => {
+				toast.info('请先创建至少一个项目经验');
+				navigate('/main/projects');
+			}, 500);
 		}
 	}, [projects, activeProjectId, dispatch, onProjectSelect]);
 
