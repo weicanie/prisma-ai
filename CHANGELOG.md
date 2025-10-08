@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.0.2](https://github.com/weicanie/prisma-ai/compare/v5.0.1...v5.0.2) (2025-10-08)
+
+### Bug Fixes
+
+- 岗位数据保存前校验字段的hook ([d196c4d](https://github.com/weicanie/prisma-ai/commit/d196c4ddc8e063f5910ffc5a887d2c50c00e1b1d))
+
 ## [5.0.1](https://github.com/weicanie/prisma-ai/compare/v5.0.0...v5.0.1) (2025-10-08)
 
 ### Bug Fixes
