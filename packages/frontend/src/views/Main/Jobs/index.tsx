@@ -111,21 +111,24 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 						header: ({ column }) => <DataTableColumnHeader column={column} title="公司名称" />,
 						cell: ({ row }) => {
 							return <div className="w-[120px]">{row.original.companyName}</div>;
-						}
+						},
+						enableSorting: false
 					},
 					{
 						accessorKey: 'location',
 						header: ({ column }) => <DataTableColumnHeader column={column} title="工作地点" />,
 						cell: ({ row }) => {
 							return <div className="w-[100px]">{row.original.location || '未知'}</div>;
-						}
+						},
+						enableSorting: false
 					},
 					{
 						accessorKey: 'salary',
 						header: ({ column }) => <DataTableColumnHeader column={column} title="薪资范围" />,
 						cell: ({ row }) => {
 							return <div className="w-[100px]">{row.original.salary || '面议'}</div>;
-						}
+						},
+						enableSorting: false
 					},
 					{
 						accessorKey: 'jon_status',
@@ -134,10 +137,11 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 							const job_status = row.original.job_status;
 							return (
 								<Badge variant={job_status === 'open' ? 'default' : 'secondary'}>
-									{job_status === 'open' ? '开放' : '关闭'}
+									{job_status === 'open' ? '开放招聘' : '关闭招聘'}
 								</Badge>
 							);
-						}
+						},
+						enableSorting: false
 					},
 					{
 						accessorKey: 'updatedAt',
