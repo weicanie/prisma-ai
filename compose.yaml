@@ -115,7 +115,7 @@ services:
       timeout: 5s
       retries: 5
   minio-container:
-    image: docker.1ms.run/bitnami/minio:2025.4.3
+    image: docker.1ms.run/bitnamilegacy/minio:2025.4.3
     ports:
       - '9003:9000'
       - '9004:9001'

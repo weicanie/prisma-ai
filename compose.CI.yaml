@@ -103,7 +103,7 @@ services:
       timeout: 5s
       retries: 5
   minio-container:
-    image: bitnami/minio:2025.4.3
+    image: bitnamilegacy/minio:2025.4.3
     ports:
       - '9003:9000'
       - '9004:9001'

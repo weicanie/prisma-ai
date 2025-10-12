@@ -118,7 +118,7 @@ We have prepared detailed documentation to help you get started with Prisma-AI q
     - mysql (latest container)
     - redis (latest container)
     - mongodb (latest container)
-    - minio (2025.4.3 bitnami/minio container)
+    - minio (2025.4.3 bitnamilegacy/minio container)
 5.  **Start the Project**
     ```bash
     # Execute from the repository root
@@ -166,5 +166,3 @@ We believe that with the power of the community, we can make Prisma-AI even bett
     - (2) Commercial competition, data resale, or other profit-seeking activities;
     - (3) High-frequency access that interferes with the normal operation of the website.
     - (4) Any behavior that violates the relevant laws and regulations of the People's Republic of China.
-
-
