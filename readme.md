@@ -163,6 +163,28 @@ Prisma‑AI 解决你求职时最头疼的 4 件事：
 ./scripts/update.sh
 ```
 
+## 🆕 最新动态
+
+### v4.1.7：新增简历pdf编辑与导出功能
+
+<img src="https://github.com/weicanie/prisma-ai/blob/main/images/readme/v4.17.png" alt="简历编辑器"/>
+
+### v4.2.1：支持集成deepwiki作为项目知识库
+
+> DeepWiki 是一款AI工具，为GitHub上的代码库自动生成交互式、可对话的文档。
+> prisma-ai 的 deepwiki: https://deepwiki.com/weicanie/prisma-ai
+
+<img width="2355" height="1546" alt="image" src="https://github.com/user-attachments/assets/7bc8aed7-459e-4523-96e5-85e87f68d24a" />
+
+### v5.0.0：ai助手 Prisma
+
+通过用户记忆来使ai能根据用户情况进行简历优化、人岗匹配。
+提供ai助手 Prisma，通过用户记忆、项目业务研究、更好的知识库检索，ai助手懂你和你的项目。
+通过用户记忆，用户现在可以在prisma-ai hub匹配适合自己的面经和面试题，来进行针对性学习。
+优化了知识库检索。
+
+<img src="https://github.com/weicanie/prisma-ai/blob/main/images/readme/Prisma.png" alt="Prisma"/>
+
 ---
 
 ## 🛠️ 技术栈
