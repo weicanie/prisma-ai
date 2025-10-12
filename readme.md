@@ -167,7 +167,7 @@ Prisma‑AI 解决你求职时最头疼的 4 件事：
 
 ### v4.1.7：新增简历pdf编辑与导出功能
 
-<img src="https://github.com/weicanie/prisma-ai/blob/main/images/readme/v4.17.png" alt="简历编辑器"/>
+<img src="https://github.com/weicanie/prisma-ai/blob/main/images/readme/v4.1.7.png" alt="简历编辑器"/>
 
 ### v4.2.1：支持集成deepwiki作为项目知识库
 
