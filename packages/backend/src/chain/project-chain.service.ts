@@ -113,7 +113,7 @@ export class ProjectChainService {
 			{
 				// 接收 ProjectProcessingInput 作为输入，为 Prompt 准备所有插槽变量
 				input: (i: ProjectProcessingInput) => JSON.stringify(i.project),
-				userMemory: userMemoryText,
+				userMemory: () => userMemoryText,
 				chat_history: () => '', // 暂不处理多轮对话历史
 				instructions: () => outputParser.getFormatInstructions(),
 

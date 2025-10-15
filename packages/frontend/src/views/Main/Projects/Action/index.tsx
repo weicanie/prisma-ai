@@ -82,7 +82,7 @@ const Action: React.FC<ActionProps> = () => {
 					setMergedData(result.after);
 					console.log('sse 最终结果：', result);
 				} catch (error) {
-					//! 续传的情况，actionType是初始值，因此需要尝试解析为字符串
+					//! 续传的情况，actionType是初始值，因此需要尝试解析为字符串（businessLookup、businessPaper）
 					if (content.search(/[{}]/gm) === -1) {
 						//不是json格式，则认为是字符串
 						setResultData(content);

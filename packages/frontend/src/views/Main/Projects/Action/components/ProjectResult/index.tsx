@@ -27,7 +27,6 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 }) => {
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
-
 	// 创建滚动容器的引用
 	const reasoningContentRef = useRef<HTMLDivElement>(null);
 	const streamingContentRef = useRef<HTMLDivElement>(null);

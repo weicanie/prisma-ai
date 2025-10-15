@@ -105,7 +105,7 @@ const userMemorySchema = z
 	.describe('用户记忆 - 包含用户画像和求职方向的完整信息');
 
 interface UserMemoryAction {
-	userinfo: UserInfoFromToken;
+	userInfo: UserInfoFromToken;
 	project?: ProjectDto | string;
 	skill?: CreateSkillDto | string;
 	career?: CreateCareerDtoShared | string;
