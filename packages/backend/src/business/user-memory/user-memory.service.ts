@@ -19,55 +19,72 @@ export class UserMemoryService implements OnModuleInit, WithGetUserMemory {
 		this.eventBusService.on(EventList.userMemoryChange, this.userMemoryChangeHandler.bind(this));
 	}
 
+	async updateUserMemoryUseLLM(input: UserMemoryAction, llm_type: AIChatLLM) {
+		const { userInfo } = input;
+		const userId = userInfo.userId;
+
+		try {
+			const existingMemory = await this.userMemoryModel
+				.findOne({ 'userInfo.userId': userId })
+				.lean();
+
+			if (existingMemory) {
+				// 更新逻辑: 调用 updateUserMemoryChain
+				const chain = await this.aichatChainService.updateUserMemoryChain(
+					{
+						llm_type
+					},
+					userInfo.userConfig!
+				);
+
+				const new_info = this.formatNewInfo(input);
+
+				const updatedMemory: UserMemoryT = await chain.invoke({
+					existing_memory: {
+						userProfile: existingMemory.userProfile,
+						jobSeekDestination: existingMemory.jobSeekDestination
+					},
+					new_info: new_info
+				});
+
+				await this.userMemoryModel.updateOne(
+					{ 'userInfo.userId': userId },
+					{
+						userProfile: updatedMemory.userProfile,
+						jobSeekDestination: updatedMemory.jobSeekDestination,
+						userInfo: userInfo
+					},
+					{ upsert: true }
+				);
+			} else {
+				// 创建逻辑: 调用 createUserMemoryChain
+				const chain = await this.aichatChainService.createUserMemoryChain(
+					{
+						llm_type: AIChatLLM.gemini_2_5_flash // 默认使用性价比高的模型
+					},
+					userInfo.userConfig!
+				);
+				const payload = this.formatCreationPayload(input);
+				const newMemory: UserMemoryT = await chain.invoke(payload);
+
+				await this.userMemoryModel.create({
+					...newMemory,
+					userInfo: userInfo
+				});
+			}
+			console.log(`使用${llm_type}更新或创建对用户${userInfo.userId}的记忆成功`);
+		} catch (error) {
+			console.error(`使用${llm_type}更新或创建对用户${userInfo.userId}的记忆失败:`, error);
+		}
+	}
+
 	async userMemoryChangeHandler(input: UserMemoryAction) {
-		const { userinfo } = input;
-		const userId = userinfo.userId;
-
-		const existingMemory = await this.userMemoryModel.findOne({ 'userInfo.userId': userId }).lean();
-
-		if (existingMemory) {
-			// 更新逻辑: 调用 updateUserMemoryChain
-			const chain = await this.aichatChainService.updateUserMemoryChain(
-				{
-					llm_type: AIChatLLM.gemini_2_5_flash // 默认使用性价比高的模型
-				},
-				userInfo.userConfig!
-			);
-
-			const new_info = this.formatNewInfo(input);
-
-			const updatedMemory: UserMemoryT = await chain.invoke({
-				existing_memory: {
-					userProfile: existingMemory.userProfile,
-					jobSeekDestination: existingMemory.jobSeekDestination
-				},
-				new_info: new_info
-			});
-
-			await this.userMemoryModel.updateOne(
-				{ 'userInfo.userId': userId },
-				{
-					userProfile: updatedMemory.userProfile,
-					jobSeekDestination: updatedMemory.jobSeekDestination,
-					userInfo: userinfo
-				},
-				{ upsert: true }
-			);
-		} else {
-			// 创建逻辑: 调用 createUserMemoryChain
-			const chain = await this.aichatChainService.createUserMemoryChain(
-				{
-					llm_type: AIChatLLM.gemini_2_5_flash // 默认使用性价比高的模型
-				},
-				userInfo.userConfig!
-			);
-			const payload = this.formatCreationPayload(input);
-			const newMemory: UserMemoryT = await chain.invoke(payload);
-
-			await this.userMemoryModel.create({
-				...newMemory,
-				userInfo: userinfo
-			});
+		//先尝试使用 v3 更新或创建记忆
+		try {
+			await this.updateUserMemoryUseLLM(input, AIChatLLM.v3);
+		} catch (error) {
+			//如果失败，尝试使用gemini_2_5_flash模型更新或创建记忆
+			await this.updateUserMemoryUseLLM(input, AIChatLLM.gemini_2_5_flash);
 		}
 	}
 	/**

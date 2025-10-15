@@ -22,7 +22,7 @@ export class SkillService {
 		const savedSkill = await createdSkill.save();
 		/* 更新用户记忆 */
 		this.eventBusService.emit(EventList.userMemoryChange, {
-			userinfo: userInfo,
+			userInfo: userInfo,
 			skill: createSkillDto
 		});
 		return savedSkill;

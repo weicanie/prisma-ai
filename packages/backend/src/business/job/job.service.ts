@@ -29,7 +29,7 @@ export class JobService {
 		const savedJob = await createdJob.save();
 		/* 更新用户记忆 */
 		this.eventBusService.emit(EventList.userMemoryChange, {
-			userinfo: userInfoToken,
+			userInfo: userInfoToken,
 			job: createJobDto
 		});
 		return savedJob;
@@ -75,7 +75,7 @@ export class JobService {
 		this.jobModel.updateOne({ _id: jobId }, { $set: { userInfo } }, { new: true }).exec();
 		/* 更新用户记忆 */
 		this.eventBusService.emit(EventList.userMemoryChange, {
-			userinfo: userInfo,
+			userInfo: userInfo,
 			job: job.toObject() as CreateJobDto
 		});
 		return job;

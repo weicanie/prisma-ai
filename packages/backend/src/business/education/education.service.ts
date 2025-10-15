@@ -26,7 +26,7 @@ export class EducationService {
 		});
 		/* 更新用户记忆 */
 		this.eventBusService.emit(EventList.userMemoryChange, {
-			userinfo: userInfo,
+			userInfo: userInfo,
 			education: createEducationDto
 		});
 		return created;
