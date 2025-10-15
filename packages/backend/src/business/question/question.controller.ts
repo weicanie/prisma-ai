@@ -37,7 +37,7 @@ export class QuestionController {
 	@Post('generate-mindmap')
 	async generateMindmapForUser(@UserInfo() userInfo: UserInfoFromToken) {
 		const sessionId = crypto.randomUUID();
-		const task = await this.questionService.addMindmapGenerationTask(+userInfo.userId, sessionId);
+		const task = await this.questionService.addMindmapGenerationTask(userInfo, sessionId);
 		return { id: task.id };
 	}
 

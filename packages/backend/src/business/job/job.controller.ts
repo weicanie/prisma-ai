@@ -26,8 +26,11 @@ export class JobController {
 
 	@RequireLogin()
 	@Post('crawl')
-	startCrawl(@Body(new ValidationPipe()) startCrawlDto: StartCrawlDto) {
-		return this.crawlJobService.startCrawlTask(startCrawlDto);
+	startCrawl(
+		@Body(new ValidationPipe()) startCrawlDto: StartCrawlDto,
+		@UserInfo() userInfo: UserInfoFromToken
+	) {
+		return this.crawlJobService.startCrawlTask(startCrawlDto, userInfo);
 	}
 
 	@RequireLogin()

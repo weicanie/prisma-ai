@@ -56,11 +56,11 @@ export class HjmChainService {
 		outputSchema: z.Schema,
 		stream: boolean,
 		model: SelectedLLM,
-		userId: string
+		userInfo: UserInfoFromToken
 	) {
 		const businessPrompt = await promptGetter();
 
-		const userMemory = await this.userMemoryService.getUserMemory(userId);
+		const userMemory = await this.userMemoryService.getUserMemory(userInfo.userId);
 		const userMemoryText = userMemory ? userMemoryJsonToText(userMemory) : '';
 
 		let llm: any;
@@ -68,10 +68,16 @@ export class HjmChainService {
 			case SelectedLLM.gemini_2_5_pro:
 			case SelectedLLM.gemini_2_5_pro_proxy:
 			case SelectedLLM.gemini_2_5_flash:
-				llm = await this.thoughtModelService.getGeminiThinkingModelFlat(model);
+				llm = await this.thoughtModelService.getGeminiThinkingModelFlat(
+					model,
+					userInfo.userConfig!
+				);
 				break;
 			case SelectedLLM.deepseek_reasoner:
-				llm = await this.thoughtModelService.getDeepSeekThinkingModleflat('deepseek-reasoner');
+				llm = await this.thoughtModelService.getDeepSeekThinkingModleflat(
+					'deepseek-reasoner',
+					userInfo.userConfig!
+				);
 				break;
 			default:
 				throw new Error(`_createProcessChain-不支持的模型:${model}`);
@@ -139,7 +145,7 @@ export class HjmChainService {
 			schema,
 			stream,
 			model,
-			userInfo.userId
+			userInfo
 		);
 		return chain;
 	}

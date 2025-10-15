@@ -27,5 +27,6 @@ export * from './types/skill';
 export * from './types/skill.schema';
 export * from './types/sse';
 export * from './types/task';
+export * from './types/user_config';
 export * from './types/user_memory';
 export * from './utils';

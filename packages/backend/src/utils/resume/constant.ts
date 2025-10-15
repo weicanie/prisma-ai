@@ -41,7 +41,6 @@ interface ResumeTemplate {
 	projects: ProjectTemplate[];
 }
 
-export const resumesDirPath = path.join(process.cwd(), '..', '..', 'resumes');
 export const resumeTemplate: ResumeTemplate = JSON.parse(
 	fs.readFileSync(path.join(process.cwd(), 'data', 'resume_template.json'), 'utf-8')
 );

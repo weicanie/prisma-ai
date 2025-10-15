@@ -77,12 +77,17 @@ export class AichatService {
 		`;
 
 		try {
-			const chain = await this.aichatChainService.createChatChain(keyname, modelConfig, {
-				project_data: `${JSON.stringify(project)}`,
-				project_doc,
-				project_code,
-				user_memory: user_memory ? `${JSON.stringify(user_memory)}` : ''
-			});
+			const chain = await this.aichatChainService.createChatChain(
+				keyname,
+				modelConfig,
+				userInfo.userConfig!,
+				{
+					project_data: `${JSON.stringify(project)}`,
+					project_doc,
+					project_code,
+					user_memory: user_memory ? `${JSON.stringify(user_memory)}` : ''
+				}
+			);
 			const answer = await chain.invoke({ input: userInput_rag });
 			return answer;
 		} catch (error) {

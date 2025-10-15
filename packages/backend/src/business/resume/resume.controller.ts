@@ -142,6 +142,6 @@ export class ResumeController {
 	@RequireLogin()
 	@Post('repo')
 	resumeRepositoryManager(@Body() repoDto: ResumeRepoDto, @UserInfo() userInfo: UserInfoFromToken) {
-		return this.resumeJsonService.handleRepoAction(repoDto);
+		return this.resumeJsonService.handleRepoAction(repoDto, userInfo);
 	}
 }

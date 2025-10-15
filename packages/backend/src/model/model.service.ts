@@ -360,15 +360,15 @@ export class ModelService {
 		return this.chatHistoryService.getChatHistory(keyname);
 	}
 
-	getLLMGeminiRaw(modelName: 'gemini-2.5-pro' | 'gemini-2.5-flash'): ChatOpenAI;
-	getLLMGeminiRaw(config: ChatOpenAIFields): ChatOpenAI;
+	getLLMGeminiRaw(modelName: 'gemini-2.5-pro' | 'gemini-2.5-flash', apiKey?: string): ChatOpenAI;
+	getLLMGeminiRaw(config: ChatOpenAIFields, apiKey?: string): ChatOpenAI;
 
 	/**
 	 * @description 直接获取模型实例,无熔断器和限流器和请求队列等高可用保护
 	 * @description 目前使用的是国内转发接口,所以需要使用ChatOpenAI
 	 * @param [config] - 模型配置
 	 */
-	getLLMGeminiRaw(config: any) {
+	getLLMGeminiRaw(config: any, apiKey?: string) {
 		if (config === 'gemini-2.5-pro' || config === 'gemini-2.5-flash') {
 			//测试阶段使用gemini-1.5-flash-latest
 			const modelName = config;
@@ -376,6 +376,9 @@ export class ModelService {
 			config.model = modelName;
 		} else if (config === undefined) {
 			config = this.gemini_config;
+		}
+		if (apiKey) {
+			config.apiKey = apiKey;
 		}
 		const configKey = JSON.stringify(config);
 		if (this.rawModels.has(configKey)) {
@@ -390,10 +393,13 @@ export class ModelService {
 	/**
 	 * google原厂模型实例
 	 */
-	getLLMGeminiPlusRaw(config: GoogleGenerativeAIChatInput): ChatGoogleGenerativeAI;
-	getLLMGeminiPlusRaw(modelName: 'gemini-2.5-pro' | 'gemini-2.5-flash'): ChatGoogleGenerativeAI;
+	getLLMGeminiPlusRaw(config: GoogleGenerativeAIChatInput, apiKey?: string): ChatGoogleGenerativeAI;
+	getLLMGeminiPlusRaw(
+		modelName: 'gemini-2.5-pro' | 'gemini-2.5-flash',
+		apiKey?: string
+	): ChatGoogleGenerativeAI;
 
-	getLLMGeminiPlusRaw(config: any) {
+	getLLMGeminiPlusRaw(config: any, apiKey?: string) {
 		if (config === 'gemini-2.5-pro' || config === 'gemini-2.5-flash') {
 			const modelName = config;
 			config = this.gemini_config_plus;
@@ -401,6 +407,11 @@ export class ModelService {
 		} else if (config === undefined) {
 			config = this.gemini_config_plus;
 		}
+
+		if (apiKey) {
+			config.apiKey = apiKey;
+		}
+
 		const configKey = JSON.stringify(config);
 		if (this.rawModels.has(configKey)) {
 			return this.rawModels.get(configKey)!;
@@ -428,14 +439,17 @@ export class ModelService {
 		}
 	}
 
-	getLLMDeepSeekRaw(config?: ChatOpenAIFields): ChatDeepSeek;
-	getLLMDeepSeekRaw(modelName: 'deepseek-reasoner' | 'deepseek-chat'): ChatDeepSeek;
+	getLLMDeepSeekRaw(config: ChatOpenAIFields, apiKey?: string): ChatDeepSeek;
+	getLLMDeepSeekRaw(
+		modelName: 'deepseek-reasoner' | 'deepseek-chat',
+		apiKey?: string
+	): ChatDeepSeek;
 
 	/**
 	 * @description 直接获取模型实例,无熔断器和限流器和请求队列等高可用保护
 	 * @param [config] - 模型配置
 	 */
-	getLLMDeepSeekRaw(config: any) {
+	getLLMDeepSeekRaw(config: any, apiKey?: string) {
 		if (config === 'deepseek-reasoner' || config === 'deepseek-chat') {
 			const modelName = config;
 			config = this.deepseek_config;
@@ -443,6 +457,11 @@ export class ModelService {
 		} else if (config === undefined) {
 			config = this.deepseek_config;
 		}
+
+		if (apiKey) {
+			config.configuration.apiKey = apiKey;
+		}
+
 		const configKey = JSON.stringify(config);
 		if (this.rawModels.has(configKey)) {
 			return this.rawModels.get(configKey);

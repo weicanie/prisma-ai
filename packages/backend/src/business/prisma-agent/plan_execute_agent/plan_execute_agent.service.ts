@@ -61,7 +61,7 @@ export class PlanExecuteAgentService {
 	 * @input {{ projectInfo: ProjectDto; lightSpot: string; knowledge?: any; reflection?: Reflection }} - 输入包括项目信息、功能亮点、可选的知识库内容和反思。
 	 * @output {z.infer<typeof analysisSchema>} - 输出一个包含`highlightAnalysis`字段的结构化对象。
 	 */
-	createAnalysisChain(): Runnable<
+	createAnalysisChain(userId: string): Runnable<
 		{
 			projectInfo: ProjectDto;
 			lightSpot: string;
@@ -71,7 +71,7 @@ export class PlanExecuteAgentService {
 		z.infer<typeof analysisSchema>
 	> {
 		let model: ChatOpenAI | ChatDeepSeek;
-		const modelName = getAgentConfig().model.plan;
+		const modelName = getAgentConfig(userId).model.plan;
 		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
 			model = this.modelService.getLLMGeminiRaw(modelName);
 			console.log('gemini-model', model);
@@ -154,7 +154,7 @@ export class PlanExecuteAgentService {
 	 * @input {{ projectInfo: ProjectDto; lightSpot: string; highlightAnalysis: string; knowledge?: any; reflection?: Reflection }} - 输入包括项目信息、功能亮点、需求分析、可选的知识库内容和反思。
 	 * @output {z.infer<typeof planSchema>} - 输出一个包含`implementationPlan`数组的结构化对象。
 	 */
-	createPlanChain(): Runnable<
+	createPlanChain(userId: string): Runnable<
 		{
 			projectInfo: ProjectDto;
 			lightSpot: string;
@@ -165,7 +165,7 @@ export class PlanExecuteAgentService {
 		z.infer<typeof planSchema>
 	> {
 		let model: ChatOpenAI | ChatDeepSeek;
-		const modelName = getAgentConfig().model.plan;
+		const modelName = getAgentConfig(userId).model.plan;
 		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
 			model = this.modelService.getLLMGeminiRaw(modelName);
 		} else {
@@ -253,7 +253,7 @@ export class PlanExecuteAgentService {
 	 * @input 完整的重新规划上下文。
 	 * @output 更新后的`highlightAnalysis`。
 	 */
-	createReAnalysisChain(): Runnable<
+	createReAnalysisChain(userId: string): Runnable<
 		{
 			projectName: string;
 			projectDescription: string;
@@ -271,7 +271,7 @@ export class PlanExecuteAgentService {
 		z.infer<typeof analysisSchema>
 	> {
 		let model: ChatOpenAI | ChatDeepSeek;
-		const modelName = getAgentConfig().model.replan;
+		const modelName = getAgentConfig(userId).model.replan;
 		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
 			model = this.modelService.getLLMGeminiRaw(modelName);
 		} else {
@@ -359,7 +359,7 @@ export class PlanExecuteAgentService {
 	 * @input 完整的重新规划上下文。
 	 * @output 更新后的`implementationPlan`。
 	 */
-	createRePlanChain(): Runnable<
+	createRePlanChain(userId: string): Runnable<
 		{
 			projectName: string;
 			projectDescription: string;
@@ -378,7 +378,7 @@ export class PlanExecuteAgentService {
 		z.infer<typeof planSchema>
 	> {
 		let model: ChatOpenAI | ChatDeepSeek;
-		const modelName = getAgentConfig().model.replan;
+		const modelName = getAgentConfig(userId).model.replan;
 		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
 			model = this.modelService.getLLMGeminiRaw(modelName);
 		} else {

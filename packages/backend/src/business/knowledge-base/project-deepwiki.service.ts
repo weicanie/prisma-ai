@@ -12,7 +12,7 @@ import path from 'path';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { TaskQueueService } from '../../task-queue/task-queue.service';
 import { PersistentTask } from '../../type/taskqueue';
-import { deepwikiDownOutputPath, deepwikiDownScriptPath } from '../../utils/constants';
+import { deepwikiDownScriptPath, user_data_dir } from '../../utils/constants';
 import { executeShellScript } from '../../utils/execute_shell_script';
 import { KnowledgeVDBService } from '../prisma-agent/data_base/konwledge_vdb.service';
 import { Knowledgebase, KnowledgebaseDocument } from './entities/knowledge-base.entity';
@@ -106,7 +106,12 @@ export class ProjectDeepWikiService implements OnModuleInit {
 		if (!organization || !repository) {
 			throw new Error('deepwiki站点地址格式错误');
 		}
-		const mdFileDirPath = path.join(deepwikiDownOutputPath, 'wiki', organization, repository);
+		const mdFileDirPath = path.join(
+			user_data_dir.deepwikiDownOutputPath(userInfo.userId),
+			'wiki',
+			organization,
+			repository
+		);
 		// 获取md文件
 		const mdFiles = fs.readdirSync(mdFileDirPath);
 		const vectorIds: string[] = [];

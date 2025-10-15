@@ -1,6 +1,6 @@
 import { Command, END, interrupt, MemorySaver, START, StateGraph } from '@langchain/langgraph';
 import { Injectable, Logger } from '@nestjs/common';
-import { ProjectDto } from '@prisma-ai/shared';
+import { ProjectDto, UserInfoFromToken } from '@prisma-ai/shared';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as readline from 'readline';
@@ -8,7 +8,7 @@ import { ZodError } from 'zod';
 
 import { EventBusService } from '../../EventBus/event-bus.service';
 import { ModelService } from '../../model/model.service';
-import { projectsDirPath } from '../../utils/constants';
+import { user_data_dir } from '../../utils/constants';
 import { CRetrieveAgentService } from './c_retrieve_agent/c_retrieve_agent.service';
 import { KnowledgeVDBService } from './data_base/konwledge_vdb.service';
 import { ProjectCodeVDBService } from './data_base/project_code_vdb.service';
@@ -20,15 +20,12 @@ import { GraphState } from './state';
 import {
 	HumanInput,
 	humanInputSchema,
+	NodeConfig,
 	Result_step,
 	resultStepSchema,
 	ReviewType,
 	RunningConfig
 } from './types';
-
-const outputDir = path.resolve(process.cwd(), 'agent_output');
-const humanFeedbackPath = path.join(outputDir, 'human_feedback.json');
-const graphStatePath = path.join(outputDir, 'graph_state.json');
 
 @Injectable()
 export class PrismaAgentService {
@@ -109,13 +106,17 @@ export class PrismaAgentService {
 	 * @output {Partial<GraphState>} - 更新 `stepResultList` 和 `currentStepIndex`。
 	 */
 	private async executeStep(
-		state: typeof GraphState.State
+		state: typeof GraphState.State,
+		config: NodeConfig
 	): Promise<Partial<typeof GraphState.State>> {
 		this.logger.log('---节点: 执行步骤---');
 		this.logger.log('等待开发者执行步骤并提供结果...');
 
 		// 保存 stepPlan 到文件
-		const stepPlanPath = path.join(outputDir, 'plan_step_for_execution.json');
+		const stepPlanPath = path.join(
+			user_data_dir.agentOutputPath(config.configurable.userId),
+			'plan_step_for_execution.json'
+		);
 		await fs.writeFile(stepPlanPath, JSON.stringify(state.stepPlan, null, 2));
 
 		const stepResult: Result_step = interrupt({
@@ -146,6 +147,10 @@ export class PrismaAgentService {
 		if (!interrupts || interrupts.length === 0) {
 			throw new Error('handleHumanInvolve called with no interrupts.');
 		}
+		const humanFeedbackPath = path.join(
+			user_data_dir.agentOutputPath(threadConfig.configurable.userId),
+			'human_feedback.json'
+		);
 		// 提取中断信息。在我们的设计中，一次只处理一个中断。
 		const interruptData = interrupts[0].value;
 		// 总是从主图中获取状态，因为它是整个流程的入口和状态管理者。
@@ -155,7 +160,10 @@ export class PrismaAgentService {
 		// 步骤1: 保存当前中断信息到文件，供用户审查和调试。
 
 		await fs.writeFile(
-			path.join(outputDir, 'interrupt_payload.json'),
+			path.join(
+				user_data_dir.agentOutputPath(threadConfig.configurable.userId),
+				'interrupt_payload.json'
+			),
 			JSON.stringify(interruptData, null, 2)
 		);
 
@@ -176,8 +184,8 @@ export class PrismaAgentService {
 						{
 							output: {
 								userFeedback: '你的反馈(由你撰写)',
-								writtenCodeFiles: 'cursor的修改总结清单(由cursor生成)',
-								summary: 'cursor的最终总结(由cursor生成)'
+								writtenCodeFiles: '修改总结清单(ai生成)',
+								summary: '最终总结(ai生成)'
 							}
 						},
 						null,
@@ -333,33 +341,37 @@ export class PrismaAgentService {
 		projectInfo: ProjectDto,
 		lightSpot: string,
 		projectPath: string, //projects目录中的项目文件夹名称
-		userId: string,
+		userInfo: UserInfoFromToken,
 		sessionId: string
 	) {
-		const projectFullPath = path.join(projectsDirPath, projectPath);
+		const projectFullPath = path.join(user_data_dir.projectsDirPath(userInfo.userId), projectPath);
+		const userId = userInfo.userId;
 		// 步骤1: 准备所有子图和节点可能需要的运行时依赖。
 		// 这些依赖项通过 `configurable` 对象注入到图的执行中。
 		const runningConfig: RunningConfig = {
-			analysisChain: this.planExecuteAgentService.createAnalysisChain(),
-			planChain: this.planExecuteAgentService.createPlanChain(),
-			reAnalysisChain: this.planExecuteAgentService.createReAnalysisChain(),
-			rePlanChain: this.planExecuteAgentService.createRePlanChain(),
-			stepAnalysisChain: this.planStepAgentService.createAnalysisChain(),
-			stepPlanChain: this.planStepAgentService.createPlanChain(),
-			finalPromptChain: this.planStepAgentService.createFinalPromptChain(),
-			reflectChain: this.reflectAgentService.createReflectChain(),
+			analysisChain: this.planExecuteAgentService.createAnalysisChain(userId),
+			planChain: this.planExecuteAgentService.createPlanChain(userId),
+			reAnalysisChain: this.planExecuteAgentService.createReAnalysisChain(userId),
+			rePlanChain: this.planExecuteAgentService.createRePlanChain(userId),
+			stepAnalysisChain: this.planStepAgentService.createAnalysisChain(userId),
+			stepPlanChain: this.planStepAgentService.createPlanChain(userId),
+			finalPromptChain: this.planStepAgentService.createFinalPromptChain(userId),
+			reflectChain: this.reflectAgentService.createReflectChain(), //固定使用deepseek-chat
 			knowledgeVDBService: this.knowledgeVDBService,
 			projectCodeVDBService: this.projectCodeVDBService,
 			cRetrieveAgentService: this.cRetrieveAgentService,
 			eventBusService: this.eventBusService,
-			logger: this.logger
+			logger: this.logger,
+			userId,
+			userInfo
 		};
 
 		// 步骤2: 构建线程配置，它将被传递给工作流的 stream 方法。
 		const threadConfig = {
 			configurable: {
 				...runningConfig,
-				thread_id: sessionId
+				thread_id: sessionId,
+				user_id: userId
 			} as RunningConfig
 		};
 

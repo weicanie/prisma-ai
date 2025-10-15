@@ -4,15 +4,7 @@ import { ChatDeepSeek } from '@langchain/deepseek';
 import type { ChatOpenAI } from '@langchain/openai';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-	hjmRerankSchema,
-	JobVo,
-	LLMJobDto,
-	llmJobSchema,
-	projectSchema,
-	RoadFromDiffDto,
-	roadFromDiffSchema
-} from '@prisma-ai/shared';
+import { hjmRerankSchema, JobVo, LLMJobDto, llmJobSchema, UserConfig } from '@prisma-ai/shared';
 import { BufferMemory } from 'langchain/memory';
 import * as path from 'path';
 import { z } from 'zod';
@@ -50,10 +42,15 @@ export class ChainService implements WithFormfixChain {
 	async createChain<Input = string, Output = unknown>(
 		llm: ChatOpenAI | ChatDeepSeek,
 		prompt: ChatPromptTemplate,
+		userConfig: UserConfig,
 		outputSchema: z.Schema,
 		inputSchema?: z.Schema
 	): Promise<RunnableSequence<Input, Output>> {
-		const outputParser = RubustStructuredOutputParser.from<typeof outputSchema>(outputSchema, this);
+		const outputParser = RubustStructuredOutputParser.from<typeof outputSchema>(
+			outputSchema,
+			this,
+			userConfig
+		);
 
 		const memory = new BufferMemory({
 			chatHistory: this.modelService.getChatHistory(
@@ -78,7 +75,8 @@ export class ChainService implements WithFormfixChain {
 				/* 当输出包含输入格式的输出数据时,需要向模型指定 */
 				instructions_mid: async () => {
 					const outputParser =
-						inputSchema && RubustStructuredOutputParser.from<typeof inputSchema>(inputSchema, this);
+						inputSchema &&
+						RubustStructuredOutputParser.from<typeof inputSchema>(inputSchema, this, userConfig);
 					return outputParser && outputParser.getFormatInstructions();
 				}
 			},
@@ -100,6 +98,7 @@ export class ChainService implements WithFormfixChain {
 	private async createStreamChain<Input = string>(
 		llm: ChatOpenAI | ChatDeepSeek,
 		prompt: ChatPromptTemplate,
+		userConfig: UserConfig,
 		outputSchema: z.Schema,
 		inputSchema?: z.Schema
 	): Promise<RunnableSequence<Input, any>> {
@@ -119,14 +118,16 @@ export class ChainService implements WithFormfixChain {
 				instructions: async () => {
 					const outputParser = RubustStructuredOutputParser.from<typeof outputSchema>(
 						outputSchema,
-						this
+						this,
+						userConfig
 					);
 					return outputParser.getFormatInstructions();
 				},
 				/* 当输出包含输入格式的输出数据时,需要向模型指定 */
 				instructions_mid: async () => {
 					const outputParser =
-						inputSchema && RubustStructuredOutputParser.from<typeof inputSchema>(inputSchema, this);
+						inputSchema &&
+						RubustStructuredOutputParser.from<typeof inputSchema>(inputSchema, this, userConfig);
 					return outputParser && outputParser.getFormatInstructions();
 				}
 			},
@@ -141,10 +142,11 @@ export class ChainService implements WithFormfixChain {
 	/**
 	 * 将批量的异常Markdown代码块字符串转换为标准格式
 	 */
-	async createMarkdownCodeBlockNormalizeChain() {
+	async createMarkdownCodeBlockNormalizeChain(userConfig: UserConfig) {
 		const outputParser = RubustStructuredOutputParser.from<typeof markdownNormalizeSchema>(
 			markdownNormalizeSchema,
-			this
+			this,
+			userConfig
 		);
 		const prompt = ChatPromptTemplate.fromMessages([
 			[
@@ -176,7 +178,10 @@ export class ChainService implements WithFormfixChain {
 			['human', '请标准化以下代码块：\n\n{code_blocks}']
 		]);
 
-		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+		const llm = await this.modelService.getLLMDeepSeekRaw(
+			'deepseek-chat',
+			userConfig.llm.deepseek.apiKey
+		);
 		const chain = RunnableSequence.from<
 			{ code_blocks: string[] },
 			z.infer<typeof markdownNormalizeSchema>
@@ -193,49 +198,19 @@ export class ChainService implements WithFormfixChain {
 	}
 
 	/**
-	 * 输入的文本项目经验（单个）转化为JSON
-	 * @description 1、用户导入现有的项目经验,则通过llm转为JSON
-	 * @description 2、用户以表单提交项目经验,则直接就是JSON
-	 */
-	async tansformChain() {
-		const outputParser = RubustStructuredOutputParser.fromZodSchema(projectSchema);
-		const prompt = ChatPromptTemplate.fromMessages([
-			[
-				`${role.SYSTEM}`,
-				`
-				将用户输入的项目经验描述按指定格式输出。
-				如果信息缺失,就留空。
-				注意不要修改任何信息。
-				你需要对亮点进行分类,但不要修改亮点的任何信息。
-				格式说明:{instructions}` // 内部的prompt会教JSON schema、给输入的JSON schema给llm
-			],
-			[`${role.HUMAN}`, '{input}']
-		]);
-
-		const llm = await this.modelService.getLLMDeepSeekRaw('deepseek-chat');
-		const chain = RunnableSequence.from<{ input: string }, z.infer<typeof projectSchema>>([
-			{
-				input: input => input.input,
-				instructions: () => outputParser.getFormatInstructions()
-			},
-			prompt,
-			llm,
-			outputParser
-		]);
-		return chain;
-	}
-
-	/**
 	 * 格式修复：按schema指定的格式将原输入输出
 	 * @param schema zod schema
 	 * @param input 原输入
 	 * @param errMsg 格式错误信息
 	 * @returns
 	 */
-	async fomartFixChain<T = any>(schema: z.Schema, errMsg: string) {
-		const llm = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+	async fomartFixChain<T = any>(schema: z.Schema, errMsg: string, userConfig?: UserConfig) {
+		const llm = this.modelService.getLLMDeepSeekRaw(
+			'deepseek-chat',
+			userConfig?.llm.deepseek.apiKey || ''
+		);
 		//@ts-ignore
-		const outputParser = RubustStructuredOutputParser.fromZodSchema(schema);
+		const outputParser = RubustStructuredOutputParser.fromZodSchema(schema, this, userConfig);
 		const prompt = ChatPromptTemplate.fromMessages([
 			[
 				`${role.SYSTEM}`,
@@ -269,10 +244,10 @@ export class ChainService implements WithFormfixChain {
 	 * 将query关键词扩展为关键词数组,用于爬取岗位信息时扩大搜索范围
 	 * @returns
 	 */
-	async queryExpandChain() {
+	async queryExpandChain(userConfig: UserConfig) {
 		const schema = z.array(z.string());
 		const llm = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
-		const outputParser = RubustStructuredOutputParser.from<typeof schema>(schema, this);
+		const outputParser = RubustStructuredOutputParser.from<typeof schema>(schema, this, userConfig);
 		const prompt = ChatPromptTemplate.fromMessages([
 			[
 				`${role.SYSTEM}`,
@@ -303,35 +278,16 @@ export class ChainService implements WithFormfixChain {
 	}
 
 	/**
-	 * 对比简历A、B, B由A优化而来, 生成学习路线
-	 * @description 简历A + 简历B -> 学习路线
-	 */
-	async roadChain(stream = false) {
-		const schema = roadFromDiffSchema;
-
-		const prompt = await this.promptService.diffLearnPrompt();
-
-		const llm = this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
-
-		const chain = await this.createChain<string, RoadFromDiffDto>(llm, prompt, schema);
-		const streamChain = await this.createStreamChain<string>(llm, prompt, schema);
-		if (stream) {
-			return streamChain;
-		}
-		return chain;
-	}
-
-	/**
 	 * 创建人岗匹配的rerank链
 	 * @description LLM接收简历和多个岗位，返回rerank后的岗位列表和匹配原因
 	 * @param top_n 返回的岗位数量,默认5
 	 * @returns 返回一个可执行的链，输入为 { resume: ResumeVo, jobs: JobVo[] }
 	 */
-	async hjmRerankChain(top_n = 5) {
+	async hjmRerankChain(userConfig: UserConfig, top_n = 5) {
 		const schema = hjmRerankSchema;
 		const prompt = await this.promptService.hjmRerankPrompt();
 		const llm = this.modelService.getLLMDeepSeekRaw('deepseek-chat'); // 使用通用模型即可
-		const outputParser = RubustStructuredOutputParser.fromZodSchema(schema);
+		const outputParser = RubustStructuredOutputParser.from(schema, this, userConfig);
 
 		const chain = RunnableSequence.from([
 			{
@@ -358,13 +314,13 @@ export class ChainService implements WithFormfixChain {
 	 * 将简历转化为岗位描述
 	 * @description 简历 -> 岗位描述
 	 */
-	async hjmTransformChain(stream = false) {
+	async hjmTransformChain(stream = false, userConfig: UserConfig) {
 		const schema = llmJobSchema;
 		const prompt = await this.promptService.hjmTransformPrompt();
 		const llm = this.modelService.getLLMDeepSeekRaw('deepseek-chat'); // 使用通用模型即可
 
-		const chain = await this.createChain<string, LLMJobDto>(llm, prompt, schema);
-		const streamChain = await this.createStreamChain<string>(llm, prompt, schema);
+		const chain = await this.createChain<string, LLMJobDto>(llm, prompt, userConfig, schema);
+		const streamChain = await this.createStreamChain<string>(llm, prompt, userConfig, schema);
 		if (stream) {
 			return streamChain;
 		}
@@ -374,14 +330,14 @@ export class ChainService implements WithFormfixChain {
 	/**
 	 * @description 获取用于为面试题生成思维导图的Chain
 	 */
-	async getMindmapGenerationChain() {
+	async getMindmapGenerationChain(userConfig: UserConfig) {
 		// 定义LLM响应的期望JSON结构，我们期望得到一个包含多个markdown字符串的数组
 		const schema = z.object({
 			results: z
 				.array(z.string().describe('转换后的 markmap Markdown 文本'))
 				.describe('与输入顺序严格对应的Markdown文本数组')
 		});
-		const parser = RubustStructuredOutputParser.from<typeof schema>(schema, this);
+		const parser = RubustStructuredOutputParser.from<typeof schema>(schema, this, userConfig);
 
 		const prompt = await this.promptService.generateMindmapPrompt();
 
@@ -402,6 +358,7 @@ export class ChainService implements WithFormfixChain {
 		return chain;
 	}
 
+	//! 仅用于本地测试
 	/**
 	 * 通过agent和mcp查询本地mongodb数据库
 	 * @param query 用户输入的查询语句

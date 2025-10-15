@@ -1,4 +1,5 @@
 import { GraphState } from '../state';
+import { NodeConfig } from '../types';
 
 /**
  * @description 执行反思的图节点。
@@ -8,7 +9,7 @@ import { GraphState } from '../state';
  */
 export async function reflect(
 	state: typeof GraphState.State,
-	config: any
+	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
 	const { input } = state.reflectIO;
 	const reflectChain = config.configurable?.reflectChain;

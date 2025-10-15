@@ -1,5 +1,6 @@
 import { Document } from '@langchain/core/documents';
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { UserInfoFromToken } from '@prisma-ai/shared';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
@@ -10,7 +11,6 @@ import { DbService } from '../../../DB/db.service';
 import { ModelService } from '../../../model/model.service';
 import { TaskQueueService } from '../../../task-queue/task-queue.service';
 import { PersistentTask } from '../../../type/taskqueue';
-import { projectsDirPath } from '../../../utils/constants';
 import { VectorStoreService } from '../../../vector-store/vector-store.service';
 
 /**
@@ -18,6 +18,7 @@ import { VectorStoreService } from '../../../vector-store/vector-store.service';
  */
 interface ProjectEmbeddingTaskMetadata {
 	userId: string;
+	userInfo: UserInfoFromToken;
 	projectName: string;
 	projectPath: string;
 }
@@ -34,7 +35,7 @@ export enum ProjectCodeIndex {
 }
 
 @Injectable()
-export class ProjectCodeVDBService implements OnModuleInit {
+export class ProjectCodeVDBService {
 	private readonly logger = new Logger(ProjectCodeVDBService.name);
 	readonly taskTypeCodeEmbedding = 'project_code_embedding';
 
@@ -83,27 +84,22 @@ export class ProjectCodeVDBService implements OnModuleInit {
 				this.extensionToLangMap[ext] = lang;
 			}
 		}
-
-		//确保项目代码目录存在
-		if (!fs.existsSync(projectsDirPath)) {
-			fs.mkdirSync(projectsDirPath, { recursive: true });
-		}
 	}
 
 	/**
 	 * 确保用到的向量索引存在
 	 */
-	async onModuleInit() {
+	async indexExists(apiKey: string) {
 		for (const index of this.vdbIndexs) {
-			if (!(await this.vectorStoreService.indexExists(index))) {
+			if (!(await this.vectorStoreService.indexExists(apiKey, index))) {
 				await this.vectorStoreService.createEmptyIndex(
+					apiKey,
 					index,
 					this.modelService.getEmbedModelOpenAI().dimensions ?? 1536
 				);
 			}
 		}
 	}
-
 	/**
 	 * 加载所有支持的语言的tree-sitter语法解析器
 	 * @private
@@ -133,17 +129,18 @@ export class ProjectCodeVDBService implements OnModuleInit {
 	 * @returns {Promise<PersistentTask>} - 创建的后台任务
 	 */
 	async syncToVDB(
-		userId: string,
+		userInfo: UserInfoFromToken,
 		projectName: string,
 		projectPath: string,
 		sessionId: string
 	): Promise<PersistentTask> {
 		const task = await this.taskQueueService.createAndEnqueueTask(
 			sessionId,
-			userId,
+			userInfo.userId,
 			this.taskTypeCodeEmbedding,
 			{
-				userId,
+				userId: userInfo.userId,
+				userInfo,
 				projectName,
 				projectPath
 			} as ProjectEmbeddingTaskMetadata
@@ -163,12 +160,16 @@ export class ProjectCodeVDBService implements OnModuleInit {
 	async retrieveCodeChunks(
 		query: string,
 		topK: number,
-		userId: string,
+		userInfo: UserInfoFromToken,
 		projectName: string
 	): Promise<string> {
-		const namespace = this._getRepoNamespace(projectName, userId);
+		const apikey = userInfo.userConfig.vectorDb.pinecone.apiKey;
+		await this.indexExists(apikey);
+
+		const namespace = this._getRepoNamespace(projectName, userInfo.userId);
 		const embeddings = this.modelService.getEmbedModelOpenAI();
 		const retriever = await this.vectorStoreService.getRetrieverOfIndex(
+			apikey,
 			ProjectCodeIndex.CODEBASE,
 			embeddings,
 			topK,
@@ -189,13 +190,17 @@ export class ProjectCodeVDBService implements OnModuleInit {
 	async retrieveCodeChunksWithScoreFilter(
 		query: string,
 		topK: number,
-		userId: string,
+		userInfo: UserInfoFromToken,
 		projectName: string,
 		minScore = 0.6
 	): Promise<string> {
-		const namespace = this._getRepoNamespace(projectName, userId);
+		const apikey = userInfo.userConfig.vectorDb.pinecone.apiKey;
+		await this.indexExists(apikey);
+
+		const namespace = this._getRepoNamespace(projectName, userInfo.userId);
 		const embeddings = this.modelService.getEmbedModelOpenAI();
 		const chunks = await this.vectorStoreService.similaritySearchWithScore(
+			apikey,
 			ProjectCodeIndex.CODEBASE,
 			embeddings,
 			query,
@@ -213,13 +218,13 @@ export class ProjectCodeVDBService implements OnModuleInit {
 	 */
 	private async _projectCodeEmbeddingTaskHandler(task: ProjectEmbeddingTask): Promise<void> {
 		this.logger.log(`开始执行项目代码向量化任务: ${task.id}`);
-		const { projectPath, projectName, userId } = task.metadata;
+		const { projectPath, projectName, userInfo } = task.metadata;
 
 		try {
-			await this.syncProject(projectPath, projectName, parseInt(userId, 10));
-			this.logger.log(`项目 ${projectName} (用户 ${userId}) 同步成功。`);
+			await this.syncProject(projectPath, projectName, userInfo);
+			this.logger.log(`项目 ${projectName} (用户 ${userInfo.userId}) 同步成功。`);
 		} catch (error) {
-			this.logger.error(`项目 ${projectName} (用户 ${userId}) 同步失败:`, error);
+			this.logger.error(`项目 ${projectName} (用户 ${userInfo.userId}) 同步失败:`, error);
 			throw error; // 抛出错误以便任务队列可以记录失败并重试
 		}
 	}
@@ -230,17 +235,20 @@ export class ProjectCodeVDBService implements OnModuleInit {
 	 * @param projectName 项目名称
 	 * @param userId 用户ID
 	 */
-	async syncProject(projectPath: string, projectName: string, userId: number) {
+	private async syncProject(projectPath: string, projectName: string, userInfo: UserInfoFromToken) {
+		const apikey = userInfo.userConfig.vectorDb.pinecone.apiKey;
+		await this.indexExists(apikey);
+
 		this.logger.log(`[Sync] 开始同步项目: ${projectName}`);
-		const namespace = this._getRepoNamespace(projectName, String(userId));
+		const namespace = this._getRepoNamespace(projectName, String(userInfo.userId));
 
 		// 1. 获取数据库中的项目实体，如果不存在则创建
 		let project = await this.db.user_project.findFirst({
-			where: { AND: [{ user_id: userId }, { project_name: projectName }] }
+			where: { AND: [{ user_id: +userInfo.userId }, { project_name: projectName }] }
 		});
 		if (!project) {
 			project = await this.db.user_project.create({
-				data: { user_id: userId, project_name: projectName }
+				data: { user_id: +userInfo.userId, project_name: projectName }
 			});
 		}
 
@@ -297,6 +305,7 @@ export class ProjectCodeVDBService implements OnModuleInit {
 			if (vectorIdsToDelete.length > 0) {
 				this.logger.log(`[Delete] 准备从向量库删除 ${vectorIdsToDelete.length} 个向量...`);
 				await this.vectorStoreService.deleteVectors(
+					apikey,
 					vectorIdsToDelete,
 					ProjectCodeIndex.CODEBASE,
 					namespace
@@ -315,6 +324,7 @@ export class ProjectCodeVDBService implements OnModuleInit {
 			if (vectorIdsToUpdate.length > 0) {
 				this.logger.log(`[Update] 准备从向量库删除 ${vectorIdsToUpdate.length} 个旧向量...`);
 				await this.vectorStoreService.deleteVectors(
+					apikey,
 					vectorIdsToUpdate,
 					ProjectCodeIndex.CODEBASE,
 					namespace
@@ -350,6 +360,7 @@ export class ProjectCodeVDBService implements OnModuleInit {
 					// 添加到向量数据库
 					const embeddings = this.modelService.getEmbedModelOpenAI();
 					const vectorIds = await this.vectorStoreService.addDocumentsToIndex(
+						apikey,
 						documents,
 						ProjectCodeIndex.CODEBASE,
 						embeddings,

@@ -1,18 +1,15 @@
-import { RunnableConfig } from '@langchain/core/runnables';
 import { interrupt } from '@langchain/langgraph';
 import { Logger } from '@nestjs/common';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 // import { InterruptType } from '../prisma-agent.service';
 import { GraphState } from '../state';
-import { HumanInput, HumanOutput, ReviewType, RunningConfig } from '../types';
+import { HumanInput, HumanOutput, NodeConfig, ReviewType } from '../types';
 export enum InterruptType {
 	HumanReview = 'human_review',
 	ExecuteStep = 'execute_step'
 }
-interface NodeConfig extends RunnableConfig {
-	configurable: RunningConfig;
-}
+
 export class HumanInvolve {
 	private readonly logger = new Logger(HumanInvolve.name);
 	private readonly outputDir = path.resolve(process.cwd(), 'agent_output');

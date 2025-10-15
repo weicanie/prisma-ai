@@ -1,12 +1,12 @@
 ## 流程可视化
 
-![prisma-agent](../../../graph_img/prisma-agent.png)
+![prisma-agent](../../../data/graph_img/prisma-agent.png)
 
-![plan_agent](../../../graph_img/plan_agent.png)
+![plan_agent](../../../data/graph_img/plan_agent.png)
 
-![plan_step_agent](../../../graph_img/plan_step_agent.png)
+![plan_step_agent](../../../data/graph_img/plan_step_agent.png)
 
-![replan_agent](../../../graph_img/replan_agent.png)
+![replan_agent](../../../data/graph_img/replan_agent.png)
 
 ## 领域知识库
 

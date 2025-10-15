@@ -5,7 +5,7 @@ import { IterableReadableStream } from '@langchain/core/utils/stream';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatOpenAI, ChatOpenAIFields } from '@langchain/openai';
 import { Injectable, Logger } from '@nestjs/common';
-import { SelectedLLM, StreamingChunk } from '@prisma-ai/shared';
+import { SelectedLLM, StreamingChunk, UserConfig } from '@prisma-ai/shared';
 import { z } from 'zod';
 import { DeepSeekStreamChunk } from '../type/sse';
 import { ModelService } from './model.service';
@@ -81,23 +81,30 @@ export class ThoughtModelService {
 	 */
 	async getGeminiThinkingModelFlat(
 		config: ChatOpenAIFields | ChatGoogleGenerativeAI | SelectedLLM,
+		userConfig: UserConfig,
 		schema?: z.Schema
 	) {
 		let llm: ChatOpenAI | ChatGoogleGenerativeAI;
 		switch (config) {
 			case SelectedLLM.gemini_2_5_pro_proxy:
-				llm = this.modelService.getLLMGeminiRaw('gemini-2.5-pro');
+				llm = this.modelService.getLLMGeminiRaw('gemini-2.5-pro', userConfig.llm.openai.apiKey); //代理的apiKey
 				break;
 			case SelectedLLM.gemini_2_5_pro:
-				llm = this.modelService.getLLMGeminiPlusRaw('gemini-2.5-pro');
+				llm = this.modelService.getLLMGeminiPlusRaw(
+					'gemini-2.5-pro',
+					userConfig.llm.googleai.apiKey
+				);
 				if (schema) {
-					llm = llm.withStructuredOutput(schema);
+					llm = llm.withStructuredOutput(schema) as any;
 				}
 				break;
 			case SelectedLLM.gemini_2_5_flash:
-				llm = this.modelService.getLLMGeminiPlusRaw('gemini-2.5-flash');
+				llm = this.modelService.getLLMGeminiPlusRaw(
+					'gemini-2.5-flash',
+					userConfig.llm.googleai.apiKey
+				);
 				if (schema) {
-					llm = llm.withStructuredOutput(schema);
+					llm = llm.withStructuredOutput(schema) as any;
 				}
 				break;
 			default:
@@ -123,12 +130,13 @@ export class ThoughtModelService {
 	 * @returns 一个配置好的、可以直接调用的 Runnable 实例，它扮演一个 "思考型LLM" 的角色。
 	 */
 	async getDeepSeekThinkingModleflat(
-		config: ChatOpenAIFields | 'deepseek-reasoner'
+		config: ChatOpenAIFields | 'deepseek-reasoner',
+		userConfig: UserConfig
 	): Promise<Runnable<any, StreamingChunk>> {
 		if (config === 'deepseek-reasoner') {
 			config = this.modelService.deepseek_config;
 		}
-		const llm = this.modelService.getLLMDeepSeekRaw(config);
+		const llm = this.modelService.getLLMDeepSeekRaw(config, userConfig.llm.deepseek.apiKey);
 		if (!llm) {
 			throw new Error('获取 DeepSeek 模型实例失败。');
 		}

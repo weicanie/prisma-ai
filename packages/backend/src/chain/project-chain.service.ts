@@ -70,11 +70,11 @@ export class ProjectChainService {
 		stream: boolean,
 		business: BusinessEnum,
 		model: SelectedLLM,
-		userId: string
+		userInfo: UserInfoFromToken
 	) {
 		const businessPrompt = await promptGetter();
 
-		const userMemory = await this.userMemoryService.getUserMemory(userId);
+		const userMemory = await this.userMemoryService.getUserMemory(userInfo.userId);
 		const userMemoryText = userMemory ? userMemoryJsonToText(userMemory) : '';
 
 		let llm: any;
@@ -82,10 +82,16 @@ export class ProjectChainService {
 			case SelectedLLM.gemini_2_5_pro:
 			case SelectedLLM.gemini_2_5_pro_proxy:
 			case SelectedLLM.gemini_2_5_flash:
-				llm = await this.thoughtModelService.getGeminiThinkingModelFlat(model);
+				llm = await this.thoughtModelService.getGeminiThinkingModelFlat(
+					model,
+					userInfo.userConfig!
+				);
 				break;
 			case SelectedLLM.deepseek_reasoner:
-				llm = await this.thoughtModelService.getDeepSeekThinkingModleflat('deepseek-reasoner');
+				llm = await this.thoughtModelService.getDeepSeekThinkingModleflat(
+					'deepseek-reasoner',
+					userInfo.userConfig!
+				);
 				break;
 			default:
 				throw new Error(`_createProcessChain-不支持的模型:${model}`);
@@ -174,24 +180,26 @@ export class ProjectChainService {
 			stream,
 			BusinessEnum.lookup,
 			model,
-			userInfo.userId
+			userInfo
 		);
 		return chain;
 	}
 
 	async businessLookupChain(
 		stream: true,
-		model: SelectedLLM
+		model: SelectedLLM,
+		userInfo: UserInfoFromToken
 	): Promise<RunnableSequence<ProjectProcessingInput, StreamingChunk>>; //流式返回时输出类型是指单个chunk的类型
 	async businessLookupChain(
 		stream: false,
-		model: SelectedLLM
+		model: SelectedLLM,
+		userInfo: UserInfoFromToken
 	): Promise<RunnableSequence<ProjectProcessingInput, string>>;
 
 	/**
 	 * 项目经验业务分析
 	 */
-	async businessLookupChain(stream: boolean, model: SelectedLLM) {
+	async businessLookupChain(stream: boolean, model: SelectedLLM, userInfo: UserInfoFromToken) {
 		const schema = businessLookupResultSchema;
 		return this._createProcessChain(
 			() => this.promptService.businessLookupPrompt(),
@@ -199,7 +207,7 @@ export class ProjectChainService {
 			stream,
 			BusinessEnum.businessLookup,
 			model,
-			'-1'
+			userInfo
 		);
 	}
 
@@ -225,7 +233,7 @@ export class ProjectChainService {
 			stream,
 			BusinessEnum.businessPaper,
 			model,
-			userInfo.userId
+			userInfo
 		);
 		return chain;
 	}
@@ -257,7 +265,7 @@ export class ProjectChainService {
 			stream,
 			BusinessEnum.polish,
 			model,
-			userInfo.userId
+			userInfo
 		);
 		return chain;
 	}
@@ -305,7 +313,7 @@ export class ProjectChainService {
 			stream,
 			BusinessEnum.mine,
 			model,
-			userInfo.userId
+			userInfo
 		);
 
 		return chain;

@@ -2,7 +2,7 @@ import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf';
 import { CheerioWebBaseLoader } from '@langchain/community/document_loaders/web/cheerio';
 import { GithubRepoLoader } from '@langchain/community/document_loaders/web/github';
 import { Document } from '@langchain/core/documents';
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
 	CreateProjectDeepWikiKnowledgeDto,
 	FileTypeEnum,
@@ -49,7 +49,7 @@ interface KnowledgeChunkDoc extends Document {
 }
 
 @Injectable()
-export class KnowledgeVDBService implements OnModuleInit {
+export class KnowledgeVDBService {
 	private readonly logger = new Logger(KnowledgeVDBService.name);
 
 	private readonly embedModel = this.modelService.getEmbedModelOpenAI();
@@ -69,10 +69,14 @@ export class KnowledgeVDBService implements OnModuleInit {
 	/**
 	 * 确保用到的向量索引存在
 	 */
-	async onModuleInit() {
+	async indexExists(apiKey: string) {
 		for (const index of this.vdbIndexs) {
-			if (!(await this.vectorStoreService.indexExists(index))) {
-				await this.vectorStoreService.createEmptyIndex(index, this.embedModel.dimensions ?? 1536);
+			if (!(await this.vectorStoreService.indexExists(apiKey, index))) {
+				await this.vectorStoreService.createEmptyIndex(
+					apiKey,
+					index,
+					this.embedModel.dimensions ?? 1536
+				);
 			}
 		}
 	}
@@ -87,6 +91,9 @@ export class KnowledgeVDBService implements OnModuleInit {
 		knowledge: ProjectKnowledgeVo,
 		userInfo: UserInfoFromToken
 	): Promise<string[]> {
+		const apiKey = userInfo.userConfig.vectorDb.pinecone.apiKey;
+		await this.indexExists(apiKey);
+
 		const { id, type, projectName } = knowledge;
 		this.logger.log(`开始处理知识 [${knowledge.name}] (ID: ${id})...`);
 
@@ -118,6 +125,7 @@ export class KnowledgeVDBService implements OnModuleInit {
 				indexName = KnowledgeIndex.KNOWLEDGEBASE;
 				namespace = this._getUserProjectNamespaceByType(type, userInfo.userId, projectName);
 				const vectorIds = await this.vectorStoreService.addDocumentsToIndex(
+					apiKey,
 					chunks,
 					indexName,
 					embeddings,
@@ -144,6 +152,9 @@ export class KnowledgeVDBService implements OnModuleInit {
 		knowledge: CreateProjectDeepWikiKnowledgeDto & { content: string },
 		userInfo: UserInfoFromToken
 	): Promise<string[]> {
+		const apiKey = userInfo.userConfig.vectorDb.pinecone.apiKey;
+		await this.indexExists(apiKey);
+
 		try {
 			//数据加载
 			const doc = new Document({
@@ -159,6 +170,7 @@ export class KnowledgeVDBService implements OnModuleInit {
 				knowledge.projectName
 			);
 			const vectorIds = await this.vectorStoreService.addDocumentsToIndex(
+				apiKey,
 				chunks,
 				KnowledgeIndex.KNOWLEDGEBASE,
 				this.embedModel,
@@ -177,9 +189,13 @@ export class KnowledgeVDBService implements OnModuleInit {
 		userInfo: UserInfoFromToken,
 		projectName: string
 	): Promise<void> {
+		const apiKey = userInfo.userConfig.vectorDb.pinecone.apiKey;
+		await this.indexExists(apiKey);
+
 		try {
 			const namespace = this._getUserProjectNamespaceByType(type, userInfo.userId, projectName);
 			await this.vectorStoreService.deleteVectors(
+				apiKey,
 				vectorIds,
 				KnowledgeIndex.KNOWLEDGEBASE,
 				namespace
@@ -200,17 +216,17 @@ export class KnowledgeVDBService implements OnModuleInit {
 	async retrieveKnowbase(
 		query: string,
 		topK: number,
-		userId: string,
+		userInfo: UserInfoFromToken,
 		projectName: string
 	): Promise<string> {
 		let namespaces = [KnowledgeNamespace.PROJECT_DOC_USER, KnowledgeNamespace.TECH_DOC].map(
-			namespace => this._getUserProjectNamespace(namespace, userId, projectName)
+			namespace => this._getUserProjectNamespace(namespace, userInfo.userId, projectName)
 		);
 		//过滤掉不存在的索引
 
 		const retrievers = await Promise.all(
 			namespaces.map(namespace =>
-				this.getRetriever(KnowledgeIndex.KNOWLEDGEBASE, namespace, userId, topK)
+				this.getRetriever(KnowledgeIndex.KNOWLEDGEBASE, namespace, userInfo, topK)
 			)
 		);
 
@@ -227,42 +243,6 @@ export class KnowledgeVDBService implements OnModuleInit {
 	}
 
 	/**
-	 * 从代码、文档索引召回topK个文档(每个索引topK个),并分类组装为文本,返回所选命名空间匹配的文档文本
-	 * @param query - 用户的查询字符串
-	 * @param topK - 需要返回的文档数量
-	 * @param userId - 当前用户的ID
-	 * @param projectName - 项目名称
-	 * @param knowledgeNamespaces - 所选命名空间
-	 * @returns {Promise<Record<KnowledgeNamespace, string>>} - 各个命名空间匹配的文档文本
-	 */
-	async retrieveKnowbaseFromNamespace(
-		query: string,
-		topK: number,
-		userId: string,
-		projectName: string,
-		knowledgeNamespaces: KnowledgeNamespace[]
-	) {
-		let namespaces = knowledgeNamespaces.map(namespace =>
-			this._getUserProjectNamespace(namespace, userId, projectName)
-		);
-		4;
-
-		const retrievers = await Promise.all(
-			namespaces.map(namespace =>
-				this.getRetriever(KnowledgeIndex.KNOWLEDGEBASE, namespace, userId, topK)
-			)
-		);
-		const docs = await Promise.all(retrievers.map(retriever => retriever.invoke(query)));
-		const texts = docs.map(doc => doc.map(doc => doc.pageContent).join('\n\n'));
-
-		const result: Record<KnowledgeNamespace, string> = {} as Record<KnowledgeNamespace, string>;
-		for (let i = 0; i < knowledgeNamespaces.length; i++) {
-			result[knowledgeNamespaces[i]] = texts[i];
-		}
-		return result;
-	}
-
-	/**
 	 * 从代码、文档索引召回topK个文档(每个索引召回topK个，然后去掉 score<minScore 的),并分类组装为文本,返回所选命名空间匹配的文档文本
 	 * @param query - 用户的查询字符串
 	 * @param topK - 需要返回的文档数量
@@ -273,19 +253,22 @@ export class KnowledgeVDBService implements OnModuleInit {
 	async retrieveKnowbaseFromNamespaceWithScoreFilter(
 		query: string,
 		topK: number,
-		userId: string,
+		userInfo: UserInfoFromToken,
 		projectName: string,
 		knowledgeNamespaces: KnowledgeNamespace[],
 		minScore = 0.6
 	) {
+		const apiKey = userInfo.userConfig.vectorDb.pinecone.apiKey;
+		await this.indexExists(apiKey);
 		let namespaces = knowledgeNamespaces.map(namespace =>
-			this._getUserProjectNamespace(namespace, userId, projectName)
+			this._getUserProjectNamespace(namespace, userInfo.userId, projectName)
 		);
 		4;
 
 		const nsDocs = await Promise.all(
 			namespaces.map(ns => {
 				return this.vectorStoreService.similaritySearchWithScore(
+					apiKey,
 					KnowledgeIndex.KNOWLEDGEBASE,
 					this.embedModel,
 					query,
@@ -318,16 +301,16 @@ export class KnowledgeVDBService implements OnModuleInit {
 	async retrieveKonwbase_CRAG(
 		query: string,
 		topK: number,
-		userId: string,
+		userInfo: UserInfoFromToken,
 		projectName: string
 	): Promise<string> {
 		let namespaces = [KnowledgeNamespace.PROJECT_DOC_USER, KnowledgeNamespace.TECH_DOC].map(
-			namespace => this._getUserProjectNamespace(namespace, userId, projectName)
+			namespace => this._getUserProjectNamespace(namespace, userInfo.userId, projectName)
 		);
 
 		const retrievers = await Promise.all(
 			namespaces.map(namespace =>
-				this.getRetriever(KnowledgeIndex.KNOWLEDGEBASE, namespace, userId, topK)
+				this.getRetriever(KnowledgeIndex.KNOWLEDGEBASE, namespace, userInfo, topK)
 			)
 		);
 
@@ -355,11 +338,15 @@ export class KnowledgeVDBService implements OnModuleInit {
 	private async getRetriever(
 		index: KnowledgeIndex,
 		namespace: string,
-		userId: string,
+		userInfo: UserInfoFromToken,
 		topK: number
 	) {
+		const apiKey = userInfo.userConfig.vectorDb.pinecone.apiKey;
+		await this.indexExists(apiKey);
+
 		const embeddings = this.embedModel;
 		const retriever = await this.vectorStoreService.getRetrieverOfIndex(
+			apiKey,
 			index,
 			embeddings,
 			topK,
@@ -444,42 +431,6 @@ export class KnowledgeVDBService implements OnModuleInit {
 		const splitter =
 			type === ProjectKnowledgeTypeEnum.userProjectDeepWiki ? mdSplitter : textSplitter;
 		return splitter.splitDocuments(documents);
-	}
-
-	/**
-	 * 根据文件路径猜测编程语言。
-	 * @private
-	 */
-	private _getLangFromPath(filePath: string): string | null {
-		const extension = filePath.split('.').pop();
-		if (!extension) return null;
-		const extToLang: Record<string, string> = {
-			js: 'javascript',
-			jsx: 'javascript',
-			ts: 'typescript',
-			tsx: 'typescript',
-			py: 'python',
-			java: 'java',
-			go: 'go',
-			cpp: 'cpp',
-			c: 'cpp',
-			hpp: 'cpp',
-			h: 'cpp'
-		};
-		return extToLang[extension] || null;
-	}
-
-	/**
-	 * 确保向量索引存在，如果不存在则创建。
-	 * @private
-	 */
-	private async _ensureIndexExists(indexName: string): Promise<void> {
-		const exists = await this.vectorStoreService.indexExists(indexName);
-		if (!exists) {
-			this.logger.log(`索引 '${indexName}' 不存在，将自动创建...`);
-			const embedding = this.embedModel;
-			await this.vectorStoreService.createEmptyIndex(indexName, embedding.dimensions ?? 1536);
-		}
 	}
 
 	/**

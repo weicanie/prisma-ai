@@ -27,9 +27,12 @@ export class UserMemoryService implements OnModuleInit, WithGetUserMemory {
 
 		if (existingMemory) {
 			// 更新逻辑: 调用 updateUserMemoryChain
-			const chain = await this.aichatChainService.updateUserMemoryChain({
-				llm_type: AIChatLLM.gemini_2_5_flash // 默认使用性价比高的模型
-			});
+			const chain = await this.aichatChainService.updateUserMemoryChain(
+				{
+					llm_type: AIChatLLM.gemini_2_5_flash // 默认使用性价比高的模型
+				},
+				userInfo.userConfig!
+			);
 
 			const new_info = this.formatNewInfo(input);
 
@@ -52,9 +55,12 @@ export class UserMemoryService implements OnModuleInit, WithGetUserMemory {
 			);
 		} else {
 			// 创建逻辑: 调用 createUserMemoryChain
-			const chain = await this.aichatChainService.createUserMemoryChain({
-				llm_type: AIChatLLM.gemini_2_5_flash // 默认使用性价比高的模型
-			});
+			const chain = await this.aichatChainService.createUserMemoryChain(
+				{
+					llm_type: AIChatLLM.gemini_2_5_flash // 默认使用性价比高的模型
+				},
+				userInfo.userConfig!
+			);
 			const payload = this.formatCreationPayload(input);
 			const newMemory: UserMemoryT = await chain.invoke(payload);
 

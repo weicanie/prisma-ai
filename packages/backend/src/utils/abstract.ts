@@ -1,5 +1,5 @@
 import { RunnableSequence } from '@langchain/core/runnables';
-import { UserMemoryT } from '@prisma-ai/shared';
+import { UserConfig, UserMemoryT } from '@prisma-ai/shared';
 import z from 'zod';
 import { SseFunc } from './type';
 /**
@@ -15,7 +15,8 @@ export abstract class WithFuncPool {
 export abstract class WithFormfixChain {
 	abstract fomartFixChain<T = any>(
 		schema: z.Schema,
-		errMsg: string
+		errMsg: string,
+		userConfig?: UserConfig
 	): Promise<
 		RunnableSequence<
 			{

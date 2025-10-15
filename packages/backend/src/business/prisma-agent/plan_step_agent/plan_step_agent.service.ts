@@ -94,7 +94,7 @@ export class PlanStepAgentService {
 	 * @input {{ projectInfo: ProjectDto; totalPlan: Plan; currentStep: Step; knowledge?: Knowledge; reflection?: Reflection }} - 输入包括项目信息、整体计划、当前步骤、以及可选的反思。
 	 * @output {z.infer<typeof stepAnalysisSchema>} - 输出包含`stepAnalysis`字段的结构化对象。
 	 */
-	createAnalysisChain(): Runnable<
+	createAnalysisChain(userId: string): Runnable<
 		{
 			projectInfo: ProjectDto;
 			totalPlan: Plan;
@@ -105,7 +105,7 @@ export class PlanStepAgentService {
 		z.infer<typeof stepAnalysisSchema>
 	> {
 		let model: ChatOpenAI | ChatDeepSeek;
-		const modelName = getAgentConfig().model.plan_step;
+		const modelName = getAgentConfig(userId).model.plan_step;
 		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
 			model = this.modelService.getLLMGeminiRaw(modelName);
 		} else {
@@ -183,7 +183,7 @@ export class PlanStepAgentService {
 	 * @input {{ stepAnalysis: string; knowledge?: Knowledge; reflection?: Reflection }} - 输入包括步骤需求分析和可选的反思。
 	 * @output {z.infer<typeof stepPlanSchema>} - 输出包含`implementationPlan`（子步骤列表）的结构化对象。
 	 */
-	createPlanChain(): Runnable<
+	createPlanChain(userId: string): Runnable<
 		{
 			stepAnalysis: string;
 			knowledge?: Knowledge;
@@ -192,7 +192,7 @@ export class PlanStepAgentService {
 		z.infer<typeof stepPlanSchema>
 	> {
 		let model: ChatOpenAI | ChatDeepSeek;
-		const modelName = getAgentConfig().model.plan_step;
+		const modelName = getAgentConfig(userId).model.plan_step;
 		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
 			model = this.modelService.getLLMGeminiRaw(modelName);
 		} else {
@@ -253,7 +253,7 @@ export class PlanStepAgentService {
 	 * @input {{ stepAnalysis: string; implementationPlan: Step[]; knowledge: Knowledge }} - 输入包括步骤分析、子步骤计划和相关知识。
 	 * @output {string} - 输出一个最终的、可以直接执行的字符串Prompt。
 	 */
-	createFinalPromptChain(): Runnable<
+	createFinalPromptChain(userId: string): Runnable<
 		{
 			stepAnalysis: string;
 			implementationPlan: Step[];
@@ -262,7 +262,7 @@ export class PlanStepAgentService {
 		string
 	> {
 		let model: ChatOpenAI | ChatDeepSeek;
-		const modelName = getAgentConfig().model.plan_step;
+		const modelName = getAgentConfig(userId).model.plan_step;
 		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
 			model = this.modelService.getLLMGeminiRaw(modelName);
 		} else {

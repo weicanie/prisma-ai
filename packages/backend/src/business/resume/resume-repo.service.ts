@@ -9,7 +9,8 @@ import {
 import fs from 'fs';
 import lodash from 'lodash';
 import path from 'path';
-import { ActionType, resumesDirPath, resumeTemplate } from '../../utils/resume/constant';
+import { user_data_dir } from '../../utils/constants';
+import { ActionType, resumeTemplate } from '../../utils/resume/constant';
 import { serverResumefileManager } from '../../utils/resume/resumeRepositoryManager';
 import { ResumeRepoDto } from './dto/resumeRepo.dto';
 import { ResumeDocument } from './entities/resume.entity';
@@ -28,7 +29,10 @@ export class ResumeJsonService {
 			let resumeJson: any = (resume as unknown as ResumeDocument).toJSON();
 			resumeJson = this.fillTemplate(resumeJson);
 
-			const resumeJsonPath = path.join(resumesDirPath, `${resumeId}.json`);
+			const resumeJsonPath = path.join(
+				user_data_dir.resumesDirPath(userInfo.userId),
+				`${resumeId}.json`
+			);
 			fs.writeFileSync(resumeJsonPath, JSON.stringify(resumeJson, null, 2));
 			return '简历导入编辑器成功';
 		} catch (error) {
@@ -80,17 +84,20 @@ export class ResumeJsonService {
 		return template;
 	}
 
-	async handleRepoAction(repoDto: ResumeRepoDto) {
+	async handleRepoAction(repoDto: ResumeRepoDto, userInfo: UserInfoFromToken) {
 		switch (repoDto.actionType) {
 			case ActionType.GET:
-				return serverResumefileManager.getResumeFromRepository();
+				return serverResumefileManager.getResumeFromRepository(userInfo);
 			case ActionType.SYNC:
 				return serverResumefileManager.syncResumeToRepository(
 					repoDto.payload.resumeData,
 					repoDto.payload.prevResume
 				);
 			case ActionType.DELETE:
-				return serverResumefileManager.deleteResumeFromRepository(repoDto.payload.resumeData);
+				return serverResumefileManager.deleteResumeFromRepository(
+					repoDto.payload.resumeData,
+					userInfo
+				);
 		}
 	}
 }

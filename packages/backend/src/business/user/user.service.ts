@@ -4,6 +4,7 @@ import { ErrorCode, RegistResponse } from '@prisma-ai/shared';
 
 import { DbService } from '../../DB/db.service';
 import { RedisService } from '../../redis/redis.service';
+import { user_data_dir } from '../../utils/constants';
 import { addLogs, logType } from '../../utils/log.utils';
 import { createHashedPassword, verifyPassword } from '../../utils/passwordEncrypt';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -58,6 +59,8 @@ export class UserService {
 				}
 			});
 			addLogs(userRes, logType.Regist);
+			//初始化用户数据目录
+			user_data_dir.initUserDir(`${userRes.id}`);
 			return userRes;
 		} catch (e) {
 			this.logger.error(e, UserService);
@@ -83,6 +86,9 @@ export class UserService {
 			}
 		});
 		const { password, ...userWithoutPwd } = userRes!;
+
+		//迁移用户数据目录
+		user_data_dir.migrateUserDir(`${userInfo.id}`);
 
 		addLogs(userWithoutPwd, logType.Login);
 

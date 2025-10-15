@@ -17,6 +17,7 @@ const serverlessConfig = {
 
 @Injectable()
 export class VectorStoreService {
+	//根据环境变量中的PINECONE_API_KEY初始化的Pinecone客户端
 	public pinecone: Pinecone;
 
 	private logger = new Logger(VectorStoreService.name);
@@ -37,9 +38,17 @@ export class VectorStoreService {
 	 * @param dimension 向量维度
 	 * @returns {Promise<void>}
 	 */
-	async createEmptyIndex(indexName: string, dimension: number): Promise<void> {
+	async createEmptyIndex(apiKey: string, indexName: string, dimension: number): Promise<void> {
+		let pinecone: Pinecone;
+		if (!apiKey) {
+			pinecone = this.pinecone;
+		} else {
+			pinecone = new Pinecone({
+				apiKey
+			});
+		}
 		try {
-			await this.pinecone.createIndex({
+			await pinecone.createIndex({
 				name: indexName,
 				dimension: dimension,
 				metric: 'cosine',
@@ -65,16 +74,25 @@ export class VectorStoreService {
 	 * @returns {Promise<string[]>} 添加的文档的 vector ID 列表
 	 */
 	async addDocumentsToIndex(
+		apiKey: string,
 		documents: Document[],
 		indexName: string,
 		embeddings: Embeddings,
 		namespace?: string
 	): Promise<string[]> {
+		let pinecone: Pinecone;
+		if (!apiKey) {
+			pinecone = this.pinecone;
+		} else {
+			pinecone = new Pinecone({
+				apiKey
+			});
+		}
 		try {
-			if (!(await this.indexExists(indexName))) {
+			if (!(await this.indexExists(apiKey, indexName))) {
 				throw new Error(`索引 ${indexName} 不存在，请先创建索引`);
 			}
-			const index = this.pinecone.Index(indexName);
+			const index = pinecone.Index(indexName);
 			const pineconeStore = await PineconeStore.fromExistingIndex(embeddings, {
 				pineconeIndex: index,
 				namespace
@@ -109,12 +127,21 @@ export class VectorStoreService {
 	 * @returns 检索器
 	 */
 	async getRetrieverOfIndex(
+		apiKey: string,
 		indexName: string,
 		embeddings: Embeddings,
 		topK: number = 3,
 		namespace?: string
 	) {
-		const index = this.pinecone.Index(indexName);
+		let pinecone: Pinecone;
+		if (!apiKey) {
+			pinecone = this.pinecone;
+		} else {
+			pinecone = new Pinecone({
+				apiKey
+			});
+		}
+		const index = pinecone.Index(indexName);
 		const vectorStore = new PineconeStore(embeddings, { pineconeIndex: index, namespace });
 
 		const retriever = vectorStore.asRetriever(topK);
@@ -131,13 +158,22 @@ export class VectorStoreService {
 	 * @returns 返回一个包含文档和其对应分数的元组 [Document, number][]
 	 */
 	async similaritySearchWithScore(
+		apiKey: string,
 		indexName: string,
 		embeddings: Embeddings,
 		query: string,
 		topK: number = 3,
 		namespace?: string
 	): Promise<[Document, number][]> {
-		const index = this.pinecone.Index(indexName);
+		let pinecone: Pinecone;
+		if (!apiKey) {
+			pinecone = this.pinecone;
+		} else {
+			pinecone = new Pinecone({
+				apiKey
+			});
+		}
+		const index = pinecone.Index(indexName);
 		const vectorStore = new PineconeStore(embeddings, { pineconeIndex: index, namespace });
 
 		const results = await vectorStore.similaritySearchWithScore(query, topK);
@@ -151,14 +187,27 @@ export class VectorStoreService {
 	 * @param namespace 命名空间
 	 * @returns {Promise<void>}
 	 */
-	async deleteVectors(vectorIds: string[], indexName: string, namespace?: string): Promise<void> {
+	async deleteVectors(
+		apiKey: string,
+		vectorIds: string[],
+		indexName: string,
+		namespace?: string
+	): Promise<void> {
+		let pinecone: Pinecone;
+		if (!apiKey) {
+			pinecone = this.pinecone;
+		} else {
+			pinecone = new Pinecone({
+				apiKey
+			});
+		}
 		if (vectorIds.length === 0) {
 			this.logger.log('没有需要删除的向量，跳过删除操作。');
 			return;
 		}
 
 		try {
-			const index = this.pinecone.Index(indexName);
+			const index = pinecone.Index(indexName);
 			await index.namespace(namespace || '').deleteMany(vectorIds);
 			this.logger.log(
 				`成功从索引 ${indexName} 的命名空间 "${namespace || 'default'}" 中删除 ${
@@ -176,7 +225,15 @@ export class VectorStoreService {
 	 * @param indexName 索引名
 	 * @returns {Promise<boolean>} 是否存在的布尔值
 	 */
-	async indexExists(indexName: string): Promise<boolean> {
+	async indexExists(apiKey: string, indexName: string): Promise<boolean> {
+		let pinecone: Pinecone;
+		if (!apiKey) {
+			pinecone = this.pinecone;
+		} else {
+			pinecone = new Pinecone({
+				apiKey
+			});
+		}
 		let retryCount = 0;
 		const maxRetries = 3;
 

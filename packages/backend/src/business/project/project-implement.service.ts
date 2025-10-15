@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ProjectVo } from '@prisma-ai/shared';
+import { ProjectVo, UserInfoFromToken } from '@prisma-ai/shared';
 import { TaskQueueService } from '../../task-queue/task-queue.service';
 import { PersistentTask } from '../../type/taskqueue';
 import { PrismaAgentService } from '../prisma-agent/prisma-agent.service';
@@ -9,7 +9,7 @@ interface LightspotImplementTask extends PersistentTask {
 		project: ProjectVo;
 		lightspot: string;
 		projectPath: string;
-		userId: string;
+		userInfo: UserInfoFromToken;
 		sessionId: string;
 	};
 }
@@ -41,14 +41,14 @@ export class ProjectImplementService {
 		project: ProjectVo,
 		lightspot: string,
 		projectPath: string,
-		userId: string,
+		userInfo: UserInfoFromToken,
 		sessionId: string
 	) {
 		const task = await this.taskQueueService.createAndEnqueueTask(
 			sessionId,
-			userId,
+			userInfo.userId,
 			ProjectImplementService.taskTypeLightspotImplement,
-			{ project, lightspot, projectPath, userId, sessionId }
+			{ project, lightspot, projectPath, userInfo, sessionId }
 		);
 		this.logger.log(`已创建亮点实现任务: ${task.id}`);
 		return task;
@@ -58,14 +58,20 @@ export class ProjectImplementService {
 		project: ProjectVo,
 		lightspot: string,
 		projectPath: string,
-		userId: string,
+		userInfo: UserInfoFromToken,
 		sessionId: string
 	) {
-		return await this.prismaAgentService.invoke(project, lightspot, projectPath, userId, sessionId);
+		return await this.prismaAgentService.invoke(
+			project,
+			lightspot,
+			projectPath,
+			userInfo,
+			sessionId
+		);
 	}
 
 	private async lightspotImplementTaskHandler(task: LightspotImplementTask) {
-		const { project, lightspot, projectPath, userId, sessionId } = task.metadata;
-		await this.processLightspotImplement(project, lightspot, projectPath, userId, sessionId);
+		const { project, lightspot, projectPath, userInfo, sessionId } = task.metadata;
+		await this.processLightspotImplement(project, lightspot, projectPath, userInfo, sessionId);
 	}
 }

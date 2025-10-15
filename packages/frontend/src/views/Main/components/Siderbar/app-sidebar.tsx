@@ -6,6 +6,7 @@ import {
 	LayoutList,
 	LibraryBig,
 	Pyramid,
+	SlidersHorizontal,
 	Sparkles,
 	SquarePen,
 	Target,
@@ -30,6 +31,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const navigate = useNavigate();
 	const userInfoData = localStorage.getItem('userInfo');
 	const userInfo = userInfoData && JSON.parse(userInfoData);
+	const isOnline = import.meta.env.VITE_IS_ONLINE === 'true';
 	//流程、分组
 	const data: {
 		navMain: {
@@ -116,6 +118,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				icon: Book,
 				url: '/main/offer/anki',
 				groupLabel: '面向offer学习'
+			},
+			{
+				title: '用户配置',
+				icon: SlidersHorizontal,
+				url: '/main/user-config',
+				groupLabel: '用户配置'
 			}
 		]
 	};

@@ -30,6 +30,7 @@ const EducationRead = lazy(() => import('../views/Main/Education/Read'));
 const Career = lazy(() => import('../views/Main/Career'));
 const CareerRead = lazy(() => import('../views/Main/Career/Read'));
 const UserMemory = lazy(() => import('../views/Main/UserMemory'));
+const UserConfig = lazy(() => import('../views/Main/userConfig'));
 const AIChat = lazy(() => import('../views/Main/aichat/AIChat'));
 
 const knowBaseRoute = {
@@ -496,6 +497,15 @@ export const routes = [
 						<UserMemory />
 					</UpdateBreadRouter>
 				)
+			},
+			// 用户配置
+			{
+				path: '/main/user-config',
+				element: (
+					<UpdateBreadRouter>
+						<UserConfig />
+					</UpdateBreadRouter>
+				)
 			}
 		]
 	}
@@ -509,6 +519,7 @@ export const path_name: Record<string, string> = {
 	'/main/knowledge/skills': '职业技能',
 	'/main/knowledge/skills/skill-detail': '详情',
 	'/main/user-memory': '用户记忆',
+	'/main/user-config': '用户配置',
 
 	'/main/projects': '项目经验',
 	'/main/projects/action': 'AI优化',

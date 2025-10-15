@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import * as path from 'path';
+import { user_data_dir } from '../../../utils/constants';
 interface AgentConfig {
 	_uploadedProjects: string[];
 	CRAG: boolean;
@@ -23,12 +23,13 @@ interface AgentConfig {
 		replan: 'deepseek-reasoner' | 'deepseek-chat' | 'gemini-2.5-pro' | 'gemini-2.5-flash';
 	};
 }
-const agentConfigPath = path.join(process.cwd(), 'prisma_agent_config.json');
 
-export function getAgentConfig() {
-	const agentConfig: AgentConfig = JSON.parse(fs.readFileSync(agentConfigPath, 'utf-8'));
+export function getAgentConfig(userId: string) {
+	const agentConfig: AgentConfig = JSON.parse(
+		fs.readFileSync(user_data_dir.agentConfigPath(userId), 'utf-8')
+	);
 	return agentConfig;
 }
-export function updateAgentConfig(agentConfig: AgentConfig) {
-	fs.writeFileSync(agentConfigPath, JSON.stringify(agentConfig, null, 2));
+export function updateAgentConfig(agentConfig: AgentConfig, userId: string) {
+	fs.writeFileSync(user_data_dir.agentConfigPath(userId), JSON.stringify(agentConfig, null, 2));
 }

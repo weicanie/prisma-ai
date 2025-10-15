@@ -1,4 +1,5 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { UserConfig, UserInfoFromToken } from '@prisma-ai/shared';
 import { chunk } from 'lodash';
 import { ChainService } from '../../chain/chain.service';
 import { DbService } from '../../DB/db.service';
@@ -9,6 +10,7 @@ interface MindmapGenerationTask extends PersistentTask {
 	metadata: {
 		options: {
 			userId: number;
+			userConfig: UserConfig;
 		};
 		progress: {
 			totalCount: number;
@@ -48,15 +50,15 @@ export class QuestionService implements OnModuleInit {
 	 * @param userId - 用户ID
 	 * @param sessionId - 会话ID，用于追踪任务
 	 */
-	async addMindmapGenerationTask(userId: number, sessionId: string) {
-		this.logger.log(`为用户 ${userId} 添加思维导图生成任务`);
+	async addMindmapGenerationTask(userInfo: UserInfoFromToken, sessionId: string) {
+		this.logger.log(`为用户 ${userInfo.userId} 添加思维导图生成任务`);
 		// 使用现有的任务队列服务创建并派发一个任务
 		const task = await this.taskQueueService.createAndEnqueueTask(
 			sessionId,
-			userId.toString(),
+			userInfo.userId.toString(),
 			'generate-mindmaps-for-user',
 			{
-				options: { userId },
+				options: { userId: userInfo.userId, userConfig: userInfo.userConfig! },
 				progress: { totalCount: -1, completedCount: 0 }
 			}
 		);
@@ -89,7 +91,9 @@ export class QuestionService implements OnModuleInit {
 				return;
 			}
 
-			const mindmapChain = await this.chainService.getMindmapGenerationChain();
+			const mindmapChain = await this.chainService.getMindmapGenerationChain(
+				task.metadata.options.userConfig
+			);
 			let hasMore = true;
 			let completedCount = 0;
 

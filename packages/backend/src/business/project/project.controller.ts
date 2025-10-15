@@ -163,7 +163,7 @@ export class ProjectController {
 					project,
 					implementDto.lightspot,
 					implementDto.projectPath,
-					userInfo.userId,
+					userInfo,
 					crypto.randomUUID()
 				),
 				message: '请到 CLI 与Agent协作'
@@ -188,17 +188,6 @@ export class ProjectController {
 	@Post('add')
 	async createProject(@Body() project: ProjectDto, @UserInfo() userInfo: UserInfoFromToken) {
 		return await this.projectProcessService.checkoutProject(project, userInfo);
-	}
-
-	/**
-	 * 用户上传已有的项目经验文本,  使用llm改写格式。
-	 * @param project 项目经验
-	 *
-	 */
-	@RequireLogin()
-	@Post('add-text')
-	async createFrommRawText(@Body() projectText: string, @UserInfo() userInfo: UserInfoFromToken) {
-		return await this.projectProcessService.transformAndCheckProject(projectText, userInfo);
 	}
 
 	/**

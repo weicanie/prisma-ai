@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { CreateJobDto } from '@prisma-ai/shared';
+import { CreateJobDto, UserInfoFromToken } from '@prisma-ai/shared';
 import { Model } from 'mongoose';
 import * as puppeteer from 'puppeteer';
 import { ChainService } from '../../chain/chain.service';
@@ -99,10 +99,10 @@ export class CrawlJobService {
 	 * 传入query数组,则每个query都爬取一次,否则只爬取一次
 	 * @description 某直聘的一个query能获取的职位数量有限(82/300),所以需要使用多个query多次爬取
 	 */
-	async startCrawlTask(options: StartCrawlDto) {
+	async startCrawlTask(options: StartCrawlDto, userInfo: UserInfoFromToken) {
 		/* 使用llm扩展query关键词 */
 		if (!Array.isArray(options.query)) {
-			const queryExpandChain = await this.chainService.queryExpandChain();
+			const queryExpandChain = await this.chainService.queryExpandChain(userInfo.userConfig!);
 			const queryExpand = await queryExpandChain.invoke({
 				input: options.query
 			});

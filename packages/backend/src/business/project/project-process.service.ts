@@ -107,7 +107,11 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 			const validationResult = schema.safeParse(result);
 			if (!validationResult.success) {
 				const errorMessage = JSON.stringify(validationResult.error.format());
-				const fomartFixChain = await this.chainService.fomartFixChain(schema, errorMessage);
+				const fomartFixChain = await this.chainService.fomartFixChain(
+					schema,
+					errorMessage,
+					userInfo.userConfig!
+				);
 				const projectPolishedStr = JSON.stringify(result);
 				result = await fomartFixChain.invoke({ input: projectPolishedStr });
 			}
@@ -119,7 +123,11 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 			const inputValidationResult = inputSchema.safeParse(resultAfter);
 			if (!inputValidationResult.success) {
 				const errorMessage = JSON.stringify(inputValidationResult.error.format());
-				const fomartFixChain = await this.chainService.fomartFixChain(projectSchema, errorMessage);
+				const fomartFixChain = await this.chainService.fomartFixChain(
+					projectSchema,
+					errorMessage,
+					userInfo.userConfig!
+				);
 				const projectPolishedStr = JSON.stringify(resultAfter);
 				resultAfter = await fomartFixChain.invoke({
 					input: projectPolishedStr
@@ -146,21 +154,6 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 			await resultSave_model.save();
 		};
 	};
-
-	/**
-	 * 项目经验文本转换为json格式对象并提交
-	 * @param projectText 项目经验文本
-	 * @returns
-	 */
-	async transformAndCheckProject(
-		projectText: string,
-		userInfo: UserInfoFromToken
-	): Promise<Omit<ProjectVo, 'lookupResult'>> {
-		const chain = await this.chainService.tansformChain();
-		const project = await chain.invoke({ input: projectText });
-
-		return await this.checkoutProject(project, userInfo);
-	}
 
 	/**
 	 * 验证项目数据格式
@@ -301,7 +294,7 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 				});
 		});
 
-		const chain = await this.projectChainService.businessLookupChain(true, model);
+		const chain = await this.projectChainService.businessLookupChain(true, model, userInfo);
 		const businessLookupStream = await chain.stream({
 			project,
 			userInfo,
@@ -387,7 +380,8 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 			// 创建一个格式修复链
 			const fomartFixChain = await this.chainService.fomartFixChain(
 				lookupResultSchema,
-				errorMessage
+				errorMessage,
+				userInfo.userConfig!
 			);
 			const projectPolishedStr = JSON.stringify(lookupResult);
 			// 调用链来修复格式
@@ -439,7 +433,8 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 			// 创建一个格式修复链
 			const fomartFixChain = await this.chainService.fomartFixChain(
 				businessLookupResultSchema,
-				errorMessage
+				errorMessage,
+				userInfo.userConfig!
 			);
 			const projectPolishedStr = JSON.stringify(lookupResult);
 			// 调用链来修复格式
@@ -490,7 +485,8 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 			// 创建一个格式修复链
 			const fomartFixChain = await this.chainService.fomartFixChain(
 				businessPaperResultSchema,
-				errorMessage
+				errorMessage,
+				userInfo.userConfig!
 			);
 			const projectPolishedStr = JSON.stringify(result);
 			// 调用链来修复格式
@@ -672,7 +668,7 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 			true,
 			model,
 			userInfo,
-			this.skillService,
+			this.skillService
 		);
 		let projectMined = await chain.stream({
 			project,

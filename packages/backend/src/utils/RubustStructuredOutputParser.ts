@@ -1,3 +1,4 @@
+import { UserConfig } from '@prisma-ai/shared';
 import { StructuredOutputParser } from 'langchain/output_parsers';
 import z from 'zod';
 import { WithFormfixChain } from '../utils/abstract';
@@ -58,18 +59,22 @@ function fixJsonString(jsonString: string): string {
 export class RubustStructuredOutputParser<
 	T extends z.ZodTypeAny
 > extends StructuredOutputParser<T> {
+	userConfig?: UserConfig;
 	constructor(
 		schema: T,
-		private readonly chainService: WithFormfixChain
+		private readonly chainService: WithFormfixChain,
+		userConfig?: UserConfig
 	) {
 		super(schema);
+		this.userConfig = userConfig;
 	}
 
 	static from<T extends z.ZodTypeAny>(
 		schema: T,
-		chainService: WithFormfixChain
+		chainService: WithFormfixChain,
+		userConfig?: UserConfig
 	): RubustStructuredOutputParser<T> {
-		return new RubustStructuredOutputParser(schema, chainService);
+		return new RubustStructuredOutputParser(schema, chainService, userConfig);
 	}
 
 	async parse(text: string): Promise<T> {
@@ -83,7 +88,8 @@ export class RubustStructuredOutputParser<
 			} catch (_error) {
 				const fomartFixChain = await this.chainService.fomartFixChain(
 					this.schema,
-					_error.message || _error.toString?.() || '错误信息未提供'
+					_error.message || _error.toString?.() || '错误信息未提供',
+					this.userConfig
 				);
 				const result = await fomartFixChain.invoke({ input: text });
 				return result;

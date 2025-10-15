@@ -2,10 +2,12 @@ import { Document } from '@langchain/core/documents';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
+	initialUserConfig,
 	JobStatus,
 	JobVo,
 	LLMJobDto,
 	ResumeVo,
+	UserConfig,
 	UserInfoFromToken,
 	userMemoryJsonToText
 } from '@prisma-ai/shared';
@@ -75,7 +77,8 @@ export class HjmService implements OnModuleInit {
 
 	userInfoSpider = {
 		userId: 'system',
-		username: '系统爬虫'
+		username: '系统爬虫',
+		userConfig: initialUserConfig
 	};
 
 	@InjectModel(Job.name)
@@ -117,8 +120,10 @@ export class HjmService implements OnModuleInit {
 		try {
 			this.logger.log('正在检查 Pinecone 连接...');
 			for (const index of this.vdbIndexs) {
-				if (!(await this.vectorStoreService.indexExists(index))) {
+				//使用默认的apiKey（只在本地使用）
+				if (!(await this.vectorStoreService.indexExists('', index))) {
 					await this.vectorStoreService.createEmptyIndex(
+						'',
 						index,
 						this.vectorStoreService.embeddingModelService.dimensions ?? 768
 					);
@@ -250,6 +255,7 @@ export class HjmService implements OnModuleInit {
 				const embeddings = this.vectorStoreService.getLocalEmbeddings();
 				try {
 					await this.vectorStoreService.addDocumentsToIndex(
+						'',
 						allChunks,
 						JobIndex.JOBS,
 						embeddings,
@@ -294,7 +300,7 @@ export class HjmService implements OnModuleInit {
 
 		// 1. 获取简历信息并格式化为长文本
 		const resume = await this.resumeService.findOne(resumeId, userInfo);
-		const resumeText = await this.formatResumeToText(resume);
+		const resumeText = await this.formatResumeToText(resume, userInfo.userConfig!);
 
 		// 2. 将简历文本也进行分块
 		const textSplitter = new RecursiveCharacterTextSplitter({
@@ -361,7 +367,7 @@ export class HjmService implements OnModuleInit {
 		// 8. 调用 LLM 进行重排 (Rerank)
 		const userMemory = await this.userMemoryService.getUserMemory(userInfo.userId);
 		const userMemoryText = userMemory ? userMemoryJsonToText(userMemory) : '';
-		const rerankChain = await this.chainService.hjmRerankChain();
+		const rerankChain = await this.chainService.hjmRerankChain(userInfo.userConfig!);
 		const rerankResult = await rerankChain.invoke({
 			userMemory: userMemoryText,
 			jobs: candidateJobs
@@ -411,8 +417,8 @@ export class HjmService implements OnModuleInit {
 	 * @description 用llm把简历改写成反映用户画像的岗位描述！
 	 * @returns {string} - 用于召回的文本
 	 */
-	private async formatResumeToText(resume: ResumeVo): Promise<string> {
-		const toTextChain = await this.chainService.hjmTransformChain();
+	private async formatResumeToText(resume: ResumeVo, userConfig: UserConfig): Promise<string> {
+		const toTextChain = await this.chainService.hjmTransformChain(false, userConfig);
 		const result: LLMJobDto = await toTextChain.invoke(JSON.stringify(resume));
 		const text = `职位: ${result.jobName}, 公司: ${result.companyName}. 职位要求: ${result.description}`;
 		return text;

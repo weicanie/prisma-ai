@@ -3,7 +3,13 @@ import { StringOutputParser } from '@langchain/core/output_parsers';
 import { RunnableLambda, RunnablePassthrough, RunnableSequence } from '@langchain/core/runnables';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AIChatLLM, UserMemoryT, UserModelConfig, userMemorySchema } from '@prisma-ai/shared';
+import {
+	AIChatLLM,
+	UserConfig,
+	UserMemoryT,
+	UserModelConfig,
+	userMemorySchema
+} from '@prisma-ai/shared';
 import { BufferMemory } from 'langchain/memory';
 import { ModelService } from '../model/model.service';
 import { PromptService } from '../prompt/prompt.service';
@@ -28,11 +34,12 @@ export class AichatChainService {
 	async createChatChain(
 		keyname: string,
 		modelConfig: UserModelConfig<AIChatLLM>,
+		userConfig: UserConfig,
 		aichatChainContext: AichatChainContext
 	) {
 		const prompt = await this.promptService.aichatSystemPrompt();
 		const chatHistory = this.modelService.getChatHistory(keyname); //使用自定义的chatHistory
-		//FIXME 使用ConversationSummaryMemory时,会话记录会丢失,是chatHistory的保存逻辑没支持
+		//TODO 使用ConversationSummaryMemory时,会话记录会丢失,是chatHistory的保存逻辑没支持
 		// const memory = new ConversationSummaryMemory({
 		// 	chatHistory: chatHistory,
 		// 	memoryKey: 'history',
@@ -46,16 +53,28 @@ export class AichatChainService {
 		let llm: BaseChatModel;
 		switch (modelConfig.llm_type) {
 			case AIChatLLM.v3:
-				llm = await this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+				llm = await this.modelService.getLLMDeepSeekRaw(
+					'deepseek-chat',
+					userConfig.llm.deepseek.apiKey
+				);
 				break;
 			case AIChatLLM.r1:
-				llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
+				llm = await this.modelService.getLLMDeepSeekRaw(
+					'deepseek-reasoner',
+					userConfig.llm.deepseek.apiKey
+				);
 				break;
 			case AIChatLLM.gemini_2_5_pro:
-				llm = await this.modelService.getLLMGeminiPlusRaw('gemini-2.5-pro');
+				llm = await this.modelService.getLLMGeminiPlusRaw(
+					'gemini-2.5-pro',
+					userConfig.llm.googleai.apiKey
+				);
 				break;
 			case AIChatLLM.gemini_2_5_flash:
-				llm = await this.modelService.getLLMGeminiPlusRaw('gemini-2.5-flash');
+				llm = await this.modelService.getLLMGeminiPlusRaw(
+					'gemini-2.5-flash',
+					userConfig.llm.googleai.apiKey
+				);
 				break;
 		}
 
@@ -93,25 +112,40 @@ export class AichatChainService {
 		return chain;
 	}
 
-	async createUserMemoryChain(modelConfig: UserModelConfig<AIChatLLM>) {
-		console.log('createUserMemoryChain');
+	async createUserMemoryChain(modelConfig: UserModelConfig<AIChatLLM>, userConfig: UserConfig) {
 		let llm: BaseChatModel;
 		switch (modelConfig.llm_type) {
 			case AIChatLLM.v3:
-				llm = await this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+				llm = await this.modelService.getLLMDeepSeekRaw(
+					'deepseek-chat',
+					userConfig.llm.deepseek.apiKey
+				);
 				break;
 			case AIChatLLM.r1:
-				llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
+				llm = await this.modelService.getLLMDeepSeekRaw(
+					'deepseek-reasoner',
+					userConfig.llm.deepseek.apiKey
+				);
 				break;
 			case AIChatLLM.gemini_2_5_pro:
-				llm = await this.modelService.getLLMGeminiPlusRaw('gemini-2.5-pro');
+				llm = await this.modelService.getLLMGeminiPlusRaw(
+					'gemini-2.5-pro',
+					userConfig.llm.googleai.apiKey
+				);
 				break;
 			case AIChatLLM.gemini_2_5_flash:
-				llm = await this.modelService.getLLMGeminiPlusRaw('gemini-2.5-flash');
+				llm = await this.modelService.getLLMGeminiPlusRaw(
+					'gemini-2.5-flash',
+					userConfig.llm.googleai.apiKey
+				);
 				break;
 		}
 
-		const outputParser = RubustStructuredOutputParser.from(userMemorySchema, this.chainService);
+		const outputParser = RubustStructuredOutputParser.from(
+			userMemorySchema,
+			this.chainService,
+			userConfig
+		);
 		const prompt = await this.promptService.createUserMemoryPrompt();
 
 		const chain = RunnableSequence.from([
@@ -132,24 +166,40 @@ export class AichatChainService {
 		return chain;
 	}
 
-	async updateUserMemoryChain(modelConfig: UserModelConfig<AIChatLLM>) {
+	async updateUserMemoryChain(modelConfig: UserModelConfig<AIChatLLM>, userConfig: UserConfig) {
 		let llm: BaseChatModel;
 		switch (modelConfig.llm_type) {
 			case AIChatLLM.v3:
-				llm = await this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+				llm = await this.modelService.getLLMDeepSeekRaw(
+					'deepseek-chat',
+					userConfig.llm.deepseek.apiKey
+				);
 				break;
 			case AIChatLLM.r1:
-				llm = await this.modelService.getLLMDeepSeekRaw('deepseek-reasoner');
+				llm = await this.modelService.getLLMDeepSeekRaw(
+					'deepseek-reasoner',
+					userConfig.llm.deepseek.apiKey
+				);
 				break;
 			case AIChatLLM.gemini_2_5_pro:
-				llm = await this.modelService.getLLMGeminiPlusRaw('gemini-2.5-pro');
+				llm = await this.modelService.getLLMGeminiPlusRaw(
+					'gemini-2.5-pro',
+					userConfig.llm.googleai.apiKey
+				);
 				break;
 			case AIChatLLM.gemini_2_5_flash:
-				llm = await this.modelService.getLLMGeminiPlusRaw('gemini-2.5-flash');
+				llm = await this.modelService.getLLMGeminiPlusRaw(
+					'gemini-2.5-flash',
+					userConfig.llm.googleai.apiKey
+				);
 				break;
 		}
 
-		const outputParser = RubustStructuredOutputParser.from(userMemorySchema, this.chainService);
+		const outputParser = RubustStructuredOutputParser.from(
+			userMemorySchema,
+			this.chainService,
+			userConfig
+		);
 		const prompt = await this.promptService.updateUserMemoryPrompt();
 
 		const chain = RunnableSequence.from([

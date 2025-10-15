@@ -9,6 +9,7 @@ packages/backend/generated
 /resumes/*
 /models/*
 /project_wikis/*
+/user_data/*
 
 # Node.js
 /node_modules

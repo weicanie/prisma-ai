@@ -176,7 +176,8 @@ export class ResumeService implements WithFuncPool, OnModuleInit {
 			// 创建一个格式修复链
 			const fomartFixChain = await this.chainService.fomartFixChain(
 				resumeMatchedSchema,
-				errorMessage
+				errorMessage,
+				userInfo.userConfig!
 			);
 			const contentStr = JSON.stringify(matchedResume);
 			// 调用链来修复格式

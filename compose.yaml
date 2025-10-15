@@ -40,12 +40,13 @@ services:
       - '3003:3003'
     volumes:
       - ./docker-data/nest-app/logs:/app/packages/backend/logs
-      - ./packages/backend/agent_output:/app/packages/backend/agent_output
-      - ./packages/backend/prisma_agent_config.json:/app/packages/backend/prisma_agent_config.json
-      - ./projects:/app/projects
       - ./models:/app/models
+      - ./user_data:/app/user_data
+      # 这些用户数据目录在v5.0.2之后已废弃，保留是为了旧版本向新版本的迁移
+      - ./projects:/app/projects
       - ./resumes:/app/resumes
       - ./project_wikis:/app/project_wikis
+      - ./packages/backend/prisma_agent_config.json:/app/packages/backend/prisma_agent_config.json
   magic-resume-container:
     image: docker.1ms.run/onlyie/prisma-ai-resume-editor:5.0.0
     # build:

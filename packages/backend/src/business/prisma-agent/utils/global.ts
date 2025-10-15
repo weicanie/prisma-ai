@@ -9,5 +9,5 @@ export async function visualizeGraph(compiledGraph: any, filename: string) {
 	const arrayBuffer = await image.arrayBuffer();
 	const buffer = new Uint8Array(arrayBuffer);
 	//写入文件
-	fs.writeFileSync(`./graph_img/${filename}.png`, buffer);
+	fs.writeFileSync(`./data/graph_img/${filename}.png`, buffer);
 }

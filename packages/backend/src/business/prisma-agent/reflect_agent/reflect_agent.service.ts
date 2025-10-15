@@ -29,6 +29,8 @@ export class ReflectAgentService {
 	 */
 	createReflectChain(): Runnable<{ content: string; context?: string }, Reflection> {
 		const model = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+		//TODO 没有传入userConfig，使用环境变量中的apiKey！！！（prisma-agent模块中的RubustStructuredOutputParser都是如此，仅会导致本地的deepseek apikey未配置时，自动修复chain不会生效）
+		//现阶段只在本地使用，所以可以直接使用环境变量中的apiKey
 		const parser = RubustStructuredOutputParser.from(reflectionSchema, this.chainService);
 
 		const reflectPrompt = ChatPromptTemplate.fromMessages<{

@@ -1,4 +1,3 @@
-import { RunnableConfig } from '@langchain/core/runnables';
 import { Command, END, START, StateGraph } from '@langchain/langgraph';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -6,12 +5,8 @@ import { EventList } from '../../../EventBus/event-bus.service';
 import { waitForHumanReview } from '../human_involve_agent/node';
 import { reflect } from '../reflect_agent/node';
 import { GraphState } from '../state';
-import { Plan, ReviewType, RunningConfig, UserAction } from '../types';
+import { NodeConfig, Plan, ReviewType, UserAction } from '../types';
 import { getAgentConfig, updateAgentConfig } from '../utils/config';
-const agentConfigPath = path.join(process.cwd(), 'prisma_agent_config.json');
-interface NodeConfig extends RunnableConfig {
-	configurable: RunningConfig;
-}
 
 // --- Node Implementations ---
 
@@ -24,12 +19,10 @@ export async function uploadCode(
 	state: typeof GraphState.State,
 	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
-	const agentConfig = await getAgentConfig();
+	const agentConfig = await getAgentConfig(config.configurable.userId);
+	//项目代码已上传则跳过
 	if (agentConfig._uploadedProjects.includes(state.projectPath)) {
 		return {};
-	} else {
-		agentConfig._uploadedProjects.push(state.projectPath);
-		await updateAgentConfig(agentConfig);
 	}
 
 	config.configurable.logger.log('---节点: 项目代码同步到知识库---');
@@ -43,7 +36,7 @@ export async function uploadCode(
 
 	//增量更新项目代码知识库
 	const task = await projectCodeVDBService.syncToVDB(
-		userId,
+		config.configurable.userInfo,
 		projectInfo!.info.name,
 		projectPath,
 		crypto.randomUUID()
@@ -63,6 +56,9 @@ export async function uploadCode(
 	});
 
 	config.configurable.logger.log('---项目代码同步完成---');
+	//更新已上传项目列表
+	agentConfig._uploadedProjects.push(state.projectPath);
+	await updateAgentConfig(agentConfig, config.configurable.userId);
 	return {};
 }
 
@@ -87,25 +83,25 @@ export async function retrieveNode(
 
 	config.configurable.logger.log(`检索知识:根据功能亮点 "${lightSpot}" 检索项目代码和领域知识`);
 
-	const agentConfig = await getAgentConfig();
+	const agentConfig = await getAgentConfig(config.configurable.userId);
 	const [projectDocs, domainDocs] = await Promise.all([
 		projectCodeVDBService.retrieveCodeChunks(
 			lightSpot,
 			agentConfig.topK.plan.projectCode,
-			userId,
+			config.configurable.userInfo,
 			projectName
 		),
 		agentConfig.CRAG
 			? knowledgeVDBService.retrieveKonwbase_CRAG(
 					lightSpot,
 					agentConfig.topK.plan.knowledge,
-					userId,
+					config.configurable.userInfo,
 					projectName
 				)
 			: knowledgeVDBService.retrieveKnowbase(
 					lightSpot,
 					agentConfig.topK.plan.knowledge,
-					userId,
+					config.configurable.userInfo,
 					projectName
 				)
 	]);

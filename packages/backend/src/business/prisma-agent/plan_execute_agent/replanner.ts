@@ -39,19 +39,19 @@ export async function retrieveNode(
 	if (!userId) throw new Error('User ID is not set');
 	if (!projectInfo) throw new Error('Project info is not set');
 	const { name: projectName } = projectInfo.info;
-	const agentConfig = await getAgentConfig();
+	const agentConfig = await getAgentConfig(config.configurable.userId);
 
 	const retrievedDomainDocs = agentConfig.CRAG
 		? await knowledgeVDBService.retrieveKonwbase_CRAG(
 				stepResult.output.userFeedback,
 				agentConfig.topK.replan.knowledge,
-				userId,
+				config.configurable.userInfo,
 				projectName
 			)
 		: await knowledgeVDBService.retrieveKnowbase(
 				stepResult.output.userFeedback,
 				agentConfig.topK.replan.knowledge,
-				userId,
+				config.configurable.userInfo,
 				projectName
 			);
 	console.log(`Retrieved ${retrievedDomainDocs.length} domain documents with user feedback`);

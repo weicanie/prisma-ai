@@ -144,7 +144,7 @@ export class ProjectKonwbaseRetrieveService {
 			await this.knowledgeVDBService.retrieveKnowbaseFromNamespaceWithScoreFilter(
 				query,
 				topK,
-				i.userInfo.userId,
+				i.userInfo,
 				i.project.info.name,
 				namespaces,
 				minScore
@@ -236,7 +236,7 @@ export class ProjectKonwbaseRetrieveService {
 		const codeQueryResult = await this.projectCodeVDBService.retrieveCodeChunksWithScoreFilter(
 			query,
 			topK,
-			i.userInfo.userId,
+			i.userInfo,
 			i.project.info.name,
 			minScore
 		);

@@ -43,6 +43,7 @@
 		"@radix-ui/react-select": "^2.2.5",
 		"@radix-ui/react-separator": "^1.1.6",
 		"@radix-ui/react-slot": "^1.2.2",
+		"@radix-ui/react-switch": "^1.1.1",
 		"@radix-ui/react-tabs": "^1.1.12",
 		"@radix-ui/react-tooltip": "^1.2.6",
 		"@reduxjs/toolkit": "^2.8.1",

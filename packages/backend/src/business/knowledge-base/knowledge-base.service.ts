@@ -13,7 +13,7 @@ import { Model, Types } from 'mongoose';
 import * as path from 'path';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { OssService } from '../../oss/oss.service';
-import { cloneProjectScriptPath, projectsDirPath } from '../../utils/constants';
+import { cloneProjectScriptPath, user_data_dir } from '../../utils/constants';
 import { executeShellScript } from '../../utils/execute_shell_script';
 import { getOssObjectNameFromURL } from '../../utils/getOssObjectNameFromURL';
 import { KnowledgeVDBService } from '../prisma-agent/data_base/konwledge_vdb.service';
@@ -100,12 +100,12 @@ export class KnowledgebaseService {
 		//clone项目到指定目录
 		await executeShellScript(cloneProjectScriptPath, [
 			projectRepoPath,
-			`${projectsDirPath}/${projectName}`
+			`${user_data_dir.projectsDirPath(userInfo.userId)}/${projectName}`
 		]);
 		//上传项目代码到向量数据库
-		const projectPath = path.resolve(projectsDirPath, projectName);
+		const projectPath = path.resolve(user_data_dir.projectsDirPath(userInfo.userId), projectName);
 		await this.projectCodeVDBService.syncToVDB(
-			userInfo.userId,
+			userInfo,
 			projectName,
 			projectPath,
 			crypto.randomUUID()

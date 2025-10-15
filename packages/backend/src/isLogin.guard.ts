@@ -2,7 +2,14 @@ import { CanActivate, ExecutionContext, Inject, Injectable } from '@nestjs/commo
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { ErrorCode, UserInfoFromToken, VerifyMetaData } from '@prisma-ai/shared';
+import {
+	ErrorCode,
+	initialUserConfig,
+	UserConfig,
+	UserConfigSchema,
+	UserInfoFromToken,
+	VerifyMetaData
+} from '@prisma-ai/shared';
 import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
 
@@ -42,6 +49,26 @@ export class IsLoginGuard implements CanActivate {
 			});
 		} catch (error) {
 			throw new Error(ErrorCode.USER_TOKEN_INVALID);
+		}
+
+		// 从请求头解析用户配置 (由前端通过 X-User-Config 传入，Base64 + URI 编码)
+		const rawUserConfig = request.headers['x-user-config'];
+		let headerUserConfig: UserConfig | undefined;
+		try {
+			const encoded = Array.isArray(rawUserConfig) ? rawUserConfig[0] : rawUserConfig;
+			if (encoded && typeof encoded === 'string') {
+				const decodedStr = decodeURIComponent(Buffer.from(encoded, 'base64').toString('utf-8'));
+				headerUserConfig = JSON.parse(decodedStr) as UserConfig;
+			}
+			UserConfigSchema.parse(headerUserConfig);
+		} catch {
+			// 解析失败不影响主流程
+			headerUserConfig = initialUserConfig;
+		}
+
+		// 合并用户信息
+		if (headerUserConfig) {
+			userInfo = { ...userInfo, userConfig: headerUserConfig } as UserInfoFromToken;
 		}
 
 		// 存储用户信息
