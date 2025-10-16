@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.2.0-beta.1](https://github.com/weicanie/prisma-ai/compare/v5.1.0...v5.2.0-beta.1) (2025-10-16)
+
+### Features
+
+- 区分线上部署与本地部署 ([2b1f503](https://github.com/weicanie/prisma-ai/commit/2b1f5034e886270bc59d58288dce002e87f7ab14))
+- 优化UI ([19d735c](https://github.com/weicanie/prisma-ai/commit/19d735c3de860a57277111851bbe8d39b696e35f))
+- nginx配置https ([51d04a4](https://github.com/weicanie/prisma-ai/commit/51d04a48d395a17f565f85028a9a4ccdb54ec25b))
+
 # [5.1.0](https://github.com/weicanie/prisma-ai/compare/v5.0.2...v5.1.0) (2025-10-16)
 
 ### Bug Fixes
