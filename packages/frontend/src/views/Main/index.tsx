@@ -15,7 +15,12 @@ import { ThemeSwitcher } from './components/ThemeSwitcher';
 function Main() {
 	// 预加载微应用
 	useEffect(() => {
-		prefetchApps([{ name: 'magic-resume', entry: 'http://localhost:3009/mfe-entry.html' }]);
+		prefetchApps([
+			{
+				name: 'magic-resume',
+				entry: `${import.meta.env.VITE_MAGIC_RESUME_BASE_URL}/mfe-entry.html`
+			}
+		]);
 	}, []);
 
 	return (

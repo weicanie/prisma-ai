@@ -9,8 +9,8 @@
 		"build:tsc": "tsc -b && vite build",
 		"start": "swc src -d dist && vite build --mode development && vite preview",
 		"build": "swc src -d dist && vite build --mode production",
-		"build:online": "swc src -d dist && vite build --mode online",
-		"build:both": "pnpm run build && pnpm run build:online",
+		"build:ol": "swc src -d dist && vite build --mode online",
+		"build:both": "pnpm run build && pnpm run build:ol",
 		"lint": "eslint .",
 		"preview": "vite preview"
 	},
