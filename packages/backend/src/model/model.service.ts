@@ -180,7 +180,7 @@ export class ModelService {
 			this.embedModel_openai = new OpenAIEmbeddings(embedModel_openai_config);
 			this.logger.log('模型池初始化成功');
 		} catch (error) {
-			this.logger.error('模型池初始化失败，线上部署请忽略:', error);
+			this.logger.error('模型池初始化失败，线上部署或本地但使用用户配置请忽略:', error);
 		}
 	}
 
