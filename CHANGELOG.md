@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.1.0](https://github.com/weicanie/prisma-ai/compare/v5.0.2...v5.1.0) (2025-10-16)
+
+### Bug Fixes
+
+- 拼写错误 ([c1b4099](https://github.com/weicanie/prisma-ai/commit/c1b40995ccf11d71a6b7998059f06e4c343e449c))
+- bitnami/minio:2025.4.3镜像无法拉取 ([160d98e](https://github.com/weicanie/prisma-ai/commit/160d98eafcfd580d71c303410c0736423fb81381))
+- build failed ([090a51d](https://github.com/weicanie/prisma-ai/commit/090a51de4b99632031b3ddf199cd7204ccd2137f))
+- userMemory prompt注入 ([e798448](https://github.com/weicanie/prisma-ai/commit/e7984485b0d112dc235fac8b1ddd01eed25aa4eb))
+
+### Features
+
+- 单用户文件存储 -> 多用户文件存储 ([44696e1](https://github.com/weicanie/prisma-ai/commit/44696e13904be389d4cce1057ea27984825af203))
+- 用户配置功能 ([41f7e0b](https://github.com/weicanie/prisma-ai/commit/41f7e0b791b38eae6686c2020bbacaab86532257))
+
 ## [5.0.2](https://github.com/weicanie/prisma-ai/compare/v5.0.1...v5.0.2) (2025-10-08)
 
 ### Bug Fixes

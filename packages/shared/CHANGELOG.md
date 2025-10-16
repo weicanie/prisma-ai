@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.1.0](https://github.com/weicanie/prisma-ai/compare/v5.0.2...v5.1.0) (2025-10-16)
+
+### Bug Fixes
+
+- userMemory prompt注入 ([e798448](https://github.com/weicanie/prisma-ai/commit/e7984485b0d112dc235fac8b1ddd01eed25aa4eb))
+
+### Features
+
+- 用户配置功能 ([41f7e0b](https://github.com/weicanie/prisma-ai/commit/41f7e0b791b38eae6686c2020bbacaab86532257))
+
 # [5.0.0](https://github.com/weicanie/prisma-ai/compare/v4.2.1...v5.0.0) (2025-10-02)
 
 ### Bug Fixes
