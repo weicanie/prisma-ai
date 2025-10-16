@@ -1,10 +1,6 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-
-// import registAgreement from '@/assets/注册协议.md?raw';
-// import privacyAgreement from '@/assets/隐私协议.md?raw';
+import registAgreement from '@/assets/注册协议.md?raw';
+import privacyAgreement from '@/assets/隐私协议.md?raw';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { register } from '@/services/login_regist';
@@ -12,6 +8,7 @@ import MilkdownEditor from '@/views/Main/components/Editor';
 import { Button } from '@/views/Saas/components/c-cpns/Button';
 import { Logo } from '@/views/Saas/components/c-cpns/Logo';
 import { SlimLayout } from '@/views/Saas/components/c-cpns/SlimLayout';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
 	ErrorCode,
 	registformSchema,
@@ -20,9 +17,12 @@ import {
 	type ServerDataFormat
 } from '@prisma-ai/shared';
 import { useMutation } from '@tanstack/react-query';
+import { useEffect, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { z } from 'zod';
 import Prism from '../../components/Prism';
 import Wall from '../../components/Wall';
 import { useCustomMutation } from '../../query/config';
@@ -30,7 +30,6 @@ import { registerCaptcha } from '../../services/login_regist';
 import { setRegistrationInfo } from '../../store/login';
 import { useTheme } from '../../utils/theme';
 import { TextField } from '../Saas/components/c-cpns/Fields';
-
 export default function Register() {
 	const [isChecked, setIsChecked] = useState(false);
 	const [dialogOpen, setDialogOpen] = useState(false);
@@ -71,7 +70,7 @@ export default function Register() {
 	const registerCaptchaMutation = useCustomMutation<string, string>(registerCaptcha, {
 		onSuccess: () => {
 			toast.success('发送成功');
-			setCountdown(10);
+			setCountdown(20);
 		}
 	});
 	async function sendCaptcha() {
@@ -83,9 +82,9 @@ export default function Register() {
 		registerCaptchaMutation.mutate(address);
 	}
 	async function onSubmit(values: z.infer<typeof registformSchema>) {
-		// if (!isChecked) {
-		// 	return toast.error('请先阅读并同意注册协议和隐私政策');
-		// }
+		if (!isChecked) {
+			return toast.info('请先阅读并同意注册协议和隐私政策');
+		}
 		if (values.password !== values.confirmPassword) {
 			return toast.error('两次密码不一致');
 		}
@@ -121,9 +120,9 @@ export default function Register() {
 
 	const openAgreementDialog = (type: 'regist' | 'privacy') => {
 		if (type === 'regist') {
-			setDialogContent({ title: '注册协议', content: '' });
+			setDialogContent({ title: '注册协议', content: registAgreement });
 		} else {
-			setDialogContent({ title: '隐私政策', content: '' });
+			setDialogContent({ title: '隐私政策', content: privacyAgreement });
 		}
 		setDialogOpen(true);
 	};
@@ -202,15 +201,16 @@ export default function Register() {
 								)}
 							/>
 						))}
-						{/* <div className="flex items-center space-x-2">
+						<div className="flex items-center space-x-2">
 							<Checkbox
 								id="terms"
+								className="border-gray-400"
 								checked={isChecked}
 								onCheckedChange={checked => setIsChecked(Boolean(checked))}
 							/>
 							<label
 								htmlFor="terms"
-								className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+								className="text-gray-500 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 							>
 								我已阅读并同意
 								<span
@@ -227,7 +227,7 @@ export default function Register() {
 									《隐私政策》
 								</span>
 							</label>
-						</div> */}
+						</div>
 						<div className="col-span-full">
 							<Button type="submit" variant="solid" color="blue" className="w-full">
 								<span>
