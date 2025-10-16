@@ -7,8 +7,9 @@ import {
 	OpenAIEmbeddings,
 	OpenAIEmbeddingsParams
 } from '@langchain/openai';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { UserConfig } from '@prisma-ai/shared';
 import { ChatHistoryService } from './chat_history.service';
 import {
 	HAModelClient,
@@ -60,6 +61,7 @@ type EmbedOpenAIFields = Partial<OpenAIEmbeddingsParams> & {
 
 @Injectable()
 export class ModelService {
+	logger = new Logger(ModelService.name);
 	/**
 	 * 模型池: config -> HAModelClient模型实例 的哈希表
 	 *
@@ -131,47 +133,55 @@ export class ModelService {
 		public HAModelClientService: HAModelClientService,
 		public configService: ConfigService
 	) {
-		//初始化模型池
-		const raw_openai = new ChatOpenAI(this.openai_config);
-		this.rawModels.set(JSON.stringify(this.openai_config), raw_openai);
-		/* ChatOpenAI格式转为ChatDeepSeek格式,配置和键统一保持为ChatOpenAI格式 */
-		const deepseekConfig = {
-			...this.deepseek_config,
-			...this.deepseek_config.configuration,
-			configuration: undefined
-		};
-		const raw_deepseek = new ChatDeepSeek(deepseekConfig);
-		this.rawModels.set(JSON.stringify(this.deepseek_config), raw_deepseek);
-		const raw_gemini = new ChatOpenAI(this.gemini_config);
-		this.rawModels.set(JSON.stringify(this.gemini_config), raw_gemini);
-		const raw_gemini_plus = new ChatGoogleGenerativeAI(this.gemini_config_plus);
-		this.rawModels.set(JSON.stringify(this.gemini_config_plus), raw_gemini_plus);
-		const raw_kimi = new ChatOpenAI(this.kimi_config);
-		this.rawModels.set(JSON.stringify(this.kimi_config), raw_kimi);
+		try {
+			//初始化模型池
+			const raw_openai = new ChatOpenAI(this.openai_config);
+			this.rawModels.set(JSON.stringify(this.openai_config), raw_openai);
+			/* ChatOpenAI格式转为ChatDeepSeek格式,配置和键统一保持为ChatOpenAI格式 */
+			const deepseekConfig = {
+				...this.deepseek_config,
+				...this.deepseek_config.configuration,
+				configuration: undefined
+			};
+			const raw_deepseek = new ChatDeepSeek(deepseekConfig);
+			this.rawModels.set(JSON.stringify(this.deepseek_config), raw_deepseek);
+			const raw_gemini = new ChatOpenAI(this.gemini_config);
+			this.rawModels.set(JSON.stringify(this.gemini_config), raw_gemini);
+			const raw_gemini_plus = new ChatGoogleGenerativeAI(this.gemini_config_plus);
+			this.rawModels.set(JSON.stringify(this.gemini_config_plus), raw_gemini_plus);
+			const raw_kimi = new ChatOpenAI(this.kimi_config);
+			this.rawModels.set(JSON.stringify(this.kimi_config), raw_kimi);
 
-		//@ts-no-check 类型递归过深
-		const LLM_openai = this.HAModelClientService.createClient(raw_openai, this.openai_config);
-		//@ts-no-check
-		const LLM_deepseek = this.HAModelClientService.createClient(raw_deepseek, this.deepseek_config);
-		//@ts-no-check
-		const LLM_gemini = this.HAModelClientService.createClient(raw_gemini, this.gemini_config);
-		//@ts-no-check
-		const LLM_kimi = this.HAModelClientService.createClient(raw_kimi, this.kimi_config);
-		this.models.set(JSON.stringify(this.openai_config), LLM_openai);
-		this.models.set(JSON.stringify(this.deepseek_config), LLM_deepseek);
-		this.models.set(JSON.stringify(this.gemini_config), LLM_gemini);
-		this.models.set(JSON.stringify(this.kimi_config), LLM_kimi);
-		//embedModel 单例
-		const embedModel_openai_config: EmbedOpenAIFields = {
-			model: 'text-embedding-3-small',
-			configuration: {
-				apiKey: this.configService.get('OPENAI_API_KEY'),
-				timeout: 6000,
-				baseURL: this.configService.get('OPENAI_API_BASE_URL'),
-				maxRetries: 1
-			}
-		};
-		this.embedModel_openai = new OpenAIEmbeddings(embedModel_openai_config);
+			//@ts-no-check 类型递归过深
+			const LLM_openai = this.HAModelClientService.createClient(raw_openai, this.openai_config);
+			//@ts-no-check
+			const LLM_deepseek = this.HAModelClientService.createClient(
+				raw_deepseek,
+				this.deepseek_config
+			);
+			//@ts-no-check
+			const LLM_gemini = this.HAModelClientService.createClient(raw_gemini, this.gemini_config);
+			//@ts-no-check
+			const LLM_kimi = this.HAModelClientService.createClient(raw_kimi, this.kimi_config);
+			this.models.set(JSON.stringify(this.openai_config), LLM_openai);
+			this.models.set(JSON.stringify(this.deepseek_config), LLM_deepseek);
+			this.models.set(JSON.stringify(this.gemini_config), LLM_gemini);
+			this.models.set(JSON.stringify(this.kimi_config), LLM_kimi);
+			//embedModel 单例
+			const embedModel_openai_config: EmbedOpenAIFields = {
+				model: 'text-embedding-3-small',
+				configuration: {
+					apiKey: this.configService.get('OPENAI_API_KEY'),
+					timeout: 6000,
+					baseURL: this.configService.get('OPENAI_API_BASE_URL'),
+					maxRetries: 1
+				}
+			};
+			this.embedModel_openai = new OpenAIEmbeddings(embedModel_openai_config);
+			this.logger.log('模型池初始化成功');
+		} catch (error) {
+			this.logger.error('模型池初始化失败，线上部署请忽略:', error);
+		}
 	}
 
 	/**
@@ -352,8 +362,21 @@ export class ModelService {
 	/**
 	 * @description 获取单例的嵌入模型实例
 	 */
-	getEmbedModelOpenAI() {
-		return this.embedModel_openai;
+	getEmbedModelOpenAI(userConfig: UserConfig | null) {
+		if (!userConfig) {
+			return this.embedModel_openai;
+		} else {
+			const embedModel_openai_config: EmbedOpenAIFields = {
+				model: 'text-embedding-3-small',
+				configuration: {
+					apiKey: userConfig.llm.openai.apiKey,
+					timeout: 6000,
+					baseURL: userConfig.llm.openai.baseUrl,
+					maxRetries: 1
+				}
+			};
+			return new OpenAIEmbeddings(embedModel_openai_config);
+		}
 	}
 
 	getChatHistory(keyname: string) {
