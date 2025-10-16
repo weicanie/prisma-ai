@@ -16,6 +16,7 @@ export * from './types/learn.schema';
 export * from './types/login_regist';
 export * from './types/login_regist.schema';
 export * from './types/loginVerify';
+export * from './types/manage';
 export * from './types/project/project';
 export * from './types/project/project.schema';
 export * from './types/project/project.schema-form';

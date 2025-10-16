@@ -4,6 +4,7 @@ import { breadRouterReducer } from './bread-router';
 import { JobReducer } from './jobs';
 import { knowledgeReducer } from './knowbase';
 import { loginReducer } from './login';
+import { notificationReducer } from './notification';
 import { projectReducer } from './projects';
 import { ResumeReducer } from './resume';
 import { skillReducer } from './skills';
@@ -17,7 +18,8 @@ const store = configureStore({
 		job: JobReducer,
 		knowledge: knowledgeReducer,
 		aichat: AIChatReducer,
-		login: loginReducer
+		login: loginReducer,
+		notification: notificationReducer
 	}
 });
 

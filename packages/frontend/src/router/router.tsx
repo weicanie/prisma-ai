@@ -32,7 +32,10 @@ const CareerRead = lazy(() => import('../views/Main/Career/Read'));
 const UserMemory = lazy(() => import('../views/Main/UserMemory'));
 const UserConfig = lazy(() => import('../views/Main/userConfig'));
 const AIChat = lazy(() => import('../views/Main/aichat/AIChat'));
-
+const UserManagePage = lazy(() => import('../views/Main/Manage/User'));
+const ServiceManagePage = lazy(() => import('../views/Main/Manage/Service'));
+const NotificationManagePage = lazy(() => import('../views/Main/Manage/Notifaction'));
+const UserNotificationPage = lazy(() => import('../views/Main/Notifaction'));
 const isOnline = import.meta.env.VITE_IS_ONLINE === 'true';
 
 const knowBaseRoute = {
@@ -264,6 +267,45 @@ const resumeRoute = {
 	]
 };
 
+const manegeRoute = {
+	path: '/main/manage',
+	element: (
+		<UpdateBreadRouter>
+			<Outlet />
+		</UpdateBreadRouter>
+	),
+	children: [
+		{
+			path: '',
+			element: <Navigate to="/main/manage/user" />
+		},
+		{
+			path: 'user',
+			element: (
+				<UpdateBreadRouter>
+					<UserManagePage />
+				</UpdateBreadRouter>
+			)
+		},
+		{
+			path: 'service',
+			element: (
+				<UpdateBreadRouter>
+					<ServiceManagePage />
+				</UpdateBreadRouter>
+			)
+		},
+		{
+			path: 'notification',
+			element: (
+				<UpdateBreadRouter>
+					<NotificationManagePage />
+				</UpdateBreadRouter>
+			)
+		}
+	]
+};
+
 const hjmRoute = {
 	path: 'hjm',
 	element: (
@@ -441,6 +483,8 @@ export const routes = [
 			hjmRoute,
 			// 面向offer学习
 			learnRoute,
+			// 后台管理
+			manegeRoute,
 			// 简历编辑器
 			{
 				path: '/main/resume-editor',
@@ -474,6 +518,15 @@ export const routes = [
 				element: (
 					<UpdateBreadRouter>
 						<UserConfig />
+					</UpdateBreadRouter>
+				)
+			},
+			// 通知中心
+			{
+				path: '/main/notification',
+				element: (
+					<UpdateBreadRouter>
+						<UserNotificationPage />
 					</UpdateBreadRouter>
 				)
 			}
@@ -521,5 +574,12 @@ export const path_name: Record<string, string> = {
 
 	'/main/resume-editor': '简历编辑器',
 
-	'/main/offer/anki': '集成面试题库和 anki'
+	'/main/offer/anki': '集成面试题库和 anki',
+
+	'/main/notification': '通知中心',
+
+	'/main/manage': '管理后台',
+	'/main/manage/user': '用户管理',
+	'/main/manage/service': '服务管理',
+	'/main/manage/notification': '通知管理'
 };

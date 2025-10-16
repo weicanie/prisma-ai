@@ -3,10 +3,12 @@ interface RegistResponse {
 	username: string;
 	email: string;
 	create_at: Date | null;
+	role: string;
 }
 interface LoginResponse {
 	id: number;
 	username: string;
+	role: string;
 	create_at: Date | null;
 	update_at: Date | null;
 	email: string;

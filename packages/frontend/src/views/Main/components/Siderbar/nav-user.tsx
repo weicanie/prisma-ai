@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronsUpDown, LogOut } from 'lucide-react';
+import { Badge } from '../../../../components/ui/badge';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -19,6 +20,7 @@ import {
 } from '@/components/ui/sidebar';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import Notice from '../Notice';
 
 export function NavUser({
 	user
@@ -35,11 +37,20 @@ export function NavUser({
 		localStorage.removeItem('userInfo');
 		navigate('/login');
 		toast.success('退出登录成功');
-	}
+	};
 	const { isMobile } = useSidebar();
 
 	return (
 		<SidebarMenu>
+			<SidebarMenuItem className="mb-3 flex items-center justify-between gap-2">
+				<Badge
+					variant="outline"
+					className="text-xs font-semibold text-zinc-500 dark:text-zinc-300 "
+				>
+					当前版本：{import.meta.env.VITE_APP_VERSION || '未知'}
+				</Badge>
+				<Notice />
+			</SidebarMenuItem>
 			<SidebarMenuItem>
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>

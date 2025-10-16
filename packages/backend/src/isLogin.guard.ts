@@ -12,6 +12,7 @@ import {
 } from '@prisma-ai/shared';
 import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
+import { Role } from './decorator';
 
 export interface UserRequest extends Request {
 	userInfo: UserInfoFromToken;
@@ -49,6 +50,13 @@ export class IsLoginGuard implements CanActivate {
 			});
 		} catch (error) {
 			throw new Error(ErrorCode.USER_TOKEN_INVALID);
+		}
+
+		// 角色校验
+		const requiredRoles = verify.roles || [Role.user, Role.admin]; //没有声明角色的接口，默认只需要登录，任意角色都可以访问
+		const userRole = userInfo.role || Role.user;
+		if (!requiredRoles.includes(userRole as Role)) {
+			throw new Error(ErrorCode.USER_ROLE_NOT_ALLOWED);
 		}
 
 		// 从请求头解析用户配置 (由前端通过 X-User-Config 传入，Base64 + URI 编码)

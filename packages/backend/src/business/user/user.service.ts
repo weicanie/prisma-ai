@@ -117,9 +117,9 @@ export class UserService {
 	}
 	//* 改用双token方案? 前端再使用队列处理refresh token请求的并发
 	async tokenDispatch(userInfo: UserInfo, userId: number) {
-		const { username } = userInfo;
+		const { username, role } = userInfo;
 		const token = this.JwtService.sign(
-			{ userId, username },
+			{ userId, username, role },
 			{
 				privateKey: process.env.PRIVATE_KEY,
 				algorithm: 'RS256',

@@ -26,9 +26,14 @@ model user {
   update_at DateTime? @default(now()) @db.Timestamp(0)
   email     String    @db.VarChar(100)
 
-  user_articles   user_article[]
-  ai_conversation ai_conversation[]
-  user_project    user_project[]
+  role      String  @default("user") // 新增角色字段，默认为普通用户
+  is_banned Boolean @default(false) // 用户是否被封禁
+
+  user_articles      user_article[]
+  ai_conversation    ai_conversation[]
+  user_project       user_project[]
+  user_notifications UserNotification[] // 用户通知的中间表
+  user_violations    UserViolation[] // 用户违规记录
 }
 
 model user_article {
@@ -121,4 +126,64 @@ model ai_conversation {
   user       user      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id], map: "user_id")
+}
+
+// 网站状态
+model WebsiteStatus {
+  id        Int      @id @default(autoincrement())
+  status    String // 'online', 'maintenance'
+  message   String?  @db.Text
+  update_at DateTime @default(now()) @updatedAt
+}
+
+// 通知
+model Notification {
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String   @db.Text
+  create_at   DateTime @default(now())
+  target_user Int? // null表示全体用户，否则为特定用户的id
+
+  user_notifications UserNotification[] // 用户通知的中间表
+
+  @@index([target_user])
+}
+
+// 用户通知中间表，记录用户是否已读
+model UserNotification {
+  id              Int          @id @default(autoincrement())
+  user_id         Int
+  notification_id Int
+  is_read         Boolean      @default(false)
+  user            user         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  notification    Notification @relation(fields: [notification_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, notification_id])
+  @@index([user_id])
+  @@index([notification_id])
+}
+
+// 黑名单邮箱，用于封禁用户
+model BannedEmail {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  reason    String?  @db.Text
+  create_at DateTime @default(now())
+
+  @@index([email])
+}
+
+// 用户违规记录
+model UserViolation {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  email       String
+  type        String // 违规类型，如 'junk_content', 'sensitive_content', 'other'
+  description String?  @db.Text
+  create_at   DateTime @default(now())
+
+  user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([email])
 }

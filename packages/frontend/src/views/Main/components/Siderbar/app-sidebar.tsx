@@ -5,6 +5,7 @@ import {
 	FileText,
 	LayoutList,
 	LibraryBig,
+	MonitorCog,
 	Pyramid,
 	SlidersHorizontal,
 	Sparkles,
@@ -134,7 +135,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				icon: SlidersHorizontal,
 				url: '/main/user-config',
 				groupLabel: '用户配置'
-			}
+			},
+			...(userInfo?.role === 'admin'
+				? [
+						{
+							title: '管理后台',
+							icon: MonitorCog,
+							url: '/main/manage',
+							groupLabel: '管理员',
+							items: [
+								{
+									title: '用户管理',
+									icon: MonitorCog,
+									url: '/main/manage/user'
+								},
+								{
+									title: '服务管理',
+									icon: MonitorCog,
+									url: '/main/manage/service'
+								},
+								{
+									title: '通知管理',
+									icon: MonitorCog,
+									url: '/main/manage/notification'
+								}
+							]
+						}
+					]
+				: [])
 		]
 	};
 	// const { state, open, setOpen, openMobile, setOpenMobile, isMobile, toggleSidebar } = useSidebar();

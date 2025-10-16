@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `user` ADD COLUMN `is_banned` BOOLEAN NOT NULL DEFAULT false,
+    ADD COLUMN `role` VARCHAR(191) NOT NULL DEFAULT 'user';

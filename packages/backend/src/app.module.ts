@@ -8,6 +8,7 @@ import { EducationModule } from './business/education/education.module';
 import { HjmModule } from './business/human-job-match/hjm.module';
 import { JobModule } from './business/job/job.module';
 import { KnowledgebaseModule } from './business/knowledge-base/knowledge-base.module';
+import { ManageModule } from './business/manage/manage.module';
 import { PrismaAgentModule } from './business/prisma-agent/prisma-agent.module';
 import { ProjectModule } from './business/project/project.module';
 import { QuestionModule } from './business/question/question.module';
@@ -40,6 +41,7 @@ import { TaskManagerModule } from './manager/task-manager/task-manager.module';
 		AichatModule,
 		ProjectModule,
 		UserModule,
+		ManageModule,
 		/* 基础设施模块 */
 		DbModule,
 		ChainModule,

@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { WebsiteStatus } from '@prisma-ai/shared';
 import * as crypto from 'crypto';
 import { EventBusService, EventList } from '../EventBus/event-bus.service';
 import { RedisService } from '../redis/redis.service';
@@ -27,7 +28,7 @@ export class TaskQueueService {
 	/* 当前执行数 */
 	private activeCount = 0;
 	/* 最大并发数 */
-	private readonly maxConcurrent = 500;
+	readonly maxConcurrent: number;
 
 	// redis键前缀
 	public readonly PREFIX = {
@@ -53,6 +54,9 @@ export class TaskQueueService {
 		public EventBusService: EventBusService,
 		private readonly dbService: DbService
 	) {
+		this.maxConcurrent = process.env.TASK_MAX_CONCURRENT
+			? parseInt(process.env.TASK_MAX_CONCURRENT)
+			: 300;
 		// 注册默认任务处理器
 		this.registerTaskHandler('default', async task => {
 			this.logger.log(`对${task.type}任务${task.id}执行默认任务处理器`);
@@ -198,11 +202,11 @@ export class TaskQueueService {
 		taskType: string,
 		metadata?: any
 	): Promise<PersistentTask> {
-		//检查服务器是否在维护状态
-		// const websiteStatus = await this.dbService.websiteStatus.findFirst();
-		// if (websiteStatus?.status === WebsiteStatus.MAINTENANCE) {
-		// 	throw new Error('服务器正在维护中，请稍后再试');
-		// }
+		// 检查服务器是否在维护状态;
+		const websiteStatus = await this.dbService.websiteStatus.findFirst();
+		if (websiteStatus?.status === WebsiteStatus.MAINTENANCE) {
+			throw new Error('服务器正在维护中，请稍后再试');
+		}
 
 		// 检查会话是否已有关联任务
 		const existingTaskId = await this.getSessionTaskId(sessionId);
