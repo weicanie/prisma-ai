@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.2.0-beta.2](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.1...v5.2.0-beta.2) (2025-10-16)
+
+### Features
+
+- 用户协议和隐私政策 ([6149e1e](https://github.com/weicanie/prisma-ai/commit/6149e1e31735493c7663f8a83685ee267975a372))
+
 # [5.2.0-beta.1](https://github.com/weicanie/prisma-ai/compare/v5.1.0...v5.2.0-beta.1) (2025-10-16)
 
 ### Features

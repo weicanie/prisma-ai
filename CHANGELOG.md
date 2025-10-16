@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.2.0-beta.2](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.1...v5.2.0-beta.2) (2025-10-16)
+
+### Bug Fixes
+
+- 线上不初始化pinecone客户端 ([e3033d6](https://github.com/weicanie/prisma-ai/commit/e3033d6c9c53e498de6e1dc8602e021621b781a0))
+- 项目知识缓存用户间的隔离 ([482ba2f](https://github.com/weicanie/prisma-ai/commit/482ba2f72f5adf9402b331f0c474b6f330d7bb52))
+
+### Features
+
+- 用户协议和隐私政策 ([6149e1e](https://github.com/weicanie/prisma-ai/commit/6149e1e31735493c7663f8a83685ee267975a372))
+
 # [5.2.0-beta.1](https://github.com/weicanie/prisma-ai/compare/v5.1.0...v5.2.0-beta.1) (2025-10-16)
 
 ### Features
