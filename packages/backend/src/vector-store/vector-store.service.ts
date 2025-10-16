@@ -26,6 +26,9 @@ export class VectorStoreService {
 		private configService: ConfigService,
 		public embeddingModelService: EmbeddingModelService
 	) {
+		if (process.env.IS_ONLINE === 'true') {
+			return;
+		}
 		// 初始化 Pinecone 客户端
 		this.pinecone = new Pinecone({
 			apiKey: this.configService.get('PINECONE_API_KEY')!
