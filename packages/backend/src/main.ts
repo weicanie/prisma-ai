@@ -52,6 +52,6 @@ async function bootstrap() {
 		console.error('figlet error:', error);
 	}
 
-	console.log(`Server started on port ${PORT}~`);
+	console.log(`Server started on port ${PORT}, IS_ONLINE=${process.env.IS_ONLINE}`);
 }
 bootstrap();

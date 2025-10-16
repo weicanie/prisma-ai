@@ -31,6 +31,9 @@ export class EmbeddingModelService extends Embeddings implements OnModuleInit {
 	 * 在这里执行模型的异步加载和初始化。
 	 */
 	async onModuleInit() {
+		if (process.env.IS_ONLINE === 'true') {
+			return;
+		}
 		this.logger.log('开始初始化本地 M3E 嵌入模型...');
 		try {
 			// 获取模型管道的单例

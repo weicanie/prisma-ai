@@ -148,8 +148,7 @@ export const user_data_dir = {
 
 			console.log(`[迁移 用户${userId}] 的数据迁移完成`);
 		} catch (error) {
-			console.error(`[迁移 用户${userId}] 数据迁移失败:`, error);
-			throw new Error(`[迁移 用户${userId}] 数据迁移失败: ${error.message}`);
+			console.error(`[尝试迁移 用户${userId}] 数据失败，不需要迁移则可忽略此错误:`, error);
 		}
 	}
 };

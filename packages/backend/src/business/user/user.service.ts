@@ -88,7 +88,9 @@ export class UserService {
 		const { password, ...userWithoutPwd } = userRes!;
 
 		//迁移用户数据目录
-		user_data_dir.migrateUserDir(`${userInfo.id}`);
+		if (process.env.IS_ONLINE !== 'true') {
+			user_data_dir.migrateUserDir(`${userInfo.id}`);
+		}
 
 		addLogs(userWithoutPwd, logType.Login);
 
