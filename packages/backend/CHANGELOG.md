@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.2.0-beta.4](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.3...v5.2.0-beta.4) (2025-10-16)
+
+### Bug Fixes
+
+- 第三方嵌入模型兼容用户配置方式 ([4ebe0bf](https://github.com/weicanie/prisma-ai/commit/4ebe0bfaaf6b67980f982cb67d629e9c0887c9c0))
+- 线上部署时不要求初始化模型池 ([aa321fa](https://github.com/weicanie/prisma-ai/commit/aa321facbffe99371d6e1c16be84d7b1265d1b16))
+
 # [5.2.0-beta.3](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.2...v5.2.0-beta.3) (2025-10-16)
 
 ### Bug Fixes
