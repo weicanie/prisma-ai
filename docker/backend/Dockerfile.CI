@@ -77,7 +77,6 @@ COPY --from=builder /app/packages/backend/prisma ./packages/backend/prisma
 COPY --from=builder /app/packages/backend/data ./packages/backend/data
 # 启动脚本
 COPY --from=builder /app/packages/backend/scripts ./packages/backend/scripts
-COPY --from=builder /app/packages/backend/agent_output ./packages/backend/agent_output
 
 # 修复启动脚本可能的行结束符问题（Windows CRLF -> Unix LF）
 RUN sed -i 's/\r$//' /app/packages/backend/scripts/start.sh
