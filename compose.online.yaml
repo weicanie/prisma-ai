@@ -20,7 +20,7 @@
 # ps aux --sort=-%mem | awk '{printf "%-8s %-6s %-6s %-6s %s\n", $2, $3, $4, $6, $11}' | head -20
 
 # 依赖的外部文件：
-# 1. 项目中的后端环境变量文件
+# 1. 项目中的后端环境变量文件、前端静态资源
 # 2. 项目中的nginx文件夹
 # 3. docker-data文件夹
 services:
@@ -36,9 +36,6 @@ services:
         condition: service_healthy
       minio-container:
         condition: service_healthy
-      # 添加对 browserless-chrome 服务的依赖
-      browserless-chrome:
-        condition: service_started
     restart: unless-stopped
     container_name: backend
     # 将指定的文件的环境变量加载到容器中
@@ -49,21 +46,13 @@ services:
       IS_ONLINE: true
       NODE_ENV: production
       MONGO_HOST: mongo-container
-      # 覆盖env_file中的同名环境变量
-      DATABASE_URL: mysql://root:qwqw1314.@mysql-container:3306/prisma-ai
-      # 新增环境变量，指向 browserless 服务
-      PUPPETEER_BROWSER_WSE_ENDPOINT: ws://browserless-chrome:3000
+      # 生产环境下的prisma数据库连接配置
+      DATABASE_URL: mysql://root:Qwqw1314!@mysql-container:3306/prisma-ai?connection_limit=30&connect_timeout=10&pool_timeout=20&socket_timeout=60
     ports:
       - '3003:3003'
     volumes:
       - ./docker-data/nest-app/logs:/app/packages/backend/logs
-      - ./models:/app/models
       - ./user_data:/app/user_data
-      # 这些用户数据目录在v5.0.2之后已废弃，保留是为了旧版本向新版本的迁移
-      - ./projects:/app/projects
-      - ./resumes:/app/resumes
-      - ./project_wikis:/app/project_wikis
-      - ./packages/backend/prisma_agent_config.json:/app/packages/backend/prisma_agent_config.json
   magic-resume-container:
     image: onlyie/prisma-ai-resume-editor:latest
     # build:
