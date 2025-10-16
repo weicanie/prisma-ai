@@ -27,38 +27,39 @@ import { SseSessionManagerModule } from './manager/sse-session-manager/sse-sessi
 import { TaskManagerModule } from './manager/task-manager/task-manager.module';
 @Module({
 	imports: [
-		UserModule,
-		DbModule,
-		ProjectModule,
-		ChainModule,
+		/* 业务模块 */
+		// 线上版本不提供一些功能
+		...(process.env.IS_ONLINE === 'true' ? [] : [HjmModule, PrismaAgentModule, QuestionModule]),
+		EducationModule,
+		CareerModule,
+		UserMemoryModule,
+		SkillModule,
+		ResumeModule,
+		JobModule,
+		KnowledgebaseModule,
 		AichatModule,
+		ProjectModule,
+		UserModule,
+		/* 基础设施模块 */
+		DbModule,
+		ChainModule,
 		CacheModule,
 		ConfigModule.forRoot({
 			isGlobal: true,
 			envFilePath: [
-				//本地开发时不传入环境变量NODE_ENV即可
+				//本地开发时不传入环境变量NODE_ENV也行
 				'.env',
 				process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development'
 			]
 		}),
-		/* mongodb数据库 */
+		// mongodb数据库
 		MongooseModule.forRoot(
 			`mongodb://${process.env.MONGO_HOST ?? 'localhost'}:${process.env.MONGO_PORT ?? '27017'}/prisma-ai`
 		),
 		EventBusModule,
-		SkillModule,
-		ResumeModule,
-		JobModule,
 		CopilotModule,
-		KnowledgebaseModule,
-		HjmModule,
-		PrismaAgentModule,
-		QuestionModule,
 		SseSessionManagerModule,
-		TaskManagerModule,
-		EducationModule,
-		CareerModule,
-		UserMemoryModule
+		TaskManagerModule
 	],
 	providers: [
 		{

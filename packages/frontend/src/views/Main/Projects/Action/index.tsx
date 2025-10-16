@@ -118,7 +118,9 @@ const Action: React.FC<ActionProps> = () => {
 
 	// 根据项目状态确定可用操作
 	const getAvailableActions = (status: ProjectStatus) => {
-		const availableActions = ['mine', 'collaborate'];
+		const isOnline = import.meta.env.VITE_IS_ONLINE === 'true';
+
+		const availableActions = isOnline ? ['mine'] : ['mine', 'collaborate'];
 		// lookup后才能polish
 		if (status === ProjectStatus.lookuped) {
 			availableActions.push('polish');

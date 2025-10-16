@@ -32,6 +32,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const userInfoData = localStorage.getItem('userInfo');
 	const userInfo = userInfoData && JSON.parse(userInfoData);
 	const isOnline = import.meta.env.VITE_IS_ONLINE === 'true';
+
 	//流程、分组
 	const data: {
 		navMain: {
@@ -91,12 +92,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				icon: Bot,
 				url: '/main/aichat'
 			},
-			{
-				title: '匹配岗位',
-				icon: Target,
-				url: '/main/hjm/job',
-				groupLabel: '人岗匹配'
-			},
+			...(isOnline
+				? []
+				: [
+						{
+							title: '匹配岗位',
+							icon: Target,
+							url: '/main/hjm/job',
+							groupLabel: '人岗匹配'
+						}
+					]),
 			{
 				title: '定制简历',
 				icon: FileText,
@@ -113,12 +118,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				icon: SquarePen,
 				url: '/main/resume-editor'
 			},
-			{
-				title: '题库和 anki',
-				icon: Book,
-				url: '/main/offer/anki',
-				groupLabel: '面向offer学习'
-			},
+			...(isOnline
+				? []
+				: [
+						{
+							title: '题库和 anki',
+							icon: Book,
+							url: '/main/offer/anki',
+							groupLabel: '面向offer学习'
+						}
+					]),
+
 			{
 				title: '用户配置',
 				icon: SlidersHorizontal,

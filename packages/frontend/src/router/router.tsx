@@ -33,6 +33,8 @@ const UserMemory = lazy(() => import('../views/Main/UserMemory'));
 const UserConfig = lazy(() => import('../views/Main/userConfig'));
 const AIChat = lazy(() => import('../views/Main/aichat/AIChat'));
 
+const isOnline = import.meta.env.VITE_IS_ONLINE === 'true';
+
 const knowBaseRoute = {
 	path: 'knowledge',
 	element: (
@@ -280,19 +282,11 @@ const hjmRoute = {
 			children: [
 				{
 					path: '',
-					element: (
-						<UpdateBreadRouter>
-							<JobMatch />
-						</UpdateBreadRouter>
-					)
+					element: <UpdateBreadRouter>{isOnline ? '' : <JobMatch />}</UpdateBreadRouter>
 				},
 				{
 					path: 'get-jobs',
-					element: (
-						<UpdateBreadRouter>
-							<DataCrawl />
-						</UpdateBreadRouter>
-					)
+					element: <UpdateBreadRouter>{isOnline ? '' : <DataCrawl />}</UpdateBreadRouter>
 				},
 				{
 					path: 'resume-detail/:resumeId',
@@ -394,36 +388,12 @@ const learnRoute = {
 	),
 	children: [
 		{
-			path: '',
-			element: (
-				<UpdateBreadRouter>
-					<>技术学习路线 coming soon</>
-				</UpdateBreadRouter>
-			)
-		},
-		{
-			path: 'road',
-			element: (
-				<UpdateBreadRouter>
-					<>技术学习路线 coming soon</>
-				</UpdateBreadRouter>
-			)
-		},
-		{
-			path: 'questions',
-			element: (
-				<UpdateBreadRouter>
-					<>简历延申八股 coming soon</>
-				</UpdateBreadRouter>
-			)
-		},
-		{
 			path: 'anki',
-			element: (
-				<UpdateBreadRouter>
-					<Anki />
-				</UpdateBreadRouter>
-			)
+			element: <UpdateBreadRouter>{isOnline ? '' : <Anki />}</UpdateBreadRouter>
+		},
+		{
+			path: '',
+			element: <UpdateBreadRouter>{isOnline ? '' : <Anki />}</UpdateBreadRouter>
 		}
 	]
 };

@@ -1,0 +1,154 @@
+# 从hub拉取镜像，用于线上部署
+
+# 1、更新服务镜像
+# docker pull onlyie/prisma-ai-backend:latest
+
+# 2、关闭正在运行的服务
+# docker stop $(docker ps)
+
+# 3、重新部署
+# docker compose -f ./compose.CD.yaml up --build
+
+# 4、关闭ssh远程连接进程（必须）
+# pkill -f /root/.vscode-server/
+# pkill -f /root/.cursor-server/
+
+# 查看日志
+# docker compose -f ./compose.CD.yaml logs -f
+
+# 服务器内存、CPU占用情况
+# ps aux --sort=-%mem | awk '{printf "%-8s %-6s %-6s %-6s %s\n", $2, $3, $4, $6, $11}' | head -20
+
+# 依赖的外部文件：
+# 1. 项目中的后端环境变量文件
+# 2. 项目中的nginx文件夹
+# 3. docker-data文件夹
+services:
+  prisma-ai-backend:
+    image: onlyie/prisma-ai-backend:latest
+    depends_on:
+      # mysql经常需要启动好几次才能成功,得在它启动成功后再启动服务
+      mysql-container:
+        condition: service_healthy
+      redis-container:
+        condition: service_healthy
+      mongo-container:
+        condition: service_healthy
+      minio-container:
+        condition: service_healthy
+      # 添加对 browserless-chrome 服务的依赖
+      browserless-chrome:
+        condition: service_started
+    restart: unless-stopped
+    container_name: backend
+    # 将指定的文件的环境变量加载到容器中
+    env_file:
+      - ./packages/backend/.env
+      - ./packages/backend/.env.production
+    environment:
+      IS_ONLINE: true
+      NODE_ENV: production
+      MONGO_HOST: mongo-container
+      # 覆盖env_file中的同名环境变量
+      DATABASE_URL: mysql://root:qwqw1314.@mysql-container:3306/prisma-ai
+      # 新增环境变量，指向 browserless 服务
+      PUPPETEER_BROWSER_WSE_ENDPOINT: ws://browserless-chrome:3000
+    ports:
+      - '3003:3003'
+    volumes:
+      - ./docker-data/nest-app/logs:/app/packages/backend/logs
+      - ./models:/app/models
+      - ./user_data:/app/user_data
+      # 这些用户数据目录在v5.0.2之后已废弃，保留是为了旧版本向新版本的迁移
+      - ./projects:/app/projects
+      - ./resumes:/app/resumes
+      - ./project_wikis:/app/project_wikis
+      - ./packages/backend/prisma_agent_config.json:/app/packages/backend/prisma_agent_config.json
+  magic-resume-container:
+    image: onlyie/prisma-ai-resume-editor:latest
+    # build:
+    #   context: .
+    #   dockerfile: ./docker/magic-resume/Dockerfile.CI
+    ports:
+      - '3009:3009'
+    restart: unless-stopped
+    container_name: magic-resume
+  nginx-container:
+    image: onlyie/prisma-ai-hub-nginx:1.0.0
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./packages/frontend/dist:/usr/share/nginx/html
+      - ./nginx/logs:/var/log/nginx # Nginx 日志
+      - ./nginx/conf/default.online.conf:/etc/nginx/conf.d/default.conf
+      - /etc/nginx/ssl:/etc/nginx/ssl
+    restart: unless-stopped
+    depends_on:
+      - prisma-ai-backend
+      - minio-container
+  mysql-container:
+    image: mysql
+    #占用的主机端口:网络内访问使用的端口
+    ports:
+      - '3308:3306'
+      # 目录内不能有文件,否则报错
+    volumes:
+      - ./docker-data/mysql:/var/lib/mysql
+    environment:
+      # 初始数据库
+      MYSQL_DATABASE: prisma-ai
+      MYSQL_ROOT_PASSWORD: qwqw1314.
+      # 允许任何主机连接
+      MYSQL_ROOT_HOST: '%'
+    restart: unless-stopped
+    healthcheck:
+      test: [ 'CMD', 'mysqladmin', 'ping', '-h', 'localhost' ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  redis-container:
+    image: redis
+    ports:
+      - '6377:6379'
+    volumes:
+      - ./docker-data/redis:/data
+    restart: unless-stopped
+    healthcheck:
+      test: [ 'CMD', 'redis-cli', 'ping' ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  mongo-container:
+    image: mongo
+    ports:
+      - '27018:27017'
+    volumes:
+      - ./docker-data/mongo:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  minio-container:
+    image: bitnamilegacy/minio:2025.4.3
+    ports:
+      - '9003:9000'
+      - '9004:9001'
+    volumes:
+      - ./docker-data/minio:/bitnami/minio/data
+    restart: unless-stopped
+    user: root
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: admin123.
+      MINIO_DEFAULT_BUCKETS: prisma-ai
+    command: server /bitnami/minio/data --console-address :9001
+
+#使用默认桥接网络
