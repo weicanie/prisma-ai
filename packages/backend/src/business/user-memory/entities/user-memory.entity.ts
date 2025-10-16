@@ -1,15 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { type JobSeekDestination, type UserProfile } from '@prisma-ai/shared';
+import { type jobSeekDestinationT, type UserProfileT } from '@prisma-ai/shared';
 import { HydratedDocument } from 'mongoose';
 import { UserInfo } from '../../project/entities/project.entity';
 
 @Schema({ timestamps: true })
 export class UserMemory {
 	@Prop({ type: Object, required: true })
-	userProfile: UserProfile;
+	userProfile: UserProfileT;
 
 	@Prop({ type: Object, required: true })
-	jobSeekDestination: JobSeekDestination;
+	jobSeekDestination: jobSeekDestinationT;
 
 	@Prop({ type: UserInfo, required: true })
 	userInfo: UserInfo;

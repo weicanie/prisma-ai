@@ -8,6 +8,7 @@ import {
 	FileTypeEnum,
 	ProjectKnowledgeTypeEnum,
 	ProjectKnowledgeVo,
+	UserConfig,
 	UserInfoFromToken
 } from '@prisma-ai/shared';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
@@ -52,8 +53,6 @@ interface KnowledgeChunkDoc extends Document {
 export class KnowledgeVDBService {
 	private readonly logger = new Logger(KnowledgeVDBService.name);
 
-	private readonly embedModel = this.modelService.getEmbedModelOpenAI();
-
 	private readonly vdbIndexs = [KnowledgeIndex.KNOWLEDGEBASE];
 
 	constructor(
@@ -69,13 +68,15 @@ export class KnowledgeVDBService {
 	/**
 	 * 确保用到的向量索引存在
 	 */
-	async indexExists(apiKey: string) {
+	async indexExists(userConfig: UserConfig) {
 		for (const index of this.vdbIndexs) {
-			if (!(await this.vectorStoreService.indexExists(apiKey, index))) {
+			if (
+				!(await this.vectorStoreService.indexExists(userConfig.vectorDb.pinecone.apiKey, index))
+			) {
 				await this.vectorStoreService.createEmptyIndex(
-					apiKey,
+					userConfig.vectorDb.pinecone.apiKey,
 					index,
-					this.embedModel.dimensions ?? 1536
+					this.modelService.getEmbedModelOpenAI(userConfig).dimensions ?? 1536
 				);
 			}
 		}
@@ -92,7 +93,7 @@ export class KnowledgeVDBService {
 		userInfo: UserInfoFromToken
 	): Promise<string[]> {
 		const apiKey = userInfo.userConfig.vectorDb.pinecone.apiKey;
-		await this.indexExists(apiKey);
+		await this.indexExists(userInfo.userConfig);
 
 		const { id, type, projectName } = knowledge;
 		this.logger.log(`开始处理知识 [${knowledge.name}] (ID: ${id})...`);
@@ -108,7 +109,7 @@ export class KnowledgeVDBService {
 			// 切分
 			const chunks = await this._splitDocuments(documents, type);
 			this.logger.log(`  - 已将文档分割成 ${chunks.length} 个块。`);
-			const embeddings = this.embedModel;
+			const embeddings = this.modelService.getEmbedModelOpenAI(userInfo.userConfig);
 			// 为每个块添加原始知识库ID的元数据
 			chunks.forEach(chunk => {
 				chunk.metadata.knowledgeId = id;
@@ -153,7 +154,7 @@ export class KnowledgeVDBService {
 		userInfo: UserInfoFromToken
 	): Promise<string[]> {
 		const apiKey = userInfo.userConfig.vectorDb.pinecone.apiKey;
-		await this.indexExists(apiKey);
+		await this.indexExists(userInfo.userConfig);
 
 		try {
 			//数据加载
@@ -173,7 +174,7 @@ export class KnowledgeVDBService {
 				apiKey,
 				chunks,
 				KnowledgeIndex.KNOWLEDGEBASE,
-				this.embedModel,
+				this.modelService.getEmbedModelOpenAI(userInfo.userConfig),
 				namespace
 			);
 			return vectorIds;
@@ -190,7 +191,7 @@ export class KnowledgeVDBService {
 		projectName: string
 	): Promise<void> {
 		const apiKey = userInfo.userConfig.vectorDb.pinecone.apiKey;
-		await this.indexExists(apiKey);
+		await this.indexExists(userInfo.userConfig);
 
 		try {
 			const namespace = this._getUserProjectNamespaceByType(type, userInfo.userId, projectName);
@@ -259,7 +260,7 @@ export class KnowledgeVDBService {
 		minScore = 0.6
 	) {
 		const apiKey = userInfo.userConfig.vectorDb.pinecone.apiKey;
-		await this.indexExists(apiKey);
+		await this.indexExists(userInfo.userConfig);
 		let namespaces = knowledgeNamespaces.map(namespace =>
 			this._getUserProjectNamespace(namespace, userInfo.userId, projectName)
 		);
@@ -270,7 +271,7 @@ export class KnowledgeVDBService {
 				return this.vectorStoreService.similaritySearchWithScore(
 					apiKey,
 					KnowledgeIndex.KNOWLEDGEBASE,
-					this.embedModel,
+					this.modelService.getEmbedModelOpenAI(userInfo.userConfig),
 					query,
 					topK,
 					ns
@@ -342,9 +343,9 @@ export class KnowledgeVDBService {
 		topK: number
 	) {
 		const apiKey = userInfo.userConfig.vectorDb.pinecone.apiKey;
-		await this.indexExists(apiKey);
+		await this.indexExists(userInfo.userConfig);
 
-		const embeddings = this.embedModel;
+		const embeddings = this.modelService.getEmbedModelOpenAI(userInfo.userConfig);
 		const retriever = await this.vectorStoreService.getRetrieverOfIndex(
 			apiKey,
 			index,

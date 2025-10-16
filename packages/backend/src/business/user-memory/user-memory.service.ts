@@ -24,10 +24,7 @@ export class UserMemoryService implements OnModuleInit, WithGetUserMemory {
 		const userId = userInfo.userId;
 
 		try {
-			const existingMemory = await this.userMemoryModel
-				.findOne({ 'userInfo.userId': userId })
-				.lean();
-
+			const existingMemory = await this.userMemoryModel.findOne({ 'userInfo.userId': userId });
 			if (existingMemory) {
 				// 更新逻辑: 调用 updateUserMemoryChain
 				const chain = await this.aichatChainService.updateUserMemoryChain(

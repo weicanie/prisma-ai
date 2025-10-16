@@ -1,6 +1,6 @@
 import { Document } from '@langchain/core/documents';
 import { Injectable, Logger } from '@nestjs/common';
-import { UserInfoFromToken } from '@prisma-ai/shared';
+import { UserConfig, UserInfoFromToken } from '@prisma-ai/shared';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
@@ -89,13 +89,15 @@ export class ProjectCodeVDBService {
 	/**
 	 * 确保用到的向量索引存在
 	 */
-	async indexExists(apiKey: string) {
+	async indexExists(userConfig: UserConfig) {
 		for (const index of this.vdbIndexs) {
-			if (!(await this.vectorStoreService.indexExists(apiKey, index))) {
+			if (
+				!(await this.vectorStoreService.indexExists(userConfig.vectorDb.pinecone.apiKey, index))
+			) {
 				await this.vectorStoreService.createEmptyIndex(
-					apiKey,
+					userConfig.vectorDb.pinecone.apiKey,
 					index,
-					this.modelService.getEmbedModelOpenAI().dimensions ?? 1536
+					this.modelService.getEmbedModelOpenAI(userConfig).dimensions ?? 1536
 				);
 			}
 		}
@@ -164,10 +166,10 @@ export class ProjectCodeVDBService {
 		projectName: string
 	): Promise<string> {
 		const apikey = userInfo.userConfig.vectorDb.pinecone.apiKey;
-		await this.indexExists(apikey);
+		await this.indexExists(userInfo.userConfig);
 
 		const namespace = this._getRepoNamespace(projectName, userInfo.userId);
-		const embeddings = this.modelService.getEmbedModelOpenAI();
+		const embeddings = this.modelService.getEmbedModelOpenAI(userInfo.userConfig);
 		const retriever = await this.vectorStoreService.getRetrieverOfIndex(
 			apikey,
 			ProjectCodeIndex.CODEBASE,
@@ -195,10 +197,10 @@ export class ProjectCodeVDBService {
 		minScore = 0.6
 	): Promise<string> {
 		const apikey = userInfo.userConfig.vectorDb.pinecone.apiKey;
-		await this.indexExists(apikey);
+		await this.indexExists(userInfo.userConfig);
 
 		const namespace = this._getRepoNamespace(projectName, userInfo.userId);
-		const embeddings = this.modelService.getEmbedModelOpenAI();
+		const embeddings = this.modelService.getEmbedModelOpenAI(userInfo.userConfig);
 		const chunks = await this.vectorStoreService.similaritySearchWithScore(
 			apikey,
 			ProjectCodeIndex.CODEBASE,
@@ -237,7 +239,7 @@ export class ProjectCodeVDBService {
 	 */
 	private async syncProject(projectPath: string, projectName: string, userInfo: UserInfoFromToken) {
 		const apikey = userInfo.userConfig.vectorDb.pinecone.apiKey;
-		await this.indexExists(apikey);
+		await this.indexExists(userInfo.userConfig);
 
 		this.logger.log(`[Sync] 开始同步项目: ${projectName}`);
 		const namespace = this._getRepoNamespace(projectName, String(userInfo.userId));
@@ -358,7 +360,7 @@ export class ProjectCodeVDBService {
 					);
 
 					// 添加到向量数据库
-					const embeddings = this.modelService.getEmbedModelOpenAI();
+					const embeddings = this.modelService.getEmbedModelOpenAI(userInfo.userConfig);
 					const vectorIds = await this.vectorStoreService.addDocumentsToIndex(
 						apikey,
 						documents,

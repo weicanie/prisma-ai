@@ -78,7 +78,8 @@ export class HjmService implements OnModuleInit {
 	userInfoSpider = {
 		userId: 'system',
 		username: '系统爬虫',
-		userConfig: initialUserConfig
+		userConfig: initialUserConfig,
+		role: 'user'
 	};
 
 	@InjectModel(Job.name)
