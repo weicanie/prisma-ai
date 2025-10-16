@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { UserConfig } from '@prisma-ai/shared';
 import { Edit, Save } from 'lucide-react';
 import { memo, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -24,7 +25,6 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { Badge } from '../../../components/ui/badge';
 import {
-	type UserConfig,
 	getUserConfig,
 	saveUserConfig,
 	validateUserConfig
@@ -113,15 +113,16 @@ const UserConfigUpdate = memo(({ onUpdate, showSecrets }: UserConfigUpdateProps)
 			label: 'Pinecone API Key',
 			description: 'Pinecone向量数据库的API密钥',
 			category: '向量数据库'
-		}
+		},
 		// 搜索服务配置
-		// {
-		// 	key: 'search.serpapi.apiKey',
-		// 	value: currentConfig.search.serpapi.apiKey || '',
-		// 	label: 'SerpAPI API Key',
-		// 	description: 'SerpAPI搜索服务的API密钥',
-		// 	category: '搜索服务',
-		// }
+		{
+			key: 'search.serpapi.apiKey',
+			value: currentConfig.search.serpapi.apiKey || '',
+			label: 'SerpAPI API Key',
+			description: 'SerpAPI搜索服务的API密钥',
+			category: '搜索服务',
+			required: false
+		}
 	];
 
 	// 按类别分组配置项
@@ -223,7 +224,7 @@ const UserConfigUpdate = memo(({ onUpdate, showSecrets }: UserConfigUpdateProps)
 									<div className="flex-1">
 										<div className="flex items-center gap-2">
 											<h4 className={`font-medium ${isDark ? 'text-white' : ''}`}>{item.label}</h4>
-											{/* {item.required && (
+											{item.required === true && (
 												<span
 													className={`text-xs px-2 py-1 rounded ${
 														isDark ? 'bg-red-900/30 text-red-300' : 'bg-red-100 text-red-800'
@@ -231,7 +232,18 @@ const UserConfigUpdate = memo(({ onUpdate, showSecrets }: UserConfigUpdateProps)
 												>
 													必需
 												</span>
-											)} */}
+											)}
+											{item.required === false && (
+												<span
+													className={`text-xs px-2 py-1 rounded ${
+														isDark
+															? 'bg-green-900/30 text-green-300'
+															: 'bg-green-100 text-green-800'
+													}`}
+												>
+													可选
+												</span>
+											)}
 										</div>
 										<p className={`text-sm ${isDark ? 'text-gray-300' : 'text-muted-foreground'}`}>
 											<Badge variant={item.value ? 'default' : 'destructive'}>
