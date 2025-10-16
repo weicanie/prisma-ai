@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.2.0-beta.3](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.2...v5.2.0-beta.3) (2025-10-16)
+
+### Bug Fixes
+
+- 完善线上部署 ([99223b2](https://github.com/weicanie/prisma-ai/commit/99223b2d3918e2c662fa9a1096744f4da073e895))
+
+### Features
+
+- 后台管理和通知中心 ([ef755ba](https://github.com/weicanie/prisma-ai/commit/ef755ba7d8b4d3947837867e3d03dda948652d47))
+- **frontend:** 移动端适配优化 ([c436f4a](https://github.com/weicanie/prisma-ai/commit/c436f4a230017520bc15fd6094d3762e60b89bfa))
+
 # [5.2.0-beta.2](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.1...v5.2.0-beta.2) (2025-10-16)
 
 ### Bug Fixes
