@@ -36,7 +36,7 @@ export function FreeSession() {
 						eventBusService.emit(EventList.sessionFree);
 						navigate('#next-action');
 					}}
-					className="text-zinc-200 font-semibold"
+					className="dark:text-zinc-200 font-semibold"
 				>
 					<Eraser></Eraser>
 					清除当前对话

@@ -11,6 +11,7 @@ import ImplementRequest from './ImplementRequest';
 const PreflightBtns: React.FC<PreflightBtnsProps> = ({ availableActions, actionHandlers }) => {
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === 'dark';
+
 	const [isImplementRequestOpen, setIsImplementRequestOpen] = useState(false);
 
 	return (
@@ -38,9 +39,12 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({ availableActions, actionH
 								<Button
 									onClick={actionHandlers['lookup']}
 									size="lg"
+									variant="outline"
 									className={`w-1/2 rounded-full ${
-										isDark ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600'
-									} text-white `}
+										isDark
+											? 'border-gray-600 text-gray-200 hover:bg-gray-700'
+											: 'border-gray-300 hover:bg-gray-50'
+									}`}
 								>
 									<Wand2 className="mr-2 h-5 w-5" /> 使用 Prisma 分析项目
 								</Button>
@@ -70,7 +74,12 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({ availableActions, actionH
 							<div className="flex flex-col items-center justify-center text-center">
 								<Button
 									onClick={actionHandlers['polish']}
-									className="w-1/2 rounded-full bg-blue-600 hover:bg-blue-700 text-white"
+									variant="outline"
+									className={`w-1/2 rounded-full ${
+										isDark
+											? 'border-gray-600 text-gray-200 hover:bg-gray-700'
+											: 'border-gray-300 hover:bg-gray-50'
+									}`}
 									size="lg"
 								>
 									<Sparkles className="w-4 h-4 mr-2" />
@@ -106,7 +115,7 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({ availableActions, actionH
 									className={`w-1/2 rounded-full ${
 										isDark
 											? 'border-gray-600 text-gray-200 hover:bg-gray-700'
-											: 'border-gray-300 text-purple-700 hover:bg-gray-50'
+											: 'border-gray-300 hover:bg-gray-50'
 									}`}
 									size="lg"
 								>
@@ -139,15 +148,18 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({ availableActions, actionH
 							<div className="flex flex-col items-center justify-center text-center">
 								<Button
 									onClick={() => setIsImplementRequestOpen(true)}
-									variant="default"
-									className="w-1/2 rounded-full  bg-purple-600 hover:bg-purple-700 text-white"
+									variant="outline"
+									className={`w-1/2 rounded-full ${
+										isDark
+											? 'border-gray-600 text-gray-200 hover:bg-gray-700'
+											: 'border-gray-300 hover:bg-gray-50'
+									}`}
 									size="lg"
 								>
 									<MessageSquare className="w-4 h-4 mr-2" />
 									与AI Agent协作
 								</Button>
 							</div>
-
 							<div className="flex flex-col items-center justify-center text-center opacity-0 max-h-0 group-hover:opacity-100 group-hover:max-h-96 overflow-hidden transition-all duration-500 ease-in-out">
 								<MessageSquare
 									className={`w-12 h-12 mb-4 mx-auto ${isDark ? 'text-blue-400' : 'text-blue-600'}`}
@@ -177,7 +189,7 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({ availableActions, actionH
 									className={`w-1/2 rounded-full ${
 										isDark
 											? 'border-gray-600 text-gray-200 hover:bg-gray-700'
-											: 'border-gray-300 text-purple-700 hover:bg-gray-50'
+											: 'border-gray-300 hover:bg-gray-50'
 									}`}
 									size="lg"
 								>
