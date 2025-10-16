@@ -35,7 +35,7 @@ export interface Event_Payload {
 	/* user memory */
 	[EventList.userMemoryChange]: UserMemoryAction;
 	/* cache invalidate */
-	[EventList.cacheProjectRetrievedDocAndCodeInvalidate]: { projectName: string };
+	[EventList.cacheProjectRetrievedDocAndCodeInvalidate]: { projectName: string; userId: string };
 }
 
 /**

@@ -21,7 +21,7 @@ export class ProjectKonwbaseRetrieveService {
 
 	async retrievedDomainDocs(i: ProjectProcessingInput, business: BusinessEnum) {
 		const project_doc_cache = await this.cacheService.getOrSet(
-			this.cacheService.getProjectRetrievedDocKey(i.project.info.name),
+			this.cacheService.getProjectRetrievedDocKey(i.project.info.name, i.userInfo.userId),
 			async () => {
 				return await this._retrievedDomainDocs(i, business);
 			},
@@ -168,7 +168,7 @@ export class ProjectKonwbaseRetrieveService {
 
 	async retrievedProjectCodes(i: ProjectProcessingInput, business: BusinessEnum) {
 		const project_code_cache = await this.cacheService.getOrSet(
-			this.cacheService.getProjectRetrievedCodeKey(i.project.info.name),
+			this.cacheService.getProjectRetrievedCodeKey(i.project.info.name, i.userInfo.userId),
 			async () => {
 				return await this._retrievedProjectCodes(i, business);
 			},

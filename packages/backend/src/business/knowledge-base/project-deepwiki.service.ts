@@ -145,7 +145,8 @@ export class ProjectDeepWikiService implements OnModuleInit {
 		await this.taskQueueService.saveTask(newTask);
 		// 失效项目检索到的文档和代码的缓存
 		this.eventBusService.emit(EventList.cacheProjectRetrievedDocAndCodeInvalidate, {
-			projectName: dto.projectName
+			projectName: dto.projectName,
+			userId: userInfo.userId
 		});
 	}
 }

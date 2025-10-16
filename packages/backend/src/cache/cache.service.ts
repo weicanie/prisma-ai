@@ -154,19 +154,25 @@ export class CacheService implements OnModuleInit {
 		return dbData;
 	}
 
-	getProjectRetrievedDocKey(projectName: string) {
-		return `${CacheKeyPrefix.project_retrieved_doc}${projectName}`;
+	getProjectRetrievedDocKey(projectName: string, userId: string) {
+		return `${CacheKeyPrefix.project_retrieved_doc}${userId}:${projectName}`;
 	}
-	getProjectRetrievedCodeKey(projectName: string) {
-		return `${CacheKeyPrefix.project_retrieved_code}${projectName}`;
+	getProjectRetrievedCodeKey(projectName: string, userId: string) {
+		return `${CacheKeyPrefix.project_retrieved_code}${userId}:${projectName}`;
 	}
 
 	/**
 	 * 失效项目检索到的文档和代码的缓存
 	 * @param projectId 项目id
 	 */
-	async invalidateProjectRetrievedDocAndCode({ projectName }: { projectName: string }) {
-		await this.del(this.getProjectRetrievedDocKey(projectName));
-		await this.del(this.getProjectRetrievedCodeKey(projectName));
+	async invalidateProjectRetrievedDocAndCode({
+		projectName,
+		userId
+	}: {
+		projectName: string;
+		userId: string;
+	}) {
+		await this.del(this.getProjectRetrievedDocKey(projectName, userId));
+		await this.del(this.getProjectRetrievedCodeKey(projectName, userId));
 	}
 }

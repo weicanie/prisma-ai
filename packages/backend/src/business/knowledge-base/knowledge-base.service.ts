@@ -85,7 +85,8 @@ export class KnowledgebaseService {
 
 		// 失效项目检索到的文档和代码的缓存
 		this.eventBusService.emit(EventList.cacheProjectRetrievedDocAndCodeInvalidate, {
-			projectName: createKnowledgeDto.projectName
+			projectName: createKnowledgeDto.projectName,
+			userId: userInfo.userId
 		});
 		return embedKnowledgeDto as ProjectKnowledgeVo;
 	}
@@ -112,7 +113,8 @@ export class KnowledgebaseService {
 		);
 		// 失效项目检索到的文档和代码的缓存
 		this.eventBusService.emit(EventList.cacheProjectRetrievedDocAndCodeInvalidate, {
-			projectName: projectName
+			projectName: projectName,
+			userId: userInfo.userId
 		});
 	}
 
@@ -207,7 +209,8 @@ export class KnowledgebaseService {
 		);
 		// 失效项目检索到的文档和代码的缓存
 		this.eventBusService.emit(EventList.cacheProjectRetrievedDocAndCodeInvalidate, {
-			projectName: existingkn.projectName
+			projectName: existingkn.projectName,
+			userId: userInfo.userId
 		});
 	}
 }
