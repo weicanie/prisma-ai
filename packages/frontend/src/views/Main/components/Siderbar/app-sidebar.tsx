@@ -88,7 +88,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				groupLabel: '简历优化'
 			},
 			{
-				title: '问问 Prisma',
+				title: 'Prisma',
 				icon: Bot,
 				url: '/main/aichat'
 			},

@@ -6,6 +6,7 @@ import { Database } from 'lucide-react';
 import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useIsMobile } from '../../../hooks/use-mobile';
 import { useCustomMutation, useCustomQuery } from '../../../query/config';
 import { ResumeQueryKey } from '../../../query/keys';
 import { findAllResumeMatched, removeResumeMatched } from '../../../services/resume';
@@ -22,6 +23,7 @@ interface MatchedResumeProps {
 
 const MatchedResume: React.FC<MatchedResumeProps> = memo(({ title, description }) => {
 	const navigate = useNavigate();
+	const isMobile = useIsMobile();
 
 	const { data: resumeMatchedData, status: resumeMatchedStatus } = useCustomQuery(
 		[ResumeQueryKey.ResumeMatched, 1, 1000],
@@ -173,16 +175,14 @@ const MatchedResume: React.FC<MatchedResumeProps> = memo(({ title, description }
 				title={title ?? '岗位专用简历'}
 				description={description ?? '已定制的契合、匹配岗位的专用简历'}
 			>
-				<div className="flex flex-wrap gap-3">
-					<Button
-						variant="outline"
-						onClick={() => navigate('/main/hjm/resume/custom-resume')}
-						className="flex items-center gap-2"
-					>
-						<Database className="h-4 w-4" />
-						根据岗位定制简历
-					</Button>
-				</div>
+				<Button
+					variant="outline"
+					onClick={() => navigate('/main/hjm/resume/custom-resume')}
+					className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}
+				>
+					<Database className={`h-4 w-4 ${isMobile ? 'h-3 w-3' : ''}`} />
+					定制简历
+				</Button>
 			</PageHeader>
 			<div className="pl-10 pr-10">
 				<ConfigDataTable dataTableConfig={dataTableConfigResumeMatched} data={resumeMatchedDatas} />

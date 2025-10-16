@@ -7,6 +7,7 @@ import { AlignLeft, Briefcase, Database, GraduationCap, Link, ListChecks } from 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useIsMobile } from '../../../hooks/use-mobile';
 import { useCustomMutation, useCustomQuery } from '../../../query/config';
 import { KnowledgeQueryKey } from '../../../query/keys';
 import { findAllUserKnowledge, removeKnowledge } from '../../../services/knowbase';
@@ -27,6 +28,7 @@ const Knowledges: React.FC<KnowledgesProps<ProjectKnowledgeVo>> = ({
 	selectionHandler
 }) => {
 	const navigate = useNavigate();
+	const isMobile = useIsMobile();
 	const { data, status } = useCustomQuery([KnowledgeQueryKey.Knowledges], () =>
 		findAllUserKnowledge({ page: 1, limit: 1000 })
 	);
@@ -209,40 +211,38 @@ const Knowledges: React.FC<KnowledgesProps<ProjectKnowledgeVo>> = ({
 	return (
 		<>
 			<PageHeader title="项目知识库" description="上传项目相关信息来和 Prisma 共享, 这很重要 ">
-				<div className="flex flex-wrap gap-3">
-					<Button
-						variant="outline"
-						onClick={() => navigate('/main/knowledge/deepwiki')}
-						className="flex items-center gap-2"
-					>
-						<Database className="h-4 w-4" />
-						DeepWiki 集成
-					</Button>
-					<Button
-						variant="outline"
-						onClick={() => navigate('/main/knowledge/skills')}
-						className="flex items-center gap-2"
-					>
-						<ListChecks className="h-4 w-4" />
-						职业技能
-					</Button>
-					<Button
-						variant="outline"
-						onClick={() => navigate('/main/resumes/career')}
-						className="flex items-center gap-2"
-					>
-						<Briefcase className="h-4 w-4" />
-						工作经历
-					</Button>
-					<Button
-						variant="outline"
-						onClick={() => navigate('/main/resumes/education')}
-						className="flex items-center gap-2"
-					>
-						<GraduationCap className="h-4 w-4" />
-						教育经历
-					</Button>
-				</div>
+				<Button
+					variant="outline"
+					onClick={() => navigate('/main/knowledge/deepwiki')}
+					className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}
+				>
+					<Database className={`h-4 w-4 ${isMobile ? 'h-3 w-3' : ''}`} />
+					DeepWiki 集成
+				</Button>
+				<Button
+					variant="outline"
+					onClick={() => navigate('/main/knowledge/skills')}
+					className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}
+				>
+					<ListChecks className={`h-4 w-4 ${isMobile ? 'h-3 w-3' : ''}`} />
+					职业技能
+				</Button>
+				<Button
+					variant="outline"
+					onClick={() => navigate('/main/resumes/career')}
+					className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}
+				>
+					<Briefcase className={`h-4 w-4 ${isMobile ? 'h-3 w-3' : ''}`} />
+					工作经历
+				</Button>
+				<Button
+					variant="outline"
+					onClick={() => navigate('/main/resumes/education')}
+					className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}
+				>
+					<GraduationCap className={`h-4 w-4 ${isMobile ? 'h-3 w-3' : ''}`} />
+					教育经历
+				</Button>
 			</PageHeader>
 
 			<div className="pl-10 pr-10">

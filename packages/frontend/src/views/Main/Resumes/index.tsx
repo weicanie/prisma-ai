@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useIsMobile } from '../../../hooks/use-mobile';
 import { useCustomMutation, useCustomQuery } from '../../../query/config';
 import { ResumeQueryKey } from '../../../query/keys';
 import { exportResumeToEditor, findAllUserResumes, removeResume } from '../../../services/resume';
@@ -41,6 +42,7 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 }) => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
+	const isMobile = useIsMobile();
 
 	const { data, status } = useCustomQuery([ResumeQueryKey.Resumes, 1, 1000], ({ queryKey }) => {
 		const [, page, limit] = queryKey; // 从 queryKey 中解构分页参数
@@ -297,32 +299,30 @@ const Resumes: React.FC<ResumesProps<ResumeVo>> = ({
 				title={title ?? '简历'}
 				description={description ?? '组装您的简历并导出到简历编辑器进行编辑'}
 			>
-				<div className="flex flex-wrap gap-3">
-					<Button
-						variant="outline"
-						onClick={() => navigate('/main/resumes/skills')}
-						className="flex items-center gap-2"
-					>
-						<ListChecks className="h-4 w-4" />
-						职业技能
-					</Button>
-					<Button
-						variant="outline"
-						onClick={() => navigate('/main/resumes/career')}
-						className="flex items-center gap-2"
-					>
-						<Briefcase className="h-4 w-4" />
-						工作经历
-					</Button>
-					<Button
-						variant="outline"
-						onClick={() => navigate('/main/resumes/education')}
-						className="flex items-center gap-2"
-					>
-						<GraduationCap className="h-4 w-4" />
-						教育经历
-					</Button>
-				</div>
+				<Button
+					variant="outline"
+					onClick={() => navigate('/main/resumes/skills')}
+					className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}
+				>
+					<ListChecks className={`h-4 w-4 ${isMobile ? 'h-3 w-3' : ''}`} />
+					职业技能
+				</Button>
+				<Button
+					variant="outline"
+					onClick={() => navigate('/main/resumes/career')}
+					className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}
+				>
+					<Briefcase className={`h-4 w-4 ${isMobile ? 'h-3 w-3' : ''}`} />
+					工作经历
+				</Button>
+				<Button
+					variant="outline"
+					onClick={() => navigate('/main/resumes/education')}
+					className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}
+				>
+					<GraduationCap className={`h-4 w-4 ${isMobile ? 'h-3 w-3' : ''}`} />
+					教育经历
+				</Button>
 			</PageHeader>
 			<div className="pl-10 pr-10">
 				<ConfigDataTable dataTableConfig={dataTableConfig} data={resumeDatas} />

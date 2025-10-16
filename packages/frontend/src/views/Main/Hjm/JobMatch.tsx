@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Badge } from '../../../components/ui/badge';
+import { useIsMobile } from '../../../hooks/use-mobile';
 import { useCustomQuery } from '../../../query/config';
 import { JobQueryKey } from '../../../query/keys';
 import { getJobCount, getTaskResult, startMatchJobs } from '../../../services/hjm';
@@ -71,6 +72,7 @@ function useTaskPolling(taskId: string | null) {
 export function JobMatch() {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
+	const isMobile = useIsMobile();
 
 	const selectedResume = useSelector(selectResumeData);
 	const resumeIdToMatch = selectedResume?.resuemIdToMatch;
@@ -146,16 +148,14 @@ export function JobMatch() {
 				title={'简历匹配岗位'}
 				description={'通过相似性检索，将您的简历与岗位数据进行匹配'}
 			>
-				<div className="flex flex-wrap gap-3">
-					<Button
-						variant="outline"
-						onClick={() => navigate('/main/hjm/job/get-jobs')}
-						className="flex items-center gap-2"
-					>
-						<Database className="h-4 w-4" />
-						获取岗位数据
-					</Button>
-				</div>
+				<Button
+					variant="outline"
+					onClick={() => navigate('/main/hjm/job/get-jobs')}
+					className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}
+				>
+					<Database className={`h-4 w-4 ${isMobile ? 'h-3 w-3' : ''}`} />
+					获取岗位数据
+				</Button>
 			</PageHeader>
 			<div className="space-y-6 p-4 md:p-10 pb-16">
 				<Card className="bg-background/50">

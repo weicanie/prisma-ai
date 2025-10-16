@@ -1,5 +1,6 @@
 import { Moon, Sun } from 'lucide-react';
 import React, { useState } from 'react';
+import { useIsMobile } from '../../../hooks/use-mobile';
 import { cn } from '../../../lib/utils';
 import { useTheme } from '../../../utils/theme';
 
@@ -20,9 +21,11 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ className }) => {
 		document.documentElement.setAttribute('class', newTheme); //tailwind样式消费
 	};
 
+	const isMobile = useIsMobile();
+
 	const iconMap = {
-		light: <Sun aria-hidden="true" className="size-5" />,
-		dark: <Moon aria-hidden="true" className="size-5" />
+		light: <Sun aria-hidden="true" className={cn('size-5', isMobile && 'size-4')} />,
+		dark: <Moon aria-hidden="true" className={cn('size-5', isMobile && 'size-4')} />
 	};
 
 	return (
