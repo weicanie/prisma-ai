@@ -583,3 +583,57 @@ export const path_name: Record<string, string> = {
 	'/main/manage/service': '服务管理',
 	'/main/manage/notification': '通知管理'
 };
+
+/* 用于侧边栏路由按钮hover时预加载 */
+/**
+ * 当前URL路径对应的页面的文件路径
+ * 注意：动态import需要使用相对路径，@/别名在运行时无法解析
+ */
+export const sideBar_urlpath_filePath: Record<string, string> = {
+	// 知识库
+	'/main/knowledge': '../views/Main/Knowbase',
+	'/main/knowledge/knowledge-detail': '../views/Main/Knowbase/KnowledgeRead',
+	'/main/knowledge/deepwiki': '../views/Main/Knowbase/DeepwikiDown',
+	'/main/knowledge/skills': '../views/Main/Skills',
+	'/main/knowledge/skills/skill-detail': '../views/Main/Skills/SkillRead',
+
+	// 项目经验
+	'/main/projects': '../views/Main/Projects',
+	'/main/projects/action': '../views/Main/Projects/Action',
+
+	// 简历
+	'/main/resumes': '../views/Main/Resumes',
+	'/main/resumes/resume-detail': '../views/Main/Resumes/ResumeRead',
+	'/main/resumes/action': '../views/Main/Resumes/Action',
+	'/main/resumes/skills': '../views/Main/Skills',
+	'/main/resumes/skills/skill-detail': '../views/Main/Skills/SkillRead',
+	'/main/resumes/education': '../views/Main/Education',
+	'/main/resumes/education/education-detail': '../views/Main/Education/Read',
+	'/main/resumes/career': '../views/Main/Career',
+	'/main/resumes/career/career-detail': '../views/Main/Career/Read',
+
+	// 人岗匹配
+	'/main/hjm/job': '../views/Main/Hjm/JobMatch',
+	'/main/hjm/job/get-jobs': '../views/Main/Hjm/DataCrawl',
+	'/main/hjm/job/resume-detail': '../views/Main/Resumes/ResumeRead',
+	'/main/hjm/resume': '../views/Main/Resumes/MatchedResume',
+	'/main/hjm/resume/resumeMatched-detail': '../views/Main/Jobs/ResumeMatchedRead',
+	'/main/hjm/resume/custom-resume': '../views/Main/Jobs',
+	'/main/hjm/resume/custom-resume/job-detail': '../views/Main/Jobs/JobRead',
+	'/main/hjm/resume/custom-resume/resume-detail': '../views/Main/Resumes/ResumeRead',
+
+	// 面向offer学习
+	'/main/offer/anki': '../views/Main/Anki/Anki',
+
+	// 管理后台
+	'/main/manage/user': '../views/Main/Manage/User',
+	'/main/manage/service': '../views/Main/Manage/Service',
+	'/main/manage/notification': '../views/Main/Manage/Notifaction',
+
+	// 其他功能
+	'/main/resume-editor': '../views/Main/ResumeEditor',
+	'/main/aichat': '../views/Main/aichat/AIChat',
+	'/main/user-memory': '../views/Main/UserMemory',
+	'/main/user-config': '../views/Main/userConfig',
+	'/main/notification': '../views/Main/Notifaction'
+};

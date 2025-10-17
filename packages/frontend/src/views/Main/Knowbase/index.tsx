@@ -11,6 +11,7 @@ import { useIsMobile } from '../../../hooks/use-mobile';
 import { useCustomMutation, useCustomQuery } from '../../../query/config';
 import { KnowledgeQueryKey } from '../../../query/keys';
 import { findAllUserKnowledge, removeKnowledge } from '../../../services/knowbase';
+import { preloadOnItemHover } from '../../../utils/preloadOnItemHover';
 import { ConfigDataTable } from '../components/config-data-table';
 import type { DataTableConfig } from '../components/config-data-table/config.type';
 import { DataTableColumnHeader } from '../components/config-data-table/data-table/columns/header';
@@ -204,6 +205,7 @@ const Knowledges: React.FC<KnowledgesProps<ProjectKnowledgeVo>> = ({
 				});
 			};
 		},
+		//! 由于懒加载了antd，因此会触发外层的Suspense
 		createBtn: <KnowledgeCreate />,
 		selectionHandler
 	};
@@ -214,6 +216,7 @@ const Knowledges: React.FC<KnowledgesProps<ProjectKnowledgeVo>> = ({
 				<Button
 					variant="outline"
 					onClick={() => navigate('/main/knowledge/deepwiki')}
+					onMouseEnter={() => preloadOnItemHover('/main/knowledge/deepwiki')}
 					className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}
 				>
 					<Database className={`h-4 w-4 ${isMobile ? 'h-3 w-3' : ''}`} />
@@ -222,6 +225,7 @@ const Knowledges: React.FC<KnowledgesProps<ProjectKnowledgeVo>> = ({
 				<Button
 					variant="outline"
 					onClick={() => navigate('/main/knowledge/skills')}
+					onMouseEnter={() => preloadOnItemHover('/main/knowledge/skills')}
 					className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}
 				>
 					<ListChecks className={`h-4 w-4 ${isMobile ? 'h-3 w-3' : ''}`} />
@@ -230,6 +234,7 @@ const Knowledges: React.FC<KnowledgesProps<ProjectKnowledgeVo>> = ({
 				<Button
 					variant="outline"
 					onClick={() => navigate('/main/resumes/career')}
+					onMouseEnter={() => preloadOnItemHover('/main/resumes/career')}
 					className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}
 				>
 					<Briefcase className={`h-4 w-4 ${isMobile ? 'h-3 w-3' : ''}`} />
@@ -238,6 +243,7 @@ const Knowledges: React.FC<KnowledgesProps<ProjectKnowledgeVo>> = ({
 				<Button
 					variant="outline"
 					onClick={() => navigate('/main/resumes/education')}
+					onMouseEnter={() => preloadOnItemHover('/main/resumes/education')}
 					className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}
 				>
 					<GraduationCap className={`h-4 w-4 ${isMobile ? 'h-3 w-3' : ''}`} />

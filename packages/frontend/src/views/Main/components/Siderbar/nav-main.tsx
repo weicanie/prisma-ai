@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Fragment } from 'react/jsx-runtime';
 import { cn } from '../../../../lib/utils';
+import { preloadOnItemHover } from '../../../../utils/preloadOnItemHover';
 
 type NavMainProps = {
 	items: {
@@ -130,6 +131,7 @@ export function NavMain({
 															selectedGroupIndex === groupIdx && selectedItemIndex === subIdx
 														}
 														onClick={() => onItemClick(groupIdx, subIdx, subItem.url)}
+														onMouseEnter={() => preloadOnItemHover(subItem.url)}
 														className="cursor-pointer"
 													>
 														<span>{subItem.title}</span>

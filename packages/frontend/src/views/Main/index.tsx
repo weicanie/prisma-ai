@@ -1,7 +1,9 @@
+import PageSkeleton from '@/components/PageSkeleton';
 import { Separator } from '@/components/ui/separator';
+import { AnimatePresence, motion } from 'framer-motion';
 import { prefetchApps } from 'qiankun';
-import { useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Suspense, useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '../../components/ui/sidebar';
 import { BreadcrumbNav } from './components/Breadcrumb';
 import { AppSidebar } from './components/Siderbar/app-sidebar';
@@ -22,6 +24,8 @@ function Main() {
 			}
 		]);
 	}, []);
+
+	const location = useLocation();
 
 	return (
 		<>
@@ -52,7 +56,20 @@ function Main() {
 						</div>
 					</header>
 					{/* 路由到的组件 */}
-					<Outlet />
+					{/* 用于页面加载和知识库新建表单加载时显示骨架屏 */}
+					<Suspense fallback={<PageSkeleton />}>
+						{/* 添加淡入动画，避免页面切换时出现闪烁 */}
+						<AnimatePresence initial={false} mode="sync">
+							<motion.div
+								key={location.pathname}
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								transition={{ duration: 0.18 }}
+							>
+								<Outlet />
+							</motion.div>
+						</AnimatePresence>
+					</Suspense>
 				</SidebarInset>
 			</SidebarProvider>
 		</>
