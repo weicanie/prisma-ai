@@ -30,7 +30,7 @@ export default function Notice() {
 		<>
 			<Button
 				size="icon"
-				className="size-8 dark:bg-transparent group-data-[collapsible=icon]:opacity-0 relative"
+				className="size-8 dark:bg-transparent relative"
 				variant="outline"
 				onClick={handleClick}
 			>

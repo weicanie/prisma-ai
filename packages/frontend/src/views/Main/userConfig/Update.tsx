@@ -246,7 +246,7 @@ const UserConfigUpdate = memo(({ onUpdate, showSecrets }: UserConfigUpdateProps)
 											)}
 										</div>
 										<p className={`text-sm ${isDark ? 'text-gray-300' : 'text-muted-foreground'}`}>
-											<Badge variant={item.value ? 'default' : 'destructive'}>
+											<Badge variant={item.value ? 'default' : 'secondary'}>
 												{item.value ? formatSecret(item.value) : '未设置'}
 											</Badge>
 										</p>

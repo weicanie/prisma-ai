@@ -1,7 +1,6 @@
 'use client';
 
 import { ChevronsUpDown, LogOut } from 'lucide-react';
-import { Badge } from '../../../../components/ui/badge';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -42,14 +41,16 @@ export function NavUser({
 
 	return (
 		<SidebarMenu>
-			<SidebarMenuItem className="mb-3 flex items-center justify-between gap-2">
-				<Badge
-					variant="outline"
-					className="text-xs font-semibold text-zinc-500 dark:text-zinc-300 "
+			<SidebarMenuItem>
+				<SidebarMenuButton
+					size="lg"
+					className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground mb-3 flex items-center gap-2"
 				>
-					当前版本：{import.meta.env.VITE_APP_VERSION || '未知'}
-				</Badge>
-				<Notice />
+					<Notice />
+					<div className="text-xs font-semibold text-zinc-500 dark:text-zinc-300 ">
+						当前版本：{import.meta.env.VITE_APP_VERSION || '未知'}
+					</div>
+				</SidebarMenuButton>
 			</SidebarMenuItem>
 			<SidebarMenuItem>
 				<DropdownMenu>
