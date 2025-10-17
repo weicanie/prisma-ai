@@ -45,51 +45,51 @@ const data_dir = {
 
 export const user_data_dir = {
 	//下载的用户项目 deepwiki md文件
-	deepwikiDownOutputPath: (userId: string) => {
-		const pathRes = path.join(process.cwd(), '..', '..', 'user_data', userId, 'project_wikis');
+	deepwikiDownOutputPath: (userId: string | number) => {
+		const pathRes = path.join(process.cwd(), '..', '..', 'user_data', `${userId}`, 'project_wikis');
 		pathExist(pathRes);
 		return pathRes;
 	},
 	//用户项目代码仓库
-	projectsDirPath: (userId: string) => {
-		const pathRes = path.join(process.cwd(), '..', '..', 'user_data', userId, 'projects');
+	projectsDirPath: (userId: string | number) => {
+		const pathRes = path.join(process.cwd(), '..', '..', 'user_data', `${userId}`, 'projects');
 		pathExist(pathRes);
 		return pathRes;
 	},
 	//prisma_agent配置
-	agentConfigPath: (userId: string) => {
+	agentConfigPath: (userId: string | number) => {
 		const pathRes = path.join(
 			process.cwd(),
 			'..',
 			'..',
 			'user_data',
-			userId,
+			`${userId}`,
 			'prisma_agent_config.json'
 		);
 		pathExist(pathRes);
 		return pathRes;
 	},
 	//agent输出
-	agentOutputPath: (userId: string) => {
-		const pathRes = path.join(process.cwd(), '..', '..', 'user_data', userId, 'agent_output');
+	agentOutputPath: (userId: string | number) => {
+		const pathRes = path.join(process.cwd(), '..', '..', 'user_data', `${userId}`, 'agent_output');
 		pathExist(pathRes);
 		return pathRes;
 	},
 	//用户简历数据
-	resumesDirPath: (userId: string) => {
-		const pathRes = path.join(process.cwd(), '..', '..', 'user_data', userId, 'resumes');
+	resumesDirPath: (userId: string | number) => {
+		const pathRes = path.join(process.cwd(), '..', '..', 'user_data', `${userId}`, 'resumes');
 		pathExist(pathRes);
 		return pathRes;
 	},
 	//初始化用户agent配置
-	_initUserAgentConfig: (userId: string) => {
+	_initUserAgentConfig: (userId: string | number) => {
 		const agentConfigPath = user_data_dir.agentConfigPath(userId);
 		if (!fs.existsSync(agentConfigPath)) {
 			fs.writeFileSync(agentConfigPath, JSON.stringify(defaultAgentConfig, null, 2));
 		}
 	},
 	//初始化用户所有数据文件夹、文件
-	initUserDir: (userId: string) => {
+	initUserDir: (userId: string | number) => {
 		pathExist(user_data_dir.deepwikiDownOutputPath(userId));
 		pathExist(user_data_dir.projectsDirPath(userId));
 		pathExist(user_data_dir.agentConfigPath(userId));
@@ -99,7 +99,7 @@ export const user_data_dir = {
 	/**
 	 * 迁移：将 v5.0.2 及之前的版本的用户数据文件夹中的数据自动迁移到新位置
 	 */
-	migrateUserDir: (userId: string) => {
+	migrateUserDir: (userId: string | number) => {
 		// 首先初始化用户目录结构
 		user_data_dir.initUserDir(userId);
 
