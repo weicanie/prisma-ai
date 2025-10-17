@@ -75,7 +75,8 @@ export class QuestionController {
 	) {
 		const task = await this.crawlQuestionService.startCrawl({
 			...startCrawlQuestionDto,
-			userId: userInfo.userId.toString()
+			userId: userInfo.userId.toString(),
+			userInfo
 		});
 		return { id: task.id };
 	}

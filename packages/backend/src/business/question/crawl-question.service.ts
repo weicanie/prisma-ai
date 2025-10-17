@@ -1,4 +1,5 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import { UserInfoFromToken } from '@prisma-ai/shared';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as puppeteer from 'puppeteer';
@@ -27,6 +28,7 @@ interface CrawlTask extends PersistentTask {
 	metadata: {
 		options: StartCrawlQuestionDto & {
 			userId: number;
+			userInfo: UserInfoFromToken;
 		};
 		progress: {
 			totalCount: number;
@@ -107,7 +109,9 @@ export class CrawlQuestionService implements OnModuleDestroy {
 	/**
 	 * 启动爬虫任务
 	 */
-	async startCrawl(options: StartCrawlQuestionDto & { userId: string }) {
+	async startCrawl(
+		options: StartCrawlQuestionDto & { userId: string; userInfo: UserInfoFromToken }
+	) {
 		const sessionId = crypto.randomUUID();
 		const task = await this.taskQueueService.createAndEnqueueTask(
 			sessionId,
@@ -225,7 +229,10 @@ export class CrawlQuestionService implements OnModuleDestroy {
 			for (let i = 0; i < articlesToSave.length; i += batchSize) {
 				const batch = articlesToSave.slice(i, i + batchSize);
 				//批量净化markdown内容
-				const normalizedArticles = await this._markdownNormalize(batch);
+				const normalizedArticles = await this._markdownNormalize(
+					batch,
+					task.metadata.options.userInfo
+				);
 				//批量保存到数据库
 				await this._saveArticles(normalizedArticles, task);
 			}
@@ -681,7 +688,10 @@ export class CrawlQuestionService implements OnModuleDestroy {
 		}
 	}
 
-	private async _markdownNormalize(articles: CrawledArticle[]): Promise<CrawledArticle[]> {
+	private async _markdownNormalize(
+		articles: CrawledArticle[],
+		userInfo: UserInfoFromToken
+	): Promise<CrawledArticle[]> {
 		this.logger.log(`开始净化 ${articles.length} 篇文章的Markdown内容...`);
 
 		// 步骤1：提取所有需要格式化的代码块
@@ -711,7 +721,9 @@ export class CrawlQuestionService implements OnModuleDestroy {
 			const BATCH_SIZE = 500;
 			const CONCURRENCY_LEVEL = 50;
 			const allNormalizedBlocks: string[] = [];
-			const normalizeChain = await this.chainService.createMarkdownCodeBlockNormalizeChain();
+			const normalizeChain = await this.chainService.createMarkdownCodeBlockNormalizeChain(
+				userInfo.userConfig
+			);
 
 			for (let i = 0; i < llmInputs.length; i += BATCH_SIZE) {
 				const mainBatch = llmInputs.slice(i, i + BATCH_SIZE);
