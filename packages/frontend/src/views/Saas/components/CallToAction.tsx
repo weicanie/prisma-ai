@@ -18,12 +18,9 @@ export function CallToAction() {
 			<Container className="relative">
 				<div className="mx-auto max-w-lg text-center">
 					<h2 className="font-display text-3xl tracking-tight text-white sm:text-4xl">
-						别再海投了，让简历主动替你出击
+						准备好迎接你的 offer 了吗？
 					</h2>
-					<p className="mt-4 text-lg tracking-tight text-white">
-						用 Prisma‑AI，3 分钟把项目写出亮点，1 次点击匹配最合适的岗位， AI
-						还会把“想实现的亮点”变成“真的做到”。
-					</p>
+					<p className="mt-4 text-lg tracking-tight text-white">PrismaAI，从简历到 offer</p>
 					{isLogin ? (
 						<Button to="/main" color="white" className="mt-10">
 							进入工作台

@@ -21,7 +21,7 @@ export function Hero() {
 				</span>
 			</h1>
 			<p className="mx-auto mt-6 max-w-2xl text-lg tracking-tight text-slate-700">
-				开源免费。3 分钟把项目写出亮点，1 次点击匹配合适岗位，AI Agent
+				开源免费，3 分钟把简历写出亮点，1 次点击匹配目标岗位，
 				还能帮你把“想实现的亮点”变成“真的做到”。
 			</p>
 			<div className="mt-10 flex justify-center gap-x-6">

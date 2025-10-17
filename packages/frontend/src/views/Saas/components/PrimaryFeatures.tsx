@@ -7,34 +7,13 @@ import screenshot1 from '@/assets/images/screenshots/primary_features_1.webp';
 import screenshot2 from '@/assets/images/screenshots/primary_features_2.webp';
 import screenshot3 from '@/assets/images/screenshots/primary_features_3.webp';
 import screenshot4 from '@/assets/images/screenshots/primary_features_4.webp';
+import screenshot5 from '@/assets/images/screenshots/primary_features_5.webp';
 import { Container } from './c-cpns/Container';
-
-const features = [
-	{
-		title: '项目亮点一键挖掘',
-		description:
-			'不再堆名词，AI 深挖你的经历，自动产出能打动面试官的“团队贡献 + 技术亮点 + 业务价值”。',
-		image: screenshot1
-	},
-	{
-		title: '精准岗位一键匹配',
-		description: '实时抓岗位 + 本地向量匹配与重排，只推真正适合你的职位，不再盲投。',
-		image: screenshot2
-	},
-	{
-		title: '简历对岗定制',
-		description: '针对目标 JD(Job Description)，自动改写简历重点与表述，命中筛选关键词。',
-		image: screenshot3
-	},
-	{
-		title: '高效备战：题库 + 思维导图 + Anki',
-		description: '理解 + 记忆双引擎，准备更系统，八股不焦虑。',
-		image: screenshot4
-	}
-];
 
 export function PrimaryFeatures() {
 	const [tabOrientation, setTabOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
+
+	const isOnline = import.meta.env.VITE_IS_ONLINE === 'true';
 
 	useEffect(() => {
 		const lgMediaQuery = window.matchMedia('(min-width: 1024px)');
@@ -50,6 +29,44 @@ export function PrimaryFeatures() {
 			lgMediaQuery.removeEventListener('change', onMediaQueryChange);
 		};
 	}, []);
+
+	const features = [
+		{
+			title: '项目分析、优化、亮点挖掘，简历对岗定制',
+			description:
+				'不再堆名词，AI 深挖你的经历，产出能打动面试官的“团队贡献 + 技术亮点 + 业务价值”。针对目标 JD(Job Description)，自动改写简历重点与表述，命中筛选关键词。',
+			image: screenshot1
+		},
+		...(isOnline
+			? [
+					{
+						title: '人岗匹配',
+						description: '实时抓岗位 + 本地向量匹配与重排，只推真正适合你的职位，不再盲投。',
+						image: screenshot2
+					}
+				]
+			: []),
+
+		{
+			title: '简历快速编辑：简历富文本编辑与pdf导出',
+			description: '支持Markdown语法，一键导出可直接投递的简历pdf。',
+			image: screenshot3
+		},
+		{
+			title: 'AI助手：懂你和你的项目',
+			description: '基于项目知识库和用户记忆，提供个性化服务。',
+			image: screenshot4
+		},
+		...(isOnline
+			? [
+					{
+						title: '高效准备面试：题库 + 思维导图 + Anki',
+						description: '理解 + 记忆双引擎，准备更系统，八股不焦虑。',
+						image: screenshot5
+					}
+				]
+			: [])
+	];
 
 	return (
 		<section
@@ -67,10 +84,10 @@ export function PrimaryFeatures() {
 			<Container className="relative">
 				<div className="max-w-2xl md:mx-auto md:text-center xl:max-w-none">
 					<h2 className="font-display text-3xl tracking-tight text-white sm:text-4xl md:text-5xl">
-						让面试官更快看到你的价值
+						从简历到 offer
 					</h2>
 					<p className="mt-6 text-lg tracking-tight text-blue-100">
-						从亮点挖掘到对岗改写，从岗位匹配到备战训练，闭环搞定求职关键路径。
+						解决求职核心痛点，闭环搞定求职关键路径。
 					</p>
 				</div>
 				<TabGroup
