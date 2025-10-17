@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.2.0-beta.5](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.4...v5.2.0-beta.5) (2025-10-17)
+
+### Bug Fixes
+
+- 微前端加载 ([4799404](https://github.com/weicanie/prisma-ai/commit/479940467ae1dc07644b3e411d6c0bd253585f77))
+
+### Features
+
+- **frontend:** 预加载+骨架屏+淡入动画，优化页面路由 ([6e9c849](https://github.com/weicanie/prisma-ai/commit/6e9c849beabaeec248d5538db377282fdfba5471))
+
 # [5.2.0-beta.4](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.3...v5.2.0-beta.4) (2025-10-16)
 
 ### Bug Fixes
