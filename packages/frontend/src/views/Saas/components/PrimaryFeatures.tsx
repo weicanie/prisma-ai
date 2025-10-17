@@ -38,14 +38,14 @@ export function PrimaryFeatures() {
 			image: screenshot1
 		},
 		...(isOnline
-			? [
+			? []
+			: [
 					{
 						title: '人岗匹配',
 						description: '实时抓岗位 + 本地向量匹配与重排，只推真正适合你的职位，不再盲投。',
 						image: screenshot2
 					}
-				]
-			: []),
+				]),
 
 		{
 			title: '简历快速编辑：简历富文本编辑与pdf导出',
@@ -58,14 +58,14 @@ export function PrimaryFeatures() {
 			image: screenshot4
 		},
 		...(isOnline
-			? [
+			? []
+			: [
 					{
 						title: '高效准备面试：题库 + 思维导图 + Anki',
 						description: '理解 + 记忆双引擎，准备更系统，八股不焦虑。',
 						image: screenshot5
 					}
-				]
-			: [])
+				])
 	];
 
 	return (
