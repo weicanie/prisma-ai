@@ -4,7 +4,7 @@ export interface UserInfoFromToken {
 	userId: string;
 	username: string;
 	role: string;
-	userConfig: UserConfig;
+	userConfig: UserConfig; //并不在token中，而是从请求头中获取的
 }
 
 export type VerifyMetaData = {

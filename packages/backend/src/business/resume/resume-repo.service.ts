@@ -91,6 +91,7 @@ export class ResumeJsonService {
 			case ActionType.SYNC:
 				return serverResumefileManager.syncResumeToRepository(
 					repoDto.payload.resumeData,
+					userInfo,
 					repoDto.payload.prevResume
 				);
 			case ActionType.DELETE:
