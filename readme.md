@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <a href="README.md">简体中文</a> | <a href="i18n/README-EN.md">English</a>
+  简体中文 | <a href="i18n/README-EN.md">English</a>
 </p>
 
 ---
