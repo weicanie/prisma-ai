@@ -1,6 +1,6 @@
 {
 	"name": "deepwiki-down",
-	"version": "5.0.0",
+	"version": "5.2.0-beta.8",
 	"private": true,
 	"scripts": {
 		"start": "uv run python -m src.application.interface.cli service --host localhost --port 9009"

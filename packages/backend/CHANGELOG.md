@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.2.0-beta.8](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.7...v5.2.0-beta.8) (2025-10-18)
+
+### Bug Fixes
+
+- pinecone客户端根据用户配置创建 ([d84d96d](https://github.com/weicanie/prisma-ai/commit/d84d96d616509f1c9edc9a0ff6347f14397b91bc))
+
+### Features
+
+- deepwiki-down服务 ([a95623f](https://github.com/weicanie/prisma-ai/commit/a95623f1b94bb263bb60596f2b1a5e9060137f2d))
+
 # [5.2.0-beta.7](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.6...v5.2.0-beta.7) (2025-10-17)
 
 ### Bug Fixes

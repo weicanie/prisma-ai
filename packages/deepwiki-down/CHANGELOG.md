@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.2.0-beta.8](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.7...v5.2.0-beta.8) (2025-10-18)
+
+### Features
+
+- deepwiki-down服务 ([a95623f](https://github.com/weicanie/prisma-ai/commit/a95623f1b94bb263bb60596f2b1a5e9060137f2d))
+
 # [5.0.0](https://github.com/weicanie/prisma-ai/compare/v4.2.1...v5.0.0) (2025-10-02)
 
 **Note:** Version bump only for package deepwiki-down
