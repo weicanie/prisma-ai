@@ -242,7 +242,7 @@ export class VectorStoreService {
 
 		while (retryCount < maxRetries) {
 			try {
-				const indexes = (await this.pinecone.listIndexes()).indexes;
+				const indexes = (await pinecone.listIndexes()).indexes;
 				if (!indexes || indexes.length === 0) {
 					return false;
 				}
