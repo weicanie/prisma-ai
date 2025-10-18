@@ -29,11 +29,11 @@
 	"scripts": {
 		"prepare": "husky",
 		"dev": "concurrently --kill-others-on-fail --kill-timeout 30000 --prefix \"[{name}]\" --names \"backend,frontend,mcp-server,shared\" --prefix-colors \"blue,green,yellow,purple\" \"cd packages/backend && npm run dev\" \"cd packages/frontend && npm run dev\" \"cd packages/mcp-server && npm run dev\" \"cd packages/shared && npm run dev\"",
-		"dev:no-b": "concurrently --kill-others-on-fail --kill-timeout 30000 --prefix \"[{name}]\" --names \"frontend,mcp-server,shared\" --prefix-colors \"blue,green,yellow,purple\" \"cd packages/frontend && npm run dev\" \"cd packages/mcp-server && npm run dev\" \"cd packages/shared && npm run dev\"",
+		"dev:no-b": "concurrently --kill-others-on-fail --kill-timeout 30000 --prefix \"[{name}]\" --names \"frontend,mcp-server,deepwiki-down,shared\" --prefix-colors \"blue,green,yellow,purple\" \"cd packages/frontend && npm run dev\" \"cd packages/mcp-server && npm run dev\" \"cd packages/shared && npm run dev\" \"cd packages/deepwiki-down && npm run start\"",
 		"dev:lerna": "pnpm lerna run dev --stream",
 		"dev:b": "cd packages/backend && npm run dev",
+		"dev:dd": "cd packages/deepwiki-down && npm run start",
 		"dev:f": "cd packages/frontend && npm run dev",
-		"dev:frontend": "cd packages/frontend && npm run dev",
 		"dev:mcp": "cd packages/mcp-server && npm run dev",
 		"dev:shared": "cd packages/shared && npm run dev",
 		"format": "prettier --write \"**/src/**/*.[ts,tsx,css]\" \"**/test/**/*.ts\"",

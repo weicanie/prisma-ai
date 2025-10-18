@@ -36,6 +36,7 @@ services:
       DATABASE_URL: mysql://root:qwqw1314.@mysql-container:3306/prisma-ai
       # 新增环境变量，指向 browserless 服务
       PUPPETEER_BROWSER_WSE_ENDPOINT: ws://browserless-chrome:3000
+      DEEPWIKI_DOWN_URL: http://deepwiki-down:9009
     ports:
       - '3003:3003'
     volumes:
@@ -56,6 +57,12 @@ services:
       - '3009:3009'
     restart: unless-stopped
     container_name: magic-resume
+  deepwiki-down:
+    image: docker.1ms.run/onlyie/prisma-ai-deepwiki-down:latest
+    volumes:
+      # docker run -v 需要处理windows兼容性
+      - ./user_data:/user_data
+    command: service --host 0.0.0.0 --port 9009
   nginx-container:
     image: docker.1ms.run/onlyie/prisma-ai-nginx:5.0.0
     ports:
@@ -134,5 +141,4 @@ services:
       MINIO_ROOT_PASSWORD: admin123.
       MINIO_DEFAULT_BUCKETS: prisma-ai
     command: server /bitnami/minio/data --console-address :9001
-
 #使用默认桥接网络

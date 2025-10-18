@@ -11,6 +11,8 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+/prisma_agent_config.json
+
 # OS
 .DS_Store
 

@@ -32,7 +32,6 @@ function _copyDirectoryRecursive(srcDir: string, destDir: string): void {
 
 //脚本
 export const cloneProjectScriptPath = path.join(process.cwd(), 'scripts', 'clone_repo.sh');
-export const deepwikiDownScriptPath = path.join(process.cwd(), 'scripts', 'deepwiki-down.sh');
 const data_dir = {
 	/* v5.0.2及之前使用的旧目录结构 */
 	deepwikiDownOutputPath: path.join(process.cwd(), '..', '..', 'project_wikis'),

@@ -1,3 +1,4 @@
+import { HttpService } from '@nestjs/axios';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
@@ -9,19 +10,19 @@ import {
 import fs from 'fs';
 import { Model } from 'mongoose';
 import path from 'path';
+import { firstValueFrom } from 'rxjs';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { TaskQueueService } from '../../task-queue/task-queue.service';
 import { PersistentTask } from '../../type/taskqueue';
-import { deepwikiDownScriptPath, user_data_dir } from '../../utils/constants';
-import { executeShellScript } from '../../utils/execute_shell_script';
+import { user_data_dir } from '../../utils/constants';
 import { KnowledgeVDBService } from '../prisma-agent/data_base/konwledge_vdb.service';
 import { Knowledgebase, KnowledgebaseDocument } from './entities/knowledge-base.entity';
 import { KnowledgebaseService } from './knowledge-base.service';
-
 interface DownloadDeepWikiTask extends PersistentTask {
 	metadata: {
 		param: {
 			dto: DeepWikiKnowledgeDto;
+			userInfo: UserInfoFromToken;
 		};
 		progress: {
 			done: boolean;
@@ -55,7 +56,8 @@ export class ProjectDeepWikiService implements OnModuleInit {
 		private readonly knowledgeVDBService: KnowledgeVDBService,
 		private readonly knowledgebaseService: KnowledgebaseService,
 		private readonly taskQueueService: TaskQueueService,
-		private readonly eventBusService: EventBusService
+		private readonly eventBusService: EventBusService,
+		private readonly httpService: HttpService
 	) {}
 
 	onModuleInit() {
@@ -72,9 +74,16 @@ export class ProjectDeepWikiService implements OnModuleInit {
 	 */
 	async downloadDeepWiki(task: DownloadDeepWikiTask) {
 		try {
-			await executeShellScript(deepwikiDownScriptPath, [task.metadata.param.dto.wikiUrl]);
+			console.log('DEEPWIKI_DOWN_URL', process.env.DEEPWIKI_DOWN_URL);
+			console.log('NODE_ENV', process.env.NODE_ENV);
+			// 调用deepwiki-down服务下载deepwiki文档
+			const response = this.httpService.post(`${process.env.DEEPWIKI_DOWN_URL}/wiki`, {
+				wikiUrl: task.metadata.param.dto.wikiUrl,
+				outputDir: user_data_dir.deepwikiDownOutputPath(task.metadata.param.userInfo.userId)
+			});
+			await firstValueFrom(response);
 		} catch (error) {
-			throw new Error('下载deepwiki失败');
+			throw new Error('下载deepwiki失败' + error.message);
 		}
 		// 更新任务进度
 		const newTask: DownloadDeepWikiTask = {

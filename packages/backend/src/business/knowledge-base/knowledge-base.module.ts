@@ -1,3 +1,4 @@
+import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { OssModule } from '../../oss/oss.module';
@@ -13,7 +14,8 @@ import { ProjectDeepWikiService } from './project-deepwiki.service';
 		MongooseModule.forFeature([{ name: Knowledgebase.name, schema: KnowledgebaseSchema }]),
 		OssModule,
 		PrismaAgentModule,
-		TaskQueueModule
+		TaskQueueModule,
+		HttpModule
 	],
 	controllers: [KnowledgebaseController],
 	providers: [KnowledgebaseService, ProjectDeepWikiService],

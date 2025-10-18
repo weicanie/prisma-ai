@@ -166,7 +166,7 @@ class ConvertWikiSiteToMarkdownViaRSCUsecase:
             
             for page_key, page_data in sorted_pages:
                 page_id = page_data.get('id', '')
-                title = f'{page_id}-{page_data.get('title', page_key)}'
+                title = f"{page_id}-{page_data.get('title', page_key)}"
 
                 # 生成文件名（与实际保存的文件名一致）
                 filename = self._generate_hierarchical_filename(title, page_id)

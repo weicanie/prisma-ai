@@ -5,10 +5,10 @@ packages/backend/generated
 /docker-data
 **/*.log
 /nginx/logs/*
-/projects/*
-/resumes/*
+/projects
+/resumes
 /models/*
-/project_wikis/*
+/project_wikis
 /user_data/*
 
 # Node.js

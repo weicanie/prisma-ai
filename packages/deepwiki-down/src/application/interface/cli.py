@@ -15,6 +15,7 @@ from src.infrastructure.gateway.file_adapter import FileAdapter
 from src.infrastructure.gateway.rsc_adapter import RSCAdapter
 from src.infrastructure.repository.file_repository import FileRepository
 from src.infrastructure.repository.rsc_repository import RSCRepository
+from src.application.interface.service import start_service
 
 
 def parse_arguments():
@@ -33,6 +34,10 @@ def parse_arguments():
         help="Output directory path (default: current directory)",
         default=os.getcwd(),
     )
+
+    service_parser = subparsers.add_parser("service", help="Run as a service")
+    service_parser.add_argument("--host", default="0.0.0.0", help="Host to bind")
+    service_parser.add_argument("--port", default=9009, type=int, help="Port to listen on")
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -77,7 +82,7 @@ async def run_cli():
         if args.command == "wiki":
             await execute_wiki_command(args.url, args.output)
         else:
-            print("Error: Unknown command. Use 'wiki'.")
+            print("Error: Unknown command. Use 'wiki' or 'service'.")
             return 1
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
@@ -88,7 +93,20 @@ async def run_cli():
 
 def main():
     """Main entry point for the CLI application."""
-    return asyncio.run(run_cli())
+    # Parse command line arguments first to check if it's a service command
+    args = parse_arguments()
+    
+    # Handle service command separately to avoid asyncio conflicts
+    if args.command == "service":
+        try:
+            start_service(args.host, args.port)
+            return 0
+        except Exception as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return 1
+    else:
+        # For other commands, use asyncio.run
+        return asyncio.run(run_cli())
 
 
 if __name__ == "__main__":

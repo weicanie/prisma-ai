@@ -60,6 +60,14 @@ services:
     depends_on:
       - prisma-ai-backend
       - minio-container
+  deepwiki-down:
+  build:
+    context: .
+    dockerfile: ./docker/deepwiki-down/Dockerfile.CI
+  volumes:
+    # docker run -v 需要处理windows兼容性
+    - ./user_data:/user_data
+  command: service --host 0.0.0.0 --port 9009
   mysql-container:
     image: library/mysql
     #占用的主机端口:网络内访问使用的端口

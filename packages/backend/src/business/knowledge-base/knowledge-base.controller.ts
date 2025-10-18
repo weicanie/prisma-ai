@@ -76,7 +76,7 @@ export class KnowledgebaseController {
 			sessionId,
 			userInfo.userId.toString(),
 			'downloadDeepWiki',
-			{ param: { dto }, progress: { done: false } }
+			{ param: { dto, userInfo }, progress: { done: false } }
 		);
 		return task;
 	}
