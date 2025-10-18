@@ -24,4 +24,4 @@ jobs:
       # 并构建其中定义的所有服务（如 prisma-ai-backend 和 nginx-container），
       # 这是测试多服务 Docker 配置是否正确的最佳方式。
       - name: Build Docker images with compose
-        run: docker compose -f compose.CI.yaml build  --no-cache --progress=plain
+        run: docker compose -f compose.CI.yaml --progress=plain build --no-cache

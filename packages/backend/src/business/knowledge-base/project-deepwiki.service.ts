@@ -74,8 +74,6 @@ export class ProjectDeepWikiService implements OnModuleInit {
 	 */
 	async downloadDeepWiki(task: DownloadDeepWikiTask) {
 		try {
-			console.log('DEEPWIKI_DOWN_URL', process.env.DEEPWIKI_DOWN_URL);
-			console.log('NODE_ENV', process.env.NODE_ENV);
 			// 调用deepwiki-down服务下载deepwiki文档
 			const response = this.httpService.post(`${process.env.DEEPWIKI_DOWN_URL}/wiki`, {
 				wikiUrl: task.metadata.param.dto.wikiUrl,
