@@ -6,6 +6,7 @@ import { RedisService } from '../../redis/redis.service';
 import { TaskQueueService } from '../../task-queue/task-queue.service';
 import { PersistentTask, TaskStatus } from '../../type/taskqueue';
 import { LLMStreamingChunk, SseFunc } from '../../utils/type';
+import { recordUserUseData } from '../../utils/userUseDataRecord';
 import { TaskManagerService } from '../task-manager/task-manager.service';
 import { SseSessionManagerService } from './session-manager.service';
 /**
@@ -94,6 +95,18 @@ export class SseManagerService implements OnModuleInit {
 		const context = await this.sessionPool.getContext(sessionId);
 		if (!context || !context.input) {
 			throw new Error('会话上下文不完整，请先创建会话');
+		}
+		/**
+		 * 如果存在用户反馈，则记录
+		 */
+		if (context.userFeedback?.reflect && context.userFeedback?.content) {
+			recordUserUseData(context.userFeedback, {
+				...context,
+				userInfo: {
+					...context.userInfo,
+					userConfig: '已去除用户配置信息'
+				}
+			});
 		}
 		/* 调用llm开启流式传输 */
 		const func: SseFunc = this.taskManager.pools[metadata.poolName].funcPool[metadata.funcKey];

@@ -41,6 +41,7 @@ services:
       - '3003:3003'
     volumes:
       - ./docker-data/nest-app/logs:/app/packages/backend/logs
+      - ./docker-data/nest-app/data_user_use/feedback_ai:/app/packages/backend/data_user_use/feedback_ai
       - ./models:/app/models
       - ./user_data:/app/user_data
       # 这些用户数据目录在v5.0.2之后已废弃，保留是为了旧版本向新版本的迁移

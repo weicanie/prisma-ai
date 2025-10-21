@@ -39,7 +39,8 @@ const data_dir = {
 	agentConfigPath: path.join(process.cwd(), 'prisma_agent_config.json'),
 	resumesDirPath: path.join(process.cwd(), '..', '..', 'resumes'),
 	//日志
-	baseLogsDir: path.join(process.cwd(), 'logs')
+	baseLogsDir: path.join(process.cwd(), 'logs'),
+	baseUserUseDataDir: path.join(process.cwd(), 'data_user_use')
 };
 
 export const user_data_dir = {
@@ -157,3 +158,4 @@ export const defaultAgentConfig = JSON.parse(
 );
 
 export const baseLogsDir = data_dir.baseLogsDir;
+export const baseUserUseDataDir = data_dir.baseUserUseDataDir;
