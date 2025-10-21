@@ -12,26 +12,27 @@ const modelConfigs = {
 	[SelectedLLM.gemini_2_5_pro]: {
 		shortName: '2.5 Pro',
 		fullName: 'Gemini 2.5 Pro',
-		description: '复杂推理、动态思考、多模态输入',
 		scenario: '复杂推理 · 动态思考 · 首选模型'
 	},
 	[SelectedLLM.gemini_2_5_pro_proxy]: {
 		shortName: '2.5 Pro',
 		fullName: 'Gemini 2.5 Pro 国内代理',
-		description: '复杂推理、动态思考、多模态输入',
 		scenario: '复杂推理 · 动态思考 · 首选模型'
 	},
 	[SelectedLLM.deepseek_reasoner]: {
 		shortName: 'R1',
 		fullName: 'DeepSeek R1',
-		description: '逻辑推理、思考过程',
 		scenario: '逻辑推理 · 思考过程 · 次选模型'
 	},
 	[SelectedLLM.gemini_2_5_flash]: {
 		shortName: '2.5 Flash',
 		fullName: 'Gemini 2.5 Flash',
-		description: '逻辑推理、高性价比、多模态输入',
 		scenario: '逻辑推理 · 高性价比 · 次选模型'
+	},
+	[SelectedLLM.glm_4_6]: {
+		shortName: 'GLM 4.6',
+		fullName: 'GLM 4.6',
+		scenario: '逻辑推理 · 动态思考 · 次选模型'
 	}
 };
 
@@ -144,9 +145,6 @@ export function ChangeLLM() {
 										</div>
 										<div className={`text-xs mb-1 ${colorScheme.item.scenario.text}`}>
 											{config.scenario}
-										</div>
-										<div className={`text-xs ${colorScheme.item.description.text}`}>
-											{config.description}
 										</div>
 									</div>
 									{isSelected && (

@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTheme } from '@/utils/theme';
-import { AIChatLLM, SelectedLLM } from '@prisma-ai/shared';
+import { AIChatLLM } from '@prisma-ai/shared';
 import type { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import { Bot, Check, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
@@ -11,23 +11,33 @@ import { useDispatch, useSelector } from 'react-redux';
 const aichatModelConfigs = {
 	[AIChatLLM.gemini_2_5_flash]: {
 		shortName: '2.5 Flash',
-		fullName: 'Gemini 2.5 Flash',
+		fullName: '2.5 Flash',
 		scenario: 'google'
 	},
 	[AIChatLLM.gemini_2_5_pro]: {
 		shortName: '2.5 Pro',
-		fullName: 'Gemini 2.5 Pro',
+		fullName: '2.5 Pro',
 		scenario: 'google'
+	},
+	[AIChatLLM.gemini_2_5_pro_proxy]: {
+		shortName: '2.5 Pro',
+		fullName: '2.5 Pro',
+		scenario: '国内代理'
 	},
 	[AIChatLLM.v3]: {
 		shortName: 'V3',
-		fullName: 'DeepSeek V3',
+		fullName: 'V3',
 		scenario: 'deepseek'
 	},
 	[AIChatLLM.r1]: {
 		shortName: 'V3 Thinking',
-		fullName: 'DeepSeek V3 Thinking',
+		fullName: 'V3 Thinking',
 		scenario: 'deepseek'
+	},
+	[AIChatLLM.glm_4_6]: {
+		shortName: 'GLM 4.6',
+		fullName: 'GLM 4.6',
+		scenario: 'zhipu'
 	}
 };
 
@@ -57,7 +67,7 @@ export function ChangeLLM({ selector, setModelAction, className, size = 'sm' }: 
 	const currentModel = useSelector(selector);
 	const [open, setOpen] = useState(false);
 
-	const handleModelChange = (model: SelectedLLM | AIChatLLM) => {
+	const handleModelChange = (model: AIChatLLM) => {
 		dispatch(setModelAction(model));
 		setOpen(false);
 	};
@@ -167,7 +177,7 @@ export function ChangeLLM({ selector, setModelAction, className, size = 'sm' }: 
 												: `${colorScheme.item.unselected.hover} border ${colorScheme.item.unselected.border}`
 										}
 									`}
-									onClick={() => handleModelChange(modelKey as SelectedLLM | AIChatLLM)}
+									onClick={() => handleModelChange(modelKey as AIChatLLM)}
 								>
 									<div className="flex-1">
 										<div className="flex items-center gap-2 mb-1">

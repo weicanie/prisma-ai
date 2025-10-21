@@ -6,13 +6,18 @@ export interface UserConfig {
 	llm: {
 		deepseek: {
 			apiKey: string;
-			baseUrl: string;
 		};
 		openai: {
 			apiKey: string;
 			baseUrl: string;
 		};
 		googleai: {
+			apiKey: string;
+		};
+		zhipu: {
+			apiKey: string;
+		};
+		qwen: {
 			apiKey: string;
 		};
 	};
@@ -35,14 +40,19 @@ export const UserConfigSchema = z.object({
 	// LLM配置
 	llm: z.object({
 		deepseek: z.object({
-			apiKey: z.string().min(0).max(200),
-			baseUrl: z.string().min(0).max(200)
+			apiKey: z.string().min(0).max(200)
 		}),
 		openai: z.object({
 			apiKey: z.string().min(0).max(200),
 			baseUrl: z.string().min(0).max(200)
 		}),
 		googleai: z.object({
+			apiKey: z.string().min(0).max(200)
+		}),
+		zhipu: z.object({
+			apiKey: z.string().min(0).max(200)
+		}),
+		qwen: z.object({
 			apiKey: z.string().min(0).max(200)
 		})
 	}),
@@ -66,14 +76,19 @@ export type UserConfigFromSchema = z.infer<typeof UserConfigSchema>;
 export const initialUserConfig: UserConfig = {
 	llm: {
 		deepseek: {
-			apiKey: '',
-			baseUrl: 'https://api.deepseek.com'
+			apiKey: ''
 		},
 		openai: {
 			apiKey: '',
 			baseUrl: ''
 		},
 		googleai: {
+			apiKey: ''
+		},
+		zhipu: {
+			apiKey: ''
+		},
+		qwen: {
 			apiKey: ''
 		}
 	},

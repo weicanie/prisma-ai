@@ -75,7 +75,7 @@ const UserConfigUpdate = memo(({ onUpdate, showSecrets }: UserConfigUpdateProps)
 	// 获取当前配置
 	const currentConfig = getUserConfig();
 
-	// 配置项列表（仅包含用户数据）
+	// 配置项列表
 	const configItems = [
 		// LLM配置
 		{
@@ -104,8 +104,24 @@ const UserConfigUpdate = memo(({ onUpdate, showSecrets }: UserConfigUpdateProps)
 			value: currentConfig.llm.googleai.apiKey || '',
 			label: 'Google AI API Key',
 			description: 'Google AI平台的API密钥',
-			category: 'LLM'
+			category: 'LLM',
+			required: false
 		},
+		{
+			key: 'llm.zhipu.apiKey',
+			value: currentConfig.llm.zhipu.apiKey || '',
+			label: 'Zhipu AI API Key',
+			description: 'Zhipu AI平台的API密钥',
+			category: 'LLM',
+			required: false
+		},
+		// {
+		// 	key: 'llm.qwen.apiKey',
+		// 	value: currentConfig.llm.qwen.apiKey || '',
+		// 	label: 'Qwen API Key',
+		// 	description: 'Qwen平台的API密钥',
+		// 	category: 'LLM'
+		// },
 		// 向量数据库配置
 		{
 			key: 'vectorDb.pinecone.apiKey',

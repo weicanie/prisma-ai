@@ -8,11 +8,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { SelectedLLM, StreamingChunk, UserConfig } from '@prisma-ai/shared';
 import { z } from 'zod';
 import { DeepSeekStreamChunk } from '../type/sse';
-import { ModelService } from './model.service';
+import { GlmModel, GlmNeed, ModelService } from './model.service';
 // TODO gemini 思考与回答分离方案
 // streamEvents + tool方案是可以实现gemini的思考/答案的分离输出，但prompt复杂（比如现在的要求复杂JSON输出）gemini的生成格式就会出错
-// gemini-2.5-pro的思考/答案分离输出（不进行结构化），然后使用deepseek-chat进行结构化输出
-// ChatGoogleGenerativeAI的特殊性？json、stream选项
 
 /**
  * Gemini "思考/答案" 功能所需的系统提示。
@@ -75,7 +73,7 @@ export class ThoughtModelService {
 	}
 
 	/**
-	 * 进行默认输出的gemini-2.5-pro模型，不进行思考与答案分离，和r1一样流式输出StreamingChunk（兼容原接口）
+	 * 进行默认输出的gemini-2.5-pro模型，不进行思考与答案分离，流式输出StreamingChunk（兼容原接口）
 	 * @param config
 	 * @returns
 	 */
@@ -115,7 +113,39 @@ export class ThoughtModelService {
 		const flatModel = new RunnableLambda<any, any>({
 			func: async (prompt: any) => {
 				const stream = await llm.stream(prompt);
-				return this._transformAIMessageStream(stream);
+				return this._transformAIMessageStream(stream, 'Gemini');
+			}
+		});
+
+		return flatModel as Runnable<any, StreamingChunk>;
+	}
+
+	/**
+	 * 进行默认输出的gemini-2.5-pro模型，不进行思考与答案分离，流式输出StreamingChunk（兼容原接口）
+	 * @param config
+	 * @returns
+	 */
+	async getGLMThinkingModelFlat(config: SelectedLLM, userConfig: UserConfig, schema?: z.Schema) {
+		let llm: ChatOpenAI;
+		switch (config) {
+			case SelectedLLM.glm_4_6:
+				llm = (
+					await this.modelService.glmModelpool({
+						need: GlmNeed.high,
+						apiKey: userConfig!.llm.zhipu.apiKey,
+						modelName: GlmModel.glm_4_6
+					})
+				).withStructuredOutput(schema) as any;
+				break;
+			default:
+				throw new Error(`getGLMThinkingModelFlat-不支持的glm模型:${config}`);
+		}
+
+		// 使用RunnableLambda封装整个流转换过程
+		const flatModel = new RunnableLambda<any, any>({
+			func: async (prompt: any) => {
+				const stream = await llm.stream(prompt);
+				return this._transformAIMessageStream(stream, 'GLM');
 			}
 		});
 
@@ -157,13 +187,15 @@ export class ThoughtModelService {
 	 * @returns 一个 `StreamingChunk` 类型的异步生成器。
 	 */
 	public async *_transformAIMessageStream(
-		stream: AsyncGenerator<AIMessageChunk>
+		stream: AsyncGenerator<AIMessageChunk>,
+		llmType: string
 	): AsyncGenerator<StreamingChunk> {
+		//TODO langchain.js官方issue表明这是其自身的bug！
+		// https://github.com/langchain-ai/langchainjs/issues/6440
 		// 会在第一个chunk产生时（此时llm已生成完毕）才发送，而不是llm开始生成时
-		// 可能是gemini的流式输出机制？或者langchain-google-genai的流式输出机制？
 		yield {
 			content: '',
-			reasonContent: 'Gemini 正在后台动态思考...',
+			reasonContent: `${llmType} 正在后台动态思考...`,
 			isReasoning: true,
 			done: false
 		};

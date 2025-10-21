@@ -46,10 +46,10 @@ export enum GlmNeed {
 }
 
 export enum GlmModel {
-	// glm-4.5-air 适合简单、普通任务
+	// 适合简单、普通任务
 	glm_4_5_air = 'glm-4.5-air',
-	// glm-4.5 适合复杂任务
-	glm_4_5 = 'glm-4.5'
+	// 适合复杂任务
+	glm_4_6 = 'glm-4.6'
 }
 
 type EmbedOpenAIFields = Partial<OpenAIEmbeddingsParams> & {
@@ -152,16 +152,12 @@ export class ModelService {
 			const raw_kimi = new ChatOpenAI(this.kimi_config);
 			this.rawModels.set(JSON.stringify(this.kimi_config), raw_kimi);
 
-			//@ts-no-check 类型递归过深
 			const LLM_openai = this.HAModelClientService.createClient(raw_openai, this.openai_config);
-			//@ts-no-check
 			const LLM_deepseek = this.HAModelClientService.createClient(
 				raw_deepseek,
 				this.deepseek_config
 			);
-			//@ts-no-check
 			const LLM_gemini = this.HAModelClientService.createClient(raw_gemini, this.gemini_config);
-			//@ts-no-check
 			const LLM_kimi = this.HAModelClientService.createClient(raw_kimi, this.kimi_config);
 			this.models.set(JSON.stringify(this.openai_config), LLM_openai);
 			this.models.set(JSON.stringify(this.deepseek_config), LLM_deepseek);
@@ -333,7 +329,7 @@ export class ModelService {
 			const modelMapping: Record<GlmNeed, GlmModel[]> = {
 				[GlmNeed.low]: [GlmModel.glm_4_5_air],
 				[GlmNeed.medium]: [GlmModel.glm_4_5_air],
-				[GlmNeed.high]: [GlmModel.glm_4_5]
+				[GlmNeed.high]: [GlmModel.glm_4_6]
 			};
 
 			// 获取对应难度级别的模型数组
@@ -379,10 +375,6 @@ export class ModelService {
 		}
 	}
 
-	getChatHistory(keyname: string) {
-		return this.chatHistoryService.getChatHistory(keyname);
-	}
-
 	getLLMGeminiRaw(modelName: 'gemini-2.5-pro' | 'gemini-2.5-flash', apiKey?: string): ChatOpenAI;
 	getLLMGeminiRaw(config: ChatOpenAIFields, apiKey?: string): ChatOpenAI;
 
@@ -393,7 +385,6 @@ export class ModelService {
 	 */
 	getLLMGeminiRaw(config: any, apiKey?: string) {
 		if (config === 'gemini-2.5-pro' || config === 'gemini-2.5-flash') {
-			//测试阶段使用gemini-1.5-flash-latest
 			const modelName = config;
 			config = this.gemini_config;
 			config.model = modelName;
@@ -499,5 +490,9 @@ export class ModelService {
 			this.rawModels.set(JSON.stringify(config), newModel);
 			return newModel;
 		}
+	}
+
+	getChatHistory(keyname: string) {
+		return this.chatHistoryService.getChatHistory(keyname);
 	}
 }
