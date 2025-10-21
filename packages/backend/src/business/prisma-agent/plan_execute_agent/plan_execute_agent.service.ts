@@ -132,7 +132,7 @@ export class PlanExecuteAgentService {
 		return RunnableSequence.from([
 			{
 				reflection: input => input.reflection ?? '无相关反思',
-				projectName: input => input.projectInfo.info.name,
+				projectName: input => input.projectInfo.name,
 				projectBgAndTarget: input => input.projectInfo.info.desc.bgAndTarget,
 				projectRole: input => input.projectInfo.info.desc.role,
 				projectContribute: input => input.projectInfo.info.desc.contribute,
@@ -229,7 +229,7 @@ export class PlanExecuteAgentService {
 		return RunnableSequence.from([
 			{
 				reflection: input => input.reflection ?? '无相关反思',
-				projectName: input => input.projectInfo.info.name,
+				projectName: input => input.projectInfo.name,
 				projectBgAndTarget: input => input.projectInfo.info.desc.bgAndTarget,
 				projectRole: input => input.projectInfo.info.desc.role,
 				projectContribute: input => input.projectInfo.info.desc.contribute,

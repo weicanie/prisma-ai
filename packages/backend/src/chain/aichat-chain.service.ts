@@ -1,6 +1,10 @@
-import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import { RunnableLambda, RunnablePassthrough, RunnableSequence } from '@langchain/core/runnables';
+import {
+	Runnable,
+	RunnableLambda,
+	RunnablePassthrough,
+	RunnableSequence
+} from '@langchain/core/runnables';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -11,7 +15,8 @@ import {
 	userMemorySchema
 } from '@prisma-ai/shared';
 import { BufferMemory } from 'langchain/memory';
-import { ModelService } from '../model/model.service';
+import { GlmModel, GlmNeed, ModelService } from '../model/model.service';
+import { ThoughtModelService } from '../model/thought-model.service';
 import { PromptService } from '../prompt/prompt.service';
 import { AichatChainContext } from '../type/aichat';
 import { RubustStructuredOutputParser } from '../utils/RubustStructuredOutputParser';
@@ -20,6 +25,7 @@ import { ChainService } from './chain.service';
 export class AichatChainService {
 	constructor(
 		public modelService: ModelService,
+		public thoughtModelService: ThoughtModelService,
 		public promptService: PromptService,
 		public configService: ConfigService,
 		public chainService: ChainService
@@ -50,7 +56,7 @@ export class AichatChainService {
 			memoryKey: 'history'
 		});
 
-		let llm: BaseChatModel;
+		let llm: Runnable;
 		switch (modelConfig.llm_type) {
 			case AIChatLLM.v3:
 				llm = await this.modelService.getLLMDeepSeekRaw(
@@ -75,6 +81,19 @@ export class AichatChainService {
 					'gemini-2.5-flash',
 					userConfig.llm.googleai.apiKey
 				);
+				break;
+			case AIChatLLM.gemini_2_5_pro_proxy:
+				llm = await this.thoughtModelService.getGeminiThinkingModelFlat(
+					modelConfig.llm_type as any,
+					userConfig!
+				);
+				break;
+			case AIChatLLM.glm_4_6:
+				llm = await this.modelService.glmModelpool({
+					need: GlmNeed.high,
+					apiKey: userConfig.llm.zhipu.apiKey,
+					modelName: GlmModel.glm_4_6
+				});
 				break;
 		}
 
@@ -113,7 +132,7 @@ export class AichatChainService {
 	}
 
 	async createUserMemoryChain(modelConfig: UserModelConfig<AIChatLLM>, userConfig: UserConfig) {
-		let llm: BaseChatModel;
+		let llm: Runnable;
 		switch (modelConfig.llm_type) {
 			case AIChatLLM.v3:
 				llm = await this.modelService.getLLMDeepSeekRaw(
@@ -139,6 +158,8 @@ export class AichatChainService {
 					userConfig.llm.googleai.apiKey
 				);
 				break;
+			default:
+				throw new Error(`不支持的LLM类型: ${modelConfig.llm_type}`);
 		}
 
 		const outputParser = RubustStructuredOutputParser.from(
@@ -167,7 +188,7 @@ export class AichatChainService {
 	}
 
 	async updateUserMemoryChain(modelConfig: UserModelConfig<AIChatLLM>, userConfig: UserConfig) {
-		let llm: BaseChatModel;
+		let llm: Runnable;
 		switch (modelConfig.llm_type) {
 			case AIChatLLM.v3:
 				llm = await this.modelService.getLLMDeepSeekRaw(
@@ -193,6 +214,8 @@ export class AichatChainService {
 					userConfig.llm.googleai.apiKey
 				);
 				break;
+			default:
+				throw new Error(`不支持的LLM类型: ${modelConfig.llm_type}`);
 		}
 
 		const outputParser = RubustStructuredOutputParser.from(

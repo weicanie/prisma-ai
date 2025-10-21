@@ -4,4 +4,4 @@ import { createZodDto } from 'nestjs-zod';
 1、 createZodDto(zodSchema) + ZodValidationPipe
 2、 class-validator(使用其装饰器装饰的class) + ValidationPipe
 */
-export class ProjectDto extends createZodDto(projectSchema) {}
+export class ProjectZodDto extends createZodDto(projectSchema) {}

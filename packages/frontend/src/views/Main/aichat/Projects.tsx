@@ -58,7 +58,7 @@ export default function Projects({ className, menu, onProjectSelect }: ProjectsP
 
 		return data.data.map(project => ({
 			key: project.id,
-			label: project.info.name,
+			label: project.name,
 			group: '项目经验',
 			score: project.lookupResult?.score,
 			status: project.status

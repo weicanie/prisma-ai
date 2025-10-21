@@ -33,7 +33,7 @@ export const OriginalProject: React.FC<OriginalProjectProps> = ({
 						项目经验
 					</CardTitle>
 					<CardDescription className={`flex gap-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-						<h1 className="font-bold">{projectData.info.name}</h1>
+						<h1 className="font-bold">{projectData.name}</h1>
 						<StatusBadge status={projectData.status} type="project" />
 					</CardDescription>
 				</CardHeader>

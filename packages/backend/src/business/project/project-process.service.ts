@@ -30,6 +30,7 @@ import { RedisService } from '../../redis/redis.service';
 import { WithFuncPool } from '../../utils/abstract';
 import { SseFunc } from '../../utils/type';
 import { SkillService } from '../skill/skill.service';
+import { ProjectZodDto } from './dto/project.dto';
 import { Project, ProjectDocument } from './entities/project.entity';
 import { ProjectMined, ProjectMinedDocument } from './entities/projectMined.entity';
 import { ProjectPolished, ProjectPolishedDocument } from './entities/projectPolished.entity';
@@ -94,7 +95,7 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 		status: ProjectStatus,
 		statusMerged: ProjectStatus,
 		inputSchema = projectSchema,
-		existingProjectId: ProjectDocument
+		existingProject: ProjectDocument
 	) => {
 		//格式验证及修复、数据库存储
 		return async (resultRedis: redisStoreResult) => {
@@ -116,7 +117,7 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 				result = await fomartFixChain.invoke({ input: projectPolishedStr });
 			}
 
-			const resultSave = { ...result, status, userInfo };
+			const resultSave = { ...result, status, userInfo, name: existingProject.name };
 			const resultSave_model = new model(resultSave);
 
 			let resultAfter: z.infer<typeof schema> = results?.after || {};
@@ -140,7 +141,7 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 			// 	status: statusMerged
 			// };
 			await this.projectModel.updateOne(
-				{ _id: existingProjectId.id },
+				{ _id: existingProject.id },
 				{
 					$set: {
 						status: statusMerged,
@@ -161,18 +162,17 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 	 * 	否则抛出错误
 	 */
 	async checkoutProject(
-		project: ProjectDto,
+		project: ProjectZodDto,
 		userInfo: UserInfoFromToken
 	): Promise<Omit<ProjectVo, 'lookupResult'>> {
-		//保证用户的项目名称唯一
+		//使用用户第一次提交的项目名称作为名称
+		//保证用户项目的名称唯一
 		const query = {
-			'info.name': project.info.name
+			name: project.info.name
 		};
 		const existingProject = await this.projectModel.findOne(query).exec();
 		if (existingProject) {
-			throw new Error(
-				`项目名称为 ${project.info.name} 的项目经验已存在，请修改项目名称后重新提交。`
-			);
+			throw new Error(`名称为 ${project.info.name} 的项目经验已存在，请修改项目名称后重新提交。`);
 		}
 
 		const zodSchema = projectSchema;
@@ -185,8 +185,13 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 			throw error;
 		}
 
-		const dataToSave = {
+		const projectToSave = {
 			...project,
+			name: project.info.name
+		};
+
+		const dataToSave = {
+			...projectToSave,
 			status: ProjectStatus.committed,
 			userInfo
 		};
@@ -195,7 +200,7 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 		/* 更新用户记忆 */
 		this.eventBusService.emit(EventList.userMemoryChange, {
 			userInfo: userInfo,
-			project: project
+			project: projectToSave
 		});
 		return { ...newModel.toObject() } as Omit<ProjectVo, 'lookupResult'>;
 	}
@@ -212,7 +217,7 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 	): Promise<Observable<StreamingChunk>> {
 		const existingPolishingProject = await this.projectPolishedModel
 			.findOne({
-				'info.name': project.info.name,
+				name: project.name,
 				'userInfo.userId': userInfo.userId
 			})
 			.exec();
@@ -392,7 +397,7 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 		const lookupResultSave = {
 			...lookupResult,
 			userInfo,
-			projectName: project.info.name
+			projectName: project.name
 		};
 
 		// 5. 更新项目经验
@@ -400,7 +405,7 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 			$set: { status: ProjectStatus.lookuped, lookupResult: lookupResultSave }
 		};
 		const query = {
-			'info.name': project.info.name,
+			name: project.name,
 			'userInfo.userId': userInfo.userId
 		};
 
@@ -452,7 +457,7 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 			}
 		};
 		const query = {
-			'info.name': project.info.name,
+			name: project.name,
 			'userInfo.userId': userInfo.userId
 		};
 
@@ -504,7 +509,7 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 			}
 		};
 		const query = {
-			'info.name': project.info.name,
+			name: project.name,
 			'userInfo.userId': userInfo.userId
 		};
 
@@ -526,14 +531,14 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 	): Promise<Observable<StreamingChunk>> {
 		const existingPolishingProject = await this.projectPolishedModel
 			.findOne({
-				'info.name': project.info.name,
+				name: project.name,
 				'userInfo.userId': userInfo.userId
 			})
 			.exec();
 
 		const existingProject: ProjectDocument | null = await this.projectModel
 			.findOne({
-				'info.name': project.info.name,
+				name: project.name,
 				'userInfo.userId': userInfo.userId
 			})
 			.exec();
@@ -612,14 +617,14 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 	): Promise<Observable<StreamingChunk>> {
 		const existingMiningProject = await this.projectMinedModel
 			.findOne({
-				'info.name': project.info.name,
+				name: project.name,
 				'userInfo.userId': userInfo.userId
 			})
 			.exec();
 
 		const existingProject = await this.projectModel
 			.findOne({
-				'info.name': project.info.name,
+				name: project.name,
 				'userInfo.userId': userInfo.userId
 			})
 			.exec();

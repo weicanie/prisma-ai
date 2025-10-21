@@ -1,5 +1,5 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { RunnableSequence } from '@langchain/core/runnables';
+import { Runnable, RunnableSequence } from '@langchain/core/runnables';
 import { Inject, Injectable } from '@nestjs/common';
 import {
 	businessLookupResultSchema,
@@ -17,10 +17,9 @@ import {
 	userMemoryJsonToText
 } from '@prisma-ai/shared';
 import { z } from 'zod';
+import { ReflectAgentService } from '../business/prisma-agent/reflect_agent/reflect_agent.service';
 import { ModelService } from '../model/model.service';
 import { ThoughtModelService } from '../model/thought-model.service';
-
-import { ReflectAgentService } from '../business/prisma-agent/reflect_agent/reflect_agent.service';
 import { PromptService } from '../prompt/prompt.service';
 import { WithGetUserMemory } from '../utils/abstract';
 import { RubustStructuredOutputParser } from '../utils/RubustStructuredOutputParser';
@@ -77,7 +76,8 @@ export class ProjectChainService {
 		const userMemory = await this.userMemoryService.getUserMemory(userInfo.userId);
 		const userMemoryText = userMemory ? userMemoryJsonToText(userMemory) : '';
 
-		let llm: any;
+		let llm: Runnable<any, StreamingChunk>;
+
 		switch (model) {
 			case SelectedLLM.gemini_2_5_pro:
 			case SelectedLLM.gemini_2_5_pro_proxy:
@@ -91,6 +91,13 @@ export class ProjectChainService {
 				llm = await this.thoughtModelService.getDeepSeekThinkingModleflat(
 					'deepseek-reasoner',
 					userInfo.userConfig!
+				);
+				break;
+			case SelectedLLM.glm_4_6:
+				llm = await this.thoughtModelService.getGLMThinkingModelFlat(
+					SelectedLLM.glm_4_6,
+					userInfo.userConfig!,
+					outputSchema
 				);
 				break;
 			default:

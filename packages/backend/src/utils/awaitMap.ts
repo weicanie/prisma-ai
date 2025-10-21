@@ -65,7 +65,7 @@ export async function asyncMap<T = any, R = any>(
 		} else {
 			// 如果某个异步操作失败，抛出错误，包含失败原因和索引信息
 			throw new Error(
-				`Async operation failed at index ${index}: ${result.reason?.message || result.reason}`
+				`asyncMap ~ Async operation failed at index ${index}: ${result.reason?.message || result.reason}`
 			);
 		}
 	});

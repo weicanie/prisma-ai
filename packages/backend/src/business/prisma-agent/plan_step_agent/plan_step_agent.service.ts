@@ -161,7 +161,7 @@ export class PlanStepAgentService {
 			(input: any) => ({
 				totalPlan: JSON.stringify(input.totalPlan, null, 2),
 				currentStep: JSON.stringify(input.currentStep, null, 2),
-				projectName: input.projectInfo.info.name,
+				projectName: input.projectInfo.name,
 				projectBgAndTarget: input.projectInfo.info.desc.bgAndTarget,
 				projectRole: input.projectInfo.info.desc.role,
 				projectContribute: input.projectInfo.info.desc.contribute,

@@ -90,7 +90,16 @@ const Projects: React.FC<ProjectsProps<ProjectVo>> = ({
 				{
 					accessorKey: 'name',
 					header: ({ column }) => <DataTableColumnHeader column={column} title="名称" />,
-					cell: ({ row }) => <div className="max-w-[160px] truncate">{row.original.info.name}</div>,
+					cell: ({ row }) => <div className="max-w-[160px] truncate">{row.original.name}</div>,
+					enableHiding: false,
+					enableSorting: false
+				},
+				{
+					accessorKey: 'nameOfInfo',
+					header: ({ column }) => <DataTableColumnHeader column={column} title="别名" />,
+					cell: ({ row }) => (
+						<div className="max-w-[160px] truncate">{row.original.nameOfInfo}</div>
+					),
 					enableHiding: false,
 					enableSorting: false
 				},

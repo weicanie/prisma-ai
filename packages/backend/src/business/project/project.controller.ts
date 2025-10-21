@@ -8,7 +8,7 @@ import {
 import * as crypto from 'crypto';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { SseManagerService } from '../../manager/sse-session-manager/sse-manager.service';
-import { ProjectDto } from './dto/project.dto';
+import { ProjectZodDto } from './dto/project.dto';
 import { ProjectImplementService } from './project-implement.service';
 import { ProjectProcessService } from './project-process.service';
 import { ProjectService } from './project.service';
@@ -186,7 +186,7 @@ export class ProjectController {
 	 */
 	@RequireLogin()
 	@Post('add')
-	async createProject(@Body() project: ProjectDto, @UserInfo() userInfo: UserInfoFromToken) {
+	async createProject(@Body() project: ProjectZodDto, @UserInfo() userInfo: UserInfoFromToken) {
 		return await this.projectProcessService.checkoutProject(project, userInfo);
 	}
 
@@ -227,7 +227,7 @@ export class ProjectController {
 	@Put(':id')
 	async updateProject(
 		@Param('id') id: string,
-		@Body() projectUpdateDto: Partial<ProjectDto>,
+		@Body() projectUpdateDto: Partial<ProjectZodDto>,
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
 		const updatedProject = await this.projectService.updateProject(id, projectUpdateDto, userInfo);

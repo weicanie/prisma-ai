@@ -6,7 +6,7 @@ import { ChainService } from '../../chain/chain.service';
 import { ProjectChainService } from '../../chain/project-chain.service';
 import { EventBusService } from '../../EventBus/event-bus.service';
 import { RedisService } from './../../redis/redis.service';
-import { ProjectDto } from './dto/project.dto';
+import { ProjectZodDto } from './dto/project.dto';
 import { Project, ProjectDocument } from './entities/project.entity';
 import { ProjectMined, ProjectMinedDocument } from './entities/projectMined.entity';
 import { ProjectPolished, ProjectPolishedDocument } from './entities/projectPolished.entity';
@@ -71,7 +71,7 @@ export class ProjectService {
 	): Promise<ProjectVo | undefined> {
 		const query: any = { 'userInfo.userId': userInfo.userId, status };
 		if (name) {
-			query['info.name'] = { $regex: name, $options: 'i' }; // 不区分大小写
+			query['name'] = { $regex: name, $options: 'i' }; // 不区分大小写
 		}
 		//projectPolishedModel里只有状态为polishing的项目
 		//projectMinedModel里只有状态为mining的项目
@@ -97,7 +97,7 @@ export class ProjectService {
 	 */
 	async updateProject(
 		id: string,
-		updateProjectDto: Partial<ProjectDto>,
+		updateProjectDto: Partial<ProjectZodDto>,
 		userInfo: UserInfoFromToken
 	): Promise<ProjectVo> {
 		const existingProject = await this.projectModel
@@ -135,11 +135,11 @@ export class ProjectService {
 		}
 		// 删除相关的挖掘和打磨数据
 		await this.projectPolishedModel.deleteMany({
-			'info.name': project.info.name,
+			name: project.name,
 			'userInfo.userId': userInfo.userId
 		});
 		await this.projectMinedModel.deleteMany({
-			'info.name': project.info.name,
+			name: project.name,
 			'userInfo.userId': userInfo.userId
 		});
 

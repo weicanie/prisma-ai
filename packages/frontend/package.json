@@ -92,7 +92,7 @@
 		"@vitejs/plugin-react": "^4.4.1",
 		"tailwind-scrollbar": "^4.0.2",
 		"tw-animate-css": "^1.2.9",
-		"typescript": "^5.8.2",
+		"typescript": "^5.9.2",
 		"vite": "^6.3.5"
 	}
 }

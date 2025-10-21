@@ -189,11 +189,11 @@ export async function reAnalyze(
 	const lastStepResult =
 		stepResultList.length > 0 ? stepResultList[stepResultList.length - 1] : null;
 
-	const { info } = projectInfo;
+	const { info, name } = projectInfo;
 	const projectDescription = `背景和目标: ${info.desc.bgAndTarget} | 角色: ${info.desc.role} | 贡献: ${info.desc.contribute}`;
 
 	const chainInput = {
-		projectName: info.name,
+		projectName: name,
 		projectDescription,
 		projectTechStack: info.techStack.join(', '),
 		lightSpot,
@@ -263,11 +263,11 @@ export async function rePlan(
 	const lastStepResult =
 		stepResultList.length > 0 ? stepResultList[stepResultList.length - 1] : null;
 
-	const { info } = projectInfo;
+	const { info, name } = projectInfo;
 	const projectDescription = `背景和目标: ${info.desc.bgAndTarget} | 角色: ${info.desc.role} | 贡献: ${info.desc.contribute}`;
 
 	const chainInput = {
-		projectName: info.name,
+		projectName: name,
 		projectDescription,
 		projectTechStack: info.techStack.join(', '),
 		lightSpot,

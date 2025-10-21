@@ -16,7 +16,7 @@ export class ProjectDesc {
 @Schema()
 export class ProjectInfo {
 	@Prop({ required: true })
-	name: string; // 项目名称
+	name: string; // 项目名称（仅用于展示）
 
 	@Prop({ type: ProjectDesc })
 	desc?: ProjectDesc;
@@ -87,6 +87,12 @@ export class Business {
 
 @Schema({ timestamps: true })
 export class Project {
+	// 名称，用于标识项目数据，关联知识库、代码库
+	// 在创建项目经验时由info.name指定，此后保持不变
+	// 必须与github仓库名称一致（用于关联代码库）
+	@Prop({ required: true })
+	name: string;
+
 	@Prop({ type: ProjectInfo, required: true })
 	info: ProjectInfo; //项目信息
 
@@ -118,7 +124,7 @@ ProjectSchema.set('toJSON', {
 	versionKey: false,
 	transform: function (doc, ret) {
 		ret.id = ret._id.toString();
-		ret.name = ret.info.name;
+		ret.nameOfInfo = ret.info.name;
 		delete ret._id;
 		delete ret.__v;
 		return ret;
@@ -130,13 +136,13 @@ ProjectSchema.set('toObject', {
 	virtuals: true,
 	transform: function (doc, ret, options) {
 		ret.id = ret._id.toString();
-		ret.name = ret.info.name;
+		ret.nameOfInfo = ret.info.name;
 		return ret;
 	}
 });
 
 ProjectSchema.index({ 'userInfo.userId': 1 });
-ProjectSchema.index({ 'userInfo.userId': 1, 'info.name': 1 });
+ProjectSchema.index({ 'userInfo.userId': 1, name: 1 });
 ProjectSchema.index({ 'userInfo.userId': 1, status: 1 });
 
 ProjectSchema.pre('save', function (this: ProjectDocument) {

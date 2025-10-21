@@ -29,15 +29,27 @@ export enum ProjectStatus {
 }
 export type lookupResultDto = z.infer<typeof lookupResultSchema>;
 /* 含lookupResult的projectDto */
-export type projectLookupedDto = z.infer<typeof projectLookupedSchema>;
-export type ProjectDto = z.infer<typeof projectSchema>;
+export type projectLookupedDto = z.infer<typeof projectLookupedSchema> & {
+	name?: string; //名称
+};
+export type ProjectDto = z.infer<typeof projectSchema> & {
+	// 名称，用于标识项目数据，关联知识库、代码库
+	// 在创建项目经验时由info.name指定，此后保持不变
+	// 必须与github仓库名称一致（用于关联代码库）
+	name?: string; //名称
+};
 export type updateProjectDto = Partial<ProjectDto>;
-export type ProjectPolishedDto = z.infer<typeof projectPolishedSchema>;
-export type ProjectMinedDto = z.infer<typeof projectMinedSchema>;
+export type ProjectPolishedDto = z.infer<typeof projectPolishedSchema> & {
+	name?: string; //名称
+};
+export type ProjectMinedDto = z.infer<typeof projectMinedSchema> & {
+	name?: string; //名称
+};
 
 export interface ProjectVo extends z.infer<typeof projectSchema> {
 	id: string; // 数据库中的ID
-	name?: string; //项目名称
+	nameOfInfo?: string; //项目名称（用于显示）
+	name: string; //名称
 	status: ProjectStatus; //项目状态
 
 	createdAt: string;
@@ -71,5 +83,6 @@ export enum SelectedLLM {
 	gemini_2_5_pro = 'gemini-2.5-pro', //google原厂
 	gemini_2_5_pro_proxy = 'gemini-2.5-pro-proxy', //国内代理
 	deepseek_reasoner = 'deepseek-reasoner',
-	gemini_2_5_flash = 'gemini-2.5-flash' //google原厂
+	gemini_2_5_flash = 'gemini-2.5-flash', //google原厂
+	glm_4_6 = 'glm-4.6' //zhipu
 }

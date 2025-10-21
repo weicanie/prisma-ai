@@ -33,7 +33,7 @@ async function retrieveNode(
 	if (!projectInfo || !plan || !userId) {
 		throw new Error('Missing required state for step retrieval.');
 	}
-	const projectName = projectInfo.info.name;
+	const projectName = projectInfo.name;
 	const currentStep = plan.output.implementationPlan[currentStepIndex];
 	const query = currentStep.stepDescription;
 

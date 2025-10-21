@@ -31,13 +31,13 @@ export async function uploadCode(
 
 	if (!projectPath) throw new Error('Project path is not set');
 	if (!userId) throw new Error('User ID is not set');
-	if (!projectInfo?.info.name) throw new Error('Project name is not set');
+	if (!projectInfo?.name) throw new Error('Project name is not set');
 	if (!projectCodeVDBService) throw new Error('projectCodeVDBService not found in runningConfig');
 
 	//增量更新项目代码知识库
 	const task = await projectCodeVDBService.syncToVDB(
 		config.configurable.userInfo,
-		projectInfo!.info.name,
+		projectInfo!.name,
 		projectPath,
 		crypto.randomUUID()
 	);
@@ -79,7 +79,7 @@ export async function retrieveNode(
 		throw new Error('Missing required state or services in configurable for retrieval.');
 	}
 
-	const projectName = projectInfo.info.name;
+	const projectName = projectInfo.name;
 
 	config.configurable.logger.log(`检索知识:根据功能亮点 "${lightSpot}" 检索项目代码和领域知识`);
 
