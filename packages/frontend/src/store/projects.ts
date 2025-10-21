@@ -7,7 +7,7 @@ import {
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 interface ProjectState {
-	data: ProjectDto;
+	data: ProjectDto & { name?: string };
 	dataMd: string;
 	model: SelectedLLM;
 }
@@ -52,6 +52,7 @@ const initialMd = `### 1、项目信息
 
 const initialState: ProjectState = {
 	data: {
+		name: '',
 		info: {
 			name: '',
 			desc: {
@@ -75,7 +76,7 @@ const projectSlice = createSlice({
 	name: 'project',
 	initialState,
 	reducers: {
-		setDataFromDto: (state, { payload }: PayloadAction<ProjectDto>) => {
+		setDataFromDto: (state, { payload }: PayloadAction<ProjectDto & { name: string }>) => {
 			const data = payload;
 			state.data = data;
 			state.dataMd = projectSchemaToMarkdown(data);

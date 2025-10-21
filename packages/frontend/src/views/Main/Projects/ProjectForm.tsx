@@ -84,6 +84,7 @@ const ProjectForm: React.FC<PropsType> = ({ setIsUseMdEditor, id }) => {
 		if (status === 'pending') return;
 		if (status === 'error') return;
 		if (projectData) {
+			form.setValue('name', projectData.name);
 			form.setValue('info.name', projectData.info.name);
 			form.setValue('info.desc', projectData.info.desc);
 			form.setValue('info.techStack', projectData.info.techStack);
@@ -214,8 +215,23 @@ const ProjectForm: React.FC<PropsType> = ({ setIsUseMdEditor, id }) => {
 	// 渲染项目信息步骤
 	const renderProjectInfo = () => (
 		<div className="space-y-8">
+			{/* 名称 */}
+			<FormField
+				control={form.control}
+				name="name"
+				render={({ field }) => (
+					<FormItem>
+						<FormLabel>
+							<h4 className="text-lg font-semibold mb-2">名称</h4>
+						</FormLabel>
+						<FormControl>
+							<Input placeholder="请输入小写英文字母和-组成的名称" {...field} />
+						</FormControl>
+						<FormMessage />
+					</FormItem>
+				)}
+			/>
 			<h3 className="text-2xl font-bold">项目信息</h3>
-
 			{/* 项目名称 */}
 			<FormField
 				control={form.control}

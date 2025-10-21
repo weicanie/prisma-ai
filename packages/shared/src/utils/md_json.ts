@@ -9,6 +9,7 @@ import { type CreateSkillDto, type SkillItem } from '../types/skill';
 export function markdownToProjectSchema(markdown: string): z.infer<typeof projectSchemaForm> {
 	// 初始化结果对象
 	const result: z.infer<typeof projectSchemaForm> = {
+		name: '',
 		info: {
 			name: '',
 			desc: {

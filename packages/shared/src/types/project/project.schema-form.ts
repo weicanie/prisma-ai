@@ -42,7 +42,13 @@ function getLightspotSchemaForm(item: any = z.string()) {
 }
 const projectSchemaForm = z.object({
 	info: infoSchemaForm,
-	lightspot: getLightspotSchemaForm()
+	lightspot: getLightspotSchemaForm(),
+	name: z
+		.string()
+		.min(2)
+		.max(40)
+		.regex(/^[a-zA-Z0-9-_]+$/)
+		.describe('项目经验的名称')
 });
 
 export { projectSchemaForm };
