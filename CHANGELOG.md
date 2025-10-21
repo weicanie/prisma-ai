@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.2.0-beta.10](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.9...v5.2.0-beta.10) (2025-10-21)
+
+### Features
+
+- 启用json mode进行结构化输出 ([321a02e](https://github.com/weicanie/prisma-ai/commit/321a02e8143778fbe9b74757d542cc4bdff11163))
+- 收集用户反馈以改进服务 ([8b7ed0c](https://github.com/weicanie/prisma-ai/commit/8b7ed0cb91f8b6fc3d94045194107acc94260051))
+- 支持glm 4.6 ([f4eee83](https://github.com/weicanie/prisma-ai/commit/f4eee83f2170c6781fa9d4419288070827dc808d))
+- **frontend:** 改进UI ([526c6da](https://github.com/weicanie/prisma-ai/commit/526c6da5c3bd0b895e076375c7553dce66093cee))
+
 # [5.2.0-beta.9](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.8...v5.2.0-beta.9) (2025-10-18)
 
 ### Bug Fixes

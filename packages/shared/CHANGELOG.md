@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.2.0-beta.10](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.9...v5.2.0-beta.10) (2025-10-21)
+
+### Features
+
+- 支持glm 4.6 ([f4eee83](https://github.com/weicanie/prisma-ai/commit/f4eee83f2170c6781fa9d4419288070827dc808d))
+
 # [5.2.0-beta.9](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.8...v5.2.0-beta.9) (2025-10-18)
 
 **Note:** Version bump only for package @prisma-ai/shared
