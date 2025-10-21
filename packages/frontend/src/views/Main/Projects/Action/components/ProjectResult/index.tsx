@@ -11,7 +11,6 @@ import PreflightBtns from '../preflightBtns';
 import { ProejctPMResultCard } from './ProejctPMResultCard';
 import { ProjectBusinessResultCard } from './ProjectBNesultCard.';
 import { ProjectAnalysisResultCard } from './ProjectLResultCard';
-
 export const ProjectResult: React.FC<ProjectResultProps> = ({
 	resultData,
 	mergedData,
@@ -103,9 +102,11 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 	const reasonContentSection = () => (
 		<>
 			<CardHeader>
-				<CardTitle className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+				<CardTitle
+					className={`flex items-center gap-2 font-mono ${isDark ? 'text-white' : 'text-gray-900'}`}
+				>
 					<div className="animate-pulse w-4 h-4 bg-blue-500 rounded-full"></div>
-					{isReasoning ? `Prisma 正在分析和推理...` : `Prisma 的推理过程`}
+					Prisma 的推理过程
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-0 h-full">
@@ -113,7 +114,7 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 				<div
 					ref={reasoningContentRef}
 					onScroll={handleReasoningScroll}
-					className={`whitespace-pre-wrap font-mono text-sm p-4 pb-20 rounded-md  max-h-[calc(100vh-200px)] overflow-y-auto scb-thin  ${isDark ? 'bg-gray-900 text-green-400' : 'bg-gray-50 text-gray-800'}`}
+					className={`whitespace-pre-wrap font-mono text-sm text-zinc-200 p-4 pb-20 rounded-md  max-h-[calc(100vh-400px)] overflow-y-auto scb-thin`}
 					style={{
 						scrollBehavior: 'smooth'
 					}}
@@ -123,7 +124,7 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 							? 'Prisma 在等待你的指示送达...'
 							: 'Prisma 正在后台动态思考...')}
 					{/* 添加一个闪烁的光标效果 */}
-					<span className="animate-pulse text-blue-400">▋</span>
+					{/* <span className="animate-pulse text-blue-400">▋</span> */}
 				</div>
 			</CardContent>
 		</>
@@ -143,13 +144,13 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 				<div
 					ref={streamingContentRef}
 					onScroll={handleStreamingScroll}
-					className={`whitespace-pre-wrap font-mono text-sm p-4 pb-20 rounded-md  max-h-[calc(100vh-200px)] overflow-y-auto scb-thin  ${isDark ? 'bg-gray-900 text-green-400' : 'bg-gray-50 text-gray-800'}`}
+					className={`whitespace-pre-wrap font-mono text-sm text-zinc-200 p-4 pb-20 rounded-md  max-h-[calc(100vh-400px)] overflow-y-auto scb-thin`}
 					style={{
 						scrollBehavior: 'smooth'
 					}}
 				>
 					{content || 'Prisma 在等待你的指示送达...'}
-					<span className="animate-pulse text-blue-400">▋</span>
+					{/* <span className="animate-pulse text-blue-400">▋</span> */}
 				</div>
 			</CardContent>
 		</>

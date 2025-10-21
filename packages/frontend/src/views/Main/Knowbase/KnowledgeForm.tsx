@@ -186,7 +186,7 @@ export const KnowledgeForm = memo(() => {
 								<FormControl>
 									<Input placeholder="请输入项目名称" {...field} />
 								</FormControl>
-								<FormDescription>项目名称必须与项目经验中的名称相同</FormDescription>
+								<FormDescription>项目名称必须与项目经验新建时的名称相同</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}

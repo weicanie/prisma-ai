@@ -5,7 +5,8 @@ import '@milkdown/crepe/theme/common/style.css';
 //编辑器基础样式
 import { Milkdown, useEditor } from '@milkdown/react';
 import { replaceAll } from '@milkdown/utils';
-import { memo, useEffect, useRef, type FC } from 'react';
+import { throttle } from 'lodash';
+import { memo, useCallback, useEffect, useRef, type FC } from 'react';
 import './theme.css'; //编辑器主题样式
 export interface EditorProps {
 	text: string;
@@ -21,11 +22,18 @@ export const Editor: FC<EditorProps> = memo(
 
 		const crepeRef = useRef<Crepe>();
 
+		const updateText = useCallback(
+			throttle((content: string) => {
+				crepeRef.current?.editor.action(replaceAll(content, true));
+			}, 300),
+			[]
+		);
+
 		useEffect(() => {
 			if (crepeRef.current && isTypingMode) {
-				crepeRef.current.editor.action(replaceAll(text, true));
+				updateText(text);
 			}
-		}, [text, isTypingMode]);
+		}, [text, isTypingMode, updateText]);
 
 		const onFocus = () => {};
 		const onBlur = () => {};

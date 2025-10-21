@@ -7,7 +7,7 @@ import { replaceAll } from '@milkdown/utils';
 import type { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import { debounce, throttle } from 'lodash';
 import { ArrowLeft, CheckIcon } from 'lucide-react';
-import { useEffect, useRef, type FC } from 'react';
+import { useCallback, useEffect, useRef, type FC } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button } from '../../../../components/ui/button';
 import { cn } from '../../../../lib/utils';
@@ -79,6 +79,13 @@ export const Editor: FC<EditorProps> = ({
 		return crepe;
 	}, []);
 
+	const updateText = useCallback(
+		throttle((content: string) => {
+			crepeRef.current?.editor.action(replaceAll(content, true));
+		}, 300),
+		[]
+	);
+
 	// 展示模式：监听外部 md 变化，更新编辑器内容
 	useEffect(
 		throttle(() => {
@@ -87,7 +94,7 @@ export const Editor: FC<EditorProps> = ({
 				if (currentContent !== md) {
 					isInternalUpdate.current = true; // 标记为内部更新
 					// 使用 replaceAll 命令更新编辑器内容
-					crepeRef.current.editor.action(replaceAll(md, true));
+					updateText(md);
 					// 确保内部更新完成再重置标记
 					Promise.resolve().then(() => {
 						isInternalUpdate.current = false; // 重置标记

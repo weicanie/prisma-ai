@@ -121,16 +121,14 @@ export const ResumeResult: React.FC<ResumeResultProps> = ({
 				<div
 					ref={reasoningContentRef}
 					onScroll={handleReasoningScroll}
-					className={`whitespace-pre-wrap font-mono text-sm p-4 pb-20 rounded-md  max-h-[calc(100vh-200px)] overflow-y-auto scb-thin  ${
-						isDark ? 'bg-gray-900 text-green-400' : 'bg-gray-50 text-gray-800'
-					}`}
+					className={`whitespace-pre-wrap font-mono text-sm text-zinc-200 p-4 pb-20 rounded-md  max-h-[calc(100vh-400px)] overflow-y-auto scb-thin`}
 					style={{ scrollBehavior: 'smooth' }}
 				>
 					{reasonContent ||
 						(selectedllm === SelectedLLM.deepseek_reasoner
 							? 'Prisma 在等待你的指示送达...'
 							: 'Prisma 正在后台动态思考...')}
-					<span className="animate-pulse text-blue-400">▋</span>
+					{/* <span className="animate-pulse text-blue-400">▋</span> */}
 				</div>
 			</CardContent>
 		</>
@@ -151,13 +149,11 @@ export const ResumeResult: React.FC<ResumeResultProps> = ({
 				<div
 					ref={streamingContentRef}
 					onScroll={handleStreamingScroll}
-					className={`whitespace-pre-wrap font-mono text-sm p-4 pb-20 rounded-md  max-h-[calc(100vh-200px)] overflow-y-auto scb-thin  ${
-						isDark ? 'bg-gray-900 text-green-400' : 'bg-gray-50 text-gray-800'
-					}`}
+					className={`whitespace-pre-wrap font-mono text-sm text-zinc-200 p-4 pb-20 rounded-md  max-h-[calc(100vh-400px)] overflow-y-auto scb-thin`}
 					style={{ scrollBehavior: 'smooth' }}
 				>
 					{content || 'Prisma 在等待你的指示送达...'}
-					<span className="animate-pulse text-blue-400">▋</span>
+					{/* <span className="animate-pulse text-blue-400">▋</span> */}
 				</div>
 			</CardContent>
 		</>

@@ -140,6 +140,7 @@ const Action: React.FC<ActionProps> = () => {
 	// 处理AI分析
 	const handleLookup = () => {
 		const projectDto: ProjectDto = {
+			name: projectData.name,
 			info: projectData.info,
 			lightspot: projectData.lightspot
 		};
@@ -151,6 +152,7 @@ const Action: React.FC<ActionProps> = () => {
 	// 处理AI打磨
 	const handlePolish = () => {
 		const projectLookupedDto: projectLookupedDto = {
+			name: projectData.name,
 			info: projectData.info,
 			lightspot: projectData.lightspot,
 			lookupResult: projectData.lookupResult!
@@ -163,6 +165,7 @@ const Action: React.FC<ActionProps> = () => {
 	// 处理AI挖掘
 	const handleMine = () => {
 		const projectDto: ProjectDto = {
+			name: projectData.name,
 			info: projectData.info,
 			lightspot: projectData.lightspot
 		};
@@ -202,7 +205,11 @@ const Action: React.FC<ActionProps> = () => {
 				start({
 					path: '/project/lookup',
 					input: {
-						input: projectData,
+						input: {
+							name: projectData.name,
+							info: projectData.info,
+							lightspot: projectData.lightspot
+						},
 						userFeedback: { reflect: true, content }
 					},
 					model
@@ -210,6 +217,7 @@ const Action: React.FC<ActionProps> = () => {
 				break;
 			case 'polish': {
 				const projectLookupedDto: projectLookupedDto = {
+					name: projectData.name,
 					info: projectData.info,
 					lightspot: projectData.lightspot,
 					lookupResult: projectData.lookupResult!
@@ -228,7 +236,11 @@ const Action: React.FC<ActionProps> = () => {
 				start({
 					path: '/project/mine',
 					input: {
-						input: projectData,
+						input: {
+							name: projectData.name,
+							info: projectData.info,
+							lightspot: projectData.lightspot
+						},
 						userFeedback: { reflect: true, content }
 					},
 					model
