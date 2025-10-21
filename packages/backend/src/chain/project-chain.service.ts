@@ -90,7 +90,8 @@ export class ProjectChainService {
 			case SelectedLLM.deepseek_reasoner:
 				llm = await this.thoughtModelService.getDeepSeekThinkingModleflat(
 					'deepseek-reasoner',
-					userInfo.userConfig!
+					userInfo.userConfig!,
+					outputSchema
 				);
 				break;
 			case SelectedLLM.glm_4_6:

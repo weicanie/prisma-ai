@@ -86,6 +86,9 @@ export class ThoughtModelService {
 		switch (config) {
 			case SelectedLLM.gemini_2_5_pro_proxy:
 				llm = this.modelService.getLLMGeminiRaw('gemini-2.5-pro', userConfig.llm.openai.apiKey); //代理的apiKey
+				if (schema) {
+					llm = llm.withStructuredOutput(schema) as any;
+				}
 				break;
 			case SelectedLLM.gemini_2_5_pro:
 				llm = this.modelService.getLLMGeminiPlusRaw(
@@ -129,16 +132,18 @@ export class ThoughtModelService {
 		let llm: ChatOpenAI;
 		switch (config) {
 			case SelectedLLM.glm_4_6:
-				llm = (
-					await this.modelService.glmModelpool({
-						need: GlmNeed.high,
-						apiKey: userConfig!.llm.zhipu.apiKey,
-						modelName: GlmModel.glm_4_6
-					})
-				).withStructuredOutput(schema) as any;
+				llm = await this.modelService.glmModelpool({
+					need: GlmNeed.high,
+					apiKey: userConfig!.llm.zhipu.apiKey,
+					modelName: GlmModel.glm_4_6
+				});
 				break;
 			default:
 				throw new Error(`getGLMThinkingModelFlat-不支持的glm模型:${config}`);
+		}
+
+		if (schema) {
+			llm = llm.withStructuredOutput(schema) as any;
 		}
 
 		// 使用RunnableLambda封装整个流转换过程
@@ -161,12 +166,22 @@ export class ThoughtModelService {
 	 */
 	async getDeepSeekThinkingModleflat(
 		config: ChatOpenAIFields | 'deepseek-reasoner',
-		userConfig: UserConfig
+		userConfig: UserConfig,
+		schema?: z.Schema
 	): Promise<Runnable<any, StreamingChunk>> {
 		if (config === 'deepseek-reasoner') {
-			config = this.modelService.deepseek_config;
+			config = {
+				...this.modelService.deepseek_config,
+				configuration: {
+					...this.modelService.deepseek_config.configuration,
+					apiKey: userConfig.llm.deepseek.apiKey
+				}
+			};
 		}
-		const llm = this.modelService.getLLMDeepSeekRaw(config, userConfig.llm.deepseek.apiKey);
+		let llm = await this.modelService.getLLMDeepSeek(config);
+		if (schema) {
+			llm = llm.withStructuredOutput(schema) as any;
+		}
 		if (!llm) {
 			throw new Error('获取 DeepSeek 模型实例失败。');
 		}

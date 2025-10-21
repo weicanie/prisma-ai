@@ -4,6 +4,7 @@
 /build
 # Logs
 logs
+data_user_use
 *.log
 npm-debug.log*
 pnpm-debug.log*

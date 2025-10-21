@@ -76,7 +76,15 @@ export class HjmChainService {
 			case SelectedLLM.deepseek_reasoner:
 				llm = await this.thoughtModelService.getDeepSeekThinkingModleflat(
 					'deepseek-reasoner',
-					userInfo.userConfig!
+					userInfo.userConfig!,
+					outputSchema
+				);
+				break;
+			case SelectedLLM.glm_4_6:
+				llm = await this.thoughtModelService.getGLMThinkingModelFlat(
+					SelectedLLM.glm_4_6,
+					userInfo.userConfig!,
+					outputSchema
 				);
 				break;
 			default:
