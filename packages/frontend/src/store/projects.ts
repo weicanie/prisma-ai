@@ -69,7 +69,7 @@ const initialState: ProjectState = {
 		}
 	},
 	dataMd: initialMd,
-	model: isOnline ? SelectedLLM.gemini_2_5_pro : SelectedLLM.gemini_2_5_pro_proxy
+	model: isOnline ? SelectedLLM.gemini_2_5_pro_proxy : SelectedLLM.gemini_2_5_pro
 };
 
 const projectSlice = createSlice({

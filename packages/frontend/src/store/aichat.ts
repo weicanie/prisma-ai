@@ -11,7 +11,7 @@ export interface AIChatState {
 
 // 初始化状态
 const initialState: AIChatState = {
-	model: isOnline ? AIChatLLM.gemini_2_5_pro : AIChatLLM.v3,
+	model: isOnline ? AIChatLLM.v3 : AIChatLLM.gemini_2_5_pro,
 	lastConversation: '',
 	project_id: ''
 };
