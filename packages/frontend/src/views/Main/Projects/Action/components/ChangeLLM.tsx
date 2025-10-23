@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { selectProjectLLM, setLLM } from '@/store/projects';
+import { isOnline } from '@/utils/constants';
 import { useTheme } from '@/utils/theme';
 import { SelectedLLM } from '@prisma-ai/shared';
 import { Check, ChevronDown } from 'lucide-react';
@@ -9,11 +10,15 @@ import { useDispatch, useSelector } from 'react-redux';
 
 // 模型配置
 const modelConfigs = {
-	[SelectedLLM.gemini_2_5_pro]: {
-		shortName: '2.5 Pro',
-		fullName: 'Gemini 2.5 Pro',
-		scenario: '复杂推理 · 动态思考 · 首选模型'
-	},
+	...(isOnline
+		? {}
+		: {
+				[SelectedLLM.gemini_2_5_pro]: {
+					shortName: '2.5 Pro',
+					fullName: 'Gemini 2.5 Pro',
+					scenario: '复杂推理 · 动态思考 · 首选模型'
+				}
+			}),
 	[SelectedLLM.gemini_2_5_pro_proxy]: {
 		shortName: '2.5 Pro',
 		fullName: 'Gemini 2.5 Pro 国内代理',
@@ -24,11 +29,15 @@ const modelConfigs = {
 		fullName: 'DeepSeek R1',
 		scenario: '逻辑推理 · 思考过程 · 次选模型'
 	},
-	[SelectedLLM.gemini_2_5_flash]: {
-		shortName: '2.5 Flash',
-		fullName: 'Gemini 2.5 Flash',
-		scenario: '逻辑推理 · 高性价比 · 次选模型'
-	},
+	...(isOnline
+		? {}
+		: {
+				[SelectedLLM.gemini_2_5_flash]: {
+					shortName: '2.5 Flash',
+					fullName: 'Gemini 2.5 Flash',
+					scenario: '逻辑推理 · 高性价比 · 次选模型'
+				}
+			}),
 	[SelectedLLM.glm_4_6]: {
 		shortName: 'GLM 4.6',
 		fullName: 'GLM 4.6',
@@ -48,7 +57,7 @@ export function ChangeLLM() {
 		setOpen(false);
 	};
 
-	const currentConfig = modelConfigs[currentModel];
+	const currentConfig = modelConfigs[currentModel]!;
 
 	// 颜色方案
 	const colorScheme = {

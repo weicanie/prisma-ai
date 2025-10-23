@@ -49,7 +49,7 @@ const initialMd = `### 1、项目信息
   * 
 #### 2.3 用户体验/业务价值
   * `;
-
+const isOnline = import.meta.env.VITE_IS_ONLINE === 'true';
 const initialState: ProjectState = {
 	data: {
 		name: '',
@@ -69,7 +69,7 @@ const initialState: ProjectState = {
 		}
 	},
 	dataMd: initialMd,
-	model: SelectedLLM.gemini_2_5_pro
+	model: isOnline ? SelectedLLM.gemini_2_5_pro : SelectedLLM.gemini_2_5_pro_proxy
 };
 
 const projectSlice = createSlice({

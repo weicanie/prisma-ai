@@ -1,5 +1,6 @@
 import { AIChatLLM } from '@prisma-ai/shared';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { isOnline } from '../utils/constants';
 
 // AI聊天模块的状态接口
 export interface AIChatState {
@@ -10,7 +11,7 @@ export interface AIChatState {
 
 // 初始化状态
 const initialState: AIChatState = {
-	model: AIChatLLM.gemini_2_5_pro,
+	model: isOnline ? AIChatLLM.gemini_2_5_pro : AIChatLLM.v3,
 	lastConversation: '',
 	project_id: ''
 };

@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { isOnline } from '@/utils/constants';
 import { useTheme } from '@/utils/theme';
 import { AIChatLLM } from '@prisma-ai/shared';
 import type { ActionCreatorWithPayload } from '@reduxjs/toolkit';
@@ -9,16 +10,21 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 const aichatModelConfigs = {
-	[AIChatLLM.gemini_2_5_flash]: {
-		shortName: '2.5 Flash',
-		fullName: '2.5 Flash',
-		scenario: 'google'
-	},
-	[AIChatLLM.gemini_2_5_pro]: {
-		shortName: '2.5 Pro',
-		fullName: '2.5 Pro',
-		scenario: 'google'
-	},
+	...(isOnline
+		? {}
+		: {
+				[AIChatLLM.gemini_2_5_flash]: {
+					shortName: '2.5 Flash',
+					fullName: '2.5 Flash',
+					scenario: 'google'
+				},
+				[AIChatLLM.gemini_2_5_pro]: {
+					shortName: '2.5 Pro',
+					fullName: '2.5 Pro',
+					scenario: 'google'
+				}
+			}),
+
 	[AIChatLLM.gemini_2_5_pro_proxy]: {
 		shortName: '2.5 Pro',
 		fullName: '2.5 Pro',
@@ -78,7 +84,7 @@ export function ChangeLLM({ selector, setModelAction, className, size = 'sm' }: 
 		fullName: string;
 		scenario: string;
 		description?: string;
-	} = modelChoices[currentModel as keyof typeof modelChoices];
+	} = modelChoices[currentModel as keyof typeof modelChoices]!;
 
 	// 颜色方案
 	const colorScheme = {
