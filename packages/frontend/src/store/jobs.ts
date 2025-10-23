@@ -1,5 +1,6 @@
 import { JobOpenStatus, SelectedLLM, type CreateJobDto } from '@prisma-ai/shared';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { isOnline } from '../utils/constants';
 
 interface JobState {
 	data: CreateJobDto;
@@ -16,7 +17,7 @@ const initialState: JobState = {
 		link: '',
 		job_status: JobOpenStatus.OPEN // 默认状态为 "open"
 	},
-	model: SelectedLLM.gemini_2_5_pro
+	model: isOnline ? SelectedLLM.gemini_2_5_pro_proxy : SelectedLLM.gemini_2_5_pro
 };
 
 const JobSlice = createSlice({
