@@ -1,6 +1,7 @@
 import { lazy } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import EditorContainerPage from '../views/Main/ResumeEditor';
+import PreloadChunk from './PreloadChunk';
 import PrivateRoute from './PrivateRoute';
 import UpdateBreadRouter from './UpdateBreadRouter';
 const LandingPage = lazy(() => import('../views/Saas/LandingPage'));
@@ -42,7 +43,16 @@ const knowBaseRoute = {
 	path: 'knowledge',
 	element: (
 		<UpdateBreadRouter>
-			<Outlet />
+			<PreloadChunk
+				chunkPath={[
+					'../views/Main/Knowbase/DeepwikiDown',
+					'../views/Main/Knowbase/KnowledgeRead',
+					'../views/Main/Skills',
+					'../views/Main/Skills/SkillRead'
+				]}
+			>
+				<Outlet />
+			</PreloadChunk>
 		</UpdateBreadRouter>
 	),
 	children: [
@@ -103,7 +113,9 @@ const projectRoute = {
 	path: 'projects',
 	element: (
 		<UpdateBreadRouter>
-			<Outlet />
+			<PreloadChunk chunkPath={['../views/Main/Projects/Action']}>
+				<Outlet />
+			</PreloadChunk>
 		</UpdateBreadRouter>
 	),
 	children: [
@@ -130,7 +142,16 @@ const resumeRoute = {
 	path: 'resumes',
 	element: (
 		<UpdateBreadRouter>
-			<Outlet />
+			<PreloadChunk
+				chunkPath={[
+					'../views/Main/Resumes/ResumeRead',
+					'../views/Main/Resumes/Action',
+					'../views/Main/Skills',
+					'../views/Main/Skills/SkillRead'
+				]}
+			>
+				<Outlet />
+			</PreloadChunk>
 		</UpdateBreadRouter>
 	),
 	children: [
@@ -271,7 +292,9 @@ const manegeRoute = {
 	path: '/main/manage',
 	element: (
 		<UpdateBreadRouter>
-			<Outlet />
+			<PreloadChunk chunkPath={[]}>
+				<Outlet />
+			</PreloadChunk>
 		</UpdateBreadRouter>
 	),
 	children: [
@@ -318,7 +341,15 @@ const hjmRoute = {
 			path: 'job',
 			element: (
 				<UpdateBreadRouter>
-					<Outlet />
+					<PreloadChunk
+						chunkPath={[
+							'../views/Main/Hjm/JobMatch',
+							'../views/Main/Hjm/DataCrawl',
+							'../views/Main/Resumes/ResumeRead'
+						]}
+					>
+						<Outlet />
+					</PreloadChunk>
 				</UpdateBreadRouter>
 			),
 			children: [
@@ -344,7 +375,17 @@ const hjmRoute = {
 			path: 'resume',
 			element: (
 				<UpdateBreadRouter>
-					<Outlet />
+					<PreloadChunk
+						chunkPath={[
+							'../views/Main/Resumes/MatchedResume',
+							'../views/Main/Jobs/ResumeMatchedRead',
+							'../views/Main/Jobs',
+							'../views/Main/Jobs/JobRead',
+							'../views/Main/Resumes/ResumeRead'
+						]}
+					>
+						<Outlet />
+					</PreloadChunk>
 				</UpdateBreadRouter>
 			),
 			children: [
@@ -471,7 +512,7 @@ export const routes = [
 		children: [
 			{
 				path: '',
-				element: <Navigate to="/main/projects" />
+				element: <Navigate to="/main/knowledge" />
 			},
 			// 知识库
 			knowBaseRoute,

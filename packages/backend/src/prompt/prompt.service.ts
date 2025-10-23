@@ -153,7 +153,7 @@ export class PromptService implements OnModuleInit {
 
 		return prompt;
 	}
-	async fewShot(key = 'mine') {
+	private async fewShot(key = 'mine') {
 		return this.fewShotMap[key] ?? '';
 	}
 
