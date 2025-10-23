@@ -190,7 +190,7 @@ const ResumeActions: React.FC<ResumeActionsProps> = () => {
 	};
 
 	return (
-		<div className={`min-h-screen transition-colors duration-200 bg-global`}>
+		<div className={`transition-colors duration-200 bg-global`}>
 			<div className="container mx-auto px-4 py-8">
 				{/* 两栏布局 */}
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 ">

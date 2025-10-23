@@ -1,6 +1,6 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense } from 'react';
 import { DialogBtn } from '../components/DialogBtn';
-const SkillForm = lazy(() => import('./SkillForm'));
+import SkillForm from './SkillForm';
 
 interface SkillUpdateProps {
 	_?: string;

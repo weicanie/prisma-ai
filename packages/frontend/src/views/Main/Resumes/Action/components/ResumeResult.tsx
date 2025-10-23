@@ -114,14 +114,14 @@ export const ResumeResult: React.FC<ResumeResultProps> = ({
 			<CardHeader>
 				<CardTitle className={`flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
 					<div className="animate-pulse w-4 h-4 bg-blue-500 rounded-full"></div>
-					{isReasoning ? `Prisma 正在分析和推理...` : `Prisma 的推理过程`}
+					Prisma 的推理过程
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-0 h-full">
 				<div
 					ref={reasoningContentRef}
 					onScroll={handleReasoningScroll}
-					className={`whitespace-pre-wrap font-mono text-sm text-zinc-200 p-4 pb-20 rounded-md  max-h-[calc(100vh-400px)] overflow-y-auto scb-thin`}
+					className={`whitespace-pre-wrap font-mono text-sm dark:text-zinc-200 p-4 pb-20 rounded-md  max-h-[calc(100vh-400px)] overflow-y-auto scb-thin`}
 					style={{ scrollBehavior: 'smooth' }}
 				>
 					{reasonContent ||
@@ -149,7 +149,7 @@ export const ResumeResult: React.FC<ResumeResultProps> = ({
 				<div
 					ref={streamingContentRef}
 					onScroll={handleStreamingScroll}
-					className={`whitespace-pre-wrap font-mono text-sm text-zinc-200 p-4 pb-20 rounded-md  max-h-[calc(100vh-400px)] overflow-y-auto scb-thin`}
+					className={`whitespace-pre-wrap font-mono text-sm dark:text-zinc-200 p-4 pb-20 rounded-md  max-h-[calc(100vh-400px)] overflow-y-auto scb-thin`}
 					style={{ scrollBehavior: 'smooth' }}
 				>
 					{content || 'Prisma 在等待你的指示送达...'}
@@ -201,7 +201,7 @@ export const ResumeResult: React.FC<ResumeResultProps> = ({
 
 	return (
 		<Card
-			className={`overflow-auto scb-thin ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+			className={`h-full max-h-[calc(100vh-150px)] overflow-auto scb-thin ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
 		>
 			<Tabs tabs={tabs} />
 			{renderComponent()}

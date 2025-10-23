@@ -114,7 +114,7 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 				<div
 					ref={reasoningContentRef}
 					onScroll={handleReasoningScroll}
-					className={`whitespace-pre-wrap font-mono text-sm text-zinc-200 p-4 pb-20 rounded-md  max-h-[calc(100vh-400px)] overflow-y-auto scb-thin`}
+					className={`whitespace-pre-wrap font-mono text-sm dark:text-zinc-200 p-4 pb-20 rounded-md  max-h-[calc(100vh-400px)] overflow-y-auto scb-thin`}
 					style={{
 						scrollBehavior: 'smooth'
 					}}
@@ -144,7 +144,7 @@ export const ProjectResult: React.FC<ProjectResultProps> = ({
 				<div
 					ref={streamingContentRef}
 					onScroll={handleStreamingScroll}
-					className={`whitespace-pre-wrap font-mono text-sm text-zinc-200 p-4 pb-20 rounded-md  max-h-[calc(100vh-400px)] overflow-y-auto scb-thin`}
+					className={`whitespace-pre-wrap font-mono text-sm dark:text-zinc-200 p-4 pb-20 rounded-md  max-h-[calc(100vh-400px)] overflow-y-auto scb-thin`}
 					style={{
 						scrollBehavior: 'smooth'
 					}}
