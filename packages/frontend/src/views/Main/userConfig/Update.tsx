@@ -16,6 +16,7 @@ import {
 	FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { isOnline } from '@/utils/constants';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { UserConfig } from '@prisma-ai/shared';
 import { Edit, Save } from 'lucide-react';
@@ -88,25 +89,29 @@ const UserConfigUpdate = memo(({ onUpdate, showSecrets }: UserConfigUpdateProps)
 		{
 			key: 'llm.openai.apiKey',
 			value: currentConfig.llm.openai.apiKey || '',
-			label: 'OpenAI API Key',
-			description: 'OpenAI平台的API密钥',
+			label: '国内代理 API Key',
+			description: '国内代理平台的API密钥',
 			category: 'LLM'
 		},
 		{
 			key: 'llm.openai.baseUrl',
 			value: currentConfig.llm.openai.baseUrl || '',
-			label: 'OpenAI Base URL',
-			description: '自定义的OpenAI API入口地址',
+			label: '国内代理 Base URL',
+			description: '国内代理平台的API入口地址',
 			category: 'LLM'
 		},
-		{
-			key: 'llm.googleai.apiKey',
-			value: currentConfig.llm.googleai.apiKey || '',
-			label: 'Google AI API Key',
-			description: 'Google AI平台的API密钥',
-			category: 'LLM',
-			required: false
-		},
+		...(isOnline
+			? []
+			: [
+					{
+						key: 'llm.googleai.apiKey',
+						value: currentConfig.llm.googleai.apiKey || '',
+						label: 'Google AI API Key',
+						description: 'Google AI平台的API密钥',
+						category: 'LLM',
+						required: false
+					}
+				]),
 		{
 			key: 'llm.zhipu.apiKey',
 			value: currentConfig.llm.zhipu.apiKey || '',

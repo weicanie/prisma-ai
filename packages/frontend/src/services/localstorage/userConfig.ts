@@ -3,6 +3,7 @@
  * 通过浏览器本地存储(localStorage)进行管理
  */
 
+import { isOnline } from '@/utils/constants';
 import { initialUserConfig, type UserConfig } from '@prisma-ai/shared';
 
 // 本地存储键名
@@ -57,14 +58,16 @@ export function validateUserConfig(config: UserConfig): {
 
 	// 检查必填项：openai.apiKey
 	if (!config.llm.openai.apiKey) {
-		missingFields.push('OpenAI API Key');
+		missingFields.push('国内代理 API Key');
 	}
 
 	// 检查至少有一个LLM配置
-	const hasLLMConfig = config.llm.deepseek.apiKey || config.llm.googleai.apiKey;
+	const hasLLMConfig = isOnline
+		? config.llm.deepseek.apiKey
+		: config.llm.deepseek.apiKey || config.llm.googleai.apiKey;
 
 	if (!hasLLMConfig) {
-		missingFields.push('至少一个LLM API Key (DeepSeek/Google AI)');
+		missingFields.push(isOnline ? 'DeepSeek API Key' : '至少一个LLM API Key (DeepSeek/Google AI)');
 	}
 
 	return {
