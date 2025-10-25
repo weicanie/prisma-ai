@@ -52,7 +52,7 @@ function Main() {
 							<SidebarTrigger className="-ml-1" />
 							<Separator orientation="vertical" className="mr-2 h-4!" />
 							<BreadcrumbNav></BreadcrumbNav>
-							<ThemeSwitcher className={`fixed right-5`}></ThemeSwitcher>
+							<ThemeSwitcher className={`fixed right-5  dark:bg-zinc-500/20!`}></ThemeSwitcher>
 						</div>
 					</header>
 					{/* 路由到的组件 */}

@@ -10,7 +10,7 @@ packages/backend/generated
 /models/*
 /project_wikis
 /user_data/*
-
+/marketing
 # Node.js
 /node_modules
 .pnpm-store

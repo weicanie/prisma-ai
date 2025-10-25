@@ -29,14 +29,16 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ className }) => {
 	};
 
 	return (
-		<div className={cn(className)}>
-			<button
-				type="button"
-				className="rounded-full bg-[var(--sidebar-primary)] p-2 text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600  transition-colors"
-				onClick={clickHandler}
-			>
-				{iconMap[resolvedTheme]}
-			</button>
+		<div
+			className={cn(
+				'rounded-full bg-[var(--sidebar-primary)] p-2 text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600  transition-colors cursor-pointer',
+				'group-data-[state=collapsed]:bg-transparent',
+				'dark:border dark:border-zinc-600',
+				className
+			)}
+			onClick={clickHandler}
+		>
+			{iconMap[resolvedTheme]}
 		</div>
 	);
 };
