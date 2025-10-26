@@ -32,6 +32,7 @@ import { throttle } from 'lodash';
 import { X } from 'lucide-react';
 import { lazy, memo, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'sonner';
 import { useCustomMutation } from '../../../query/config';
 import { KnowledgeQueryKey } from '../../../query/keys';
 import { createKnowledge } from '../../../services/knowbase';
@@ -104,6 +105,7 @@ export const KnowledgeForm = memo(() => {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [KnowledgeQueryKey.Knowledges] });
 			dispatch(resetKnowledgeData());
+			toast.success('知识创建成功');
 		}
 	});
 

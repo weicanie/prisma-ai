@@ -29,6 +29,7 @@ import { useCustomMutation } from '../../../query/config';
 import { JobQueryKey } from '../../../query/keys';
 import { createJob } from '../../../services/job';
 import { reset, selectJobData, setData } from '../../../store/jobs';
+import { toast } from 'sonner';
 
 // 定义表单schema
 const jobFormSchema = z.object({
@@ -69,6 +70,11 @@ export const JobForm = memo(() => {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [JobQueryKey.Jobs] });
 			dispatch(reset());
+			toast.success('岗位创建成功');
+		},
+		onError: error => {
+			console.error('岗位上传失败:', error);
+			toast.error('岗位创建失败');
 		}
 	});
 

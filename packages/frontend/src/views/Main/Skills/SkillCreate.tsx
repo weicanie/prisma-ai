@@ -1,20 +1,27 @@
 import { markdownToSkills, skillDtoSchema } from '@prisma-ai/shared';
+import { useQueryClient } from '@tanstack/react-query';
 import React from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { useCustomMutation } from '../../../query/config';
+import { SkillQueryKey } from '../../../query/keys';
 import { createSkill } from '../../../services/skill';
 import { selectSkillMd, setSkillDataFromMd } from '../../../store/skills';
 import { DialogBtn } from '../components/DialogBtn';
 import MilkdownEditor from '../components/Editor';
 import SkillForm from './SkillForm';
-
 interface SkillCreateProps {
 	_?: string;
 }
 
 export const SkillCreate: React.FC<SkillCreateProps> = () => {
-	const uploadSkillMutation = useCustomMutation(createSkill);
+	const queryClient = useQueryClient();
+	const uploadSkillMutation = useCustomMutation(createSkill, {
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: [SkillQueryKey.Skills] });
+			toast.success('职业技能创建成功');
+		}
+	});
 	const [isUseMdEditor, setIsUseMdEditor] = React.useState(false);
 
 	const editorProps = {

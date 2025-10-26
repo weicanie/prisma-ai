@@ -23,9 +23,11 @@ const CreateProject: React.FC<CreateProjectProps> = () => {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [ProjectQueryKey.Projects] });
 			dispatch(resetProjectData()); // 重置表单
+			toast.success('项目经验创建成功');
 		},
 		onError: error => {
 			console.error('项目上传失败:', error);
+			toast.error('项目经验创建失败');
 		}
 	});
 	const [isUseMdEditor, setIsUseMdEditor] = React.useState(false);

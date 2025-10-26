@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import React from 'react';
+import { toast } from 'sonner';
 import { useCustomMutation } from '../../../query/config';
 import { ResumeQueryKey } from '../../../query/keys';
 import { createResume } from '../../../services/resume';
@@ -16,6 +17,11 @@ const ResumeCreate: React.FC<ResumeCreateProps> = () => {
 	const createResumeMutation = useCustomMutation(createResume, {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [ResumeQueryKey.Resumes, 1, 1000] });
+			toast.success('简历创建成功');
+		},
+		onError: error => {
+			console.error('简历上传失败:', error);
+			toast.error('简历创建失败');
 		}
 	});
 
