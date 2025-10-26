@@ -57,7 +57,7 @@ export class UserMemoryService implements OnModuleInit, WithGetUserMemory {
 				// 创建逻辑: 调用 createUserMemoryChain
 				const chain = await this.aichatChainService.createUserMemoryChain(
 					{
-						llm_type: AIChatLLM.gemini_2_5_flash // 默认使用性价比高的模型
+						llm_type
 					},
 					userInfo.userConfig!
 				);
