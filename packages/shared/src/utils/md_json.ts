@@ -224,5 +224,5 @@ export const markdownToSkills = (markdown: string): CreateSkillDto => {
 		};
 	}
 
-	return { name: '', content };
+	return { name: '我的职业技能', content };
 };
