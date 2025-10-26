@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.2.0-beta.12](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.11...v5.2.0-beta.12) (2025-10-26)
+
+### Bug Fixes
+
+- 职业技能无法使用md编辑器创建 ([52dc6a8](https://github.com/weicanie/prisma-ai/commit/52dc6a8d01f9e204bb03ef434b4c9dac08891ff2))
+
 # [5.2.0-beta.11](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.10...v5.2.0-beta.11) (2025-10-21)
 
 ### Features

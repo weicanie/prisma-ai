@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.2.0-beta.12](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.11...v5.2.0-beta.12) (2025-10-26)
+
+### Bug Fixes
+
+- 无法创建用户记忆 ([f5c1efb](https://github.com/weicanie/prisma-ai/commit/f5c1efb6d184b8860a0b42c1c062587c6233957f))
+
+### Performance Improvements
+
+- **frontend:** chunk预加载 ([5886253](https://github.com/weicanie/prisma-ai/commit/588625391bc49983d28e72a0402c34ebe5c1ba98))
+
 # [5.2.0-beta.11](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.10...v5.2.0-beta.11) (2025-10-21)
 
 **Note:** Version bump only for package backend
