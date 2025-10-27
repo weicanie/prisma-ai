@@ -62,26 +62,26 @@ const syncResumeToFile_Server = async (
 	try {
 		// 1、删除存在的旧文件
 		try {
-			if (prevResume && prevResume.title) {
+			if (prevResume && prevResume.id) {
 				if (
 					fs.existsSync(
-						path.join(user_data_dir.resumesDirPath(userInfo.userId), `${prevResume.title}.json`)
+						path.join(user_data_dir.resumesDirPath(userInfo.userId), `${prevResume.id}.json`)
 					)
 				) {
 					// 避免简历标题发生变化时保留不再使用的文件
-					resumesDirManager.removeFile(`${prevResume.title}.json`, userInfo);
+					resumesDirManager.removeFile(`${prevResume.id}.json`, userInfo);
 				}
 			}
 			if (
 				fs.existsSync(
-					path.join(user_data_dir.resumesDirPath(userInfo.userId), `${resumeData.title}.json`)
+					path.join(user_data_dir.resumesDirPath(userInfo.userId), `${resumeData.id}.json`)
 				)
 			) {
-				resumesDirManager.removeFile(`${resumeData.title}.json`, userInfo);
+				resumesDirManager.removeFile(`${resumeData.id}.json`, userInfo);
 			}
 		} catch (error) {}
 		// 2、创建新文件
-		const fileName = `${resumeData.title}.json`;
+		const fileName = `${resumeData.id}.json`;
 		resumesDirManager.createFile(fileName, JSON.stringify(resumeData, null, 2), userInfo);
 	} catch (error) {
 		console.error('Error syncing resume to file:', error);
@@ -90,7 +90,7 @@ const syncResumeToFile_Server = async (
 // 从文件系统中删除简历
 const deleteResumeFromFile_Server = async (resume: ResumeData, userInfo: UserInfoFromToken) => {
 	try {
-		resumesDirManager.removeFile(`${resume.title}.json`, userInfo);
+		resumesDirManager.removeFile(`${resume.id}.json`, userInfo);
 	} catch (error) {
 		console.error('Error deleting resume file:', error);
 	}

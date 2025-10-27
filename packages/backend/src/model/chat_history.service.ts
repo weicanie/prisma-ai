@@ -81,6 +81,10 @@ class DBChatHistory extends BaseListChatMessageHistory {
 	}
 
 	async saveMessagesToDB(id: number, messages: BaseMessage[]): Promise<void> {
+		if (!id) {
+			console.error('saveMessagesToDB ~ id is null, fail to save messages:', messages);
+			return;
+		}
 		const messagesJSON = mapChatMessagesToStoredMessages(messages);
 		await this.dbService.ai_conversation.update({
 			where: { id },

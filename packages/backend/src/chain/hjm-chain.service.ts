@@ -108,7 +108,7 @@ export class HjmChainService {
 				// 接收 ResumeMatchJobProcessingInput 作为输入，为 Prompt 准备所有插槽变量
 				input: (i: ResumeMatchJobProcessingInput) =>
 					JSON.stringify({ resume: i.resume, job: i.job }),
-				userMemory: userMemoryText,
+				userMemory: () => userMemoryText,
 				chat_history: () => '', // 暂不处理多轮对话历史
 				instructions: () => outputParser.getFormatInstructions(),
 				// 2. 反思逻辑：如果用户要求，则生成反思内容

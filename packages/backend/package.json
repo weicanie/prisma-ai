@@ -60,6 +60,7 @@
     "immer": "^10.1.1",
     "langchain": "^0.3.25",
     "lodash": "^4.17.21",
+    "marked": "^16.4.1",
     "minio": "^8.0.5",
     "mongoose": "^8.14.1",
     "nestjs-zod": "^4.3.1",

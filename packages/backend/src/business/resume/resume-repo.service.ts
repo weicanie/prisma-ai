@@ -8,6 +8,7 @@ import {
 } from '@prisma-ai/shared';
 import fs from 'fs';
 import lodash from 'lodash';
+import { marked } from 'marked';
 import path from 'path';
 import { user_data_dir } from '../../utils/constants';
 import { ActionType, resumeTemplate } from '../../utils/resume/constant';
@@ -25,9 +26,15 @@ export class ResumeJsonService {
 
 	async exportResume(resumeId: string, userInfo: UserInfoFromToken) {
 		try {
-			const resume = await this.resumeService.findOne(resumeId, userInfo);
+			let resume: ResumeVo;
+			// 先尝试根据简历ID查询普通简历，若不存在则查询岗位定制简历
+			try {
+				resume = await this.resumeService.findOne(resumeId, userInfo);
+			} catch (error) {
+				resume = await this.resumeService.findOneResumeMatched(resumeId, userInfo);
+			}
 			let resumeJson: any = (resume as unknown as ResumeDocument).toJSON();
-			resumeJson = this.fillTemplate(resumeJson);
+			resumeJson = await this.fillTemplate(resumeJson);
 
 			const resumeJsonPath = path.join(
 				user_data_dir.resumesDirPath(userInfo.userId),
@@ -43,19 +50,21 @@ export class ResumeJsonService {
 	/**
 	 * 根据简历数据填充简历模板
 	 */
-	private fillTemplate(resumeVo: ResumeVo) {
+	private async fillTemplate(resumeVo: ResumeVo) {
 		const template = lodash.cloneDeep(resumeTemplate);
 
-		const skillContent = skillsToMarkdown(resumeVo.skill);
-		const projectTemplates = resumeVo.projects.map(project => ({
-			id: project.id,
-			name: project.info.name,
-			role: project.info.desc.role.slice(0, 10) + '...',
-			date: template.projects[0].date,
-			visible: true,
-			description: projectSchemaToMarkdown(project)
-		}));
-		const educationTemplates = resumeVo.educations.map(education => ({
+		const skillContent = marked(skillsToMarkdown(resumeVo.skill), { async: false });
+		const projectTemplates = resumeVo.projects?.map(project => {
+			return {
+				id: project.id,
+				name: project.info.name,
+				role: project.info.desc.role.slice(0, 10) + '...',
+				date: template.projects[0].date,
+				visible: true,
+				description: marked(projectSchemaToMarkdown(project), { async: false })
+			};
+		});
+		const educationTemplates = resumeVo.educations?.map(education => ({
 			id: education.id,
 			school: education.school,
 			major: education.major,
@@ -64,22 +73,24 @@ export class ResumeJsonService {
 			endDate: education.endDate || '',
 			visible: true,
 			gpa: education.gpa || '',
-			description: education.description || ''
+			description: marked(education.description || '', { async: false })
 		}));
-		const experienceTemplates = resumeVo.careers.map(career => ({
+		const experienceTemplates = resumeVo.careers?.map(career => ({
 			id: career.id,
 			company: career.company,
 			position: career.position,
 			date: `${career.startDate} - ${career.endDate || '至今'}`,
 			visible: true,
-			details: career.details || ''
+			details: marked(career.details || '', { async: false })
 		}));
 
 		template.name = `${resumeVo.name}-${resumeVo.status === ResumeStatus.committed ? '通用简历' : '岗位定制简历'}`;
-		template.skillContent = skillContent;
-		template.projects = projectTemplates;
-		template.education = educationTemplates;
-		template.experience = experienceTemplates;
+		template.title = template.name;
+		template.skillContent = skillContent ?? template.skillContent;
+		template.projects = projectTemplates ?? template.projects;
+		template.education = educationTemplates ?? template.education;
+		template.experience = experienceTemplates ?? template.experience;
+		template.id = resumeVo.id;
 
 		return template;
 	}

@@ -34,7 +34,9 @@ interface ProjectTemplate {
  * magic-resume要求的JSON格式
  */
 interface ResumeTemplate {
+	title: string; // 显示的标题
 	name: string;
+	id: string; // 作为文件名
 	skillContent: string;
 	education: EducationTemplate[];
 	experience: ExperienceTemplate[];

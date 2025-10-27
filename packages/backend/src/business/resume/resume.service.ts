@@ -196,6 +196,7 @@ export class ResumeService implements WithFuncPool, OnModuleInit {
 			projects: matchedResume.projects.map((matchedProject, index) => {
 				const originalProject = resume.projects[index];
 				return {
+					name: originalProject.name, // 使用原始项目名称
 					info: matchedProject.info, // 使用LLM优化后的项目信息
 					lightspot: matchedProject.lightspot, // 使用LLM优化后的项目亮点
 					status: 'matched', // 设置状态为matched
@@ -270,6 +271,24 @@ export class ResumeService implements WithFuncPool, OnModuleInit {
 			updatedAt: resumeMatchedObj.updatedAt
 		};
 		return result as ResumeVo;
+	}
+
+	async findOneResumeMatched(id: string, userInfo: UserInfoFromToken): Promise<ResumeVo> {
+		const resumeMatched = (await this.resumeMatchedModel
+			.findOne({ _id: new Types.ObjectId(id), 'userInfo.userId': userInfo.userId })
+			.exec()) as PopulateFields<
+			ResumeDocument,
+			'projects' | 'skill' | 'careers' | 'educations',
+			{
+				projects: ProjectDocument[];
+				skill: SkillDocument;
+			}
+		> | null;
+		if (!resumeMatched) {
+			throw new Error(`Resume matched with id "${id}" not found`);
+		}
+
+		return resumeMatched as ResumeVo;
 	}
 
 	async create(

@@ -115,7 +115,7 @@ export class ProjectChainService {
 		]);
 
 		const outputParser = RubustStructuredOutputParser.from(outputSchema, this.chainService);
-		const reflectChain = this.reflectAgentService.createReflectChain();
+		const reflectChain = this.reflectAgentService.createReflectChain(userInfo);
 
 		const sequence: any = [
 			{
