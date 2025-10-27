@@ -4,6 +4,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { WithFormfixChain } from '../../../utils/abstract';
 
+import { UserInfoFromToken } from '@prisma-ai/shared';
 import { ModelService } from '../../../model/model.service';
 import { RubustStructuredOutputParser } from '../../../utils/RubustStructuredOutputParser';
 import { reflectionSchema } from '../types';
@@ -27,8 +28,18 @@ export class ReflectAgentService {
 	 * @input {{ content: string; context?: string }} - `content`是需要反思的核心内容, `context`是可选的附加背景信息。
 	 * @output {Reflection} - 返回一个包含`evaluation`, `critique`, 和 `advice`的结构化对象。
 	 */
-	createReflectChain(): Runnable<{ content: string; context?: string }, Reflection> {
-		const model = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+	createReflectChain(
+		userInfo?: UserInfoFromToken
+	): Runnable<{ content: string; context?: string }, Reflection> {
+		let model: Runnable;
+		if (userInfo) {
+			model = this.modelService.getLLMDeepSeekRaw(
+				'deepseek-chat',
+				userInfo.userConfig.llm.deepseek.apiKey
+			);
+		} else {
+			model = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
+		}
 		//TODO 没有传入userConfig，使用环境变量中的apiKey！！！（prisma-agent模块中的RubustStructuredOutputParser都是如此，仅会导致本地的deepseek apikey未配置时，自动修复chain不会生效）
 		//现阶段只在本地使用，所以可以直接使用环境变量中的apiKey
 		const parser = RubustStructuredOutputParser.from(reflectionSchema, this.chainService);
