@@ -10,7 +10,8 @@ import {
 	DollarSign,
 	ExternalLink,
 	MapPin,
-	Plus
+	Plus,
+	Target
 } from 'lucide-react';
 import React from 'react';
 import { toast } from 'sonner';
@@ -31,6 +32,8 @@ const JobCard: React.FC<JobCardProps> = ({ jobData, addBtn = false }) => {
 			toast.success('添加成功');
 		}
 	});
+
+	const matchReason = (jobData as JobVo & { reason?: string }).reason;
 
 	return (
 		<div className={`transition-colors duration-200 bg-global`}>
@@ -102,7 +105,7 @@ const JobCard: React.FC<JobCardProps> = ({ jobData, addBtn = false }) => {
 							{addBtn && (
 								<Button
 									variant="default"
-									className="flex items-center gap-2 bg-primary text-white"
+									className="flex items-center mt-3 gap-2 bg-primary text-white"
 									onClick={() => becomeMutation.mutate(jobData.id)}
 								>
 									<Plus className="w-4 h-4" />
@@ -111,6 +114,23 @@ const JobCard: React.FC<JobCardProps> = ({ jobData, addBtn = false }) => {
 							)}
 						</CardContent>
 					)}
+					{/* 匹配理由 */}
+					{matchReason && (
+						<ClickCollapsible
+							title={<h2 className="text-lg font-bold">匹配点</h2>}
+							icon={<Target className="size-5" />}
+							className="px-6"
+							defaultOpen={true}
+						>
+							<CardContent>
+								<div
+									className={`whitespace-pre-wrap ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
+								>
+									{matchReason}
+								</div>
+							</CardContent>
+						</ClickCollapsible>
+					)}
 
 					{/* 职位描述 */}
 
@@ -118,6 +138,7 @@ const JobCard: React.FC<JobCardProps> = ({ jobData, addBtn = false }) => {
 						title={<h2 className="text-lg font-bold">职位描述</h2>}
 						icon={<Building className="size-5" />}
 						className="px-6"
+						defaultOpen={false}
 					>
 						<CardContent>
 							<div className={`whitespace-pre-wrap ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>

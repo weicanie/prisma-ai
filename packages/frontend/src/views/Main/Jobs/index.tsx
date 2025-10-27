@@ -101,7 +101,7 @@ const Jobs: React.FC<JobsProps<JobVo>> = memo(
 						accessorKey: 'jobName',
 						header: ({ column }) => <DataTableColumnHeader column={column} title="职位名称" />,
 						cell: ({ row }) => {
-							return <div className="w-[120px] font-medium">{row.original.jobName}</div>;
+							return <div className="w-[120px] font-medium truncate">{row.original.jobName}</div>;
 						},
 						enableHiding: false,
 						enableSorting: false

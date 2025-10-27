@@ -76,10 +76,8 @@ const PreflightBtns: React.FC<PreflightBtnsProps> = ({ availableActions, actionH
 									onClick={actionHandlers['polish']}
 									variant="outline"
 									className={`w-1/2 rounded-full ${
-										isDark
-											? 'border-gray-600 text-gray-200 hover:bg-gray-700'
-											: 'border-gray-300 hover:bg-gray-50'
-									}`}
+										isDark ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600'
+									} text-white `}
 									size="lg"
 								>
 									<Sparkles className="w-4 h-4 mr-2" />

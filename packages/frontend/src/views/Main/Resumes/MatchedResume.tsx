@@ -9,7 +9,11 @@ import { toast } from 'sonner';
 import { useIsMobile } from '../../../hooks/use-mobile';
 import { useCustomMutation, useCustomQuery } from '../../../query/config';
 import { ResumeQueryKey } from '../../../query/keys';
-import { findAllResumeMatched, removeResumeMatched } from '../../../services/resume';
+import {
+	exportResumeToEditor,
+	findAllResumeMatched,
+	removeResumeMatched
+} from '../../../services/resume';
 import { ConfigDataTable } from '../components/config-data-table';
 import type { DataTableConfig } from '../components/config-data-table/config.type';
 import { DataTableColumnHeader } from '../components/config-data-table/data-table/columns/header';
@@ -38,6 +42,15 @@ const MatchedResume: React.FC<MatchedResumeProps> = memo(({ title, description }
 		},
 		onError: () => {
 			toast.error('删除失败');
+		}
+	});
+
+	const exportToEditorMutation = useCustomMutation(exportResumeToEditor, {
+		onSuccess: () => {
+			toast.success('导出成功');
+		},
+		onError: () => {
+			toast.error('导出失败');
 		}
 	});
 
@@ -141,6 +154,12 @@ const MatchedResume: React.FC<MatchedResumeProps> = memo(({ title, description }
 									label: '删除',
 									onClick: () => {
 										removeResumeMatchedMutation.mutate(row.original.id);
+									}
+								},
+								{
+									label: '导出',
+									onClick: () => {
+										exportToEditorMutation.mutate(row.original.id);
 									}
 								}
 							]}
