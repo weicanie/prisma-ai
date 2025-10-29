@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.2.0-beta.13](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.12...v5.2.0-beta.13) (2025-10-29)
+
+### Bug Fixes
+
+- 反思agent ([8057dd1](https://github.com/weicanie/prisma-ai/commit/8057dd1afa2c1aea274f0c8df1a152205d0b77c3))
+- 修复已知问题 ([cadc942](https://github.com/weicanie/prisma-ai/commit/cadc942295f4194c5189f7199d56e103f9113569))
+
 # [5.2.0-beta.12](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.11...v5.2.0-beta.12) (2025-10-26)
 
 ### Bug Fixes

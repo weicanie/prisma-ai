@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.2.0-beta.13](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.12...v5.2.0-beta.13) (2025-10-29)
+
+### Features
+
+- **frontend:** 简历定制UI优化与定制简历的导出功能 ([b4c6c39](https://github.com/weicanie/prisma-ai/commit/b4c6c394f459ea60fc6e23a6514a1d7af936fd5c))
+
 # [5.2.0-beta.12](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.11...v5.2.0-beta.12) (2025-10-26)
 
 ### Bug Fixes
