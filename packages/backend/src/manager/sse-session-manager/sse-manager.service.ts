@@ -309,7 +309,7 @@ export class SseManagerService implements OnModuleInit {
 			}
 		}
 
-		/* 2、校验上下文是否完整,input即储存在上下文中 */
+		/* 校验上下文是否完整,input即储存在上下文中 */
 		const context = await this.sessionPool.getContext(sessionId);
 		if (!context || !context.input) {
 			return new Observable<DataChunkErrVO>(subscriber => {
@@ -344,7 +344,7 @@ export class SseManagerService implements OnModuleInit {
 
 			this.eventBusService.on(EventList.chunkGenerated, onChunkGenerated);
 
-			// 可选：处理连接断开时的清理逻辑
+			// 连接断开时的清理逻辑
 			return () => {
 				this.eventBusService.off(EventList.chunkGenerated, onChunkGenerated);
 			};

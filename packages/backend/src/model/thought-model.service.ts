@@ -12,6 +12,10 @@ import { GlmModel, GlmNeed, ModelService } from './model.service';
 // TODO gemini 思考与回答分离方案
 // streamEvents + tool方案是可以实现gemini的思考/答案的分离输出，但prompt复杂（比如现在的要求复杂JSON输出）gemini的生成格式就会出错
 
+//TODO langchain.js官方issue表明其自身存在相关的恶性bug！
+// https://github.com/langchain-ai/langchainjs/issues/6440
+// withStructuredOutput包裹的llm会"假流式"输出（生成结束后才流式返回）
+
 /**
  * Gemini "思考/答案" 功能所需的系统提示。
  * 调用方需要将此提示整合到最终发送给模型的完整提示中。
@@ -201,22 +205,12 @@ export class ThoughtModelService {
 	 * @param stream - 一个 `AIMessageChunk` 类型的异步生成器。
 	 * @returns 一个 `StreamingChunk` 类型的异步生成器。
 	 */
-	public async *_transformAIMessageStream(
+	async *_transformAIMessageStream(
 		stream: AsyncGenerator<AIMessageChunk>,
 		llmType: string
 	): AsyncGenerator<StreamingChunk> {
-		//TODO langchain.js官方issue表明这是其自身的bug！
-		// https://github.com/langchain-ai/langchainjs/issues/6440
-		// 会在第一个chunk产生时（此时llm已生成完毕）才发送，而不是llm开始生成时
-		yield {
-			content: '',
-			reasonContent: `${llmType} 正在后台动态思考...`,
-			isReasoning: true,
-			done: false
-		};
-
 		for await (const chunk of stream) {
-			// 直接将 chunk 的内容作为答案返回，不进行思考与答案分离
+			// 直接将 chunk 的内容作为答案返回
 			let content = '';
 
 			// 处理不同类型的 content
@@ -334,7 +328,7 @@ export class ThoughtModelService {
 	 * @param stream - 一个 `DeepSeekStreamChunk` 类型的异步生成器。
 	 * @returns 一个 `StreamingChunk` 类型的异步生成器。
 	 */
-	private async *_transformDeepSeekStream(
+	async *_transformDeepSeekStream(
 		stream: IterableReadableStream<DeepSeekStreamChunk>
 	): AsyncGenerator<StreamingChunk> {
 		for await (const chunk of stream) {

@@ -12,6 +12,10 @@ class ChatMessage {
 	@MaxLength(100000)
 	@IsString()
 	content: string;
+
+	@MaxLength(100000)
+	@IsString()
+	reasonContent: string;
 }
 
 class UserModelConfigDto {

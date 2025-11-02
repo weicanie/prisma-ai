@@ -9,7 +9,7 @@ import {
 import { Bubble, Sender } from '@ant-design/x';
 import type { ChatMessage, ConversationDto } from '@prisma-ai/shared';
 import dayjs from 'dayjs';
-import { Trash } from 'lucide-react';
+import { Brain, Trash } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
@@ -20,11 +20,12 @@ import { useCustomQuery } from '../../../query/config';
 import { ProjectQueryKey } from '../../../query/keys';
 import {
 	getConversationList,
-	sendMessageToAI,
 	startNewConversation,
 	storeConversation
 } from '../../../services/aichat';
 import { findAllProjects } from '../../../services/project';
+import { useSseAnswer } from '../../../services/sse/useSseAnswer';
+import ClickCollapsible from '../components/ClickCollapsible';
 import { ChangeLLM } from './components/ChangeLLM';
 import MilkdownEditor from './components/Editor';
 import { MySpin } from './components/MySpin';
@@ -63,7 +64,25 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 
 	// ==================== Event ====================
 	const model = useSelector(selectAIChatLLM);
-	const onSubmit = async (val: string) => {
+
+	const { content, reasonContent, done, isReasoning, start } = useSseAnswer(true);
+	// 生成结束后更新消息历史记录
+	useEffect(() => {
+		if (done) {
+			const aiMessage: ChatMessage = {
+				id: `assistant-${Date.now()}`,
+				role: 'assistant',
+				content: content,
+				reasonContent: reasonContent,
+				create_at: new Date()
+			};
+			const currentHistory = [...messages];
+			// currentHistory.pop();
+			setMessages([...currentHistory, aiMessage]);
+		}
+	}, [done]);
+
+	const onSubmitStream = async (val: string) => {
 		if (!val) return;
 		if (loading) {
 			toast.error('消息正在请求中，您可以等待请求完成或立即创建新对话...');
@@ -78,32 +97,31 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 			role: 'user',
 			content: val
 		};
-		const aiMessagePlaceholder: ChatMessage = {
-			id: `assistant-${Date.now()}`,
-			role: 'assistant',
-			content: '',
-			loading: true
-		};
-		const currentHistory = [...messages, userMessage, aiMessagePlaceholder];
+		// const aiMessagePlaceholder: ChatMessage = {
+		// 	id: `assistant-${Date.now()}`,
+		// 	role: 'assistant',
+		// 	content: '',
+		// 	loading: true
+		// };
+		// const currentHistory = [...messages, userMessage, aiMessagePlaceholder];
+		const currentHistory = [...messages, userMessage];
 		setMessages(currentHistory);
 
 		try {
-			const res = await sendMessageToAI(
-				userMessage,
-				curConversation,
-				{
-					llm_type: model
+			start({
+				path: '/aichat/stream',
+				input: {
+					input: {
+						message: userMessage,
+						keyname: curConversation,
+						project_id,
+						modelConfig: {
+							llm_type: model
+						}
+					}
 				},
-				project_id
-			);
-			const aiMessage: ChatMessage = {
-				id: `assistant-${Date.now()}`,
-				role: 'assistant',
-				content: res.data,
-				create_at: new Date()
-			};
-			currentHistory.pop();
-			setMessages([...currentHistory, aiMessage]);
+				model
+			});
 		} catch (err) {
 			console.error(err);
 			toast.error('没有得到AI的响应。');
@@ -188,14 +206,14 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 
 	// 监听内容变化，自动滚动到底部
 	useEffect(() => {
-		if (messages && rollContainerRef.current && !userScrolled) {
+		if (rollContainerRef.current && !userScrolled) {
 			const element = rollContainerRef.current;
 			// 使用 requestAnimationFrame 确保DOM更新后再滚动
 			requestAnimationFrame(() => {
 				element.scrollTop = element.scrollHeight;
 			});
 		}
-	}, [messages, userScrolled]);
+	}, [messages, content, reasonContent, userScrolled]);
 
 	//切换到新的会话后自动滚动到底部
 	useEffect(() => {
@@ -259,8 +277,6 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 	if (status === 'pending') return <div></div>;
 	if (status === 'error') return <div>错误:{data?.message}</div>;
 
-	console.log('project_id', project_id);
-
 	// ==================== Nodes ====================
 
 	const chatList = (
@@ -278,18 +294,29 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 								key={item.id}
 								content={item.content}
 								messageRender={(content: string) => {
-									return <MilkdownEditor text={content} isShwoMode={true} isTypingMode={true} />;
+									return (
+										<>
+											{item.reasonContent && item.role !== 'user' && (
+												<ClickCollapsible
+													title={'思考过程'}
+													icon={<Brain className="size-5" />}
+													defaultOpen={false}
+												>
+													<MilkdownEditor
+														text={item.reasonContent}
+														isShwoMode={true}
+														isTypingMode={true}
+													/>
+												</ClickCollapsible>
+											)}
+											<MilkdownEditor text={content} isShwoMode={true} isTypingMode={true} />
+										</>
+									);
 								}}
 								variant="filled"
 								placement={item.role === 'user' ? 'end' : 'start'}
 								loading={item.loading}
-								typing={
-									index === messages.length - 1 &&
-									item.create_at &&
-									Date.now() - new Date(item.create_at!).getTime() < 10 * 1000
-										? { interval: 25 }
-										: false
-								}
+								typing={false}
 								avatar={
 									item.role === 'user' ? undefined : (
 										<div
@@ -303,6 +330,49 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 							></Bubble>
 						);
 					})}
+					{/* 当前正在生成的AI消息 */}
+					{(done === false || isReasoning) && (
+						<Bubble
+							key={'latest'}
+							content={content}
+							messageRender={() => {
+								return (
+									<>
+										{reasonContent && (
+											<ClickCollapsible
+												title={'思考过程'}
+												icon={<Brain className="size-5" />}
+												defaultOpen={true}
+											>
+												<MilkdownEditor
+													text={reasonContent}
+													isShwoMode={true}
+													isTypingMode={true}
+												/>
+											</ClickCollapsible>
+										)}
+										<MilkdownEditor
+											text={content || 'Prisma 正在生成中...'}
+											isShwoMode={true}
+											isTypingMode={true}
+										/>
+									</>
+								);
+							}}
+							variant="filled"
+							placement={'start'}
+							loading={false}
+							typing={false}
+							avatar={
+								<div
+									className={`flex items-center justify-center ${isMobile ? 'size-7' : 'size-10'}`}
+								>
+									<Logo className={` text-zinc-100 ${isMobile ? 'size-7' : 'size-10'}`} />
+								</div>
+							}
+							shape="round"
+						></Bubble>
+					)}
 				</div>
 			) : (
 				<div className="w-full flex justify-center items-center">
@@ -372,7 +442,7 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 					value={inputValue}
 					header={senderHeader}
 					onSubmit={() => {
-						onSubmit(inputValue);
+						onSubmitStream(inputValue);
 						setInputValue('');
 					}}
 					onChange={setInputValue}

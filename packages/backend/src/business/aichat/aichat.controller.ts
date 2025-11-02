@@ -1,11 +1,20 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import type { ConversationSendDto, MessageSendDto, UserInfoFromToken } from '@prisma-ai/shared';
+import { Body, Controller, Get, Param, Post, Query, Sse } from '@nestjs/common';
+import type {
+	ConversationSendDto,
+	MessageSendDto,
+	SelectedLLM,
+	UserInfoFromToken
+} from '@prisma-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
+import { SseManagerService } from '../../manager/sse-session-manager/sse-manager.service';
 import { AichatService } from './aichat.service';
 
 @Controller('aichat')
 export class AichatController {
-	constructor(private readonly aichatService: AichatService) {}
+	constructor(
+		private readonly aichatService: AichatService,
+		private readonly sseManagerService: SseManagerService
+	) {}
 
 	@Post()
 	@RequireLogin()
@@ -14,6 +23,26 @@ export class AichatController {
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
 		return await this.aichatService.sendMessageToAI(messageDto, userInfo);
+	}
+
+	@Sse('stream')
+	@RequireLogin()
+	async sendMessageToAIStream(
+		@Query('sessionId') sessionId: string,
+		@Query('recover') recover: boolean,
+		@Query('model') model: SelectedLLM,
+		@UserInfo() userInfo: UserInfoFromToken
+	) {
+		const metadata = {
+			funcKey: this.aichatService.funcKeys.sendMessageToAIStream,
+			poolName: this.aichatService.poolName,
+			model
+		};
+
+		if (recover) {
+			return this.sseManagerService.handleSseRequestAndResponseRecover(sessionId, userInfo);
+		}
+		return this.sseManagerService.handleSseRequestAndResponse(sessionId, userInfo, metadata);
 	}
 
 	/**

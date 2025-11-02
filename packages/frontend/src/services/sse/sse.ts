@@ -5,11 +5,11 @@ import type {
 	LLMSessionResponse,
 	LLMSessionStatusResponse,
 	MatchJobDto,
+	MessageSendDto,
 	ProjectDto,
 	ServerDataFormat as SDF,
 	UserFeedback
 } from '@prisma-ai/shared';
-import { SelectedLLM } from '@prisma-ai/shared';
 import { toast } from 'sonner';
 import { instance } from '../config';
 
@@ -19,7 +19,7 @@ import { instance } from '../config';
  * @description MatchJobDto 简历匹配岗位服务
  */
 export type contextInput = {
-	input: ProjectDto | MatchJobDto;
+	input: ProjectDto | MatchJobDto | MessageSendDto;
 	userFeedback?: UserFeedback;
 };
 /**
@@ -125,7 +125,7 @@ async function getSessionStatusAndDecide(input: contextInput | ''): Promise<SDF<
  */
 function getSseData(
 	path: string,
-	model: SelectedLLM | undefined,
+	model: string | undefined,
 	setData: (data: string | ((prevData: string) => string)) => void,
 	setReasonContent: (data: string | ((prevData: string) => string)) => void,
 	setDone: (done: boolean) => void,
@@ -135,7 +135,6 @@ function getSseData(
 	setErrorMsg: (msg: string) => void,
 	setAnswering?: (answering: boolean) => void
 ) {
-
 	// 每次前sse重置useSseAnswer状态
 	setData('');
 	setReasonContent('');

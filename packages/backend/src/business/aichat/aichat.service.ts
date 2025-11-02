@@ -1,27 +1,157 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 
-import { ConversationDto, ConversationSendDto, UserInfoFromToken } from '@prisma-ai/shared';
+import { Runnable, RunnableSequence } from '@langchain/core/runnables';
+import {
+	ConversationDto,
+	ConversationSendDto,
+	StreamingChunk,
+	UserInfoFromToken
+} from '@prisma-ai/shared';
+import { from, Observable } from 'rxjs';
 import { AichatChainService } from '../../chain/aichat-chain.service';
 import { ChainService } from '../../chain/chain.service';
 import { BusinessEnum } from '../../chain/project-chain.service';
 import { ProjectKonwbaseRetrieveService } from '../../chain/project-konwbase-retrieve.service';
 import { DbService } from '../../DB/db.service';
+import { EventBusService, EventList } from '../../EventBus/event-bus.service';
+import { TaskManagerService } from '../../manager/task-manager/task-manager.service';
+import { RedisService } from '../../redis/redis.service';
+import { WithFuncPool } from '../../utils/abstract';
+import { SseFunc } from '../../utils/type';
 import { ProjectService } from '../project/project.service';
 import { UserMemoryService } from '../user-memory/user-memory.service';
 import { MessageSendDto } from './dto/aichat-dto';
 
 @Injectable()
-export class AichatService {
+export class AichatService implements WithFuncPool, OnModuleInit {
 	constructor(
 		public dbService: DbService,
 		public chainService: ChainService,
 		public aichatChainService: AichatChainService,
 		public projectKonwbaseRetrieveService: ProjectKonwbaseRetrieveService,
 		public projectService: ProjectService,
-		public userMemoryService: UserMemoryService
-	) {}
+		public userMemoryService: UserMemoryService,
+		private readonly taskManager: TaskManagerService,
+		public eventBusService: EventBusService,
+		public redisService: RedisService
+	) {
+		this.funcPool = {
+			sendMessageToAIStream: this.sendMessageToAIStream.bind(this)
+		};
+	}
+
+	onModuleInit() {
+		this.taskManager.registerFuncPool(this);
+	}
+
+	public poolName = 'AichatService';
+	public funcPool: Record<string, SseFunc>;
+	public funcKeys = {
+		sendMessageToAIStream: 'sendMessageToAIStream'
+	};
 
 	private logger = new Logger();
+
+	async sendMessageToAIStream(
+		messageDto: MessageSendDto,
+		userInfo: UserInfoFromToken,
+		taskId: string
+	): Promise<Observable<StreamingChunk>> {
+		this.eventBusService.once(EventList.taskCompleted, ({ task }) => {
+			if (task.id !== taskId) {
+				return; // 确保只接收当前任务的结果
+			}
+			//取出redis中的结果进行处理
+
+			if (!task.resultKey) {
+				this.logger.error(`${task.id}任务结果redis键不存在,数据获取失败`);
+				return;
+			}
+
+			this.redisService
+				.get(task.resultKey!)
+				.then(redisStoreResult => {
+					if (!redisStoreResult) {
+						throw '任务结果不存在或已过期被清除';
+					}
+					return JSON.parse(redisStoreResult);
+				})
+				.then(result => saver(result))
+				.catch(error => {
+					this.logger.error(`任务${task.resultKey}结果获取失败: ${error}`);
+					throw error;
+				});
+		});
+
+		const { keyname, message, modelConfig, project_id } = messageDto;
+		// 项目经验数据
+		const project = await this.projectService.findProjectById(project_id, userInfo);
+		// 项目经验相关文档
+		const project_doc = await this.projectKonwbaseRetrieveService.retrievedDomainDocs(
+			{
+				project,
+				userFeedback: { reflect: false, content: '' },
+				userInfo
+			},
+			BusinessEnum.aichat
+		);
+		// 项目经验相关代码
+		const project_code = await this.projectKonwbaseRetrieveService.retrievedProjectCodes(
+			{
+				project,
+				userFeedback: { reflect: false, content: '' },
+				userInfo
+			},
+			BusinessEnum.aichat
+		);
+		// 用户记忆
+		const user_memory = await this.userMemoryService.getUserMemory(userInfo.userId);
+
+		const userInput = message.content;
+
+		const userInput_doc =
+			await this.projectKonwbaseRetrieveService.retrievedDomainDocsFromUserInput(userInput, {
+				project,
+				userFeedback: { reflect: false, content: userInput },
+				userInfo
+			});
+
+		const userInput_code =
+			await this.projectKonwbaseRetrieveService.retrievedProjectCodesFromUserInput(userInput, {
+				project,
+				userFeedback: { reflect: false, content: '' },
+				userInfo
+			});
+
+		const userInput_rag = `
+		<用户输入>
+		${userInput}
+		</用户输入>
+		<相关项目文档参考>
+		${userInput_doc}
+		</相关项目文档参考>
+		<相关项目代码参考>
+		${userInput_code}
+		</相关项目代码参考>
+		`;
+
+		const { chain, saver } = await this.aichatChainService.createChatChain(
+			keyname,
+			modelConfig,
+			userInfo.userConfig!,
+			{
+				project_data: `${JSON.stringify(project)}`,
+				project_doc,
+				project_code,
+				user_memory: user_memory ? `${JSON.stringify(user_memory)}` : ''
+			},
+			true
+		);
+		const answerStream = await (chain as Runnable).stream({ input: userInput_rag });
+
+		// 业务层不再关心模型细节，直接返回标准化的 StreamingChunk 流
+		return from(answerStream) as Observable<StreamingChunk>;
+	}
 
 	async sendMessageToAI(messageDto: MessageSendDto, userInfo: UserInfoFromToken) {
 		const { keyname, message, modelConfig, project_id } = messageDto;
@@ -86,9 +216,10 @@ export class AichatService {
 					project_doc,
 					project_code,
 					user_memory: user_memory ? `${JSON.stringify(user_memory)}` : ''
-				}
+				},
+				false
 			);
-			const answer = await chain.invoke({ input: userInput_rag });
+			const answer = await (chain as RunnableSequence).invoke({ input: userInput_rag });
 			return answer;
 		} catch (error) {
 			this.logger.error(error.stack);

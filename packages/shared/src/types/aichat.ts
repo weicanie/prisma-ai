@@ -28,6 +28,7 @@ export interface ChatMessage {
 	id: string;
 	role: 'user' | 'assistant' | 'system';
 	content: string;
+	reasonContent?: string;
 
 	loading?: boolean;
 	create_at?: Date | null; //用来标识是否打字机展示（10*1000ms内的最后元素进行打字机）
@@ -49,6 +50,15 @@ export interface MessageSendDto<T = AIChatLLM> {
 	keyname: string;
 	modelConfig: UserModelConfig<T>;
 	project_id: string;
+}
+
+export interface MessageSendStreamDto<T = AIChatLLM> {
+	message: ChatMessage;
+	keyname: string;
+	modelConfig: UserModelConfig<T>;
+	project_id: string;
+	sessionId: string;
+	recover: boolean;
 }
 
 export interface ConversationSendDto {

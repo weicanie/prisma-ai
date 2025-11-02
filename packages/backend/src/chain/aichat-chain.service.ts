@@ -1,14 +1,10 @@
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import {
-	Runnable,
-	RunnableLambda,
-	RunnablePassthrough,
-	RunnableSequence
-} from '@langchain/core/runnables';
+import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
 	AIChatLLM,
+	StreamingChunk,
 	UserConfig,
 	UserMemoryT,
 	UserModelConfig,
@@ -31,6 +27,34 @@ export class AichatChainService {
 		public chainService: ChainService
 	) {}
 
+	transformAIMessageStream(llm: Runnable): Runnable<any, StreamingChunk> {
+		// 使用RunnableLambda封装整个流转换过程
+		const flatModel = new RunnableLambda<any, any>({
+			func: async (prompt: any) => {
+				const stream = await llm.stream(prompt);
+				return this.thoughtModelService._transformAIMessageStream(stream, 'LLM');
+			}
+		});
+
+		return flatModel as Runnable<any, StreamingChunk>;
+	}
+
+	async createChatChain(
+		keyname: string,
+		modelConfig: UserModelConfig<AIChatLLM>,
+		userConfig: UserConfig,
+		aichatChainContext: AichatChainContext,
+		stream: true
+	): Promise<{ chain: RunnableSequence; saver: (output: any) => Promise<void> }>;
+
+	async createChatChain(
+		keyname: string,
+		modelConfig: UserModelConfig<AIChatLLM>,
+		userConfig: UserConfig,
+		aichatChainContext: AichatChainContext,
+		stream: false
+	): Promise<RunnableSequence>;
+
 	/**
 	 * 用于多轮对话,感知上下文。默认使用 ConversationSummaryMemory
 	 * @param prompt 传递给llm的prompt
@@ -41,7 +65,8 @@ export class AichatChainService {
 		keyname: string,
 		modelConfig: UserModelConfig<AIChatLLM>,
 		userConfig: UserConfig,
-		aichatChainContext: AichatChainContext
+		aichatChainContext: AichatChainContext,
+		stream: boolean = false
 	) {
 		const prompt = await this.promptService.aichatSystemPrompt();
 		const chatHistory = this.modelService.getChatHistory(keyname); //使用自定义的chatHistory
@@ -59,29 +84,17 @@ export class AichatChainService {
 		let llm: Runnable;
 		switch (modelConfig.llm_type) {
 			case AIChatLLM.v3:
-				llm = await this.modelService.getLLMDeepSeekRaw(
-					'deepseek-chat',
-					userConfig.llm.deepseek.apiKey
-				);
+				llm = this.modelService.getLLMDeepSeekRaw('deepseek-chat', userConfig.llm.deepseek.apiKey);
+				llm = this.transformAIMessageStream(llm);
 				break;
 			case AIChatLLM.r1:
-				llm = await this.modelService.getLLMDeepSeekRaw(
-					'deepseek-reasoner',
-					userConfig.llm.deepseek.apiKey
+				llm = await this.thoughtModelService.getDeepSeekThinkingModleflat(
+					modelConfig.llm_type as any,
+					userConfig!
 				);
 				break;
 			case AIChatLLM.gemini_2_5_pro:
-				llm = await this.modelService.getLLMGeminiPlusRaw(
-					'gemini-2.5-pro',
-					userConfig.llm.googleai.apiKey
-				);
-				break;
 			case AIChatLLM.gemini_2_5_flash:
-				llm = await this.modelService.getLLMGeminiPlusRaw(
-					'gemini-2.5-flash',
-					userConfig.llm.googleai.apiKey
-				);
-				break;
 			case AIChatLLM.gemini_2_5_pro_proxy:
 				llm = await this.thoughtModelService.getGeminiThinkingModelFlat(
 					modelConfig.llm_type as any,
@@ -94,13 +107,14 @@ export class AichatChainService {
 					apiKey: userConfig.llm.zhipu.apiKey,
 					modelName: GlmModel.glm_4_6
 				});
+				llm = this.transformAIMessageStream(llm);
 				break;
 		}
 
 		const outputParser = new StringOutputParser();
 
 		let lastInput = ''; //储存用户当前输入（以更新memory）
-		const chain = RunnableSequence.from([
+		const seq: any = [
 			{
 				input: (input, options) => {
 					lastInput = input;
@@ -116,19 +130,28 @@ export class AichatChainService {
 				user_memory: () => aichatChainContext.user_memory
 			},
 			prompt,
-			new RunnablePassthrough({
-				func: async (input: any, options: any) => {
-					return input;
+			llm
+		];
+		if (stream) {
+			const chain = RunnableSequence.from(seq);
+			return {
+				chain,
+				saver: async output => {
+					await memory.saveContext({ input: lastInput }, { output });
 				}
-			}),
-			llm,
-			outputParser,
-			RunnableLambda.from(async input => {
-				await memory.saveContext({ input: lastInput }, { output: input });
-				return input;
-			})
-		]);
-		return chain;
+			};
+		} else {
+			const chain = RunnableSequence.from(
+				seq.concat([
+					outputParser,
+					RunnableLambda.from(async input => {
+						await memory.saveContext({ input: lastInput }, { output: input });
+						return input;
+					})
+				])
+			);
+			return chain;
+		}
 	}
 
 	async createUserMemoryChain(modelConfig: UserModelConfig<AIChatLLM>, userConfig: UserConfig) {
