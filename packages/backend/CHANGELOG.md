@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.2.0-beta.14](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.13...v5.2.0-beta.14) (2025-11-02)
+
+### Features
+
+- 在AI对话中实现SSE流式生成 ([7e68def](https://github.com/weicanie/prisma-ai/commit/7e68defb042198dee15c1c7eb3656065b8052c1b))
+
 # [5.2.0-beta.13](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.12...v5.2.0-beta.13) (2025-10-29)
 
 ### Bug Fixes
