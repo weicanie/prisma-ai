@@ -8,7 +8,6 @@ import {
 } from '@prisma-ai/shared';
 import fs from 'fs';
 import lodash from 'lodash';
-import { marked } from 'marked';
 import path from 'path';
 import { user_data_dir } from '../../utils/constants';
 import { ActionType, resumeTemplate } from '../../utils/resume/constant';
@@ -51,6 +50,9 @@ export class ResumeJsonService {
 	 * 根据简历数据填充简历模板
 	 */
 	private async fillTemplate(resumeVo: ResumeVo) {
+		// 动态导入 marked 库以兼容 CommonJS 环境
+		const { marked } = await import('marked');
+		
 		const template = lodash.cloneDeep(resumeTemplate);
 
 		const skillContent = marked(skillsToMarkdown(resumeVo.skill), { async: false });
