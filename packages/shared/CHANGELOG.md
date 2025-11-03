@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.2.0-beta.15](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.14...v5.2.0-beta.15) (2025-11-03)
+
+**Note:** Version bump only for package @prisma-ai/shared
+
 # [5.2.0-beta.14](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.13...v5.2.0-beta.14) (2025-11-02)
 
 ### Features
