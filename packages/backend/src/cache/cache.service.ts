@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { EventBusService, EventList } from '../EventBus/event-bus.service';
 import { RedisService } from '../redis/redis.service';
-
+//! 有缓存雪崩风险
 export enum L1_DEFAULT_TTL {
 	SHORT = 30, // 30秒 - 超热点数据
 	MEDIUM = 300, // 5分钟 - 热点数据

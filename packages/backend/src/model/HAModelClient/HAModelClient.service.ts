@@ -4,6 +4,7 @@ import { AIMessageChunk } from '@langchain/core/messages';
 import { ChatOpenAICallOptions } from '@langchain/openai';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ZodAny } from 'zod';
 import { CircuitBreakerService } from './services/circuit-breaker.service';
 import { FactoryService } from './services/factory.service';
 import { RateLimiterService } from './services/rate-limiter.service';
@@ -122,7 +123,7 @@ export class HAModelClient {
 	 * 开启 llm 的 JSON mode （目前不支持JSON schema）
 	 * 这能确保返回的是有效的JSON
 	 */
-	withStructuredOutput(schema: Zod.AnyZodObject) {
+	withStructuredOutput(schema: ZodAny) {
 		//! 组合withStructuredOutput时解析器会出错
 		// const modelClass = this.model.constructor;
 		// let newModel = new modelClass(this.modelConfig);
@@ -261,7 +262,7 @@ export class HAModelClientService {
 				]
 			},
 			modelRequestQueueConfig: {
-				maxConcurrent: 20 //默认该模型实例的最大请求并发为20
+				maxConcurrent: this.configService.get<number>('modelRequestQueueConfig_maxConcurrent') ?? 20 //默认该模型实例的最大请求并发为20
 			}
 		},
 		jsonMode = false

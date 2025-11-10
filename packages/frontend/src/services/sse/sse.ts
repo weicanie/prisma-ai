@@ -275,7 +275,10 @@ async function frontendOver(sessionId: string) {
 	const res = await instance.get<SDF<string>>(`llm-session/frontend-over?sessionId=${sessionId}`);
 	return res;
 }
-
+/**
+ * 释放后端用户llm会话
+ * @param sessionId 会话id
+ */
 async function freeSession(sessionId: string) {
 	const res = await instance.get<SDF<string>>(`llm-session/free-session?sessionId=${sessionId}`);
 	return res;
