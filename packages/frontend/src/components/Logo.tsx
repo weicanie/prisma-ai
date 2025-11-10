@@ -72,12 +72,12 @@ export function Logo(props: React.ComponentPropsWithoutRef<'svg'>) {
 				dominantBaseline="middle"
 				textAnchor="start"
 			>
-				<tspan fill="rgb(234,27,52)">P</tspan>
-				<tspan fill="rgb(242,104,35)">ri</tspan>
-				{/* <tspan fill="rgb(209, 196, 7)">i</tspan> */}
-				<tspan fill="rgb(42,181,70)">s</tspan>
-				<tspan fill="rgb(44,162,190)">m</tspan>
-				<tspan fill="rgb(116,100,144)">a</tspan>
+				<tspan fill="rgb(116,100,144)">P</tspan>
+				<tspan fill="rgb(44,162,190)">r</tspan>
+				<tspan fill="rgb(42,181,70)">i</tspan>
+				<tspan fill="rgb(209, 196, 7)">s</tspan>
+				<tspan fill="rgb(234,27,52)">m</tspan>
+				<tspan fill="rgb(242,104,35)">a</tspan>
 				<tspan fill="rgb(86,145,225)">AI</tspan>
 			</text>
 		</svg>

@@ -2,9 +2,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { Logo } from '@/components/Logo';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Button } from '@/views/Saas/components/c-cpns/Button';
-import { Logo } from '@/views/Saas/components/c-cpns/Logo';
 import { SlimLayout } from '@/views/Saas/components/c-cpns/SlimLayout';
 import { loginformSchema, type LoginFormType, type LoginResponse } from '@prisma-ai/shared';
 import { useEffect, useState } from 'react';

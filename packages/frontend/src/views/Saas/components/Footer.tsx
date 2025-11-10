@@ -1,6 +1,6 @@
+import { Logo } from '@/components/Logo';
 import { Link } from 'react-router-dom';
 import { Container } from './c-cpns/Container';
-import { Logo } from './c-cpns/Logo';
 import { NavLink } from './c-cpns/NavLink';
 
 export function Footer() {

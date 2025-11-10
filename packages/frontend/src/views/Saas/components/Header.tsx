@@ -2,10 +2,10 @@ import { Popover, PopoverBackdrop, PopoverButton, PopoverPanel } from '@headless
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
 
+import { Logo } from '@/components/Logo';
 import { isUserLogin } from '../../../utils/isUserLogin';
 import { Button } from './c-cpns/Button';
 import { Container } from './c-cpns/Container';
-import { Logo } from './c-cpns/Logo';
 import { NavLink } from './c-cpns/NavLink';
 
 function MobileNavLink({ to, children }: { to: string; children: React.ReactNode }) {

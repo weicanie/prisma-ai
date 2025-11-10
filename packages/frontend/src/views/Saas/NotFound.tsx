@@ -1,10 +1,10 @@
+import { Logo } from '@/components/Logo';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Prism from '../../components/Prism';
 import Wall from '../../components/Wall';
 import { useTheme } from '../../utils/theme';
 import { Button } from './components/c-cpns/Button';
-import { Logo } from './components/c-cpns/Logo';
 import { SlimLayout } from './components/c-cpns/SlimLayout';
 export default function NotFound() {
 	const { resolvedTheme } = useTheme();

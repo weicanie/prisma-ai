@@ -6,7 +6,6 @@ import {
 	LayoutList,
 	LibraryBig,
 	MonitorCog,
-	Pyramid,
 	SlidersHorizontal,
 	Sparkles,
 	SquarePen,
@@ -15,6 +14,7 @@ import {
 } from 'lucide-react';
 import * as React from 'react';
 
+import { Logo } from '@/components/Logo';
 import {
 	Sidebar,
 	SidebarContent,
@@ -65,8 +65,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 		},
 		teams: [
 			{
-				name: 'Prisma',
-				logo: Pyramid,
+				name: '',
+				logo: Logo,
 				plan: '从简历到offer'
 			}
 		],
@@ -222,7 +222,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			<SidebarHeader>
 				<TeamSwitcher teams={data.teams} />
 			</SidebarHeader>
-			<SidebarContent>
+			<SidebarContent className="scb-thin">
 				<NavMain
 					items={data.navMain}
 					selectedGroupIndex={selectedGroupIndex}

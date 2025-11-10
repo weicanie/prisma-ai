@@ -1,12 +1,12 @@
 import registAgreement from '@/assets/注册协议.md?raw';
 import privacyAgreement from '@/assets/隐私协议.md?raw';
+import { Logo } from '@/components/Logo';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { register } from '@/services/login_regist';
 import MilkdownEditor from '@/views/Main/components/Editor';
 import { Button } from '@/views/Saas/components/c-cpns/Button';
-import { Logo } from '@/views/Saas/components/c-cpns/Logo';
 import { SlimLayout } from '@/views/Saas/components/c-cpns/SlimLayout';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
