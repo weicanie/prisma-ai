@@ -1,4 +1,4 @@
-import type { UserInfoFromToken } from '../loginVerify';
+import type { UserInfoFromToken } from '../login_regist';
 
 // 与后端 CreateEducationDto 对齐的请求体类型（供前端表单提交使用）
 export type EducationDegree = '博士' | '硕士' | '本科' | '大专' | '高中' | '其他';

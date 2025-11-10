@@ -1,4 +1,4 @@
-import type { UserInfoFromToken } from '../loginVerify';
+import type { UserInfoFromToken } from '../login_regist';
 
 // 与后端 CreateCareerDto 对齐的请求体类型（供前端表单提交使用）
 export interface CreateCareerDtoShared {

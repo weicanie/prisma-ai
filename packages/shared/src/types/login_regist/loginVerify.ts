@@ -1,4 +1,4 @@
-import { UserConfig } from './user_config';
+import { UserConfig } from '../user_config';
 
 export interface UserInfoFromToken {
 	userId: string;

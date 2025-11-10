@@ -21,7 +21,7 @@ import { z } from 'zod';
 import { CreateCareerDtoShared } from '../career/career';
 import { CreateEducationDtoShared } from '../education/education';
 import { CreateJobDto } from '../job';
-import { UserInfoFromToken } from '../loginVerify';
+import { UserInfoFromToken } from '../login_regist';
 import { ProjectDto } from '../project/project';
 import { CreateSkillDto } from '../skill/skill';
 

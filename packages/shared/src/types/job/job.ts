@@ -1,6 +1,6 @@
 // 定义招聘信息相关的 DTO 和 VO
 
-import { UserInfoFromToken } from './loginVerify';
+import { UserInfoFromToken } from '../login_regist';
 
 export enum JobOpenStatus {
 	OPEN = 'open', //招聘中
