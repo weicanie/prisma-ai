@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { projectSchema } from './project/project.schema';
-import { skillSchema } from './skill.schema';
+import { projectSchema } from '../project/project.schema';
+import { skillSchema } from '../skill/skill.schema';
 /**
  * match chain 传入的简历
  */

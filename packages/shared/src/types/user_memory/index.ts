@@ -23,7 +23,7 @@ import { CreateEducationDtoShared } from '../education/education';
 import { CreateJobDto } from '../job';
 import { UserInfoFromToken } from '../loginVerify';
 import { ProjectDto } from '../project/project';
-import { CreateSkillDto } from '../skill';
+import { CreateSkillDto } from '../skill/skill';
 
 const userProfileSchema = z.object({
 	qualifications: z

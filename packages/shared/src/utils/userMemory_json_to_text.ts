@@ -4,7 +4,7 @@ import { profileJsonToText, stringArrayToline } from './profile_json_to_text';
 /**
  * 将求职偏好json转为md文本
  */
-export function jobPreferenceJsonToText(jobPreference: jobSeekDestinationT): string {
+function jobPreferenceJsonToText(jobPreference: jobSeekDestinationT): string {
 	const { jobType, jobName, industry, company, city } = jobPreference;
 	return `
 ### 求职意向

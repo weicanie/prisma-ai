@@ -1,12 +1,12 @@
 // 定义简历相关的 DTO 和 VO
 
 import { z } from 'zod';
-import { CareerVO, UpdateCareerDto } from './career/career';
-import { EducationVO, UpdateEducationDto } from './education/education';
-import { JobVo } from './job';
-import { ProjectVo, updateProjectDto } from './project/project';
+import { CareerVO, UpdateCareerDto } from '../career/career';
+import { EducationVO, UpdateEducationDto } from '../education/education';
+import { JobVo } from '../job';
+import { ProjectVo, updateProjectDto } from '../project/project';
+import { SkillVo, UpdateSkillDto } from '../skill/skill';
 import { resumeMatchedSchema } from './resume.schema';
-import { SkillVo, UpdateSkillDto } from './skill';
 export enum ResumeStatus {
 	committed = 'committed', //初提交
 	matched = 'matched' //用户已合并匹配
