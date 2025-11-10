@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.2.1](https://github.com/weicanie/prisma-ai/compare/v5.2.0...v5.2.1) (2025-11-10)
+
+### Bug Fixes
+
+- **swc:** set ignoreDynamic to true to support esm packages in cjs output ([44c5d98](https://github.com/weicanie/prisma-ai/commit/44c5d987d0af64c477c16787f245720b66c7367e))
+
 # [5.2.0](https://github.com/weicanie/prisma-ai/compare/v5.2.0-beta.15...v5.2.0) (2025-11-10)
 
 **Note:** Version bump only for package root
