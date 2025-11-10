@@ -2,6 +2,14 @@
 <img src="https://github.com/weicanie/prisma-ai/blob/main/images/readme/logo.png" alt="Logo"/>
 </p>
 
+<p align="center">
+  <a href="https://www.douyin.com/video/7566259892604980530" target="_blank">
+    <img src="https://raw.githubusercontent.com/weicanie/prisma-ai/main/images/readme/video-cover.png" alt="魔历, 简历变 offer的魔法" width="600"/>
+  </a>
+  <br/>
+  <strong>点击图片观看项目介绍视频</strong>
+</p>
+
 <div align="center">
 
 # Prisma-AI：你的求职 AI co-pilot
