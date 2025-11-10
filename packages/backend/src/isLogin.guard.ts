@@ -13,7 +13,9 @@ import {
 import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
 import { Role } from './decorator';
-
+/**
+ * 通过IsLoginGuard后的请求对象
+ */
 export interface UserRequest extends Request {
 	userInfo: UserInfoFromToken;
 	token: string;
@@ -37,7 +39,7 @@ export class IsLoginGuard implements CanActivate {
 			return true;
 		}
 		// jwt鉴定token,并提取用户信息
-		const request = context.switchToHttp().getRequest<UserRequest>();
+		const request = context.switchToHttp().getRequest();
 		let token = request.headers.authorization ?? (request.query.token as string);
 		if (!token) {
 			throw new Error(ErrorCode.USER_TOKEN_NOT_CARRY);
@@ -82,9 +84,9 @@ export class IsLoginGuard implements CanActivate {
 		// 存储用户信息
 		request.userInfo = userInfo;
 		// 无感续token
-		const { userId, username } = userInfo;
+		const { userId, username, role } = userInfo;
 		const newToken = this.jwtService.sign(
-			{ userId, username },
+			{ userId, username, role },
 			{
 				privateKey: this.configService.get('PRIVATE_KEY'),
 				algorithm: 'RS256',
