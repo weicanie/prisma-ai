@@ -201,7 +201,7 @@ Prisma‑AI 解决你求职时最头疼的 4 件事：
 
 ### 主项目许可证
 
-本项目（Prisma-AI）的主要代码遵循自定义版权协议，版权归 weicanie 所有。详细信息请参阅根目录下的 [LICENSE](LICENSE) 文件。
+本项目（Prisma-AI）的主要代码遵循AGPL-3.0协议，版权归 weicanie 所有。详细信息请参阅根目录下的 [LICENSE](LICENSE) 文件。
 
 ### 第三方组件许可证
 

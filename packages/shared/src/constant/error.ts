@@ -43,7 +43,7 @@ export const errorMessage = {
 	[ErrorCode.USER_ALREADY_EXISTS]: '用户已存在',
 	[ErrorCode.USER_EMAIL_ALREADY_EXISTS]: '该邮箱已被注册',
 	[ErrorCode.USER_PASSWORD_WRONG]: '密码错误',
-	[ErrorCode.CAPTCHAEXPIRED]: '验证码已过期',
+	[ErrorCode.CAPTCHAEXPIRED]: '验证码未发送或已过期',
 	[ErrorCode.CAPTCHAWRONG]: '验证码错误',
 	[ErrorCode.USER_TOKEN_INVALID]: '用户token无效',
 	[ErrorCode.USER_TOKEN_NOT_CARRY]: '用户token未携带',
