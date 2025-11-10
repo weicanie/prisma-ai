@@ -26,6 +26,7 @@ import {
 import { findAllProjects } from '../../../services/project';
 import { useSseAnswer } from '../../../services/sse/useSseAnswer';
 import ClickCollapsible from '../components/ClickCollapsible';
+import { FreeSession } from '../components/FlushSession';
 import { ChangeLLM } from './components/ChangeLLM';
 import MilkdownEditor from './components/Editor';
 import { MySpin } from './components/MySpin';
@@ -416,6 +417,7 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 							console.log('选中项目:', projectId);
 						}}
 					/>
+					<FreeSession></FreeSession>
 				</div>
 
 				{/* 提示词 */}

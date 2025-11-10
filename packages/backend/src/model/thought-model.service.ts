@@ -10,7 +10,8 @@ import { z } from 'zod';
 import { DeepSeekStreamChunk } from '../type/sse';
 import { GlmModel, GlmNeed, ModelService } from './model.service';
 // TODO gemini 思考与回答分离方案
-// streamEvents + tool方案是可以实现gemini的思考/答案的分离输出，但prompt复杂（比如现在的要求复杂JSON输出）gemini的生成格式就会出错
+// streamEvents + tool方案是可以实现gemini的思考/答案的分离输出（中文），但prompt复杂（比如现在的要求复杂JSON输出）gemini的生成格式就会出错
+// gemini官方提供 include_thoughts参数来开启返回思考内容（英文）的功能，但langchain.js貌似没有支持
 
 //TODO langchain.js官方issue表明其自身存在相关的恶性bug！
 // https://github.com/langchain-ai/langchainjs/issues/6440
