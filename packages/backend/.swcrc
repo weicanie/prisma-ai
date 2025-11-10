@@ -32,7 +32,7 @@
 		"strictMode": false,
 		"lazy": false,
 		"noInterop": false,
-		"ignoreDynamic": false
+		"ignoreDynamic": true //保留源码中的动态导入，以在cjs产物中支持引入纯esm包
 	},
 	"minify": false,
 	"sourceMaps": true,
