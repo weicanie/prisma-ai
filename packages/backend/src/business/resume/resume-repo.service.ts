@@ -15,7 +15,10 @@ import { serverResumefileManager } from '../../utils/resume/resumeRepositoryMana
 import { ResumeRepoDto } from './dto/resumeRepo.dto';
 import { ResumeDocument } from './entities/resume.entity';
 import { ResumeService } from './resume.service';
-
+/**
+ * 防御：避免编译器将动态import()转译为 require()，导致cjs产物中require esm包而出错
+ */
+const dynamicImport = new Function('specifier', 'return import(specifier)');
 /**
  * 将简历数据导出为magic-resume要求的JSON格式，并通过写入到指定文件夹来进行共享。
  */
@@ -51,8 +54,9 @@ export class ResumeJsonService {
 	 */
 	private async fillTemplate(resumeVo: ResumeVo) {
 		// 动态导入 marked 库以兼容 CommonJS 环境
-		const { marked } = await import('marked');
-		
+		// const { marked } = await import('marked');
+		const { marked } = await dynamicImport('marked');
+
 		const template = lodash.cloneDeep(resumeTemplate);
 
 		const skillContent = marked(skillsToMarkdown(resumeVo.skill), { async: false });
