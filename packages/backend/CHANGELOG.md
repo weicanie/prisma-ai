@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.2.2](https://github.com/weicanie/prisma-ai/compare/v5.2.1...v5.2.2) (2025-11-10)
+
+### Bug Fixes
+
+- **resume-repo:** use dynamic import function to avoid cjs require esm issue ([b007743](https://github.com/weicanie/prisma-ai/commit/b0077436733da3f03a4b1e83b0345b1946738840))
+
 ## [5.2.1](https://github.com/weicanie/prisma-ai/compare/v5.2.0...v5.2.1) (2025-11-10)
 
 ### Bug Fixes
