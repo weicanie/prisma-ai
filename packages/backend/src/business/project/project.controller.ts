@@ -1,13 +1,24 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Sse } from '@nestjs/common';
+import {
+	Body,
+	Controller,
+	Delete,
+	Get,
+	Inject,
+	Param,
+	Post,
+	Put,
+	Query,
+	Sse
+} from '@nestjs/common';
 import {
 	type ImplementDto,
 	ProjectStatus,
 	type SelectedLLM,
+	type SsePipeManager,
 	type UserInfoFromToken
 } from '@prisma-ai/shared';
 import * as crypto from 'crypto';
 import { RequireLogin, UserInfo } from '../../decorator';
-import { SseManagerService } from '../../manager/sse-session-manager/sse-manager.service';
 import { ProjectZodDto } from './dto/project.dto';
 import { ProjectImplementService } from './project-implement.service';
 import { ProjectProcessService } from './project-process.service';
@@ -19,7 +30,8 @@ export class ProjectController {
 		private readonly projectService: ProjectService,
 		private readonly projectImplementService: ProjectImplementService,
 		private readonly projectProcessService: ProjectProcessService,
-		private readonly sseManagerService: SseManagerService
+		@Inject('SsePipeManager')
+		private readonly sseManagerService: SsePipeManager
 	) {}
 
 	/**

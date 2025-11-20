@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
 	businessLookupResultSchema,
@@ -15,6 +15,7 @@ import {
 	ProjectVo,
 	SelectedLLM,
 	SseFunc,
+	type SsePipeManager,
 	StreamingChunk,
 	UserFeedback,
 	UserInfoFromToken,
@@ -26,10 +27,7 @@ import { z, ZodSchema } from 'zod';
 import { ChainService } from '../../chain/chain.service';
 import { ProjectChainService } from '../../chain/project-chain.service';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
-import {
-	redisStoreResult,
-	SseManagerService
-} from '../../manager/sse-session-manager/sse-manager.service';
+import { redisStoreResult } from '../../manager/sse-session-manager/sse-manager.service';
 import { RedisService } from '../../redis/redis.service';
 import { SkillService } from '../skill/skill.service';
 import { ProjectZodDto } from './dto/project.dto';
@@ -59,7 +57,8 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 		public eventBusService: EventBusService,
 		public redisService: RedisService,
 		public skillService: SkillService,
-		private readonly sseManager: SseManagerService
+		@Inject('SsePipeManager')
+		private readonly sseManager: SsePipeManager
 	) {
 		this.initFuncPool();
 	}

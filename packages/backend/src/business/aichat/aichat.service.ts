@@ -1,10 +1,11 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 
 import { Runnable, RunnableSequence } from '@langchain/core/runnables';
 import {
 	ConversationDto,
 	ConversationSendDto,
 	SseFunc,
+	type SsePipeManager,
 	StreamingChunk,
 	UserInfoFromToken,
 	WithFuncPool
@@ -16,7 +17,6 @@ import { BusinessEnum } from '../../chain/project-chain.service';
 import { ProjectKonwbaseRetrieveService } from '../../chain/project-konwbase-retrieve.service';
 import { DbService } from '../../DB/db.service';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
-import { SseManagerService } from '../../manager/sse-session-manager/sse-manager.service';
 import { RedisService } from '../../redis/redis.service';
 import { ProjectService } from '../project/project.service';
 import { UserMemoryService } from '../user-memory/user-memory.service';
@@ -31,7 +31,8 @@ export class AichatService implements WithFuncPool, OnModuleInit {
 		public projectKonwbaseRetrieveService: ProjectKonwbaseRetrieveService,
 		public projectService: ProjectService,
 		public userMemoryService: UserMemoryService,
-		private readonly sseManager: SseManagerService,
+		@Inject('SsePipeManager')
+		private readonly sseManager: SsePipeManager,
 		public eventBusService: EventBusService,
 		public redisService: RedisService
 	) {

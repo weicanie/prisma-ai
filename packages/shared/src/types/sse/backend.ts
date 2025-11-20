@@ -63,6 +63,7 @@ interface LLMSseSessionData extends SseSessionData {
  */
 interface SsePipeManager {
 	pools: Record<string, WithFuncPool>;
+	registerFuncPool(pool: WithFuncPool): void;
 	onModuleInit(): void;
 	handleSseRequestAndResponse: (
 		sessionId: string,

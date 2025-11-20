@@ -1,21 +1,21 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import {
 	DataChunkErrVO,
 	DataChunkVO,
+	type RedisLike,
 	SelectedLLM,
 	SseFunc,
 	SsePipeManager,
+	type SseSessionManager,
 	StreamingChunk,
 	UserInfoFromToken,
 	WithFuncPool
 } from '@prisma-ai/shared';
 import { catchError, mergeMap, Observable, timeout } from 'rxjs';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
-import { RedisService } from '../../redis/redis.service';
 import { TaskQueueService } from '../../task-queue/task-queue.service';
 import { PersistentTask, TaskStatus } from '../../type/taskqueue';
 import { recordUserUseData } from '../../utils/userUseDataRecord';
-import { SseSessionManagerService } from './session-manager.service';
 /**
  * sse返回LLM生成内容的任务
  */
@@ -90,8 +90,10 @@ export class SseManagerService implements OnModuleInit, SsePipeManager {
 	constructor(
 		private taskQueueService: TaskQueueService,
 		private eventBusService: EventBusService,
-		private redisService: RedisService,
-		private readonly sessionPool: SseSessionManagerService
+		@Inject('RedisLike')
+		private redisService: RedisLike,
+		@Inject('SseSessionManager')
+		private readonly sessionPool: SseSessionManager
 	) {}
 
 	onModuleInit() {

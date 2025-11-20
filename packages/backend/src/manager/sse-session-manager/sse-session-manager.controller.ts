@@ -1,20 +1,21 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, Query } from '@nestjs/common';
 import {
 	SsePipeController,
 	type LLMSessionRequest,
+	type SseSessionManager,
 	type UserInfoFromToken
 } from '@prisma-ai/shared';
 import * as crypto from 'crypto';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { TaskQueueService } from '../../task-queue/task-queue.service';
-import { SseSessionManagerService } from './session-manager.service';
 /**
  * 创建llm生成会话的接口：1、创建用户llm生成会话（同一时间控制为最多一个）、上下文（输入）
  */
 @Controller('llm-session')
 export class SseSessionManagerController implements SsePipeController {
 	constructor(
-		private readonly sessionPool: SseSessionManagerService,
+		@Inject('SseSessionManager')
+		private readonly sessionPool: SseSessionManager,
 		private readonly taskQueueService: TaskQueueService
 	) {}
 

@@ -2,11 +2,16 @@ import { Global, Logger, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient } from 'redis';
 import { RedisService } from './redis.service';
+
 @Global()
 @Module({
 	controllers: [],
 	providers: [
 		RedisService,
+		{
+			provide: 'RedisLike',
+			useExisting: RedisService
+		},
 		{
 			provide: 'REDIS_CLIENT',
 			inject: [ConfigService],
@@ -31,6 +36,6 @@ import { RedisService } from './redis.service';
 		}
 	],
 	imports: [],
-	exports: [RedisService]
+	exports: [RedisService, 'RedisLike']
 })
 export class RedisModule {}

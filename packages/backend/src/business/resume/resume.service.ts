@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
 	JobVo,
@@ -15,6 +15,7 @@ import {
 	SelectedLLM,
 	SkillVo,
 	SseFunc,
+	type SsePipeManager,
 	StreamingChunk,
 	updateProjectDto,
 	UpdateResumeContentDto,
@@ -28,10 +29,7 @@ import { from, Observable } from 'rxjs';
 import { ChainService } from '../../chain/chain.service';
 import { HjmChainService } from '../../chain/hjm-chain.service';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
-import {
-	redisStoreResult,
-	SseManagerService
-} from '../../manager/sse-session-manager/sse-manager.service';
+import { redisStoreResult } from '../../manager/sse-session-manager/sse-manager.service';
 import { RedisService } from '../../redis/redis.service';
 import { asyncMap } from '../../utils/awaitMap';
 import { PopulateFields } from '../../utils/type';
@@ -75,7 +73,8 @@ export class ResumeService implements WithFuncPool, OnModuleInit {
 		public redisService: RedisService,
 		private readonly jobService: JobService,
 		private readonly hjmChainService: HjmChainService,
-		private readonly sseManager: SseManagerService,
+		@Inject('SsePipeManager')
+		private readonly sseManager: SsePipeManager,
 		private readonly careerService: CareerService,
 		private readonly educationService: EducationService,
 		private readonly skillService: SkillService,

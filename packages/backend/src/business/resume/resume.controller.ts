@@ -3,6 +3,7 @@ import {
 	Controller,
 	Delete,
 	Get,
+	Inject,
 	Param,
 	Patch,
 	Post,
@@ -12,11 +13,11 @@ import {
 } from '@nestjs/common';
 import {
 	SelectedLLM,
+	type SsePipeManager,
 	type UpdateResumeContentDto,
 	type UserInfoFromToken
 } from '@prisma-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
-import { SseManagerService } from '../../manager/sse-session-manager/sse-manager.service';
 import { CreateResumeDto } from './dto/create-resume.dto';
 import { ResumeRepoDto } from './dto/resumeRepo.dto';
 import { UpdateResumeDto } from './dto/update-resume.dto';
@@ -27,7 +28,8 @@ import { ResumeService } from './resume.service';
 export class ResumeController {
 	constructor(
 		private readonly resumeService: ResumeService,
-		private readonly sseManagerService: SseManagerService,
+		@Inject('SsePipeManager')
+		private readonly sseManagerService: SsePipeManager,
 		private readonly resumeJsonService: ResumeJsonService
 	) {}
 

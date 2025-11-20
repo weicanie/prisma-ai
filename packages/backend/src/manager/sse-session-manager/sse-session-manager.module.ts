@@ -9,7 +9,18 @@ import { SseSessionManagerController } from './sse-session-manager.controller';
 @Module({
 	imports: [RedisModule, TaskQueueModule, EventBusModule],
 	controllers: [SseSessionManagerController],
-	providers: [SseSessionManagerService, SseManagerService],
-	exports: [SseSessionManagerService, SseManagerService]
+	providers: [
+		SseSessionManagerService,
+		SseManagerService,
+		{
+			provide: 'SsePipeManager',
+			useExisting: SseManagerService
+		},
+		{
+			provide: 'SseSessionManager',
+			useExisting: SseSessionManagerService
+		}
+	],
+	exports: ['SseSessionManager', 'SsePipeManager']
 })
 export class SseSessionManagerModule {}

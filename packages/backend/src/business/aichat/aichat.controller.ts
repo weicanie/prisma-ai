@@ -1,19 +1,20 @@
-import { Body, Controller, Get, Param, Post, Query, Sse } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Param, Post, Query, Sse } from '@nestjs/common';
 import type {
 	ConversationSendDto,
 	MessageSendDto,
 	SelectedLLM,
+	SsePipeManager,
 	UserInfoFromToken
 } from '@prisma-ai/shared';
 import { RequireLogin, UserInfo } from '../../decorator';
-import { SseManagerService } from '../../manager/sse-session-manager/sse-manager.service';
 import { AichatService } from './aichat.service';
 
 @Controller('aichat')
 export class AichatController {
 	constructor(
 		private readonly aichatService: AichatService,
-		private readonly sseManagerService: SseManagerService
+		@Inject('SsePipeManager')
+		private readonly sseManagerService: SsePipeManager
 	) {}
 
 	@Post()
