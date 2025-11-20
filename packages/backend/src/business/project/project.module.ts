@@ -4,7 +4,6 @@ import * as bodyParser from 'body-parser';
 import { ChainModule } from '../../chain/chain.module';
 import { EventBusModule } from '../../EventBus/event-bus.module';
 import { SseSessionManagerModule } from '../../manager/sse-session-manager/sse-session-manager.module';
-import { TaskManagerModule } from '../../manager/task-manager/task-manager.module';
 import { RedisModule } from '../../redis/redis.module';
 import { TaskQueueModule } from '../../task-queue/task-queue.module';
 import { PrismaAgentModule } from '../prisma-agent/prisma-agent.module';
@@ -41,7 +40,6 @@ import { ProjectService } from './project.service';
 		TaskQueueModule,
 		SkillModule,
 		PrismaAgentModule,
-		TaskManagerModule,
 		SseSessionManagerModule,
 		MongooseModule.forFeature([
 			{ name: Project.name, schema: ProjectSchema },

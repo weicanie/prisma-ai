@@ -38,7 +38,7 @@ export class ProjectController {
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
 		const metadata = {
-			funcKey: this.projectProcessService.funcKeys.lookupProject,
+			funcKey: this.projectProcessService.lookupProject.name,
 			poolName: this.projectProcessService.poolName,
 			model: model
 		};
@@ -63,7 +63,7 @@ export class ProjectController {
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
 		const metadata = {
-			funcKey: this.projectProcessService.funcKeys.polishProject,
+			funcKey: this.projectProcessService.polishProject.name,
 			poolName: this.projectProcessService.poolName,
 			model: model
 		};
@@ -88,7 +88,7 @@ export class ProjectController {
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
 		const metadata = {
-			funcKey: this.projectProcessService.funcKeys.mineProject,
+			funcKey: this.projectProcessService.mineProject.name,
 			poolName: this.projectProcessService.poolName,
 			model: model
 		};
@@ -113,7 +113,7 @@ export class ProjectController {
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
 		const metadata = {
-			funcKey: this.projectProcessService.funcKeys.businessLookupProject,
+			funcKey: this.projectProcessService.businessLookupProject.name,
 			poolName: this.projectProcessService.poolName,
 			model: model
 		};
@@ -138,7 +138,7 @@ export class ProjectController {
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
 		const metadata = {
-			funcKey: this.projectProcessService.funcKeys.businessPaperProject,
+			funcKey: this.projectProcessService.businessPaperProject.name,
 			poolName: this.projectProcessService.poolName,
 			model: model
 		};

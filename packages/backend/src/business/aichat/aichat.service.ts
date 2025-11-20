@@ -4,8 +4,10 @@ import { Runnable, RunnableSequence } from '@langchain/core/runnables';
 import {
 	ConversationDto,
 	ConversationSendDto,
+	SseFunc,
 	StreamingChunk,
-	UserInfoFromToken
+	UserInfoFromToken,
+	WithFuncPool
 } from '@prisma-ai/shared';
 import { from, Observable } from 'rxjs';
 import { AichatChainService } from '../../chain/aichat-chain.service';
@@ -14,10 +16,8 @@ import { BusinessEnum } from '../../chain/project-chain.service';
 import { ProjectKonwbaseRetrieveService } from '../../chain/project-konwbase-retrieve.service';
 import { DbService } from '../../DB/db.service';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
-import { TaskManagerService } from '../../manager/task-manager/task-manager.service';
+import { SseManagerService } from '../../manager/sse-session-manager/sse-manager.service';
 import { RedisService } from '../../redis/redis.service';
-import { WithFuncPool } from '../../utils/abstract';
-import { SseFunc } from '../../utils/type';
 import { ProjectService } from '../project/project.service';
 import { UserMemoryService } from '../user-memory/user-memory.service';
 import { MessageSendDto } from './dto/aichat-dto';
@@ -31,24 +31,25 @@ export class AichatService implements WithFuncPool, OnModuleInit {
 		public projectKonwbaseRetrieveService: ProjectKonwbaseRetrieveService,
 		public projectService: ProjectService,
 		public userMemoryService: UserMemoryService,
-		private readonly taskManager: TaskManagerService,
+		private readonly sseManager: SseManagerService,
 		public eventBusService: EventBusService,
 		public redisService: RedisService
 	) {
+		this.initFuncPool();
+	}
+
+	public poolName = 'AichatService';
+	public funcPool: Record<string, SseFunc>;
+
+	initFuncPool() {
 		this.funcPool = {
 			sendMessageToAIStream: this.sendMessageToAIStream.bind(this)
 		};
 	}
 
 	onModuleInit() {
-		this.taskManager.registerFuncPool(this);
+		this.sseManager.registerFuncPool(this);
 	}
-
-	public poolName = 'AichatService';
-	public funcPool: Record<string, SseFunc>;
-	public funcKeys = {
-		sendMessageToAIStream: 'sendMessageToAIStream'
-	};
 
 	private logger = new Logger();
 

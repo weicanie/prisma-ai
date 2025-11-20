@@ -115,7 +115,7 @@ export function ChangeLLMJob() {
 					size="sm"
 					className={`h-8 gap-1 text-sm font-medium ${colorScheme.button.bg} ${colorScheme.button.border} ${colorScheme.button.text} ${colorScheme.button.hover}`}
 				>
-					{currentConfig.shortName}
+					{currentConfig?.shortName}
 					<ChevronDown className="h-3 w-3" />
 				</Button>
 			</PopoverTrigger>
@@ -155,9 +155,9 @@ export function ChangeLLMJob() {
 										<div className={`text-xs mb-1 ${colorScheme.item.scenario.text}`}>
 											{config.scenario}
 										</div>
-										<div className={`text-xs ${colorScheme.item.description.text}`}>
+										{/* <div className={`text-xs ${colorScheme.item.description.text}`}>
 											{config.description}
-										</div>
+										</div> */}
 									</div>
 									{isSelected && (
 										<Check className={`h-4 w-4 flex-shrink-0 ml-2 ${colorScheme.checkIcon.text}`} />

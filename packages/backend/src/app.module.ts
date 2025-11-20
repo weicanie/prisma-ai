@@ -25,7 +25,6 @@ import { GlobalFilter } from './errorHandle.filter';
 import { EventBusModule } from './EventBus/event-bus.module';
 import { IsLoginGuard } from './isLogin.guard';
 import { SseSessionManagerModule } from './manager/sse-session-manager/sse-session-manager.module';
-import { TaskManagerModule } from './manager/task-manager/task-manager.module';
 @Module({
 	imports: [
 		/* 业务模块 */
@@ -60,8 +59,7 @@ import { TaskManagerModule } from './manager/task-manager/task-manager.module';
 		),
 		EventBusModule,
 		CopilotModule,
-		SseSessionManagerModule,
-		TaskManagerModule
+		SseSessionManagerModule
 	],
 	providers: [
 		{

@@ -1,30 +1,15 @@
-import { SelectedLLM } from '@prisma-ai/shared';
+import { SelectedLLM, type SsePipeHook } from '@prisma-ai/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { eventBusService, EventList } from '../../utils/EventBus/event-bus.service';
-import {
-	getSessionStatusAndDecide,
-	getSseData,
-	modelKey,
-	pathKey,
-	sessionStatusKey,
-	type contextInput
-} from './sse';
+import type { StartParams } from './type';
+import { sseUtil } from './util';
 
-/**
- * 控制式 Hook：通过 start/cancel 明确触发/终止一次 LLM(Natrual Language Process) 流式会话
- * - 不再依赖 props 改变自动启动，避免渲染阶段副作用触发
- */
-type StartParams = {
-	path: string; // 请求的URL路径，如 '/project/lookup'
-	input: contextInput; // 后端方法的输入
-	model: string; // 选择的模型
-};
 /**
  *
  * @param initialDoneStatus done初始状态，用于区分AI聊天（初始为ture，代表没有正在进行的生成）与AI单次调用（项目与简历优化，初始为false，代表生成没有进行或者没有结束）
  * @returns
  */
-export function useSseAnswer(initialDoneStatus = false) {
+export const useSseAnswer: SsePipeHook = (initialDoneStatus = false) => {
 	// 流式内容与状态
 	const [content, setContent] = useState('');
 	const [reasonContent, setReasonContent] = useState('');
@@ -47,9 +32,9 @@ export function useSseAnswer(initialDoneStatus = false) {
 			setAnswering(true);
 			setDone(false);
 			try {
-				await getSessionStatusAndDecide(input);
+				await sseUtil.getSessionStatusAndDecide(input);
 				// 建立 SSE 连接并保存清理函数
-				const cleanup = getSseData(
+				const cleanup = sseUtil.getSseData(
 					path,
 					model,
 					setContent,
@@ -85,6 +70,41 @@ export function useSseAnswer(initialDoneStatus = false) {
 	}, []);
 
 	/**
+	 * 页面类型 -> 页面URL，用于通过当前URL确定当前页面类型
+	 */
+	const UrlMap = {
+		project: [
+			'/project/lookup',
+			'/project/polish',
+			'/project/mine',
+			'/project/business-lookup',
+			'/project/business-paper'
+		],
+		resume: ['/resume/match'],
+		aichat: ['/aichat/stream']
+	};
+	/**
+	 * 项目、简历、对话共用一个异常恢复逻辑，需要区分当前页面是否对得上当前会话，然后再恢复
+	 * @param curPath 当前调用的后端接口
+	 */
+	function shouldRecover(curPath: string) {
+		const curUrl = window.location.pathname;
+		const isAiChat = curUrl.includes('/aichat');
+		const isProjectAction = curUrl.includes('/projects');
+		const isResumeAction = curUrl.includes('/resumes');
+		if (isAiChat) {
+			return UrlMap.aichat.includes(curPath);
+		}
+		if (isProjectAction) {
+			return UrlMap.project.includes(curPath);
+		}
+		if (isResumeAction) {
+			return UrlMap.resume.includes(curPath);
+		}
+		return false;
+	}
+
+	/**
 	 * 断点接传：页面刷新/重新打开后尝试恢复
 	 * - 不影响正常的 start 调用
 	 */
@@ -95,21 +115,21 @@ export function useSseAnswer(initialDoneStatus = false) {
     只会查询并持久化当前持有的会话的状态
     不进行任何其它操作
     */
-			await getSessionStatusAndDecide('');
-			const status = localStorage.getItem(sessionStatusKey);
+			await sseUtil.getSessionStatusAndDecide('');
+			const status = localStorage.getItem(sseUtil.sessionStatusKey);
 			if (status === 'backdone' || status === 'running') {
-				const curPath = localStorage.getItem(pathKey);
+				const curPath = localStorage.getItem(sseUtil.pathKey);
 				if (!curPath) {
 					console.error('path不存在,断点接传失败');
 					return;
 				}
 				if (!shouldRecover(curPath)) {
-					console.error('当前页面不进行断点接传,路径:', curPath);
+					console.warn('当前页面不进行断点接传,路径:', curPath);
 					return;
 				}
-				const modelStr = localStorage.getItem(modelKey) || undefined;
+				const modelStr = localStorage.getItem(sseUtil.modelKey) || undefined;
 				setAnswering(true);
-				const cleanup = getSseData(
+				const cleanup = sseUtil.getSseData(
 					curPath,
 					modelStr as unknown as SelectedLLM | undefined,
 					setContent,
@@ -147,36 +167,4 @@ export function useSseAnswer(initialDoneStatus = false) {
 		start,
 		cancel
 	};
-}
-
-const UrlMap = {
-	project: [
-		'/project/lookup',
-		'/project/polish',
-		'/project/mine',
-		'/project/business-lookup',
-		'/project/business-paper'
-	],
-	resume: ['/resume/match'],
-	aichat: ['/aichat/stream']
 };
-/**
- * 项目、简历、对话共用一个异常恢复逻辑，需要区分当前页面是否对得上当前会话，然后再恢复
- * @param curPath 当前调用的后端接口
- */
-function shouldRecover(curPath: string) {
-	const curUrl = window.location.pathname;
-	const isAiChat = curUrl.includes('/aichat');
-	const isProjectAction = curUrl.includes('/projects');
-	const isResumeAction = curUrl.includes('/resumes');
-	if (isAiChat) {
-		return UrlMap.aichat.includes(curPath);
-	}
-	if (isProjectAction) {
-		return UrlMap.project.includes(curPath);
-	}
-	if (isResumeAction) {
-		return UrlMap.resume.includes(curPath);
-	}
-	return false;
-}

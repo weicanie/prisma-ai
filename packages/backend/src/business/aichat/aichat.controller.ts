@@ -34,7 +34,7 @@ export class AichatController {
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
 		const metadata = {
-			funcKey: this.aichatService.funcKeys.sendMessageToAIStream,
+			funcKey: this.aichatService.sendMessageToAIStream.name,
 			poolName: this.aichatService.poolName,
 			model
 		};

@@ -40,7 +40,7 @@ export class ResumeController {
 		@UserInfo() userInfo: UserInfoFromToken
 	) {
 		const metadata = {
-			funcKey: this.resumeService.funcKeys.resumeMatchJob,
+			funcKey: this.resumeService.resumeMatchJob.name,
 			poolName: this.resumeService.poolName,
 			model
 		};

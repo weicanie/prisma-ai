@@ -14,9 +14,11 @@ import {
 	ProjectStatus,
 	ProjectVo,
 	SelectedLLM,
+	SseFunc,
 	StreamingChunk,
 	UserFeedback,
-	UserInfoFromToken
+	UserInfoFromToken,
+	WithFuncPool
 } from '@prisma-ai/shared';
 import { Model } from 'mongoose';
 import { from, Observable } from 'rxjs';
@@ -24,11 +26,11 @@ import { z, ZodSchema } from 'zod';
 import { ChainService } from '../../chain/chain.service';
 import { ProjectChainService } from '../../chain/project-chain.service';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
-import { redisStoreResult } from '../../manager/sse-session-manager/sse-manager.service';
-import { TaskManagerService } from '../../manager/task-manager/task-manager.service';
+import {
+	redisStoreResult,
+	SseManagerService
+} from '../../manager/sse-session-manager/sse-manager.service';
 import { RedisService } from '../../redis/redis.service';
-import { WithFuncPool } from '../../utils/abstract';
-import { SseFunc } from '../../utils/type';
 import { SkillService } from '../skill/skill.service';
 import { ProjectZodDto } from './dto/project.dto';
 import { Project, ProjectDocument } from './entities/project.entity';
@@ -45,13 +47,7 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 
 	@InjectModel(ProjectMined.name)
 	private projectMinedModel: Model<ProjectMinedDocument>;
-	public funcKeys = {
-		polishProject: 'polishProject',
-		mineProject: 'mineProject',
-		lookupProject: 'lookupProject',
-		businessLookupProject: 'businessLookupProject',
-		businessPaperProject: 'businessPaperProject'
-	};
+
 	logger = new Logger(ProjectProcessService.name);
 
 	public funcPool: Record<string, SseFunc>;
@@ -63,8 +59,15 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 		public eventBusService: EventBusService,
 		public redisService: RedisService,
 		public skillService: SkillService,
-		private readonly taskManager: TaskManagerService
+		private readonly sseManager: SseManagerService
 	) {
+		this.initFuncPool();
+	}
+	onModuleInit() {
+		this.sseManager.registerFuncPool(this);
+	}
+
+	initFuncPool() {
 		this.funcPool = {
 			polishProject: this.polishProject.bind(this),
 			mineProject: this.mineProject.bind(this),
@@ -72,9 +75,6 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 			businessLookupProject: this.businessLookupProject.bind(this),
 			businessPaperProject: this.businessPaperProject.bind(this)
 		};
-	}
-	onModuleInit() {
-		this.taskManager.registerFuncPool(this);
 	}
 
 	/**

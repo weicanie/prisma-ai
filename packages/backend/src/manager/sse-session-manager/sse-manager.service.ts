@@ -1,13 +1,20 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { DataChunkErrVO, DataChunkVO, SelectedLLM, UserInfoFromToken } from '@prisma-ai/shared';
+import {
+	DataChunkErrVO,
+	DataChunkVO,
+	SelectedLLM,
+	SseFunc,
+	SsePipeManager,
+	StreamingChunk,
+	UserInfoFromToken,
+	WithFuncPool
+} from '@prisma-ai/shared';
 import { catchError, mergeMap, Observable, timeout } from 'rxjs';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { RedisService } from '../../redis/redis.service';
 import { TaskQueueService } from '../../task-queue/task-queue.service';
 import { PersistentTask, TaskStatus } from '../../type/taskqueue';
-import { LLMStreamingChunk, SseFunc } from '../../utils/type';
 import { recordUserUseData } from '../../utils/userUseDataRecord';
-import { TaskManagerService } from '../task-manager/task-manager.service';
 import { SseSessionManagerService } from './session-manager.service';
 /**
  * sse返回LLM生成内容的任务
@@ -46,14 +53,32 @@ export interface redisStoreResult {
  * 其中func参数返回流式数据的且返回的chunk转换为LLMStreamingChunk即可
  */
 @Injectable()
-export class SseManagerService implements OnModuleInit {
+export class SseManagerService implements OnModuleInit, SsePipeManager {
 	private readonly logger = new Logger(SseManagerService.name);
+
+	/**
+	 * 存储所有已注册的函数池
+	 * poolName -> 服务实例
+	 */
+	public pools: Record<string, WithFuncPool> = {};
+
+	/**
+	 * 注册一个包含多个可执行函数的服务（池）
+	 * @param pool 实现了 WithFuncPool 接口的服务实例
+	 */
+	registerFuncPool(pool: WithFuncPool) {
+		if (this.pools[pool.poolName]) {
+			this.logger.warn(`函数池 ${pool.poolName} 已存在，将被覆盖。`);
+		}
+		this.pools[pool.poolName] = pool;
+		this.logger.log(`函数池 ${pool.poolName} 已注册。`);
+	}
 
 	/**
 	 * 存储每个任务的chunk数组池
 	 * 任务id -> chunk数组
 	 */
-	chunkArrayPool: Record<string, LLMStreamingChunk[]> = {};
+	chunkArrayPool: Record<string, StreamingChunk[]> = {};
 
 	/**
 	 * 任务类型字段,用于指定任务处理器
@@ -66,8 +91,7 @@ export class SseManagerService implements OnModuleInit {
 		private taskQueueService: TaskQueueService,
 		private eventBusService: EventBusService,
 		private redisService: RedisService,
-		private readonly sessionPool: SseSessionManagerService,
-		private readonly taskManager: TaskManagerService
+		private readonly sessionPool: SseSessionManagerService
 	) {}
 
 	onModuleInit() {
@@ -109,7 +133,7 @@ export class SseManagerService implements OnModuleInit {
 			});
 		}
 		/* 调用llm开启流式传输 */
-		const func: SseFunc = this.taskManager.pools[metadata.poolName].funcPool[metadata.funcKey];
+		const func: SseFunc = this.pools[metadata.poolName].funcPool[metadata.funcKey];
 		const observable = await func(
 			context.input,
 			context.userInfo!,
@@ -122,7 +146,7 @@ export class SseManagerService implements OnModuleInit {
 			/* 创建订阅 */
 			const subscription = observable
 				.pipe(
-					mergeMap(async (chunk: LLMStreamingChunk) => {
+					mergeMap(async (chunk: StreamingChunk) => {
 						if (chunk) {
 							// this.logger.log(`SSE任务${taskId}生成chunk: ${chunk.content}`);
 							/* 储存到redis、发送chunk抵达事件 */
@@ -183,7 +207,7 @@ export class SseManagerService implements OnModuleInit {
 	/** 工具-将当前生成的chunk储存到redis中-专门用于处理llm(deepseek)生成
 	 * 事件处理器内部调用
 	 */
-	private async saveSseEventData(taskId: string, chunk: LLMStreamingChunk): Promise<void> {
+	private async saveSseEventData(taskId: string, chunk: StreamingChunk): Promise<void> {
 		const task = await this.taskQueueService.getTask<LLMSseTask>(taskId);
 		if (!task) {
 			throw new Error(`任务不存在: ${taskId}`);

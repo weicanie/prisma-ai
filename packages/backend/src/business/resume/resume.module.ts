@@ -3,7 +3,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ChainModule } from '../../chain/chain.module';
 import { EventBusModule } from '../../EventBus/event-bus.module';
 import { SseSessionManagerModule } from '../../manager/sse-session-manager/sse-session-manager.module';
-import { TaskManagerModule } from '../../manager/task-manager/task-manager.module';
 import { RedisModule } from '../../redis/redis.module';
 import { CareerModule } from '../career/career.module';
 import { EducationModule } from '../education/education.module';
@@ -32,7 +31,6 @@ import { ResumeService } from './resume.service';
 		ChainModule,
 		EventBusModule,
 		RedisModule,
-		TaskManagerModule,
 		SseSessionManagerModule,
 		CareerModule,
 		EducationModule,

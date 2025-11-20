@@ -1,20 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { LLMSessionRequest } from '@prisma-ai/shared';
+import { LLMSessionRequest, LLMSseSessionData, SseSessionManager } from '@prisma-ai/shared';
 import { RedisService } from '../../redis/redis.service';
-
-/**
- * SSE会话数据
- */
-interface SseSessionData {
-	context?: any; // 存储两步请求中的上下文
-	done?: boolean; // 标记要传输的数据是否生成完毕（后端是否完成会话）
-	fontendDone?: boolean; // 标记前端是否完成会话（完成了SSE数据流的接收）
-}
-interface LLMSseSessionData extends SseSessionData {
-	context?: LLMSessionRequest; // 存储两步请求中的上下文
-	done?: boolean; // 标记内容是否生成完毕（后端是否完成会话）
-	fontendDone?: boolean; // 标记前端是否完成会话（完全接收SSE的数据流）
-}
 
 /* 
 会话管理规定：
@@ -36,7 +22,7 @@ interface LLMSseSessionData extends SseSessionData {
  * userId -> sessionId -> session对象（SessionData）
  */
 @Injectable()
-export class SseSessionManagerService implements OnModuleInit {
+export class SseSessionManagerService implements OnModuleInit, SseSessionManager {
 	// Redis键前缀
 	private readonly KEY_PREFIX = 'session:llm:';
 	// 会话过期时间(1天)

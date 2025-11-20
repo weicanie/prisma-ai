@@ -25,5 +25,8 @@
 			"types": "./dist/index.d.ts"
 		}
 	},
-	"gitHead": "d528dbb9c4aa674d7948ddd6244cf8752c172994"
+	"gitHead": "d528dbb9c4aa674d7948ddd6244cf8752c172994",
+	"dependencies": {
+		"rxjs": "^7.8.1"
+	}
 }

@@ -14,24 +14,27 @@ import {
 	ResumeVo,
 	SelectedLLM,
 	SkillVo,
+	SseFunc,
 	StreamingChunk,
 	updateProjectDto,
 	UpdateResumeContentDto,
 	UpdateSkillDto,
 	UserFeedback,
-	UserInfoFromToken
+	UserInfoFromToken,
+	WithFuncPool
 } from '@prisma-ai/shared';
 import { Model, Types } from 'mongoose';
 import { from, Observable } from 'rxjs';
 import { ChainService } from '../../chain/chain.service';
 import { HjmChainService } from '../../chain/hjm-chain.service';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
-import { redisStoreResult } from '../../manager/sse-session-manager/sse-manager.service';
-import { TaskManagerService } from '../../manager/task-manager/task-manager.service';
+import {
+	redisStoreResult,
+	SseManagerService
+} from '../../manager/sse-session-manager/sse-manager.service';
 import { RedisService } from '../../redis/redis.service';
-import { WithFuncPool } from '../../utils/abstract';
 import { asyncMap } from '../../utils/awaitMap';
-import { PopulateFields, SseFunc } from '../../utils/type';
+import { PopulateFields } from '../../utils/type';
 import { CareerService } from '../career/career.service';
 import { UpdateCareerDto } from '../career/dto/update-career.dto';
 import { UpdateEducationDto } from '../education/dto/update-education.dto';
@@ -60,10 +63,6 @@ export class ResumeService implements WithFuncPool, OnModuleInit {
 	@InjectModel(ResumeMatched.name)
 	private resumeMatchedModel: Model<ResumeMatchedDocument>;
 
-	public funcKeys = {
-		resumeMatchJob: 'resumeMatchJob'
-	};
-
 	public funcPool: Record<string, SseFunc>;
 
 	poolName = 'ResumeService';
@@ -76,19 +75,23 @@ export class ResumeService implements WithFuncPool, OnModuleInit {
 		public redisService: RedisService,
 		private readonly jobService: JobService,
 		private readonly hjmChainService: HjmChainService,
-		private readonly taskManager: TaskManagerService,
+		private readonly sseManager: SseManagerService,
 		private readonly careerService: CareerService,
 		private readonly educationService: EducationService,
 		private readonly skillService: SkillService,
 		private readonly projectService: ProjectService
 	) {
+		this.initFuncPool();
+	}
+
+	initFuncPool() {
 		this.funcPool = {
 			resumeMatchJob: this.resumeMatchJob.bind(this)
 		};
 	}
 
 	onModuleInit() {
-		this.taskManager.registerFuncPool(this);
+		this.sseManager.registerFuncPool(this);
 	}
 
 	async resumeMatchJob(

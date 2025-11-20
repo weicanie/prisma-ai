@@ -1,6 +1,4 @@
-import { SelectedLLM, StreamingChunk, UserFeedback, UserInfoFromToken } from '@prisma-ai/shared';
 import { Types } from 'mongoose';
-import { Observable } from 'rxjs';
 /**
  * 用于获取populate后的Document类型
  * 即将相关字段的ObjectId、ObjectId[]类型转换为实际数据的类型
@@ -16,19 +14,3 @@ export type PopulateFields<T, K extends keyof T, R = unknown> = Omit<T, K> & {
 			: unknown
 		: T[P];
 };
-
-/**
- * LLM生成的chunk
- */
-export interface LLMStreamingChunk extends StreamingChunk {}
-
-/**
- * 返回sse数据的函数
- */
-export type SseFunc = (
-	input: any,
-	userInfo: UserInfoFromToken,
-	taskId: string,
-	userFeedback: UserFeedback,
-	model: SelectedLLM //使用的llm
-) => Promise<Observable<LLMStreamingChunk>>;

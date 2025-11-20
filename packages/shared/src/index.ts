@@ -13,7 +13,7 @@ export * from './types/question';
 export * from './types/resume/';
 export * from './types/serverDataFormat';
 export * from './types/skill';
-export * from './types/sse';
+export * from './types/sse/';
 export * from './types/task';
 export * from './types/user_config';
 export * from './types/user_memory';

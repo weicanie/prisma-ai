@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { RedisLike } from '@prisma-ai/shared';
 import { type RedisClientType } from 'redis';
 
 @Injectable()
-export class RedisService {
+export class RedisService implements RedisLike {
 	@Inject('REDIS_CLIENT')
 	private redisClient: RedisClientType;
 
