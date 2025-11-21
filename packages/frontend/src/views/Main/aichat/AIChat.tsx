@@ -28,13 +28,12 @@ import { useSseAnswer } from '../../../services/sse/useSseAnswer';
 import ClickCollapsible from '../components/ClickCollapsible';
 import { FreeSession } from '../components/FlushSession';
 import { ChangeLLM } from './components/ChangeLLM';
-import MilkdownEditor from './components/Editor';
 import { MySpin } from './components/MySpin';
 import Conversations from './Conversations';
 import { Logo } from './Logo';
 import Projects from './Projects';
 import TipsCard from './TipsCard';
-
+const MarkdownEditor = React.lazy(() => import('../components/Editor_react_markdown'));
 interface AIChatProps {
 	className?: string;
 }
@@ -300,17 +299,14 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 											{item.reasonContent && item.role !== 'user' && (
 												<ClickCollapsible
 													title={'思考过程'}
-													icon={<Brain className="size-5" />}
+													icon={<Brain className="size-5 text-blue-400" />}
 													defaultOpen={false}
+													className="border-blue-400 border-l-1 pl-2"
 												>
-													<MilkdownEditor
-														text={item.reasonContent}
-														isShwoMode={true}
-														isTypingMode={true}
-													/>
+													<MarkdownEditor initialValue={item.reasonContent} isReadOnly={true} />
 												</ClickCollapsible>
 											)}
-											<MilkdownEditor text={content} isShwoMode={true} isTypingMode={true} />
+											<MarkdownEditor initialValue={content} isReadOnly={true} />
 										</>
 									);
 								}}
@@ -342,21 +338,14 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 										{reasonContent && (
 											<ClickCollapsible
 												title={'思考过程'}
-												icon={<Brain className="size-5" />}
-												defaultOpen={true}
+												icon={<Brain className="size-5 text-blue-400" />}
+												defaultOpen={false}
+												className="border-blue-400 border-l-1 pl-2"
 											>
-												<MilkdownEditor
-													text={reasonContent}
-													isShwoMode={true}
-													isTypingMode={true}
-												/>
+												<MarkdownEditor initialValue={reasonContent} isReadOnly={true} />
 											</ClickCollapsible>
 										)}
-										<MilkdownEditor
-											text={content || 'Prisma 正在生成中...'}
-											isShwoMode={true}
-											isTypingMode={true}
-										/>
+										<MarkdownEditor initialValue={content} isReadOnly={true} />
 									</>
 								);
 							}}
@@ -409,7 +398,7 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 		<>
 			<div className="w-full flex flex-col justify-center items-center gap-3">
 				{/* 项目选择组件 */}
-				<div className="w-full max-w-[700px] relative top-12 z-1">
+				<div className="flex justify-between w-full max-w-[700px] relative top-1 z-1">
 					<Projects
 						className="relative"
 						onProjectSelect={projectId => {
@@ -417,26 +406,14 @@ const AIChat: React.FC<AIChatProps> = ({ className }) => {
 							console.log('选中项目:', projectId);
 						}}
 					/>
-					<FreeSession></FreeSession>
-				</div>
-
-				{/* 提示词 */}
-				<div className="w-full max-w-[700px] flex justify-end">
-					{/* <Prompts
-					items={SENDER_PROMPTS}
-					onItemClick={info => {
-						onSubmit(info.data.description as string);
-					}}
-					styles={{
-						item: { padding: '6px 12px' }
-					}}
-					className="w-full max-w-[700px]"
-				/> */}
-					<ChangeLLM
-						selector={selectAIChatLLM}
-						setModelAction={setAIChatLLM}
-						className="rounded-[20px] relative top-14 right-15 z-1 dark:text-zinc-300"
-					></ChangeLLM>
+					<div>
+						<FreeSession className="relative top-[1px]"></FreeSession>
+						<ChangeLLM
+							selector={selectAIChatLLM}
+							setModelAction={setAIChatLLM}
+							className="rounded-[20px]  z-1 dark:text-zinc-300"
+						></ChangeLLM>
+					</div>
 				</div>
 
 				{/* 输入框 */}
