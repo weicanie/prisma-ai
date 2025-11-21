@@ -56,7 +56,13 @@ export default defineConfig(({ mode }) => {
 							'@radix-ui/react-tabs',
 							'@radix-ui/react-tooltip'
 						],
-						'react-query-vendor': ['@tanstack/react-query', '@tanstack/react-query-devtools']
+						'react-query-vendor': ['@tanstack/react-query', '@tanstack/react-query-devtools'],
+						'markmap-vendor': ['markmap-common', 'markmap-view', 'markmap-toolbar'],
+						'markmap-vendor-2': ['markmap-lib'],
+						'react-markdown-vendor': ['react-markdown', 'rehype-stringify', 'remark-gfm', 'shiki'],
+						'react-markdown-plugin-vendor-1': ['rehype-raw'],
+						'react-markdown-plugin-vendor-2': ['rehype-starry-night'],
+						'react-markdown-plugin-vendor-3': ['remark-mermaid-plugin']
 					}
 				}
 			}
