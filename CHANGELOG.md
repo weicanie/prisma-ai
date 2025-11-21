@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.2.3](https://github.com/weicanie/prisma-ai/compare/v5.2.2...v5.2.3) (2025-11-21)
+
+### Features
+
+- **aichat:** 使用更合适的markdown编辑器展示ai对话消息 ([e52d7aa](https://github.com/weicanie/prisma-ai/commit/e52d7aa735d1affffbda037ed434ee5dcfbe6d1e))
+- **Hero:** adjust text size for mobile ([dfcafdb](https://github.com/weicanie/prisma-ai/commit/dfcafdbb5546c2aec45c2c0aacd0090d5b5799c2))
+
 ## [5.2.2](https://github.com/weicanie/prisma-ai/compare/v5.2.1...v5.2.2) (2025-11-10)
 
 ### Bug Fixes
