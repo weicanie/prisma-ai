@@ -84,7 +84,10 @@ export class AichatChainService {
 		let llm: Runnable;
 		switch (modelConfig.llm_type) {
 			case AIChatLLM.v3:
-				llm = this.modelService.getLLMDeepSeekRaw('deepseek-chat', userConfig.llm.deepseek.apiKey);
+				llm = this.modelService.getLLMDeepSeekRaw(
+					modelConfig.llm_type as 'deepseek-chat',
+					userConfig.llm.deepseek.apiKey
+				);
 				llm = this.transformAIMessageStream(llm);
 				break;
 			case AIChatLLM.r1:

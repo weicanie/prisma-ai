@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Eraser } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { cn } from '../../../lib/utils';
 import { sseUtil } from '../../../services/sse/util';
 import { eventBusService, EventList } from '../../../utils/EventBus/event-bus.service';
 /**
@@ -12,7 +13,7 @@ function resetStatus() {
 	localStorage.removeItem(sseUtil.pathKey);
 	localStorage.removeItem(sseUtil.modelKey);
 }
-export function FreeSession() {
+export function FreeSession({ className }: { className?: string }) {
 	const curSessionId = localStorage.getItem(sseUtil.llmSessionKey);
 	const navigate = useNavigate();
 	return (
@@ -30,10 +31,10 @@ export function FreeSession() {
 						eventBusService.emit(EventList.sessionFree);
 						navigate('#next-action');
 					}}
-					className="dark:text-zinc-200 font-semibold"
+					className={cn('dark:text-zinc-200 font-semibold', className)}
 				>
 					<Eraser></Eraser>
-					清除当前对话
+					释放当前对话
 				</Button>
 			)}
 		</>
