@@ -1,5 +1,4 @@
 import { UserInfoFromToken } from '../login_regist/';
-import { ProjectDto } from '../project/project';
 
 /* chunk的标准格式,其它observable返回的chunk都需要转换为该格式
   用于流式数据的sse传输和存储
@@ -25,28 +24,6 @@ export interface DataChunkErrVO {
 		done: true;
 	};
 }
-
-/* 参数类型 */
-export interface TRequestParams {
-	polish: {
-		input: ProjectDto;
-		target: 'polish';
-	};
-	mine: {
-		input: ProjectDto;
-		target: 'mine';
-	};
-	lookup: {
-		input: ProjectDto;
-		target: 'lookup';
-	};
-}
-
-export const RequestTargetMap = {
-	polish: '/sse/project-generate', //类型占位符
-	mine: '/sse/project-generate',
-	lookup: '/sse/project-generate'
-};
 
 /**
  * @description 用户反馈，用于决定是否需要进行反思
