@@ -20,7 +20,7 @@ interface SsePipeHookReturn {
 	cancel: () => void;
 }
 
-type SsePipeHook = (initialDoneStatus: boolean) => SsePipeHookReturn;
+type SsePipeHook = (initialDoneStatus?: boolean) => SsePipeHookReturn;
 
 /**
  * 创建sse请求的上下文中的输入

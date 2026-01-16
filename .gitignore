@@ -11,6 +11,7 @@ packages/backend/generated
 /project_wikis
 /user_data/*
 /marketing
+/paper
 # Node.js
 /node_modules
 .pnpm-store
