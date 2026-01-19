@@ -68,3 +68,8 @@ export interface ConversationSendDto {
 
 	content: ChatMessage[];
 }
+// 是与llm还是agent对话
+export enum Who {
+	llm = 'llm',
+	agent = 'agent'
+}

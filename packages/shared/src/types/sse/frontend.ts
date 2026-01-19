@@ -28,7 +28,7 @@ type SsePipeHook = (initialDoneStatus?: boolean) => SsePipeHookReturn;
  * @description MatchJobDto 简历匹配岗位服务
  */
 type ContextInput = {
-	input: ProjectDto | MatchJobDto | MessageSendDto;
+	input: ProjectDto | MatchJobDto | MessageSendDto | any; // 传入SseFunc的input（第一个参数）
 	userFeedback?: UserFeedback;
 };
 /**

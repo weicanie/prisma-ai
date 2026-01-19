@@ -7,6 +7,7 @@ export enum ErrorCode {
 	FORBIDDEN = '1003',
 	NOT_FOUND = '1004',
 	SERVER_ERROR = '1005',
+	TIMEOUT = '1006',
 	//业务错误
 	//1、注册、登录
 	USER_NOT_FOUND = '2001',
@@ -37,6 +38,7 @@ export const errorMessage = {
 	[ErrorCode.FORBIDDEN]: '禁止访问',
 	[ErrorCode.NOT_FOUND]: '资源未找到',
 	[ErrorCode.SERVER_ERROR]: '服务器错误',
+	[ErrorCode.TIMEOUT]: '请求超时',
 	//业务错误
 	//1、注册、登录
 	[ErrorCode.USER_NOT_FOUND]: '用户不存在',

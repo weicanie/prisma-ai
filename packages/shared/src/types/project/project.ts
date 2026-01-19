@@ -68,15 +68,6 @@ export interface ProjectMineddVo extends z.infer<typeof projectMinedSchema> {
 }
 
 /**
- * 亮点实现前端上传的Dto
- */
-export interface ImplementDto {
-	projectId: string;
-	lightspot: string;
-	projectPath: string;
-}
-
-/**
  * 可用的用于处理项目经验的模型
  */
 export enum SelectedLLM {
