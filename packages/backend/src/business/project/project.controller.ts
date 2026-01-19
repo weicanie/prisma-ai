@@ -11,16 +11,13 @@ import {
 	Sse
 } from '@nestjs/common';
 import {
-	type ImplementDto,
 	ProjectStatus,
 	type SelectedLLM,
 	type SsePipeManager,
 	type UserInfoFromToken
 } from '@prisma-ai/shared';
-import * as crypto from 'crypto';
 import { RequireLogin, UserInfo } from '../../decorator';
 import { ProjectZodDto } from './dto/project.dto';
-import { ProjectImplementService } from './project-implement.service';
 import { ProjectProcessService } from './project-process.service';
 import { ProjectService } from './project.service';
 
@@ -28,7 +25,6 @@ import { ProjectService } from './project.service';
 export class ProjectController {
 	constructor(
 		private readonly projectService: ProjectService,
-		private readonly projectImplementService: ProjectImplementService,
 		private readonly projectProcessService: ProjectProcessService,
 		@Inject('SsePipeManager')
 		private readonly sseManagerService: SsePipeManager
@@ -158,31 +154,6 @@ export class ProjectController {
 			return this.sseManagerService.handleSseRequestAndResponseRecover(sessionId, userInfo);
 		}
 		return this.sseManagerService.handleSseRequestAndResponse(sessionId, userInfo, metadata);
-	}
-
-	/**
-	 * 使用Agent实现亮点
-	 * @param implementDto 实现亮点所需的数据
-	 * @param userInfo 用户信息
-	 */
-	@RequireLogin()
-	@Post('agent-implement')
-	async implement(@Body() implementDto: ImplementDto, @UserInfo() userInfo: UserInfoFromToken) {
-		try {
-			const project = await this.projectService.findProjectById(implementDto.projectId, userInfo);
-			return {
-				data: await this.projectImplementService.startLightspotImplementTask(
-					project,
-					implementDto.lightspot,
-					implementDto.projectPath,
-					userInfo,
-					crypto.randomUUID()
-				),
-				message: '请到 CLI 与Agent协作'
-			};
-		} catch (error) {
-			throw error;
-		}
 	}
 
 	/* mcp tools 测试 */

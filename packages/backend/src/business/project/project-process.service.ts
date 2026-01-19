@@ -59,10 +59,9 @@ export class ProjectProcessService implements WithFuncPool, OnModuleInit {
 		public skillService: SkillService,
 		@Inject('SsePipeManager')
 		private readonly sseManager: SsePipeManager
-	) {
-		this.initFuncPool();
-	}
+	) {}
 	onModuleInit() {
+		this.initFuncPool();
 		this.sseManager.registerFuncPool(this);
 	}
 

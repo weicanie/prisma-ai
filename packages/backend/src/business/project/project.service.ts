@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { ChainService } from '../../chain/chain.service';
 import { ProjectChainService } from '../../chain/project-chain.service';
 import { EventBusService } from '../../EventBus/event-bus.service';
+import { WithProjectGet } from '../../type/abstract';
 import { RedisService } from './../../redis/redis.service';
 import { ProjectZodDto } from './dto/project.dto';
 import { Project, ProjectDocument } from './entities/project.entity';
@@ -12,7 +13,7 @@ import { ProjectMined, ProjectMinedDocument } from './entities/projectMined.enti
 import { ProjectPolished, ProjectPolishedDocument } from './entities/projectPolished.entity';
 
 @Injectable()
-export class ProjectService {
+export class ProjectService implements WithProjectGet {
 	@InjectModel(Project.name)
 	private projectModel: Model<ProjectDocument>;
 

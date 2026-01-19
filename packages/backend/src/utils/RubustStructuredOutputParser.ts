@@ -1,7 +1,7 @@
 import { UserConfig } from '@prisma-ai/shared';
 import { StructuredOutputParser } from 'langchain/output_parsers';
 import z from 'zod';
-import { WithFormfixChain } from '../utils/abstract';
+import { WithFormfixChain } from '../type/abstract';
 
 /**
  * 替换字符串值中非法的、未被转义的换行符，而保留已转义的序列。
