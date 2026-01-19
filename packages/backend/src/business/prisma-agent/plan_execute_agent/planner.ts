@@ -1,12 +1,11 @@
 import { Command, END, START, StateGraph } from '@langchain/langgraph';
-import * as fs from 'fs/promises';
-import * as path from 'path';
 import { EventList } from '../../../EventBus/event-bus.service';
 import { waitForHumanReview } from '../human_involve_agent/node';
 import { reflect } from '../reflect_agent/node';
 import { GraphState } from '../state';
-import { NodeConfig, Plan, ReviewType, UserAction } from '../types';
+import { NodeConfig, Plan, ReviewType, Step, UserAction } from '../types';
 import { getAgentConfig, updateAgentConfig } from '../utils/config';
+import { chainStreamExecutor } from '../utils/stream';
 
 // --- Node Implementations ---
 
@@ -79,7 +78,7 @@ export async function retrieveNode(
 		throw new Error('Missing required state or services in configurable for retrieval.');
 	}
 
-	const projectName = projectInfo.name;
+	const projectName = projectInfo.name!;
 
 	config.configurable.logger.log(`检索知识:根据功能亮点 "${lightSpot}" 检索项目代码和领域知识`);
 
@@ -107,7 +106,7 @@ export async function retrieveNode(
 	]);
 
 	config.configurable.logger.log(
-		`检索到 ${projectDocs.length} 个项目代码片段和 ${domainDocs.length} 个领域知识.`
+		`检索到 ${projectDocs.length}长度的项目代码片段和 ${domainDocs.length}长度的领域知识.`
 	);
 
 	return {
@@ -135,12 +134,17 @@ export async function analyze(
 
 	const { projectInfo, lightSpot, reflection, knowledge } = state;
 
-	const result: any = await analysisChain.invoke({
-		projectInfo,
-		lightSpot,
-		knowledge: knowledge ?? undefined,
-		reflection: reflection ?? undefined
-	});
+	const result = await chainStreamExecutor(
+		config.configurable.runId,
+		analysisChain,
+		{
+			projectInfo,
+			lightSpot,
+			knowledge: knowledge ?? undefined,
+			reflection: reflection ?? undefined
+		},
+		config.configurable.manageCurStream
+	);
 
 	const newPlanState: Plan = {
 		output: {
@@ -180,13 +184,18 @@ export async function plan(
 
 	const { projectInfo, lightSpot, plan, reflection, knowledge } = state;
 
-	const result: any = await planChain.invoke({
-		projectInfo,
-		lightSpot,
-		highlightAnalysis: plan.output.highlightAnalysis,
-		knowledge: knowledge ?? undefined,
-		reflection: reflection ?? undefined
-	});
+	const result = await chainStreamExecutor(
+		config.configurable.runId,
+		planChain,
+		{
+			projectInfo,
+			lightSpot,
+			highlightAnalysis: plan.output.highlightAnalysis,
+			knowledge: knowledge ?? undefined,
+			reflection: reflection ?? undefined
+		},
+		config.configurable.manageCurStream
+	);
 
 	const newPlanState: Plan = {
 		...plan,
@@ -305,20 +314,15 @@ export async function shouldReflect(
 			return new Command({ goto: 'prepare_reflection' });
 		case UserAction.FIX:
 			config.configurable.logger.log('用户进行了修正. 继续...');
-			if (!state.humanIO.reviewPath) {
-				throw new Error('Review path is missing for FIX action.');
-			}
-			let fixedContentStr = await fs.readFile(state.humanIO.reviewPath, 'utf-8');
-			const fileExtension = path.extname(state.humanIO.reviewPath);
-			const isJson = fileExtension === '.json';
-			const fixedContent = isJson ? JSON.parse(fixedContentStr) : fixedContentStr;
+
+			const fixedContent = state.fixedContent;
 
 			switch (type) {
 				case ReviewType.ANALYSIS: {
 					const newPlan: Plan = {
 						...state.plan,
 						output: {
-							highlightAnalysis: fixedContent,
+							highlightAnalysis: fixedContent as string,
 							implementationPlan: state.plan?.output.implementationPlan ?? []
 						}
 					};
@@ -334,7 +338,7 @@ export async function shouldReflect(
 						...state.plan,
 						output: {
 							highlightAnalysis: state.plan?.output.highlightAnalysis ?? '',
-							implementationPlan: fixedContent
+							implementationPlan: fixedContent as Step[]
 						}
 					};
 					return new Command({

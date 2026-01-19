@@ -7,13 +7,11 @@ import {
 } from '@langchain/core/runnables';
 import { MemorySaver } from '@langchain/langgraph';
 import { Inject, Injectable } from '@nestjs/common';
-import { ProjectDto } from '@prisma-ai/shared';
+import { ProjectDto, StreamingChunk, UserInfoFromToken } from '@prisma-ai/shared';
 import { z } from 'zod';
 
-import { ChatDeepSeek } from '@langchain/deepseek';
-import { ChatOpenAI } from '@langchain/openai';
 import { ModelService } from '../../../model/model.service';
-import { WithFormfixChain } from '../../../utils/abstract';
+import { WithFormfixChain } from '../../../type/abstract';
 import { RubustStructuredOutputParser } from '../../../utils/RubustStructuredOutputParser';
 import { ReflectAgentService } from '../reflect_agent/reflect_agent.service';
 import { Knowledge, Plan, Reflection, Step, Step_prompt } from '../types';
@@ -94,23 +92,20 @@ export class PlanStepAgentService {
 	 * @input {{ projectInfo: ProjectDto; totalPlan: Plan; currentStep: Step; knowledge?: Knowledge; reflection?: Reflection }} - 输入包括项目信息、整体计划、当前步骤、以及可选的反思。
 	 * @output {z.infer<typeof stepAnalysisSchema>} - 输出包含`stepAnalysis`字段的结构化对象。
 	 */
-	createAnalysisChain(userId: string): Runnable<
-		{
-			projectInfo: ProjectDto;
-			totalPlan: Plan;
-			currentStep: Step;
-			knowledge?: Knowledge;
-			reflection?: Reflection;
-		},
-		z.infer<typeof stepAnalysisSchema>
+	async createAnalysisChain(userInfo: UserInfoFromToken): Promise<
+		Runnable<
+			{
+				projectInfo: ProjectDto;
+				totalPlan: Plan;
+				currentStep: Step;
+				knowledge?: Knowledge;
+				reflection?: Reflection;
+			},
+			z.infer<typeof stepAnalysisSchema>
+		>
 	> {
-		let model: ChatOpenAI | ChatDeepSeek;
-		const modelName = getAgentConfig(userId).model.plan_step;
-		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
-			model = this.modelService.getLLMGeminiRaw(modelName);
-		} else {
-			model = this.modelService.getLLMDeepSeekRaw(modelName);
-		}
+		const modelName = getAgentConfig(userInfo.userId).model.plan_step;
+		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig);
 		if (!model) throw new Error('Model not found');
 		const parser = RubustStructuredOutputParser.from(stepAnalysisSchema, this.chainService);
 
@@ -157,7 +152,7 @@ export class PlanStepAgentService {
 			]
 		]);
 
-		return RunnableSequence.from([
+		const chain: any = RunnableSequence.from([
 			(input: any) => ({
 				totalPlan: JSON.stringify(input.totalPlan, null, 2),
 				currentStep: JSON.stringify(input.currentStep, null, 2),
@@ -175,6 +170,27 @@ export class PlanStepAgentService {
 			model,
 			parser
 		]);
+
+		chain.getStreamVersion = () =>
+			RunnableSequence.from([
+				(input: any) => ({
+					totalPlan: JSON.stringify(input.totalPlan, null, 2),
+					currentStep: JSON.stringify(input.currentStep, null, 2),
+					projectName: input.projectInfo.name,
+					projectBgAndTarget: input.projectInfo.info.desc.bgAndTarget,
+					projectRole: input.projectInfo.info.desc.role,
+					projectContribute: input.projectInfo.info.desc.contribute,
+					projectTechStack: input.projectInfo.info.techStack.join(', '),
+					retrievedProjectCodes: input.knowledge?.retrievedProjectCodes ?? '无',
+					retrievedDomainDocs: input.knowledge?.retrievedDomainDocs ?? '无',
+					reflection: input.reflection ?? '无相关反思',
+					format_instructions: parser.getFormatInstructions()
+				}),
+				prompt,
+				model
+			]);
+
+		return chain;
 	}
 
 	/**
@@ -183,21 +199,18 @@ export class PlanStepAgentService {
 	 * @input {{ stepAnalysis: string; knowledge?: Knowledge; reflection?: Reflection }} - 输入包括步骤需求分析和可选的反思。
 	 * @output {z.infer<typeof stepPlanSchema>} - 输出包含`implementationPlan`（子步骤列表）的结构化对象。
 	 */
-	createPlanChain(userId: string): Runnable<
-		{
-			stepAnalysis: string;
-			knowledge?: Knowledge;
-			reflection?: Reflection;
-		},
-		z.infer<typeof stepPlanSchema>
+	async createPlanChain(userInfo: UserInfoFromToken): Promise<
+		Runnable<
+			{
+				stepAnalysis: string;
+				knowledge?: Knowledge;
+				reflection?: Reflection;
+			},
+			z.infer<typeof stepPlanSchema>
+		>
 	> {
-		let model: ChatOpenAI | ChatDeepSeek;
-		const modelName = getAgentConfig(userId).model.plan_step;
-		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
-			model = this.modelService.getLLMGeminiRaw(modelName);
-		} else {
-			model = this.modelService.getLLMDeepSeekRaw(modelName);
-		}
+		const modelName = getAgentConfig(userInfo.userId).model.plan_step;
+		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig);
 		if (!model) throw new Error('Model not found');
 		const parser = RubustStructuredOutputParser.from(stepPlanSchema, this.chainService);
 
@@ -232,7 +245,7 @@ export class PlanStepAgentService {
 			]
 		]);
 
-		return RunnableSequence.from([
+		const chain: any = RunnableSequence.from([
 			(input: any) => ({
 				stepAnalysis: input.stepAnalysis,
 				retrievedProjectCodes: input.knowledge?.retrievedProjectCodes ?? '无',
@@ -245,6 +258,22 @@ export class PlanStepAgentService {
 
 			parser
 		]);
+
+		chain.getStreamVersion = () =>
+			RunnableSequence.from([
+				(input: any) => ({
+					stepAnalysis: input.stepAnalysis,
+					implementationPlan: JSON.stringify(input.implementationPlan, null, 2),
+					retrievedProjectCodes: input.knowledge?.retrievedProjectCodes ?? '无',
+					retrievedDomainDocs: input.knowledge?.retrievedDomainDocs ?? '无',
+					reflection: input.reflection ?? '无相关反思',
+					format_instructions: parser.getFormatInstructions()
+				}),
+				prompt,
+				model
+			]);
+
+		return chain;
 	}
 
 	/**
@@ -253,21 +282,18 @@ export class PlanStepAgentService {
 	 * @input {{ stepAnalysis: string; implementationPlan: Step[]; knowledge: Knowledge }} - 输入包括步骤分析、子步骤计划和相关知识。
 	 * @output {string} - 输出一个最终的、可以直接执行的字符串Prompt。
 	 */
-	createFinalPromptChain(userId: string): Runnable<
-		{
-			stepAnalysis: string;
-			implementationPlan: Step[];
-			knowledge: Knowledge;
-		},
-		string
+	async createFinalPromptChain(userInfo: UserInfoFromToken): Promise<
+		Runnable<
+			{
+				stepAnalysis: string;
+				implementationPlan: Step[];
+				knowledge: Knowledge;
+			},
+			string
+		>
 	> {
-		let model: ChatOpenAI | ChatDeepSeek;
-		const modelName = getAgentConfig(userId).model.plan_step;
-		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
-			model = this.modelService.getLLMGeminiRaw(modelName);
-		} else {
-			model = this.modelService.getLLMDeepSeekRaw(modelName);
-		}
+		const modelName = getAgentConfig(userInfo.userId).model.plan_step;
+		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig);
 		if (!model) throw new Error('Model not found');
 		const parser = RubustStructuredOutputParser.from(completedPlanSchema, this.chainService);
 
@@ -419,11 +445,10 @@ ${context}
 			}),
 			prompt,
 			model,
-
 			parser
 		]);
 
-		const finalChain = RunnableSequence.from([
+		const finalChain: any = RunnableSequence.from([
 			{
 				completedPlan: planCompletionChain,
 				originalInput: new RunnablePassthrough()
@@ -438,6 +463,24 @@ ${context}
 				}
 			})
 		]);
+
+		finalChain.getStreamVersion = () => {
+			const mock = {
+				stream: async (input: any) => {
+					const result: string = await finalChain.invoke(input);
+					const chunk: StreamingChunk = {
+						content: result,
+						reasonContent: '',
+						done: true,
+						isReasoning: false
+					};
+					// rxjs.from() 转换为 sse API要求的Observable<StreamingChunk>
+					return [chunk];
+				}
+			};
+			return mock;
+		};
+
 		return finalChain;
 	}
 }

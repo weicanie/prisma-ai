@@ -1,13 +1,11 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { Runnable, RunnableSequence } from '@langchain/core/runnables';
-import { ChatDeepSeek } from '@langchain/deepseek';
 import { MemorySaver } from '@langchain/langgraph';
-import { ChatOpenAI } from '@langchain/openai';
 import { Inject, Injectable } from '@nestjs/common';
-import { ProjectDto } from '@prisma-ai/shared';
+import { ProjectDto, UserInfoFromToken } from '@prisma-ai/shared';
 import { z } from 'zod';
 import { ModelService } from '../../../model/model.service';
-import { WithFormfixChain } from '../../../utils/abstract';
+import { WithFormfixChain } from '../../../type/abstract';
 import { RubustStructuredOutputParser } from '../../../utils/RubustStructuredOutputParser';
 import { Reflection } from '../types';
 import { getAgentConfig } from '../utils/config';
@@ -61,23 +59,20 @@ export class PlanExecuteAgentService {
 	 * @input {{ projectInfo: ProjectDto; lightSpot: string; knowledge?: any; reflection?: Reflection }} - 输入包括项目信息、功能亮点、可选的知识库内容和反思。
 	 * @output {z.infer<typeof analysisSchema>} - 输出一个包含`highlightAnalysis`字段的结构化对象。
 	 */
-	createAnalysisChain(userId: string): Runnable<
-		{
-			projectInfo: ProjectDto;
-			lightSpot: string;
-			knowledge?: { retrievedProjectCodes: string; retrievedDomainDocs: string };
-			reflection?: Reflection;
-		},
-		z.infer<typeof analysisSchema>
+	async createAnalysisChain(userInfo: UserInfoFromToken): Promise<
+		Runnable<
+			{
+				projectInfo: ProjectDto;
+				lightSpot: string;
+				knowledge?: { retrievedProjectCodes: string; retrievedDomainDocs: string };
+				reflection?: Reflection;
+			},
+			z.infer<typeof analysisSchema>
+		>
 	> {
-		let model: ChatOpenAI | ChatDeepSeek;
-		const modelName = getAgentConfig(userId).model.plan;
-		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
-			model = this.modelService.getLLMGeminiRaw(modelName);
-			console.log('gemini-model', model);
-		} else {
-			model = this.modelService.getLLMDeepSeekRaw(modelName);
-		}
+		const modelName = getAgentConfig(userInfo.userId).model.plan;
+		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig);
+
 		const parser = RubustStructuredOutputParser.from(analysisSchema, this.chainService);
 
 		const prompt = ChatPromptTemplate.fromMessages([
@@ -92,13 +87,10 @@ export class PlanExecuteAgentService {
 {reflection}
 
 **输出要求:**
-- 你必须只输出一个名为 'highlightAnalysis' 的JSON对象。
 - 需求分析必须清晰，逻辑清晰，条理清晰。
 - 需求分析必须专业，符合软件需求分析的规范。
 - 需求分析必须准确，符合项目实际情况。
 
-直接输出JSON对象本身,而不是markdown格式的json块。
-比如你应该直接输出"{{"name":"..."}}"而不是"\`\`\`json\n{{"name":"..."}}\n\`\`\`"
 
 {format_instructions}`
 			],
@@ -129,7 +121,7 @@ export class PlanExecuteAgentService {
 			]
 		]);
 
-		return RunnableSequence.from([
+		const chain: any = RunnableSequence.from([
 			{
 				reflection: input => input.reflection ?? '无相关反思',
 				projectName: input => input.projectInfo.name,
@@ -146,6 +138,25 @@ export class PlanExecuteAgentService {
 			model,
 			parser
 		]);
+		chain.getStreamVersion = () =>
+			RunnableSequence.from([
+				{
+					reflection: input => input.reflection ?? '无相关反思',
+					projectName: input => input.projectInfo.name,
+					projectBgAndTarget: input => input.projectInfo.info.desc.bgAndTarget,
+					projectRole: input => input.projectInfo.info.desc.role,
+					projectContribute: input => input.projectInfo.info.desc.contribute,
+					projectTechStack: input => input.projectInfo.info.techStack.join(', '),
+					lightSpot: input => input.lightSpot,
+					retrievedProjectCodes: input => input.knowledge?.retrievedProjectCodes ?? '无',
+					retrievedDomainDocs: input => input.knowledge?.retrievedDomainDocs ?? '无',
+					format_instructions: () => parser.getFormatInstructions()
+				},
+				prompt,
+				model
+			]);
+
+		return chain;
 	}
 
 	/**
@@ -154,23 +165,21 @@ export class PlanExecuteAgentService {
 	 * @input {{ projectInfo: ProjectDto; lightSpot: string; highlightAnalysis: string; knowledge?: any; reflection?: Reflection }} - 输入包括项目信息、功能亮点、需求分析、可选的知识库内容和反思。
 	 * @output {z.infer<typeof planSchema>} - 输出一个包含`implementationPlan`数组的结构化对象。
 	 */
-	createPlanChain(userId: string): Runnable<
-		{
-			projectInfo: ProjectDto;
-			lightSpot: string;
-			highlightAnalysis: string;
-			knowledge?: { retrievedProjectCodes: string; retrievedDomainDocs: string };
-			reflection?: Reflection;
-		},
-		z.infer<typeof planSchema>
+	async createPlanChain(userInfo: UserInfoFromToken): Promise<
+		Runnable<
+			{
+				projectInfo: ProjectDto;
+				lightSpot: string;
+				highlightAnalysis: string;
+				knowledge?: { retrievedProjectCodes: string; retrievedDomainDocs: string };
+				reflection?: Reflection;
+			},
+			z.infer<typeof planSchema>
+		>
 	> {
-		let model: ChatOpenAI | ChatDeepSeek;
-		const modelName = getAgentConfig(userId).model.plan;
-		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
-			model = this.modelService.getLLMGeminiRaw(modelName);
-		} else {
-			model = this.modelService.getLLMDeepSeekRaw(modelName);
-		}
+		const modelName = getAgentConfig(userInfo.userId).model.plan;
+		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig);
+
 		const parser = RubustStructuredOutputParser.from(planSchema, this.chainService);
 
 		const prompt = ChatPromptTemplate.fromMessages([
@@ -226,7 +235,8 @@ export class PlanExecuteAgentService {
 请生成分步实现计划。`
 			]
 		]);
-		return RunnableSequence.from([
+
+		const chain: any = RunnableSequence.from([
 			{
 				reflection: input => input.reflection ?? '无相关反思',
 				projectName: input => input.projectInfo.name,
@@ -245,6 +255,26 @@ export class PlanExecuteAgentService {
 
 			parser
 		]);
+
+		chain.getStreamVersion = () =>
+			RunnableSequence.from([
+				{
+					reflection: input => input.reflection ?? '无相关反思',
+					projectName: input => input.projectInfo.name,
+					projectBgAndTarget: input => input.projectInfo.info.desc.bgAndTarget,
+					projectRole: input => input.projectInfo.info.desc.role,
+					projectContribute: input => input.projectInfo.info.desc.contribute,
+					projectTechStack: input => input.projectInfo.info.techStack.join(', '),
+					lightSpot: input => input.lightSpot,
+					highlightAnalysis: input => input.highlightAnalysis,
+					retrievedProjectCodes: input => input.knowledge?.retrievedProjectCodes ?? '无',
+					retrievedDomainDocs: input => input.knowledge?.retrievedDomainDocs ?? '无',
+					format_instructions: () => parser.getFormatInstructions()
+				},
+				prompt,
+				model
+			]);
+		return chain;
 	}
 
 	/**
@@ -253,30 +283,27 @@ export class PlanExecuteAgentService {
 	 * @input 完整的重新规划上下文。
 	 * @output 更新后的`highlightAnalysis`。
 	 */
-	createReAnalysisChain(userId: string): Runnable<
-		{
-			projectName: string;
-			projectDescription: string;
-			projectTechStack: string;
-			lightSpot: string;
-			originalPlan: string;
-			userFeedback: string;
-			summary: string;
-			writtenCodeFiles: string;
-			stepResultList: string;
-			retrievedProjectCodes: string;
-			retrievedDomainDocs: string;
-			reflection: string;
-		},
-		z.infer<typeof analysisSchema>
+	async createReAnalysisChain(userInfo: UserInfoFromToken): Promise<
+		Runnable<
+			{
+				projectName: string;
+				projectDescription: string;
+				projectTechStack: string;
+				lightSpot: string;
+				originalPlan: string;
+				userFeedback: string;
+				summary: string;
+				writtenCodeFiles: string;
+				stepResultList: string;
+				retrievedProjectCodes: string;
+				retrievedDomainDocs: string;
+				reflection: string;
+			},
+			z.infer<typeof analysisSchema>
+		>
 	> {
-		let model: ChatOpenAI | ChatDeepSeek;
-		const modelName = getAgentConfig(userId).model.replan;
-		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
-			model = this.modelService.getLLMGeminiRaw(modelName);
-		} else {
-			model = this.modelService.getLLMDeepSeekRaw(modelName);
-		}
+		const modelName = getAgentConfig(userInfo.userId).model.replan;
+		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig);
 		const parser = RubustStructuredOutputParser.from(analysisSchema, this.chainService);
 		const prompt = ChatPromptTemplate.fromMessages([
 			[
@@ -340,7 +367,7 @@ export class PlanExecuteAgentService {
 请基于以上所有信息，生成一份更新后的详细需求分析。`
 			]
 		]);
-		return RunnableSequence.from([
+		const chain: any = RunnableSequence.from([
 			(input: any) => ({
 				...input,
 				reflection: input.reflection ?? '无相关反思',
@@ -351,6 +378,17 @@ export class PlanExecuteAgentService {
 
 			parser
 		]);
+		chain.getStreamVersion = () =>
+			RunnableSequence.from([
+				(input: any) => ({
+					...input,
+					reflection: input.reflection ?? '无相关反思',
+					format_instructions: parser.getFormatInstructions()
+				}),
+				prompt,
+				model
+			]);
+		return chain;
 	}
 
 	/**
@@ -359,31 +397,28 @@ export class PlanExecuteAgentService {
 	 * @input 完整的重新规划上下文。
 	 * @output 更新后的`implementationPlan`。
 	 */
-	createRePlanChain(userId: string): Runnable<
-		{
-			projectName: string;
-			projectDescription: string;
-			projectTechStack: string;
-			lightSpot: string;
-			highlightAnalysis: string;
-			originalPlan: string;
-			userFeedback: string;
-			summary: string;
-			writtenCodeFiles: string;
-			stepResultList: string;
-			retrievedProjectCodes: string;
-			retrievedDomainDocs: string;
-			reflection: string;
-		},
-		z.infer<typeof planSchema>
+	async createRePlanChain(userInfo: UserInfoFromToken): Promise<
+		Runnable<
+			{
+				projectName: string;
+				projectDescription: string;
+				projectTechStack: string;
+				lightSpot: string;
+				highlightAnalysis: string;
+				originalPlan: string;
+				userFeedback: string;
+				summary: string;
+				writtenCodeFiles: string;
+				stepResultList: string;
+				retrievedProjectCodes: string;
+				retrievedDomainDocs: string;
+				reflection: string;
+			},
+			z.infer<typeof planSchema>
+		>
 	> {
-		let model: ChatOpenAI | ChatDeepSeek;
-		const modelName = getAgentConfig(userId).model.replan;
-		if (modelName === 'gemini-2.5-pro' || modelName === 'gemini-2.5-flash') {
-			model = this.modelService.getLLMGeminiRaw(modelName);
-		} else {
-			model = this.modelService.getLLMDeepSeekRaw(modelName);
-		}
+		const modelName = getAgentConfig(userInfo.userId).model.replan;
+		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig);
 		const parser = RubustStructuredOutputParser.from(planSchema, this.chainService);
 		const prompt = ChatPromptTemplate.fromMessages([
 			[
@@ -454,7 +489,7 @@ export class PlanExecuteAgentService {
 如果要实现的功能亮点已完成，返回空数组`
 			]
 		]);
-		return RunnableSequence.from([
+		const chain: any = RunnableSequence.from([
 			(input: any) => ({
 				...input,
 				reflection: input.reflection ?? '无相关反思',
@@ -465,5 +500,17 @@ export class PlanExecuteAgentService {
 
 			parser
 		]);
+
+		chain.getStreamVersion = () =>
+			RunnableSequence.from([
+				(input: any) => ({
+					...input,
+					reflection: input.reflection ?? '无相关反思',
+					format_instructions: parser.getFormatInstructions()
+				}),
+				prompt,
+				model
+			]);
+		return chain;
 	}
 }

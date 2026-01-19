@@ -148,18 +148,16 @@ const SubAgentState = Annotation.Root({
 	 * @description 用户交互Agent的IO通道。
 	 * @lifecycle - `output` 在各个 `analyze` 和 `plan` 节点中被写入。
 	 *            - `input` 在 `human_review` 节点被中断后，由外部调用时写入。
-	 *            - `reviewPath` 在 `human_review` 节点被中断后，由外部调用时写入。用于获取用户fix修改后的内容。
 	 */
 	humanIO: Annotation<{
 		input: HumanInput | null;
 		output: HumanOutput | null;
-		reviewPath: string | null;
 	}>({
 		reducer: (x, y) => {
 			// console.log('humanIO reducer', x, y);
 			return y ? { ...x, ...y } : x;
 		},
-		default: () => ({ input: null, output: null, reviewPath: null })
+		default: () => ({ input: null, output: null })
 	}),
 	/**
 	 * @description 反思Agent的IO通道。
@@ -189,6 +187,10 @@ const ControlState = Annotation.Root({
 	done: Annotation<boolean>({
 		reducer: (_x, y) => y ?? false,
 		default: () => false
+	}),
+	fixedContent: Annotation<string | Record<any, any>>({
+		reducer: (_x, y) => y ?? '',
+		default: () => ''
 	})
 });
 

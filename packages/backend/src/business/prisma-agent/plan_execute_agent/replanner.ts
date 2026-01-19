@@ -5,9 +5,10 @@ import * as path from 'path';
 import { waitForHumanReview } from '../human_involve_agent/node';
 import { reflect } from '../reflect_agent/node';
 import { GraphState } from '../state';
-import { Plan, ReviewType, RunningConfig, UserAction } from '../types';
+import { Plan, ReviewType, RunningConfig, Step, UserAction } from '../types';
 import { getAgentConfig } from '../utils/config';
 import { formatProjectCodes, formatStepResults, formatWrittenCodeFiles } from '../utils/replanner';
+import { chainStreamExecutor } from '../utils/stream';
 import { uploadCode } from './planner';
 
 interface NodeConfig extends RunnableConfig {
@@ -193,7 +194,7 @@ export async function reAnalyze(
 	const projectDescription = `背景和目标: ${info.desc.bgAndTarget} | 角色: ${info.desc.role} | 贡献: ${info.desc.contribute}`;
 
 	const chainInput = {
-		projectName: name,
+		projectName: name!,
 		projectDescription,
 		projectTechStack: info.techStack.join(', '),
 		lightSpot,
@@ -207,7 +208,12 @@ export async function reAnalyze(
 		reflection: reflection ? JSON.stringify(reflection, null, 2) : '无'
 	};
 
-	const { highlightAnalysis } = await reAnalysisChain.invoke(chainInput);
+	const { highlightAnalysis } = await chainStreamExecutor(
+		config.configurable.runId,
+		reAnalysisChain,
+		chainInput,
+		config.configurable.manageCurStream
+	);
 
 	console.log('---RE-ANALYSIS OUTPUT---', highlightAnalysis);
 
@@ -267,7 +273,7 @@ export async function rePlan(
 	const projectDescription = `背景和目标: ${info.desc.bgAndTarget} | 角色: ${info.desc.role} | 贡献: ${info.desc.contribute}`;
 
 	const chainInput = {
-		projectName: name,
+		projectName: name!,
 		projectDescription,
 		projectTechStack: info.techStack.join(', '),
 		lightSpot,
@@ -282,7 +288,12 @@ export async function rePlan(
 		reflection: reflection ? JSON.stringify(reflection, null, 2) : '无'
 	};
 
-	const { implementationPlan } = await rePlanChain.invoke(chainInput);
+	const { implementationPlan } = await chainStreamExecutor(
+		config.configurable.runId,
+		rePlanChain,
+		chainInput,
+		config.configurable.manageCurStream
+	);
 
 	console.log('---RE-PLAN OUTPUT---', implementationPlan);
 	//没有步骤需要执行则整个流程结束
@@ -358,13 +369,8 @@ export async function shouldReflect(
 			return new Command({ goto: 'prepare_reflection' });
 		case UserAction.FIX: {
 			config.configurable.logger.log('用户进行了修正. 继续...');
-			if (!state.humanIO.reviewPath) {
-				throw new Error('Review path is missing for FIX action.');
-			}
-			const fixedContentStr = await fs.readFile(state.humanIO.reviewPath, 'utf-8');
-			const fileExtension = path.extname(state.humanIO.reviewPath);
-			const isJson = fileExtension === '.json';
-			const fixedContent = isJson ? JSON.parse(fixedContentStr) : fixedContentStr;
+
+			const fixedContent = state.fixedContent;
 
 			switch (type) {
 				case ReviewType.RE_ANALYSIS: {
@@ -374,7 +380,7 @@ export async function shouldReflect(
 					const newPlan: Plan = {
 						...state.plan,
 						output: {
-							highlightAnalysis: fixedContent,
+							highlightAnalysis: fixedContent as string,
 							implementationPlan: state.plan.output.implementationPlan ?? []
 						}
 					};
@@ -390,7 +396,7 @@ export async function shouldReflect(
 						...state.plan,
 						output: {
 							highlightAnalysis: state.plan?.output.highlightAnalysis ?? '',
-							implementationPlan: fixedContent
+							implementationPlan: fixedContent as Step[]
 						}
 					};
 					return new Command({

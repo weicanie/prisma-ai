@@ -1,5 +1,6 @@
 import { GraphState } from '../state';
 import { NodeConfig } from '../types';
+import { chainStreamExecutor } from '../utils/stream';
 
 /**
  * @description 执行反思的图节点。
@@ -18,10 +19,16 @@ export async function reflect(
 	}
 
 	config.configurable.logger.log('---节点: 反思---');
-	const reflection = await reflectChain.invoke({
-		content: input.content,
-		context: input.context ?? '无'
-	});
+	const reflection = await chainStreamExecutor(
+		config.configurable.runId,
+		reflectChain,
+		{
+			content: input.content,
+			context: input.context ?? '无'
+		},
+		config.configurable.manageCurStream
+	);
+
 	config.configurable.logger.log('---反思结果---', reflection);
 	return {
 		reflectIO: {

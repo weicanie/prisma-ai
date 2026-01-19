@@ -1,11 +1,12 @@
 import { Command, END, START, StateGraph } from '@langchain/langgraph';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { waitForHumanReview } from '../human_involve_agent/node';
+import { InterruptType, waitForHumanReview } from '../human_involve_agent/node';
 import { reflect } from '../reflect_agent/node';
 import { GraphState } from '../state';
-import { NodeConfig, Plan_step, ReviewType, UserAction } from '../types';
+import { NodeConfig, Plan_step, ReviewType, Step, UserAction } from '../types';
 import { getAgentConfig } from '../utils/config';
+import { chainStreamExecutor } from '../utils/stream';
 
 type ChainReturned<T extends (...args: any) => any> = T extends (...args: any) => infer R
 	? R
@@ -33,7 +34,7 @@ async function retrieveNode(
 	if (!projectInfo || !plan || !userId) {
 		throw new Error('Missing required state for step retrieval.');
 	}
-	const projectName = projectInfo.name;
+	const projectName = projectInfo.name!;
 	const currentStep = plan.output.implementationPlan[currentStepIndex];
 	const query = currentStep.stepDescription;
 
@@ -98,13 +99,18 @@ async function analyzeStep(
 
 	const currentStep = plan.output.implementationPlan[currentStepIndex];
 
-	const result: any = await stepAnalysisChain.invoke({
-		projectInfo,
-		totalPlan: plan,
-		currentStep,
-		knowledge: stepPlan?.knowledge,
-		reflection: reflection ?? undefined
-	});
+	const result = await chainStreamExecutor(
+		config.configurable.runId,
+		stepAnalysisChain,
+		{
+			projectInfo,
+			totalPlan: plan,
+			currentStep,
+			knowledge: stepPlan?.knowledge,
+			reflection: reflection ?? undefined
+		},
+		config.configurable.manageCurStream
+	);
 
 	const newStepPlan: Plan_step = {
 		...stepPlan,
@@ -145,11 +151,16 @@ async function planStep(
 	const stepPlanChain = config.configurable?.stepPlanChain;
 	if (!stepPlanChain) throw new Error('Step plan chain not found in configurable');
 
-	const result: any = await stepPlanChain.invoke({
-		stepAnalysis: stepPlan.output.stepAnalysis,
-		knowledge: stepPlan.knowledge,
-		reflection: reflection ?? undefined
-	});
+	const result = await chainStreamExecutor(
+		config.configurable.runId,
+		stepPlanChain,
+		{
+			stepAnalysis: stepPlan.output.stepAnalysis,
+			knowledge: stepPlan.knowledge,
+			reflection: reflection ?? undefined
+		},
+		config.configurable.manageCurStream
+	);
 
 	const newStepPlan = {
 		...stepPlan,
@@ -189,11 +200,17 @@ async function generateFinalPromptNode(
 		throw new Error('Missing stepPlan or finalPromptChain for final prompt generation.');
 	}
 
-	const finalPrompt = await finalPromptChain.invoke({
-		stepAnalysis: stepPlan.output.stepAnalysis,
-		implementationPlan: stepPlan.output.implementationPlan,
-		knowledge: stepPlan.knowledge
-	});
+	const finalPrompt = await chainStreamExecutor(
+		config.configurable.runId,
+		finalPromptChain,
+		{
+			stepAnalysis: stepPlan.output.stepAnalysis,
+			implementationPlan: stepPlan.output.implementationPlan,
+			knowledge: stepPlan.knowledge
+		},
+		config.configurable.manageCurStream,
+		InterruptType.ExecuteStep
+	);
 
 	return {
 		finalPrompt: finalPrompt
@@ -258,10 +275,8 @@ async function shouldReflect(state: typeof GraphState.State, config: NodeConfig)
 			return new Command({ goto: 'prepare_reflection' });
 		case UserAction.FIX:
 			config.configurable.logger.log('用户进行了修正. 继续...');
-			let fixedContent = await fs.readFile(state.humanIO.reviewPath!, 'utf-8');
-			const fileExtension = path.extname(state.humanIO.reviewPath!);
-			const isJson = fileExtension === '.json';
-			fixedContent = isJson ? JSON.parse(fixedContent) : fixedContent;
+			const fixedContent = state.fixedContent;
+
 			switch (type) {
 				case ReviewType.ANALYSIS_STEP:
 					return new Command({
@@ -270,7 +285,7 @@ async function shouldReflect(state: typeof GraphState.State, config: NodeConfig)
 							stepPlan: {
 								output: {
 									implementationPlan: state.stepPlan?.output.implementationPlan,
-									stepAnalysis: fixedContent
+									stepAnalysis: fixedContent as string
 								},
 								knowledge: state.stepPlan?.knowledge
 							}
@@ -282,7 +297,7 @@ async function shouldReflect(state: typeof GraphState.State, config: NodeConfig)
 						update: {
 							stepPlan: {
 								output: {
-									implementationPlan: fixedContent,
+									implementationPlan: fixedContent as Step[],
 									stepAnalysis: state.stepPlan?.output.stepAnalysis
 								},
 								knowledge: state.stepPlan?.knowledge

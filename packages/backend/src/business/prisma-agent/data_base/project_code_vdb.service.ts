@@ -337,76 +337,109 @@ export class ProjectCodeVDBService {
 			this.logger.log(`[Update] 已处理 ${filesToUpdate.length} 个文件的旧记录，转为新增处理。`);
 		}
 
-		// 7. 执行新增操作
+		// 7. 执行新增操作（批量处理）
 		if (filesToAdd.length > 0) {
 			this.logger.log(`[Add] 准备新增 ${filesToAdd.length} 个文件...`);
-			for (const fileInfo of filesToAdd) {
-				const fullPath = path.join(projectPath, fileInfo.filePath);
+			const addPerBatch = 30;
+
+			for (let i = 0; i < filesToAdd.length; i += addPerBatch) {
+				const batchFiles = filesToAdd.slice(i, i + addPerBatch);
+				const batchDocuments: Document[] = [];
+				// 记录每个文件对应的chunks数量，用于后续分配vectorIds
+				const fileChunksCount: { fileInfo: (typeof filesToAdd)[0]; count: number }[] = [];
+
+				// 1. 批量准备文档
+				for (const fileInfo of batchFiles) {
+					const fullPath = path.join(projectPath, fileInfo.filePath);
+					try {
+						const sourceCode = fs.readFileSync(fullPath, 'utf8');
+						const fileExtension = path.extname(fullPath).toLowerCase();
+						const lang = this._getLangFromExtension(fileExtension);
+						if (!lang) continue;
+
+						const chunks = await this.splitCodeIntoChunks(sourceCode, lang);
+						if (chunks.length === 0) continue;
+
+						const fileDocs = chunks.map(
+							chunk =>
+								new Document({
+									pageContent: chunk,
+									metadata: { source: fileInfo.filePath, lang }
+								})
+						);
+
+						batchDocuments.push(...fileDocs);
+						fileChunksCount.push({ fileInfo, count: fileDocs.length });
+					} catch (error) {
+						this.logger.error(`[Add] 处理文件 ${fullPath} 失败:`, error);
+					}
+				}
+
+				if (batchDocuments.length === 0) continue;
+
+				// 2. 批量上传向量
 				try {
-					const sourceCode = fs.readFileSync(fullPath, 'utf8');
-					const fileExtension = path.extname(fullPath).toLowerCase();
-					const lang = this._getLangFromExtension(fileExtension);
-					if (!lang) continue;
-
-					const chunks = await this.splitCodeIntoChunks(sourceCode, lang);
-					if (chunks.length === 0) continue;
-
-					const documents = chunks.map(
-						chunk =>
-							new Document({
-								pageContent: chunk,
-								metadata: { source: fileInfo.filePath, lang }
-							})
-					);
-
-					// 添加到向量数据库
 					const embeddings = this.modelService.getEmbedModelOpenAI(userInfo.userConfig);
-					const vectorIds = await this.vectorStoreService.addDocumentsToIndex(
+					const allVectorIds = await this.vectorStoreService.addDocumentsToIndex(
 						apikey,
-						documents,
+						batchDocuments,
 						ProjectCodeIndex.CODEBASE,
 						embeddings,
 						namespace
 					);
 
-					// 在数据库中创建或更新文件记录
-					const existingFile = await this.db.project_file.findFirst({
-						where: {
-							AND: [{ user_project_id: project.id }, { file_path: fileInfo.filePath }]
-						}
-					});
+					// 3. 批量更新数据库（分配 vectorIds）
+					let currentVectorIndex = 0;
+					for (const { fileInfo, count } of fileChunksCount) {
+						const fileVectorIds = allVectorIds.slice(
+							currentVectorIndex,
+							currentVectorIndex + count
+						);
+						currentVectorIndex += count;
 
-					if (existingFile) {
-						// 更新
-						await this.db.project_file.update({
-							where: { id: existingFile.id },
-							data: {
-								hash: fileInfo.hash,
-								chunks: {
-									deleteMany: {}, // 删除所有关联的旧chunk记录
-									create: vectorIds.map(vector_id => ({ vector_id }))
-								}
+						// 在数据库中创建或更新文件记录
+						const existingFile = await this.db.project_file.findFirst({
+							where: {
+								AND: [{ user_project_id: project.id }, { file_path: fileInfo.filePath }]
 							}
 						});
-					} else {
-						// 创建
-						await this.db.project_file.create({
-							data: {
-								user_project_id: project.id,
-								file_path: fileInfo.filePath,
-								hash: fileInfo.hash,
-								chunks: {
-									create: vectorIds.map(vector_id => ({ vector_id }))
+
+						if (existingFile) {
+							// 更新
+							await this.db.project_file.update({
+								where: { id: existingFile.id },
+								data: {
+									hash: fileInfo.hash,
+									chunks: {
+										deleteMany: {}, // 删除所有关联的旧chunk记录
+										create: fileVectorIds.map(vector_id => ({ vector_id }))
+									}
 								}
-							}
-						});
+							});
+						} else {
+							// 创建
+							await this.db.project_file.create({
+								data: {
+									user_project_id: project.id,
+									file_path: fileInfo.filePath,
+									hash: fileInfo.hash,
+									chunks: {
+										create: fileVectorIds.map(vector_id => ({ vector_id }))
+									}
+								}
+							});
+						}
+
+						this.logger.log(
+							`[Add] 文件 ${fileInfo.filePath} 处理完毕，新增 ${fileVectorIds.length} 个向量。`
+						);
 					}
 
 					this.logger.log(
-						`[Add] 文件 ${fileInfo.filePath} 处理完毕，新增 ${vectorIds.length} 个向量。`
+						`[Batch] 批次 ${i / addPerBatch + 1} 处理完成，共上传 ${batchDocuments.length} 个向量片段。`
 					);
 				} catch (error) {
-					this.logger.error(`[Add] 处理文件 ${fullPath} 失败:`, error);
+					this.logger.error(`[Batch] 批量上传向量失败:`, error);
 				}
 			}
 		}

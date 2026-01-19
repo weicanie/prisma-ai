@@ -1,3 +1,4 @@
+import { AIChatLLM } from '@prisma-ai/shared';
 import * as fs from 'fs';
 import { user_data_dir } from '../../../utils/constants';
 interface AgentConfig {
@@ -18,9 +19,10 @@ interface AgentConfig {
 		};
 	};
 	model: {
-		plan: 'deepseek-reasoner' | 'deepseek-chat' | 'gemini-2.5-pro' | 'gemini-2.5-flash';
-		plan_step: 'deepseek-reasoner' | 'deepseek-chat' | 'gemini-2.5-pro' | 'gemini-2.5-flash';
-		replan: 'deepseek-reasoner' | 'deepseek-chat' | 'gemini-2.5-pro' | 'gemini-2.5-flash';
+		plan: AIChatLLM;
+		plan_step: AIChatLLM;
+		replan: AIChatLLM;
+		// reflect使用与plan相同的LLM
 	};
 }
 

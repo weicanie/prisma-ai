@@ -1,15 +1,27 @@
 import { Command, END, interrupt, MemorySaver, START, StateGraph } from '@langchain/langgraph';
-import { Injectable, Logger } from '@nestjs/common';
-import { ProjectDto, UserInfoFromToken } from '@prisma-ai/shared';
-import * as fs from 'fs/promises';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import {
+	ProjectDto,
+	SelectedLLM,
+	SseFunc,
+	type SsePipeManager,
+	SsePipeStatusMap,
+	StreamingChunk,
+	UserFeedback,
+	UserInfoFromToken,
+	WithFuncPool
+} from '@prisma-ai/shared';
 import * as path from 'path';
-import * as readline from 'readline';
-import { ZodError } from 'zod';
 
+import { from, Observable } from 'rxjs';
 import { EventBusService } from '../../EventBus/event-bus.service';
 import { ModelService } from '../../model/model.service';
+import { TaskQueueService } from '../../task-queue/task-queue.service';
+import { EventList, InterruptData, ReviewType } from '../../type/eventBus';
+import { PersistentTask } from '../../type/taskqueue';
 import { user_data_dir } from '../../utils/constants';
 import { CRetrieveAgentService } from './c_retrieve_agent/c_retrieve_agent.service';
+import { PrismaAgentCLIAdapter } from './cli.adapter';
 import { KnowledgeVDBService } from './data_base/konwledge_vdb.service';
 import { ProjectCodeVDBService } from './data_base/project_code_vdb.service';
 import { InterruptType } from './human_involve_agent/node';
@@ -17,20 +29,31 @@ import { PlanExecuteAgentService } from './plan_execute_agent/plan_execute_agent
 import { PlanStepAgentService } from './plan_step_agent/plan_step_agent.service';
 import { ReflectAgentService } from './reflect_agent/reflect_agent.service';
 import { GraphState } from './state';
-import {
-	HumanInput,
-	humanInputSchema,
-	NodeConfig,
-	Result_step,
-	resultStepSchema,
-	ReviewType,
-	RunningConfig
-} from './types';
+import { NodeConfig, Result_step, RunningConfig } from './types';
+
+export interface RunAgentTask extends PersistentTask {
+	metadata: {
+		args: PrismaAgentService['invoke'] extends (...args: infer Args) => any ? Args : never;
+	};
+}
 
 @Injectable()
-export class PrismaAgentService {
+export class PrismaAgentService implements OnModuleInit, WithFuncPool {
 	private readonly logger = new Logger('Prisma Agent');
 	private workflow: ReturnType<typeof this.buildGraph>;
+
+	ssePipeStatusMap: SsePipeStatusMap = {};
+
+	public funcPool: Record<string, SseFunc>;
+	poolName = 'PrismaAgentService';
+
+	/**
+	 * 任务类型字段,用于指定任务处理器
+	 */
+	taskType = {
+		runAgent: 'PrismaAgentService_run_agent'
+	};
+
 	constructor(
 		private readonly planExecuteAgentService: PlanExecuteAgentService,
 		private readonly planStepAgentService: PlanStepAgentService,
@@ -39,13 +62,122 @@ export class PrismaAgentService {
 		private readonly knowledgeVDBService: KnowledgeVDBService,
 		private readonly projectCodeVDBService: ProjectCodeVDBService,
 		private readonly eventBusService: EventBusService,
-		private readonly modelService: ModelService
+		private readonly modelService: ModelService,
+		private readonly taskQueueService: TaskQueueService,
+		@Inject('SsePipeManager')
+		private readonly sseManager: SsePipeManager
 	) {
 		this.workflow = this.buildGraph();
 		// visualizeGraph(this.workflow, 'prisma-agent');
 		// visualizeGraph(this.planStepAgentService.getWorkflow(), 'plan_step_agent');
 		// visualizeGraph(this.planExecuteAgentService.getPlanWorkflow(), 'plan_agent');
 		// visualizeGraph(this.planExecuteAgentService.getReplanWorkflow(), 'replan_agent');
+	}
+
+	onModuleInit() {
+		/* 注册任务处理器 */
+		try {
+			this.taskQueueService.registerTaskHandler(
+				this.taskType.runAgent,
+				this.runAgentTaskHandler.bind(this)
+			);
+		} catch (error) {
+			this.logger.error(`运行智能体任务处理器注册失败: ${error}`);
+			throw error;
+		}
+		/* 注册sse函数池 */
+		this.initFuncPool();
+		this.sseManager.registerFuncPool(this);
+	}
+
+	/**
+	 * 每个运行中的agent维护自己的sse pipe
+	 */
+	async manageSsePipe(runId: string, action: 'create' | 'delete' = 'create') {
+		if (action === 'create') {
+			this.ssePipeStatusMap[runId] = {
+				hasUndoneStream: false,
+				curStream: null
+			};
+		} else {
+			delete this.ssePipeStatusMap[runId];
+		}
+	}
+	/**
+	 * 每个运行中的agent维护自己的当前 llm 输出流
+	 */
+	async manageCurStream(
+		runId: string,
+		action: 'create' | 'delete' = 'create',
+		stream?: Observable<StreamingChunk>,
+		interruptType: InterruptType = InterruptType.HumanReview
+	) {
+		if (action === 'create') {
+			this.ssePipeStatusMap[runId].curStream = stream!;
+			this.ssePipeStatusMap[runId].hasUndoneStream = true;
+			this.ssePipeStatusMap[runId].interruptType = interruptType;
+			this.eventBusService.emit(EventList.pa_curSteamCreate, {
+				metadata: {
+					runId,
+					interruptType
+				}
+			});
+		} else {
+			this.ssePipeStatusMap[runId].curStream = null;
+			this.ssePipeStatusMap[runId].hasUndoneStream = false;
+		}
+	}
+
+	initFuncPool() {
+		this.funcPool = {
+			sseAgentCurStream: this.sseAgentCurStream.bind(this)
+		};
+	}
+
+	/**
+	 * sse服务要求的sseFunc
+	 */
+	async sseAgentCurStream(
+		input: { runId: string },
+		userInfo: UserInfoFromToken,
+		taskId: string,
+		userFeedback: UserFeedback,
+		model: SelectedLLM
+	): Promise<Observable<StreamingChunk>> {
+		return (
+			this.ssePipeStatusMap[input.runId].curStream ??
+			from([
+				{
+					content: `错误：runId为${input.runId}的agent当前没有正在进行的流`,
+					reasonContent: '',
+					done: true,
+					isReasoning: false
+				}
+			])
+		);
+	}
+
+	async startRunAgentTask(
+		projectInfo: ProjectDto,
+		lightSpot: string,
+		projectPath: string, //projects目录中的项目文件夹名称
+		userInfo: UserInfoFromToken,
+		sessionId: string,
+		uiType: 'CLI' | 'WEB' = 'WEB'
+	) {
+		const args = [projectInfo, lightSpot, projectPath, userInfo, sessionId, uiType];
+		const task = await this.taskQueueService.createAndEnqueueTask(
+			sessionId,
+			userInfo.userId,
+			this.taskType.runAgent,
+			{ args }
+		);
+		return task;
+	}
+
+	private async runAgentTaskHandler(task: RunAgentTask): Promise<void> {
+		const { args } = task.metadata;
+		await this.invoke(...args);
 	}
 
 	/**
@@ -112,18 +244,10 @@ export class PrismaAgentService {
 		this.logger.log('---节点: 执行步骤---');
 		this.logger.log('等待开发者执行步骤并提供结果...');
 
-		// 保存 stepPlan 到文件
-		const stepPlanPath = path.join(
-			user_data_dir.agentOutputPath(config.configurable.userId),
-			'plan_step_for_execution.json'
-		);
-		await fs.writeFile(stepPlanPath, JSON.stringify(state.stepPlan, null, 2));
-
 		const stepResult: Result_step = interrupt({
-			message: '请执行当前步骤并提供结果。',
-			stepPlan: state.stepPlan,
-			outputPath: stepPlanPath,
-			type: InterruptType.ExecuteStep
+			content: JSON.stringify(state.stepPlan, null, 2),
+			type: InterruptType.ExecuteStep,
+			reviewType: ReviewType.Execute_Step
 		});
 		stepResult.stepDescription =
 			state.plan?.output.implementationPlan?.[state.currentStepIndex]?.stepDescription!;
@@ -135,198 +259,6 @@ export class PrismaAgentService {
 	}
 
 	/**
-	 * @description 处理工作流中断，与用户进行命令行交互以获取反馈，并返回一个用于恢复工作流的指令。
-	 * @param interrupts - LangGraph 返回的中断对象数组。
-	 * @param threadConfig - 当前工作流线程的配置，用于获取状态。
-	 * @returns {Promise<Command>} 一个包含用户反馈的 `Command` 对象，用于恢复工作流。
-	 */
-	private async handleHumanInvolve(
-		interrupts: any[],
-		threadConfig: { configurable: RunningConfig }
-	): Promise<Command> {
-		if (!interrupts || interrupts.length === 0) {
-			throw new Error('handleHumanInvolve called with no interrupts.');
-		}
-		const humanFeedbackPath = path.join(
-			user_data_dir.agentOutputPath(threadConfig.configurable.userId),
-			'human_feedback.json'
-		);
-		// 提取中断信息。在我们的设计中，一次只处理一个中断。
-		const interruptData = interrupts[0].value;
-		// 总是从主图中获取状态，因为它是整个流程的入口和状态管理者。
-		const graph = this.workflow;
-		const currentState = await graph.getState(threadConfig);
-		// this.logger.debug(' PrismaAgentService ~ currentState:', currentState);
-		// 步骤1: 保存当前中断信息到文件，供用户审查和调试。
-
-		await fs.writeFile(
-			path.join(
-				user_data_dir.agentOutputPath(threadConfig.configurable.userId),
-				'interrupt_payload.json'
-			),
-			JSON.stringify(interruptData, null, 2)
-		);
-
-		/**
-		 * @description 根据中断类型，写入不同的反馈表单到文件。
-		 * @param interruptType - 中断类型。
-		 */
-		const displayHumanFeedback = async (interruptType: InterruptType) => {
-			if (interruptType === InterruptType.HumanReview) {
-				await fs.writeFile(
-					humanFeedbackPath,
-					JSON.stringify({ action: 'accept', content: '反馈内容' }, null, 2)
-				);
-			} else if (interruptType === InterruptType.ExecuteStep) {
-				await fs.writeFile(
-					humanFeedbackPath,
-					JSON.stringify(
-						{
-							output: {
-								userFeedback: '你的反馈(由你撰写)',
-								writtenCodeFiles: '修改总结清单(ai生成)',
-								summary: '最终总结(ai生成)'
-							}
-						},
-						null,
-						2
-					)
-				);
-			}
-		};
-
-		// 步骤2: 设置命令行界面，用于和用户交互。
-		const rl = readline.createInterface({
-			input: process.stdin,
-			output: process.stdout
-		});
-
-		const askQuestion = (query: string): Promise<string> =>
-			new Promise(resolve => rl.question(query, resolve));
-
-		let validatedInput: HumanInput | Result_step | null = null;
-
-		// 步骤3: 进入循环，不断提示用户，直到获得一个有效的输入。
-		while (validatedInput === null) {
-			// 根据中断的类型（是需要审核，还是需要执行步骤），显示不同的提示信息。
-			if (interruptData.type === InterruptType.HumanReview) {
-				await displayHumanFeedback(InterruptType.HumanReview);
-				// 这是来自 waitForHumanReview 的审核请求
-				this.logger.log(
-					`\n=== 需要您审核输出文件: ${this.getRealFilePath(interruptData.outputPath)} ===`
-				);
-				this.logger.log(
-					`1. 请在以下文件中输入您的反馈: ${this.getRealFilePath(humanFeedbackPath)}`
-				);
-				this.logger.log(
-					`命令: accept（完全接受并继续） | fix（手动修改然后继续） | redo（反馈并重做,反馈内容填在content里）`
-				);
-				this.logger.log(`2. 输入 'do' 继续, 或输入 'exit' 退出.`);
-			} else if (interruptData.type === InterruptType.ExecuteStep) {
-				await displayHumanFeedback(InterruptType.ExecuteStep);
-				// 这是来自 executeStep 的执行请求
-				this.logger.log(`\n=== 需要执行步骤 ===`);
-				this.logger.log(
-					`1. 请根据以下文件中的描述执行编码任务: ${this.getRealFilePath(interruptData.outputPath)}`
-				);
-				this.logger.log(
-					`2. 请在以下文件中输入结果反馈: ${this.getRealFilePath(humanFeedbackPath)}`
-				);
-				this.logger.log(`3. 输入 'do' 继续, 或输入 'exit' 退出.`);
-			} else {
-				this.logger.error('未知的中断类型:', interruptData.type);
-				throw new Error('未知的中断类型');
-			}
-
-			const command = await askQuestion('> ');
-
-			if (command.toLowerCase() === 'exit') {
-				rl.close();
-				throw new Error('用户中止了流程。');
-			}
-
-			// 当用户准备好后，输入'do'，程序会读取反馈文件。
-			if (command.toLowerCase() === 'do') {
-				try {
-					const feedbackContent = await fs.readFile(humanFeedbackPath, 'utf-8');
-					const feedbackJson = JSON.parse(feedbackContent);
-					// 使用 Zod schema 对用户在文件中输入的内容进行严格的格式校验。
-					switch (interruptData.type) {
-						case InterruptType.ExecuteStep:
-							// 校验 Result_step
-							validatedInput = resultStepSchema.parse(feedbackJson);
-							break;
-						case InterruptType.HumanReview:
-							// 校验 HumanInput
-							validatedInput = humanInputSchema.parse(feedbackJson);
-							break;
-						default:
-							throw new Error('未知的 InterruptType');
-					}
-
-					this.logger.log('反馈校验成功。');
-				} catch (error) {
-					// 如果校验失败，打印详细错误，并让用户重新修改文件。
-					if (error instanceof ZodError) {
-						this.logger.error('格式校验错误:', error.errors);
-						this.logger.error(`文件 ${humanFeedbackPath} 格式错误，请按原格式提交。`);
-					} else {
-						this.logger.error(`读取或解析 ${humanFeedbackPath} 时出错:`, error);
-					}
-					validatedInput = null; // 重置 validatedInput，使循环继续。
-				}
-			}
-		}
-
-		rl.close();
-		// 步骤4: 将校验通过的用户输入包装成一个 Command 对象，用于恢复 LangGraph 的执行。
-		//记录用户可能修改后的内容，用于后续fix、继续执行
-		const getReviewPath = (reviewType: ReviewType) => {
-			switch (reviewType) {
-				case ReviewType.ANALYSIS:
-					return path.join(process.cwd(), 'agent_output', 'analysis.md');
-				case ReviewType.PLAN:
-					return path.join(process.cwd(), 'agent_output', 'plan.json');
-				case ReviewType.RE_ANALYSIS:
-					return path.join(process.cwd(), 'agent_output', 'analysis.md');
-				case ReviewType.RE_PLAN:
-					return path.join(process.cwd(), 'agent_output', 'plan.json');
-				case ReviewType.ANALYSIS_STEP:
-					return path.join(process.cwd(), 'agent_output', 'analysis_step.md');
-				case ReviewType.PLAN_STEP:
-					return path.join(process.cwd(), 'agent_output', 'plan_step.json');
-				default:
-					throw new Error('Invalid review type');
-			}
-		};
-
-		if (interruptData.type === InterruptType.HumanReview) {
-			const reviewType = interruptData.reviewType;
-			if (!reviewType) {
-				throw new Error(
-					'Could not determine review type from current state for HumanReview interrupt.'
-				);
-			}
-			const reviewPath = getReviewPath(reviewType);
-			return new Command({
-				resume: validatedInput,
-				update: {
-					humanIO: {
-						input: validatedInput as HumanInput,
-						reviewPath: reviewPath
-					}
-				}
-			});
-		} else if (interruptData.type === InterruptType.ExecuteStep) {
-			return new Command({
-				resume: validatedInput
-			});
-		} else {
-			throw new Error(`Unknown interrupt type: ${interruptData.type}`);
-		}
-	}
-
-	/**
 	 * @description 调用并执行主工作流。
 	 * 这是 Prisma-Agent 的入口点，它初始化状态、配置并启动一个循环来处理图的执行，
 	 * 包括处理任意次数的中断和恢复，直到工作流完成。
@@ -335,6 +267,7 @@ export class PrismaAgentService {
 	 * @param projectPath - 项目在 `projects` 目录下的文件夹名称。
 	 * @param userId - 用户ID。
 	 * @param sessionId - 会话ID。
+	 * @param uiType - 用户界面类型，默认值为 'CLI'。
 	 * @returns {Promise<any>} 工作流执行完成后的最终状态。
 	 */
 	public async invoke(
@@ -342,31 +275,42 @@ export class PrismaAgentService {
 		lightSpot: string,
 		projectPath: string, //projects目录中的项目文件夹名称
 		userInfo: UserInfoFromToken,
-		sessionId: string
+		sessionId: string,
+		uiType: 'CLI' | 'WEB' = 'WEB'
 	) {
 		const projectFullPath = path.join(user_data_dir.projectsDirPath(userInfo.userId), projectPath);
 		const userId = userInfo.userId;
-		// 步骤1: 准备所有子图和节点可能需要的运行时依赖。
+		let adapter: PrismaAgentCLIAdapter | null = null;
+		// 支持CLI和WEB UI两种用户界面
+		if (uiType === 'CLI') {
+			adapter = new PrismaAgentCLIAdapter(this, this.eventBusService);
+			adapter.init(userId);
+		}
+		// 创建sse管道
+		this.manageSsePipe(sessionId, 'create');
+		// 1、准备所有子图和节点可能需要的运行时依赖。
 		// 这些依赖项通过 `configurable` 对象注入到图的执行中。
 		const runningConfig: RunningConfig = {
-			analysisChain: this.planExecuteAgentService.createAnalysisChain(userId),
-			planChain: this.planExecuteAgentService.createPlanChain(userId),
-			reAnalysisChain: this.planExecuteAgentService.createReAnalysisChain(userId),
-			rePlanChain: this.planExecuteAgentService.createRePlanChain(userId),
-			stepAnalysisChain: this.planStepAgentService.createAnalysisChain(userId),
-			stepPlanChain: this.planStepAgentService.createPlanChain(userId),
-			finalPromptChain: this.planStepAgentService.createFinalPromptChain(userId),
-			reflectChain: this.reflectAgentService.createReflectChain(), //固定使用deepseek-chat
+			analysisChain: await this.planExecuteAgentService.createAnalysisChain(userInfo),
+			planChain: await this.planExecuteAgentService.createPlanChain(userInfo),
+			reAnalysisChain: await this.planExecuteAgentService.createReAnalysisChain(userInfo),
+			rePlanChain: await this.planExecuteAgentService.createRePlanChain(userInfo),
+			stepAnalysisChain: await this.planStepAgentService.createAnalysisChain(userInfo),
+			stepPlanChain: await this.planStepAgentService.createPlanChain(userInfo),
+			finalPromptChain: await this.planStepAgentService.createFinalPromptChain(userInfo),
+			reflectChain: await this.reflectAgentService.createReflectChain(userInfo),
 			knowledgeVDBService: this.knowledgeVDBService,
 			projectCodeVDBService: this.projectCodeVDBService,
 			cRetrieveAgentService: this.cRetrieveAgentService,
 			eventBusService: this.eventBusService,
 			logger: this.logger,
 			userId,
-			userInfo
+			userInfo,
+			runId: sessionId,
+			manageCurStream: this.manageCurStream.bind(this)
 		};
 
-		// 步骤2: 构建线程配置，它将被传递给工作流的 stream 方法。
+		// 2、构建线程配置，它将被传递给工作流的 stream 方法。
 		const threadConfig = {
 			configurable: {
 				...runningConfig,
@@ -375,7 +319,7 @@ export class PrismaAgentService {
 			} as RunningConfig
 		};
 
-		// 步骤3: 定义工作流的初始状态。
+		// 3、定义工作流的初始状态。
 		const initialState = {
 			projectInfo,
 			lightSpot,
@@ -388,12 +332,19 @@ export class PrismaAgentService {
 		let input: any = initialState;
 		let shouldContinue = true;
 
-		// 步骤4: 使用 while 循环来支持任意次数的中断和恢复。
+		// 推送开始执行事件
+		this.eventBusService.emit(EventList.pa_start, {
+			metadata: {
+				runId: runningConfig.runId,
+				userId: runningConfig.userId
+			}
+		});
+
+		// 4、使用 while 循环来支持任意次数的中断和恢复。
 		// 这是实现健壮的人类参与工作流（human-in-the-loop）的关键。
 		while (shouldContinue) {
-			shouldContinue = false; // 假设当前流程会执行完毕，除非遇到中断。
+			shouldContinue = false; // 当前流程会执行完毕，除非遇到中断。
 
-			// 启动或恢复工作流的执行流。
 			// 第一次循环时，`input` 是 `initialState`。
 			// 如果发生中断并恢复，`input` 将是 `Command({ resume: ... })` 对象。
 			const stream = await this.workflow.stream(input, threadConfig);
@@ -403,12 +354,25 @@ export class PrismaAgentService {
 				// this.logger.debug('---STREAM CHUNK---', JSON.stringify(chunk, null, 2));
 
 				// 检查事件是否是中断信号。
-
+				/** 处理中断与恢复
+					工作流中断，等待一个用于恢复工作流的指令。
+	 			*/
 				if (chunk.__interrupt__) {
-					const interruptData = chunk.__interrupt__;
-
-					// 调用 handleHumanInvolve 函数，与用户进行交互，并获取恢复指令。
-					const resumeCommand = await this.handleHumanInvolve(interruptData, threadConfig);
+					const interruptData: InterruptData = chunk.__interrupt__;
+					// 推送中断事件
+					this.eventBusService.emit(EventList.pa_interrupt, {
+						metadata: {
+							runId: runningConfig.runId,
+							userId: runningConfig.userId
+						},
+						interruptData
+					});
+					// 等待用户返回恢复指令
+					const resumeCommand = await new Promise<Command>(resolve => {
+						this.eventBusService.once(EventList.pa_recover, e => {
+							resolve(e.resumeCommand);
+						});
+					});
 
 					// 将下一个循环的输入设置为恢复指令。
 					input = resumeCommand;
@@ -425,19 +389,22 @@ export class PrismaAgentService {
 		}
 
 		this.logger.log('---工作流已完成---');
-		// 步骤5: 返回工作流的最终状态。
-		return finalState;
-	}
 
-	/**
-	 * @description 将容器内路径转换为真实文件路径（挂载的卷）
-	 * @param filePath 文件路径
-	 * @returns 真实文件路径
-	 */
-	private getRealFilePath(filePath: string) {
-		if (process.env.NODE_ENV === 'production') {
-			filePath = filePath.replace('/app', './');
+		// 推送执行结束事件
+		this.eventBusService.emit(EventList.pa_end, {
+			metadata: {
+				runId: runningConfig.runId,
+				userId: runningConfig.userId
+			}
+		});
+
+		// 删除sse管道
+		this.manageSsePipe(sessionId, 'delete');
+
+		// 5、返回工作流的最终状态。
+		if (uiType === 'CLI') {
+			adapter?.clean();
 		}
-		return filePath;
+		return finalState;
 	}
 }
