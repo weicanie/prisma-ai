@@ -4,7 +4,7 @@ import { waitForHumanReview } from '../human_involve_agent/node';
 import { reflect } from '../reflect_agent/node';
 import { GraphState } from '../state';
 import { NodeConfig, Plan, ReviewType, Step, UserAction } from '../types';
-import { getAgentConfig, updateAgentConfig } from '../utils/config';
+import { getAgentConfig } from '../utils/config';
 import { chainStreamExecutor } from '../utils/stream';
 
 // --- Node Implementations ---
@@ -18,12 +18,6 @@ export async function uploadCode(
 	state: typeof GraphState.State,
 	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
-	const agentConfig = await getAgentConfig(config.configurable.userId);
-	//项目代码已上传则跳过
-	if (agentConfig._uploadedProjects.includes(state.projectPath)) {
-		return {};
-	}
-
 	config.configurable.logger.log('---节点: 项目代码同步到知识库---');
 	const { projectPath, userId, projectInfo } = state;
 	const { projectCodeVDBService, eventBusService } = config.configurable;
@@ -55,9 +49,6 @@ export async function uploadCode(
 	});
 
 	config.configurable.logger.log('---项目代码同步完成---');
-	//更新已上传项目列表
-	agentConfig._uploadedProjects.push(state.projectPath);
-	await updateAgentConfig(agentConfig, config.configurable.userId);
 	return {};
 }
 

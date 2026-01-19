@@ -2,7 +2,6 @@ import { AIChatLLM } from '@prisma-ai/shared';
 import * as fs from 'fs';
 import { user_data_dir } from '../../../utils/constants';
 interface AgentConfig {
-	_uploadedProjects: string[];
 	CRAG: boolean;
 	topK: {
 		plan: {
