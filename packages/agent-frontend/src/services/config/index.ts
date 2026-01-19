@@ -1,4 +1,6 @@
-import { type ServerDataFormat } from '@prisma-ai/shared';
+import { UserConfigSchema, type ServerDataFormat } from '@prisma-ai/shared';
+import { ElMessage } from 'element-plus';
+import { getUserConfig } from '../../utils/userConfig';
 import { Requester, type RequestConfig } from './requester';
 
 const config: RequestConfig<unknown, ServerDataFormat> = {
@@ -11,6 +13,22 @@ const config: RequestConfig<unknown, ServerDataFormat> = {
 			const token = localStorage.getItem('token');
 			if (token && config.headers) {
 				config.headers['Authorization'] = `Bearer ${token}`;
+			}
+
+			//添加用户配置信息到请求头
+			try {
+				const userConfig = getUserConfig();
+				//校验用户配置是否符合格式
+				UserConfigSchema.parse(userConfig);
+				if (config.headers) {
+					//将用户配置转换为JSON字符串并编码，避免特殊字符问题
+					const configStr = JSON.stringify(userConfig);
+					const encodedConfig = btoa(encodeURIComponent(configStr));
+					config.headers['X-User-Config'] = encodedConfig;
+				}
+			} catch (error) {
+				ElMessage.error('非法的用户配置');
+				console.error('用户配置非法:', error);
 			}
 
 			return config;
