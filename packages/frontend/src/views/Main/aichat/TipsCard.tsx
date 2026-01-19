@@ -73,7 +73,7 @@ const TipsCard: React.FC<TipsCardProps> = ({ className }) => {
 
 			{/* 使用说明 */}
 			<Card
-				className={`${isDark ? 'bg-gradient-to-r from-blue-900 to-purple-900 border-blue-700' : 'bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200'} transition-colors duration-200 w-full max-w-3xl`}
+				className={`${isDark ? 'bg-gray-800' : ' border-blue-200'} transition-colors duration-200 w-full max-w-3xl`}
 			>
 				<CardHeader>
 					<CardTitle
