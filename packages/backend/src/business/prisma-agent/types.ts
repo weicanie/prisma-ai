@@ -1,14 +1,23 @@
-import { RunnableConfig, type Runnable } from '@langchain/core/runnables';
+import { RunnableConfig, type Runnable, type RunnableSequence } from '@langchain/core/runnables';
 import { Logger } from '@nestjs/common';
-import { UserInfoFromToken, type ProjectDto } from '@prisma-ai/shared';
+import { StreamingChunk, UserInfoFromToken, type ProjectDto } from '@prisma-ai/shared';
 import { z } from 'zod';
 import { EventBusService } from '../../EventBus/event-bus.service';
+import { humanInputSchema, resultStepSchema, ReviewType } from '../../type/eventBus';
 import { type CRetrieveAgentService } from './c_retrieve_agent/c_retrieve_agent.service';
 import { type KnowledgeVDBService } from './data_base/konwledge_vdb.service';
 import { type ProjectCodeVDBService } from './data_base/project_code_vdb.service';
 import { type PlanExecuteAgentService } from './plan_execute_agent/plan_execute_agent.service';
 import { type PlanStepAgentService } from './plan_step_agent/plan_step_agent.service';
+import { type PrismaAgentService } from './prisma-agent.service';
 import { type ReflectAgentService } from './reflect_agent/reflect_agent.service';
+export {
+	humanInputSchema,
+	resultStepSchema,
+	ReviewType,
+	UserAction,
+	userActionSchema
+} from '../../type/eventBus';
 /**
  * @description 反思的结构化输出Zod Schema
  */
@@ -17,8 +26,16 @@ export const reflectionSchema = z.object({
 	critique: z.string().describe('具体的批评，指出哪些地方做得不好或不应该做'),
 	advice: z.string().describe('具体的改进建议，指出应该如何修改或应该做什么')
 });
-type ChainReturned<T extends (...args: any) => Runnable> = T extends (...args: any) => infer R
-	? R
+
+type ChainReturned<T extends (...args: any) => Promise<Runnable>> = T extends (
+	...args: any
+) => Promise<infer R>
+	? R & {
+			getStreamVersion?: () => RunnableSequence<
+				R extends Runnable<infer U> ? U : any,
+				StreamingChunk
+			>;
+		}
 	: never;
 
 // --- Running Config ---
@@ -54,6 +71,8 @@ export interface RunningConfig {
 	logger: Logger;
 	userId: string;
 	userInfo: UserInfoFromToken;
+	runId: string; // 此次agent运行的唯一标识
+	manageCurStream: PrismaAgentService['manageCurStream'];
 }
 
 export interface NodeConfig extends RunnableConfig {
@@ -91,32 +110,6 @@ export interface HumanIOState<I = string, O = string> {
 	 */
 	input: I;
 }
-/**
- * @description 用户在审核时可能采取的操作。
- */
-export enum UserAction {
-	/* 
-	- accept：完全接受并继续
-	- fix：手动修改并继续
-	- redo：反馈并重做
-	*/
-	ACCEPT = 'accept',
-	FIX = 'fix',
-	REDO = 'redo'
-}
-
-/**
- * @description 用户在审核时可能采取的操作的Zod Schema。
- */
-export const userActionSchema = z.nativeEnum(UserAction);
-
-/**
- * @description 用户输入的Zod Schema。
- */
-export const humanInputSchema = z.object({
-	action: userActionSchema,
-	content: z.string().describe('当 action 为 redo 时，这里是具体的反馈内容。')
-});
 
 /**
  * @description 用户输入的结构。
@@ -125,18 +118,6 @@ export const humanInputSchema = z.object({
  */
 export type HumanInput = z.infer<typeof humanInputSchema>;
 
-/**
- * @description 需要人类审核的内容类型。
- * 这也用于在多轮审核中区分当前所处的阶段。
- */
-export enum ReviewType {
-	PLAN = 'plan', // 整个高阶计划
-	ANALYSIS = 'analysis', // 高阶需求分析
-	PLAN_STEP = 'plan_step', // 单个步骤的详细计划
-	ANALYSIS_STEP = 'analysis_step', // 单个步骤的详细分析
-	RE_ANALYSIS = 're_analysis', // 重新分析
-	RE_PLAN = 're_plan' // 重新计划
-}
 /**
  * @description Agent准备好让用户审核的输出。
  * @lifecycle - 在 `analyze`, `plan`, `analyze_step`, `plan_step` 节点中生成，并写入 `humanIO.output`。
@@ -227,27 +208,6 @@ export interface Plan_step {
 		retrievedDomainDocs: string;
 	};
 }
-
-/**
- * @description 开发者执行完一个步骤后的结果的Zod Schema。
- */
-export const resultStepSchema = z.object({
-	stepDescription: z.string().describe('步骤的详细描述').optional(),
-	output: z
-		.object({
-			userFeedback: z.string().describe('用户的反馈'),
-			writtenCodeFiles: z
-				.array(
-					z.object({
-						relativePath: z.string().describe('新建或修改的文件的相对路径'),
-						summary: z.string().describe('对该文件修改的简要总结')
-					})
-				)
-				.describe('开发者编写或修改的文件列表'),
-			summary: z.string().describe('对本次执行的总体总结')
-		})
-		.describe('执行的产出')
-});
 
 /**
  * @description 开发者执行完一个步骤后的结果。
