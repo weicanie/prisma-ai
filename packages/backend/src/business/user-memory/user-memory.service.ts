@@ -4,7 +4,7 @@ import { AIChatLLM, UserMemoryAction, UserMemoryT } from '@prisma-ai/shared';
 import { Model } from 'mongoose';
 import { EventBusService, EventList } from '../../EventBus/event-bus.service';
 import { AichatChainService } from '../../chain/aichat-chain.service';
-import { WithGetUserMemory } from '../../utils/abstract';
+import { WithGetUserMemory } from '../../type/abstract';
 import { UserMemory, UserMemoryDocument } from './entities/user-memory.entity';
 
 @Injectable()

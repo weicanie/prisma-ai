@@ -2,12 +2,13 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { Runnable, RunnableSequence } from '@langchain/core/runnables';
 import { Inject, Injectable } from '@nestjs/common';
 import { z } from 'zod';
-import { WithFormfixChain } from '../../../utils/abstract';
+import { WithFormfixChain } from '../../../type/abstract';
 
 import { UserInfoFromToken } from '@prisma-ai/shared';
 import { ModelService } from '../../../model/model.service';
 import { RubustStructuredOutputParser } from '../../../utils/RubustStructuredOutputParser';
 import { reflectionSchema } from '../types';
+import { getAgentConfig } from '../utils/config';
 
 export type Reflection = z.infer<typeof reflectionSchema>;
 /**
@@ -28,18 +29,11 @@ export class ReflectAgentService {
 	 * @input {{ content: string; context?: string }} - `content`是需要反思的核心内容, `context`是可选的附加背景信息。
 	 * @output {Reflection} - 返回一个包含`evaluation`, `critique`, 和 `advice`的结构化对象。
 	 */
-	createReflectChain(
-		userInfo?: UserInfoFromToken
-	): Runnable<{ content: string; context?: string }, Reflection> {
-		let model: Runnable;
-		if (userInfo) {
-			model = this.modelService.getLLMDeepSeekRaw(
-				'deepseek-chat',
-				userInfo.userConfig.llm.deepseek.apiKey
-			);
-		} else {
-			model = this.modelService.getLLMDeepSeekRaw('deepseek-chat');
-		}
+	async createReflectChain(
+		userInfo: UserInfoFromToken
+	): Promise<Runnable<{ content: string; context?: string }, Reflection>> {
+		const modelName = getAgentConfig(userInfo.userId).model.plan;
+		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig);
 		//TODO 没有传入userConfig，使用环境变量中的apiKey！！！（prisma-agent模块中的RubustStructuredOutputParser都是如此，仅会导致本地的deepseek apikey未配置时，自动修复chain不会生效）
 		//现阶段只在本地使用，所以可以直接使用环境变量中的apiKey
 		const parser = RubustStructuredOutputParser.from(reflectionSchema, this.chainService);
@@ -79,7 +73,7 @@ export class ReflectAgentService {
 			]
 		]);
 
-		return RunnableSequence.from([
+		const chain: any = RunnableSequence.from([
 			{
 				content: (input: { content: string; context?: string }) => input.content,
 				context: (input: { content: string; context?: string }) => input.context ?? '无相关上下文',
@@ -90,5 +84,16 @@ export class ReflectAgentService {
 
 			parser
 		]);
+		chain.getStreamVersion = () =>
+			RunnableSequence.from([
+				(input: any) => ({
+					content: input.content,
+					context: input.context ?? '无相关上下文',
+					format_instructions: parser.getFormatInstructions()
+				}),
+				reflectPrompt,
+				model
+			]);
+		return chain;
 	}
 }

@@ -21,7 +21,7 @@ import { ReflectAgentService } from '../business/prisma-agent/reflect_agent/refl
 import { ModelService } from '../model/model.service';
 import { ThoughtModelService } from '../model/thought-model.service';
 import { PromptService } from '../prompt/prompt.service';
-import { WithGetUserMemory } from '../utils/abstract';
+import { WithGetUserMemory } from '../type/abstract';
 import { RubustStructuredOutputParser } from '../utils/RubustStructuredOutputParser';
 import { ChainService } from './chain.service';
 import { ProjectKonwbaseRetrieveService } from './project-konwbase-retrieve.service';
@@ -115,7 +115,7 @@ export class ProjectChainService {
 		]);
 
 		const outputParser = RubustStructuredOutputParser.from(outputSchema, this.chainService);
-		const reflectChain = this.reflectAgentService.createReflectChain(userInfo);
+		const reflectChain = await this.reflectAgentService.createReflectChain(userInfo);
 
 		const sequence: any = [
 			{

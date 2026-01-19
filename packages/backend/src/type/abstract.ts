@@ -1,5 +1,11 @@
-import { RunnableSequence } from '@langchain/core/runnables';
-import { UserConfig, UserMemoryT } from '@prisma-ai/shared';
+import { Runnable, RunnableSequence } from '@langchain/core/runnables';
+import {
+	AIChatLLM,
+	ProjectVo,
+	UserConfig,
+	UserInfoFromToken,
+	UserMemoryT
+} from '@prisma-ai/shared';
 import z from 'zod';
 
 /**
@@ -18,6 +24,7 @@ export abstract class WithFormfixChain {
 			Exclude<T, Error>
 		>
 	>;
+	abstract getStreamLLM(modelType: AIChatLLM, userConfig: UserConfig): Promise<Runnable>;
 }
 
 /**
@@ -25,4 +32,8 @@ export abstract class WithFormfixChain {
  */
 export abstract class WithGetUserMemory {
 	abstract getUserMemory(userId: string): Promise<UserMemoryT>;
+}
+
+export abstract class WithProjectGet {
+	abstract findProjectById(id: string, userInfo: UserInfoFromToken): Promise<ProjectVo>;
 }

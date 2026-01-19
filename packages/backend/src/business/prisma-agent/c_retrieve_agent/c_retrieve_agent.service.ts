@@ -5,7 +5,7 @@ import { ChatOpenAI } from '@langchain/openai';
 import { Inject, Injectable } from '@nestjs/common';
 import { formatDocumentsAsString } from 'langchain/util/document';
 import { ModelService } from '../../../model/model.service';
-import { WithFormfixChain } from '../../../utils/abstract';
+import { WithFormfixChain } from '../../../type/abstract';
 import { RubustStructuredOutputParser } from '../../../utils/RubustStructuredOutputParser';
 import { CRAGGraph } from './node_edge_graph';
 import { retrievalGraderSchema, rewriteQuerySchema } from './type';
