@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { AIChatLLM } from './aichat';
+import { AgentConfig, agentConfigSchema } from './prisma_agent';
 
 // 用户配置
 export interface UserConfig {
@@ -33,6 +35,7 @@ export interface UserConfig {
 			apiKey: string;
 		};
 	};
+	agent: AgentConfig;
 }
 
 // UserConfig 对应的 Zod schema
@@ -67,7 +70,8 @@ export const UserConfigSchema = z.object({
 		serpapi: z.object({
 			apiKey: z.string().min(0).max(200)
 		})
-	})
+	}),
+	agent: agentConfigSchema
 });
 
 // 从 schema 派生的类型
@@ -100,6 +104,28 @@ export const initialUserConfig: UserConfig = {
 	search: {
 		serpapi: {
 			apiKey: ''
+		}
+	},
+	agent: {
+		CRAG: false,
+		topK: {
+			plan: {
+				knowledge: 10,
+				projectCode: 10
+			},
+			plan_step: {
+				knowledge: 10,
+				projectCode: 10
+			},
+			replan: {
+				knowledge: 10,
+				projectCode: 10
+			}
+		},
+		model: {
+			plan: AIChatLLM.r1,
+			plan_step: AIChatLLM.r1,
+			replan: AIChatLLM.r1
 		}
 	}
 };

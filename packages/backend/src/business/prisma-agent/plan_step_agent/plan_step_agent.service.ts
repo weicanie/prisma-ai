@@ -15,7 +15,6 @@ import { WithFormfixChain } from '../../../type/abstract';
 import { RubustStructuredOutputParser } from '../../../utils/RubustStructuredOutputParser';
 import { ReflectAgentService } from '../reflect_agent/reflect_agent.service';
 import { Knowledge, Plan, Reflection, Step, Step_prompt } from '../types';
-import { getAgentConfig } from '../utils/config';
 import { PlanStepGraph } from './planner_step';
 
 /**
@@ -104,7 +103,7 @@ export class PlanStepAgentService {
 			z.infer<typeof stepAnalysisSchema>
 		>
 	> {
-		const modelName = getAgentConfig(userInfo.userId).model.plan_step;
+		const modelName = userInfo.userConfig.agent.model.plan_step;
 		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig);
 		if (!model) throw new Error('Model not found');
 		const parser = RubustStructuredOutputParser.from(stepAnalysisSchema, this.chainService);
@@ -209,7 +208,7 @@ export class PlanStepAgentService {
 			z.infer<typeof stepPlanSchema>
 		>
 	> {
-		const modelName = getAgentConfig(userInfo.userId).model.plan_step;
+		const modelName = userInfo.userConfig.agent.model.plan_step;
 		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig);
 		if (!model) throw new Error('Model not found');
 		const parser = RubustStructuredOutputParser.from(stepPlanSchema, this.chainService);
@@ -292,7 +291,7 @@ export class PlanStepAgentService {
 			string
 		>
 	> {
-		const modelName = getAgentConfig(userInfo.userId).model.plan_step;
+		const modelName = userInfo.userConfig.agent.model.plan_step;
 		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig);
 		if (!model) throw new Error('Model not found');
 		const parser = RubustStructuredOutputParser.from(completedPlanSchema, this.chainService);

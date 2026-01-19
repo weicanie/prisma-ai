@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import z from 'zod';
-import { StreamingChunk } from './sse';
+import { StreamingChunk } from '../sse';
 
 /**
  * 亮点实现前端上传的Dto
@@ -48,10 +48,10 @@ export interface StageResult extends Partial<InterruptData> {
  */
 export enum UserAction {
 	/* 
-	- accept：完全接受并继续
-	- fix：手动修改并继续
-	- redo：反馈并重做
-	*/
+  - accept：完全接受并继续
+  - fix：手动修改并继续
+  - redo：反馈并重做
+  */
 	ACCEPT = 'accept',
 	FIX = 'fix',
 	REDO = 'redo'

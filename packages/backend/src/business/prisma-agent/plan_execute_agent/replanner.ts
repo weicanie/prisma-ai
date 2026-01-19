@@ -6,7 +6,6 @@ import { waitForHumanReview } from '../human_involve_agent/node';
 import { reflect } from '../reflect_agent/node';
 import { GraphState } from '../state';
 import { Plan, ReviewType, RunningConfig, Step, UserAction } from '../types';
-import { getAgentConfig } from '../utils/config';
 import { formatProjectCodes, formatStepResults, formatWrittenCodeFiles } from '../utils/replanner';
 import { chainStreamExecutor } from '../utils/stream';
 import { uploadCode } from './planner';
@@ -40,7 +39,7 @@ export async function retrieveNode(
 	if (!userId) throw new Error('User ID is not set');
 	if (!projectInfo) throw new Error('Project info is not set');
 	const { name: projectName } = projectInfo.info;
-	const agentConfig = await getAgentConfig(config.configurable.userId);
+	const agentConfig = config.configurable.userInfo.userConfig.agent;
 
 	const retrievedDomainDocs = agentConfig.CRAG
 		? await knowledgeVDBService.retrieveKonwbase_CRAG(

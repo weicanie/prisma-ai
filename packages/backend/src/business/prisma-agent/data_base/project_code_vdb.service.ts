@@ -283,6 +283,10 @@ export class ProjectCodeVDBService {
 
 		// 找出新增和修改的文件
 		for (const [filePath, localHash] of localFilesMap.entries()) {
+			/* 
+				数据库中记录已经上传的项目文件。
+				若文件内容变化就重新上传。
+			*/
 			const storedFile = storedFilesMap.get(filePath);
 			if (!storedFile) {
 				filesToAdd.push({ filePath, hash: localHash });

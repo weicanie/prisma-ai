@@ -8,7 +8,7 @@ export * from './types/job/';
 export * from './types/knowbase/project';
 export * from './types/login_regist/';
 export * from './types/manage';
-export * from './types/prisma_agent';
+export * from './types/prisma_agent/index';
 export * from './types/project/';
 export * from './types/question';
 export * from './types/resume/';

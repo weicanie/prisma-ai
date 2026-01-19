@@ -18,13 +18,3 @@ scrollbar-default:隐藏后显示滚动条 用于断点
 @utility scb-thin {
 	@apply scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent;
 }
-
-@layer base {
-	* {
-		@apply border-border outline-ring/50;
-	}
-
-	body {
-		@apply bg-background text-foreground;
-	}
-}

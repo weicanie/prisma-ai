@@ -92,7 +92,8 @@ export const user_data_dir = {
 	initUserDir: (userId: string | number) => {
 		pathExist(user_data_dir.deepwikiDownOutputPath(userId));
 		pathExist(user_data_dir.projectsDirPath(userId));
-		pathExist(user_data_dir.agentConfigPath(userId));
+		//! 此配置文件不再生效
+		// pathExist(user_data_dir.agentConfigPath(userId));
 		pathExist(user_data_dir.resumesDirPath(userId));
 		user_data_dir._initUserAgentConfig(userId);
 	},

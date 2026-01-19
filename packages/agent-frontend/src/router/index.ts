@@ -5,13 +5,18 @@ const router = createRouter({
 	routes: [
 		{
 			path: '/',
-			name: 'agent',
+			name: 'home',
 			component: () => import('@/views/agent/AgentView.vue')
 		},
 		{
 			path: '/agent',
 			name: 'agent',
 			component: () => import('@/views/agent/AgentView.vue')
+		},
+		{
+			path: '/config',
+			name: 'config',
+			component: () => import('@/views/agent/ConfigView.vue')
 		}
 	]
 });

@@ -5,7 +5,6 @@ import { InterruptType, waitForHumanReview } from '../human_involve_agent/node';
 import { reflect } from '../reflect_agent/node';
 import { GraphState } from '../state';
 import { NodeConfig, Plan_step, ReviewType, Step, UserAction } from '../types';
-import { getAgentConfig } from '../utils/config';
 import { chainStreamExecutor } from '../utils/stream';
 
 type ChainReturned<T extends (...args: any) => any> = T extends (...args: any) => infer R
@@ -39,7 +38,7 @@ async function retrieveNode(
 	const query = currentStep.stepDescription;
 
 	config.configurable.logger.log(`检索知识: 根据步骤 "${query}" 检索项目代码和领域知识`);
-	const agentConfig = await getAgentConfig(config.configurable.userId);
+	const agentConfig = config.configurable.userInfo.userConfig.agent;
 
 	const [projectDocs, domainDocs] = await Promise.all([
 		projectCodeVDBService.retrieveCodeChunks(

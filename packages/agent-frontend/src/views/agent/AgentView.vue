@@ -310,7 +310,6 @@ watch(
 	},
 	{ immediate: true }
 );
-
 //TODO 主题和主应用同步
 const { setTheme } = useTheme();
 setTheme('system');
@@ -318,7 +317,10 @@ setTheme('system');
 
 <template>
 	<div class="w-full h-[calc(100vh-100px)]! bg-white dark:bg-zinc-950 font-sans">
-		<el-button type="primary" round @click="startAgentStream">启动Agent</el-button>
+		<div class="flex gap-4 p-4">
+			<el-button type="primary" round @click="startAgentStream">启动Agent</el-button>
+			<el-button type="info" round @click="$router.push('/config')">系统设置</el-button>
+		</div>
 		<FeedBack
 			v-if="formToShow === InterruptType.HumanReview"
 			runId="123"

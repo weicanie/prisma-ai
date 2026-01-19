@@ -8,7 +8,6 @@ import { ModelService } from '../../../model/model.service';
 import { WithFormfixChain } from '../../../type/abstract';
 import { RubustStructuredOutputParser } from '../../../utils/RubustStructuredOutputParser';
 import { Reflection } from '../types';
-import { getAgentConfig } from '../utils/config';
 import { PlanGraph } from './planner';
 import { ReplanGraph } from './replanner';
 
@@ -70,7 +69,7 @@ export class PlanExecuteAgentService {
 			z.infer<typeof analysisSchema>
 		>
 	> {
-		const modelName = getAgentConfig(userInfo.userId).model.plan;
+		const modelName = userInfo.userConfig.agent.model.plan;
 		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig);
 
 		const parser = RubustStructuredOutputParser.from(analysisSchema, this.chainService);
@@ -177,7 +176,7 @@ export class PlanExecuteAgentService {
 			z.infer<typeof planSchema>
 		>
 	> {
-		const modelName = getAgentConfig(userInfo.userId).model.plan;
+		const modelName = userInfo.userConfig.agent.model.plan;
 		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig);
 
 		const parser = RubustStructuredOutputParser.from(planSchema, this.chainService);
@@ -302,7 +301,7 @@ export class PlanExecuteAgentService {
 			z.infer<typeof analysisSchema>
 		>
 	> {
-		const modelName = getAgentConfig(userInfo.userId).model.replan;
+		const modelName = userInfo.userConfig.agent.model.replan;
 		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig);
 		const parser = RubustStructuredOutputParser.from(analysisSchema, this.chainService);
 		const prompt = ChatPromptTemplate.fromMessages([
@@ -417,7 +416,7 @@ export class PlanExecuteAgentService {
 			z.infer<typeof planSchema>
 		>
 	> {
-		const modelName = getAgentConfig(userInfo.userId).model.replan;
+		const modelName = userInfo.userConfig.agent.model.replan;
 		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig);
 		const parser = RubustStructuredOutputParser.from(planSchema, this.chainService);
 		const prompt = ChatPromptTemplate.fromMessages([

@@ -8,7 +8,6 @@ import { UserInfoFromToken } from '@prisma-ai/shared';
 import { ModelService } from '../../../model/model.service';
 import { RubustStructuredOutputParser } from '../../../utils/RubustStructuredOutputParser';
 import { reflectionSchema } from '../types';
-import { getAgentConfig } from '../utils/config';
 
 export type Reflection = z.infer<typeof reflectionSchema>;
 /**
@@ -32,7 +31,7 @@ export class ReflectAgentService {
 	async createReflectChain(
 		userInfo: UserInfoFromToken
 	): Promise<Runnable<{ content: string; context?: string }, Reflection>> {
-		const modelName = getAgentConfig(userInfo.userId).model.plan;
+		const modelName = userInfo.userConfig.agent.model.plan;
 		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig);
 		//TODO 没有传入userConfig，使用环境变量中的apiKey！！！（prisma-agent模块中的RubustStructuredOutputParser都是如此，仅会导致本地的deepseek apikey未配置时，自动修复chain不会生效）
 		//现阶段只在本地使用，所以可以直接使用环境变量中的apiKey
