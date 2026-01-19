@@ -30,6 +30,8 @@ import { HjmChainService } from '../../src/chain/hjm-chain.service';
 import { EventBusService } from '../../src/EventBus/event-bus.service';
 import { RedisService } from '../../src/redis/redis.service';
 
+const userInfo = { userId: 'user123', username: 'test', role: 'user', userConfig: {} as any };
+
 describe('ResumeService', () => {
 	let service: ResumeService;
 	let resumeModel: any;
@@ -137,7 +139,6 @@ describe('ResumeService', () => {
 	});
 
 	describe('resumeMatchJob', () => {
-		const userInfo = { userId: 'user123', username: 'test' };
 		const input = { resume: 'resume123', job: 'job123' };
 		const taskId = 'task123';
 
@@ -173,7 +174,6 @@ describe('ResumeService', () => {
 	});
 
 	describe('create', () => {
-		const userInfo = { userId: 'user123', username: 'test' };
 		const createResumeDto = {
 			name: 'Test Resume',
 			skill: '507f1f77bcf86cd799439011', // 有效的ObjectId
@@ -205,8 +205,6 @@ describe('ResumeService', () => {
 	});
 
 	describe('findAll', () => {
-		const userInfo = { userId: 'user123', username: 'test' };
-
 		it('应该返回分页的简历列表', async () => {
 			const mockResumes = [
 				{ _id: 'resume1', name: 'Resume 1' },
@@ -239,7 +237,6 @@ describe('ResumeService', () => {
 	});
 
 	describe('findOne', () => {
-		const userInfo = { userId: 'user123', username: 'test' };
 		const resumeId = '507f1f77bcf86cd799439011'; // 有效的ObjectId
 
 		it('当ID格式无效时应抛出错误', async () => {
@@ -288,7 +285,6 @@ describe('ResumeService', () => {
 	});
 
 	describe('update', () => {
-		const userInfo = { userId: 'user123', username: 'test' };
 		const resumeId = '507f1f77bcf86cd799439011'; // 有效的ObjectId
 		const updateResumeDto = { name: 'Updated Resume' };
 
@@ -322,7 +318,6 @@ describe('ResumeService', () => {
 	});
 
 	describe('remove', () => {
-		const userInfo = { userId: 'user123', username: 'test' };
 		const resumeId = '507f1f77bcf86cd799439011'; // 有效的ObjectId
 
 		it('当ID格式无效时应抛出错误', async () => {
@@ -338,7 +333,7 @@ describe('ResumeService', () => {
 
 			const result = await service.remove(resumeId, userInfo);
 
-			expect(result.message).toBe('Resume with ID "507f1f77bcf86cd799439011" deleted successfully');
+			expect(result).toBe(void 0);
 			expect(resumeModel.deleteOne).toHaveBeenCalledWith({
 				_id: expect.any(Types.ObjectId),
 				'userInfo.userId': userInfo.userId

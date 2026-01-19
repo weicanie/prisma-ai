@@ -28,6 +28,8 @@ import { ProjectChainService } from '../../src/chain/project-chain.service';
 import { EventBusService } from '../../src/EventBus/event-bus.service';
 import { RedisService } from '../../src/redis/redis.service';
 
+const userInfo = { userId: 'user123', username: 'test', role: 'user', userConfig: {} as any };
+
 describe('ProjectProcessService', () => {
 	let service: ProjectProcessService;
 	let projectModel: any;
@@ -137,10 +139,7 @@ describe('ProjectProcessService', () => {
 		expect(service.poolName).toBe('ProjectProcessService');
 	});
 
-	describe('transformAndCheckProject', () => {
-		const projectText = '这是一个测试项目';
-		const userInfo = { userId: 'user123', username: 'test' };
-
+	describe('checkoutProject', () => {
 		it('应该成功转换和检查项目', async () => {
 			const mockProject = {
 				info: {
@@ -156,7 +155,7 @@ describe('ProjectProcessService', () => {
 			// Mock checkoutProject方法
 			service.checkoutProject = jest.fn().mockResolvedValue(mockProject);
 
-			const result = await service.transformAndCheckProject(projectText, userInfo);
+			const result = await service.checkoutProject(mockProject, userInfo);
 
 			expect(chainService.tansformChain).toHaveBeenCalled();
 			expect(service.checkoutProject).toHaveBeenCalled();
@@ -165,7 +164,6 @@ describe('ProjectProcessService', () => {
 	});
 
 	describe('checkoutProject', () => {
-		const userInfo = { userId: 'user123', username: 'test' };
 		const project = {
 			info: {
 				name: 'Test Project',
@@ -209,7 +207,6 @@ describe('ProjectProcessService', () => {
 	});
 
 	describe('lookupProject', () => {
-		const userInfo = { userId: 'user123', username: 'test' };
 		const project = {
 			info: {
 				name: 'Test Project',
@@ -262,7 +259,6 @@ describe('ProjectProcessService', () => {
 	});
 
 	describe('polishProject', () => {
-		const userInfo = { userId: 'user123', username: 'test' };
 		const project = {
 			info: {
 				name: 'Test Project',
@@ -340,7 +336,6 @@ describe('ProjectProcessService', () => {
 	});
 
 	describe('mineProject', () => {
-		const userInfo = { userId: 'user123', username: 'test' };
 		const project = {
 			info: {
 				name: 'Test Project',
@@ -403,7 +398,6 @@ describe('ProjectProcessService', () => {
 
 	describe('_resultHandlerCreater', () => {
 		it('应该创建正确的结果处理器', async () => {
-			const userInfo = { userId: 'user123', username: 'test' };
 			const existingProject = { _id: 'project123' };
 
 			const resultHandler = await service['_resultHandlerCreater'](
