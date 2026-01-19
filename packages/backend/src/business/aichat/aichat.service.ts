@@ -8,6 +8,7 @@ import {
 	type SsePipeManager,
 	StreamingChunk,
 	UserInfoFromToken,
+	Who,
 	WithFuncPool
 } from '@prisma-ai/shared';
 import { from, Observable } from 'rxjs';
@@ -24,6 +25,7 @@ import { MessageSendDto } from './dto/aichat-dto';
 
 @Injectable()
 export class AichatService implements WithFuncPool, OnModuleInit {
+	who = Who.llm;
 	constructor(
 		public dbService: DbService,
 		public chainService: ChainService,
@@ -236,7 +238,8 @@ export class AichatService implements WithFuncPool, OnModuleInit {
 			where: {
 				keyname: String(keyname),
 				user_id: +userId,
-				project_id: project_id
+				project_id: project_id,
+				who: this.who
 			}
 		});
 
@@ -245,7 +248,8 @@ export class AichatService implements WithFuncPool, OnModuleInit {
 			// 当项目已存在会话时，不新建会话
 			const projectConversations = await this.dbService.ai_conversation.findMany({
 				where: {
-					project_id: conversationDto.project_id
+					project_id: conversationDto.project_id,
+					who: this.who
 				}
 			});
 			if (projectConversations.length > 0) return;
@@ -256,7 +260,8 @@ export class AichatService implements WithFuncPool, OnModuleInit {
 					label,
 					content: JSON.stringify(content),
 					user_id: +userId,
-					project_id: project_id
+					project_id: project_id,
+					who: this.who
 				}
 			});
 		}
@@ -270,7 +275,9 @@ export class AichatService implements WithFuncPool, OnModuleInit {
 			return await this.dbService.ai_conversation.updateMany({
 				where: {
 					keyname: String(keyname),
-					user_id: +userId
+					user_id: +userId,
+					project_id: project_id,
+					who: this.who
 				},
 				data: {
 					content: JSON.stringify(content)
@@ -284,7 +291,8 @@ export class AichatService implements WithFuncPool, OnModuleInit {
 					label,
 					content: JSON.stringify(content),
 					user_id: +userId,
-					project_id: project_id
+					project_id: project_id,
+					who: this.who
 				}
 			});
 		}
@@ -300,7 +308,8 @@ export class AichatService implements WithFuncPool, OnModuleInit {
 				label,
 				content: JSON.stringify(content),
 				user_id: +userId,
-				project_id: project_id
+				project_id: project_id,
+				who: this.who
 			}
 		});
 	}
@@ -313,7 +322,8 @@ export class AichatService implements WithFuncPool, OnModuleInit {
 		const values = await this.dbService.ai_conversation.findMany({
 			where: {
 				user_id: +userId,
-				project_id: project_id
+				project_id: project_id,
+				who: this.who
 			}
 		});
 		values.forEach(v => {
