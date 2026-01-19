@@ -4,14 +4,13 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
 	AIChatLLM,
-	StreamingChunk,
 	UserConfig,
 	UserMemoryT,
 	UserModelConfig,
 	userMemorySchema
 } from '@prisma-ai/shared';
 import { BufferMemory } from 'langchain/memory';
-import { GlmModel, GlmNeed, ModelService } from '../model/model.service';
+import { ModelService } from '../model/model.service';
 import { ThoughtModelService } from '../model/thought-model.service';
 import { PromptService } from '../prompt/prompt.service';
 import { AichatChainContext } from '../type/aichat';
@@ -26,18 +25,6 @@ export class AichatChainService {
 		public configService: ConfigService,
 		public chainService: ChainService
 	) {}
-
-	transformAIMessageStream(llm: Runnable): Runnable<any, StreamingChunk> {
-		// 使用RunnableLambda封装整个流转换过程
-		const flatModel = new RunnableLambda<any, any>({
-			func: async (prompt: any) => {
-				const stream = await llm.stream(prompt);
-				return this.thoughtModelService._transformAIMessageStream(stream, 'LLM');
-			}
-		});
-
-		return flatModel as Runnable<any, StreamingChunk>;
-	}
 
 	async createChatChain(
 		keyname: string,
@@ -81,38 +68,7 @@ export class AichatChainService {
 			memoryKey: 'history'
 		});
 
-		let llm: Runnable;
-		switch (modelConfig.llm_type) {
-			case AIChatLLM.v3:
-				llm = this.modelService.getLLMDeepSeekRaw(
-					modelConfig.llm_type as 'deepseek-chat',
-					userConfig.llm.deepseek.apiKey
-				);
-				llm = this.transformAIMessageStream(llm);
-				break;
-			case AIChatLLM.r1:
-				llm = await this.thoughtModelService.getDeepSeekThinkingModleflat(
-					modelConfig.llm_type as any,
-					userConfig!
-				);
-				break;
-			case AIChatLLM.gemini_2_5_pro:
-			case AIChatLLM.gemini_2_5_flash:
-			case AIChatLLM.gemini_2_5_pro_proxy:
-				llm = await this.thoughtModelService.getGeminiThinkingModelFlat(
-					modelConfig.llm_type as any,
-					userConfig!
-				);
-				break;
-			case AIChatLLM.glm_4_6:
-				llm = await this.modelService.glmModelpool({
-					need: GlmNeed.high,
-					apiKey: userConfig.llm.zhipu.apiKey,
-					modelName: GlmModel.glm_4_6
-				});
-				llm = this.transformAIMessageStream(llm);
-				break;
-		}
+		let llm: Runnable = await this.chainService.getStreamLLM(modelConfig.llm_type, userConfig);
 
 		const outputParser = new StringOutputParser();
 

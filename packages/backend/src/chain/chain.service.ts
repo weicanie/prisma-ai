@@ -1,18 +1,28 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
+import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { ChatDeepSeek } from '@langchain/deepseek';
 import type { ChatOpenAI } from '@langchain/openai';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { hjmRerankSchema, JobVo, LLMJobDto, llmJobSchema, UserConfig } from '@prisma-ai/shared';
+import {
+	AIChatLLM,
+	hjmRerankSchema,
+	JobVo,
+	LLMJobDto,
+	llmJobSchema,
+	StreamingChunk,
+	UserConfig
+} from '@prisma-ai/shared';
 import { BufferMemory } from 'langchain/memory';
 import * as path from 'path';
 import { z } from 'zod';
 import { AgentService } from '../agent/agent.service';
 import { MCPClientService } from '../mcp-client/mcp-client.service';
-import { ModelService } from '../model/model.service';
+import { HAModelClient } from '../model/HAModelClient/HAModelClient.service';
+import { GlmModel, GlmNeed, ModelService } from '../model/model.service';
+import { ThoughtModelService } from '../model/thought-model.service';
 import { PromptService, role } from '../prompt/prompt.service';
-import { WithFormfixChain } from '../utils/abstract';
+import { WithFormfixChain } from '../type/abstract';
 import { RubustStructuredOutputParser } from '../utils/RubustStructuredOutputParser';
 
 const markdownNormalizeSchema = z.object({
@@ -25,11 +35,72 @@ const markdownNormalizeSchema = z.object({
 export class ChainService implements WithFormfixChain {
 	constructor(
 		public modelService: ModelService,
+		public thoughtModelService: ThoughtModelService,
 		public promptService: PromptService,
 		private agentService: AgentService,
 		public clientService: MCPClientService,
 		public configService: ConfigService
 	) {}
+
+	/**
+	 * 将llm包装为返回定义的StreamingChunk流的Runnable
+	 */
+	transformAIMessageStream(llm: Runnable): Runnable<any, StreamingChunk> {
+		// 使用RunnableLambda封装整个流转换过程
+		const flatModel = new RunnableLambda<any, any>({
+			func: async (prompt: any) => {
+				const stream = await llm.stream(prompt);
+				return this.thoughtModelService._transformAIMessageStream(stream, 'LLM');
+			}
+		});
+
+		return flatModel as Runnable<any, StreamingChunk>;
+	}
+
+	/**
+	 * 获取返回定义的StreamingChunk流的Runnable
+	 */
+	async getStreamLLM(modelType: AIChatLLM, userConfig: UserConfig) {
+		let llm: Runnable;
+		switch (modelType) {
+			case AIChatLLM.v3:
+				llm = await this.modelService.getLLMDeepSeek({
+					...this.modelService.deepseek_config,
+					model: AIChatLLM.v3,
+					configuration: {
+						...this.modelService.deepseek_config.configuration,
+						apiKey: userConfig.llm.deepseek.apiKey
+					}
+				});
+				// 开启json mode
+				llm = (llm as unknown as HAModelClient).withStructuredOutput() as unknown as Runnable;
+				llm = this.transformAIMessageStream(llm);
+				break;
+			case AIChatLLM.r1:
+				llm = await this.thoughtModelService.getDeepSeekThinkingModleflat(
+					modelType as any,
+					userConfig!
+				);
+				break;
+			case AIChatLLM.gemini_2_5_pro:
+			case AIChatLLM.gemini_2_5_flash:
+			case AIChatLLM.gemini_2_5_pro_proxy:
+				llm = await this.thoughtModelService.getGeminiThinkingModelFlat(
+					modelType as any,
+					userConfig!
+				);
+				break;
+			case AIChatLLM.glm_4_6:
+				llm = await this.modelService.glmModelpool({
+					need: GlmNeed.high,
+					apiKey: userConfig.llm.zhipu.apiKey,
+					modelName: GlmModel.glm_4_6
+				});
+				llm = this.transformAIMessageStream(llm);
+				break;
+		}
+		return llm!;
+	}
 
 	/**
 	 * 创建链, memory默认使用BufferMemory, memory是否注入prompt取决于prompt是否提供{chat_history}插槽
