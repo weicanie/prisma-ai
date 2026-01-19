@@ -116,6 +116,7 @@ model project_file_chunk {
 model ai_conversation {
   id         Int       @id @default(autoincrement())
   project_id String    @db.VarChar(255) //项目经验id（一个项目经验对应多个对话）
+  who        String    @default("llm") @db.VarChar(255) // 是与llm还是agent对话
   keyname    String    @unique @db.VarChar(100)
   label      String    @db.VarChar(100)
   content    Json? //前端使用的聊天历史
