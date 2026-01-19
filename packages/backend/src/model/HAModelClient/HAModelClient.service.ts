@@ -123,7 +123,9 @@ export class HAModelClient {
 	 * 开启 llm 的 JSON mode （目前不支持JSON schema）
 	 * 这能确保返回的是有效的JSON
 	 */
-	withStructuredOutput(schema: ZodAny) {
+	withStructuredOutput(schema?: ZodAny) {
+		//! 对于支持json mode的 LLM API（基本都支持）, schema 是不需要的（prompt中说明格式）
+
 		//! 组合withStructuredOutput时解析器会出错
 		// const modelClass = this.model.constructor;
 		// let newModel = new modelClass(this.modelConfig);

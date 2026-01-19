@@ -48,7 +48,7 @@ export class SseSessionManagerController implements SsePipeController {
 		}
 	}
 
-	/* 
+	/* 后端维护一个状态机，前端检查状态后决策
   前端在创建会话前,如localStorage的sessionId存在,需要获取当前会话状态再决策
     如不存在,则直接创建会话（说明还没进行过会话）
 

@@ -84,7 +84,7 @@ export class SseManagerService implements OnModuleInit, SsePipeManager {
 	 * 任务类型字段,用于指定任务处理器
 	 */
 	taskType = {
-		project: 'sse_llm'
+		llmSse: 'sse_llm'
 	};
 
 	constructor(
@@ -99,12 +99,12 @@ export class SseManagerService implements OnModuleInit, SsePipeManager {
 	onModuleInit() {
 		/* 注册任务处理器 */
 		try {
-			this.taskQueueService.registerTaskHandler(this.taskType.project, this.taskHandler.bind(this));
+			this.taskQueueService.registerTaskHandler(this.taskType.llmSse, this.taskHandler.bind(this));
 		} catch (error) {
 			this.logger.error(`SSE任务处理器注册失败: ${error}`);
 			throw error;
 		}
-		this.logger.log(`SSE任务处理器已注册: ${this.taskType.project}`);
+		this.logger.log(`SSE任务处理器已注册: ${this.taskType.llmSse}`);
 	}
 
 	/* sse数据推送任务处理器
@@ -250,7 +250,7 @@ export class SseManagerService implements OnModuleInit, SsePipeManager {
 	}
 
 	/* 创建任务并入队 */
-	private async createAndEnqueueTaskProject(
+	private async createAndEnqueueTaskLLMSse(
 		sessionId: string,
 		userInfo: UserInfoFromToken,
 		metadata: LLMSseTask['metadata']
@@ -258,7 +258,7 @@ export class SseManagerService implements OnModuleInit, SsePipeManager {
 		const task = await this.taskQueueService.createAndEnqueueTask(
 			sessionId,
 			userInfo.userId,
-			this.taskType.project,
+			this.taskType.llmSse,
 			metadata
 		);
 		return task;
@@ -347,7 +347,7 @@ export class SseManagerService implements OnModuleInit, SsePipeManager {
 		}
 
 		/* 3、创建task并入队 */
-		const task = await this.createAndEnqueueTaskProject(sessionId, userInfo, metadata);
+		const task = await this.createAndEnqueueTaskLLMSse(sessionId, userInfo, metadata);
 
 		/* 4、订阅任务的chunk生成事件并返回数据 */
 		return new Observable<DataChunkVO>(subscriber => {
