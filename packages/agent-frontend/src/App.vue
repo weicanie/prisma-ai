@@ -1,20 +1,13 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router';
+import ThemeProvider from '@/utils/ThemeProvider.vue';
 import './index.css';
+import AgentView from './views/agent/AgentView.vue';
 </script>
 
 <template>
-  <header>
-
-    <div class="wrapper">
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+	<div class="w-screen h-screen">
+		<ThemeProvider>
+			<AgentView></AgentView>
+		</ThemeProvider>
+	</div>
 </template>
-
