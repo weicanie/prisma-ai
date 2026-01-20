@@ -2,12 +2,16 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateJobDto, UserInfoFromToken } from '@prisma-ai/shared';
 import { Model } from 'mongoose';
-import * as puppeteer from 'puppeteer';
+import { Browser, Page } from 'puppeteer';
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { ChainService } from '../../chain/chain.service';
 import { TaskQueueService } from '../../task-queue/task-queue.service';
 import { PersistentTask } from '../../type/taskqueue';
 import { StartCrawlDto } from './dto/start-crawl.dto';
 import { Job, JobDocument } from './entities/job.entity';
+
+puppeteer.use(StealthPlugin());
 
 interface CrawlTask extends PersistentTask {
 	metadata: {
@@ -33,6 +37,9 @@ const delayConfig = {
 		maxDelay: 500
 	}
 };
+
+const dataLoadTimeout = 5 * 1000; //ms
+
 /**
  * 爬取职位信息的爬虫
  * 爬虫功能：
@@ -72,26 +79,41 @@ export class CrawlJobService {
 	private async _taskHandler(task: CrawlTask): Promise<void> {
 		const { metadata } = task;
 		const { options } = metadata;
-		if (Array.isArray(options.query)) {
-			for (const query of options.query) {
-				const curTask = await this.taskQueueService.getTask<CrawlTask>(task.id);
-				if (!curTask) {
-					this.logger.error(`获取任务失败: ${task.id}`);
-					continue;
+
+		const { browser, page } = await this._initializeBrowser();
+
+		try {
+			if (Array.isArray(options.query)) {
+				for (const query of options.query) {
+					// 每次循环重新获取任务状态，确保获取最新的 completedCount
+					const curTask = await this.taskQueueService.getTask<CrawlTask>(task.id);
+					if (!curTask) {
+						this.logger.error(`获取任务失败: ${task.id}`);
+						break;
+					}
+					const {
+						metadata: { completedCount: curCompletedCount }
+					} = curTask;
+
+					if (curCompletedCount >= options.totalCount) {
+						this.logger.log(
+							`当前任务已爬取数量: ${curCompletedCount} 已达到目标数量: ${options.totalCount},任务结束`
+						);
+						break;
+					}
+
+					this.logger.log(`开始处理查询词: ${query}`);
+					await this._startSpider({ ...options, query }, task, page);
 				}
-				const {
-					metadata: { completedCount: curCompletedCount }
-				} = curTask;
-				if (curCompletedCount >= options.totalCount) {
-					this.logger.log(
-						`当前任务已爬取数量: ${curCompletedCount} 已达到目标数量: ${options.totalCount},任务结束`
-					);
-					break;
-				}
-				await this._startSpider({ ...options, query }, task);
+			} else {
+				await this._startSpider({ ...options }, task, page);
 			}
-		} else {
-			await this._startSpider({ ...options }, task);
+		} catch (error) {
+			this.logger.error('任务执行过程中发生错误:', error);
+			throw error;
+		} finally {
+			await browser.close();
+			this.logger.log('浏览器已关闭');
 		}
 	}
 
@@ -121,10 +143,11 @@ export class CrawlJobService {
 	/**
 	 * 主入口：启动爬虫，并根据提供的参数抓取职位信息
 	 * @param options 爬虫启动参数
+	 * @param page Puppeteer 页面实例
 	 * @returns 返回一个包含成功信息和保存数量的对象
 	 */
-	private async _startSpider(options: StartCrawlDto, task: CrawlTask) {
-		const { totalCount, city, query, industry, position } = options;
+	private async _startSpider(options: StartCrawlDto, task: CrawlTask, page: Page) {
+		const { totalCount, city, query, industry, position, maxRetries = 7 } = options;
 		const listPageUrl = `https://m.zhipin.com/${city}/?query=${query}&industry=${
 			industry || ''
 		}&position=${position || ''}`;
@@ -133,11 +156,9 @@ export class CrawlJobService {
 		this.logger.log(`目标新增数据总数：${totalCount}`);
 		this.logger.log(`当前已新增的数据总数: ${task?.metadata?.completedCount ?? '未知'}`);
 
-		const { browser, page } = await this._initializeBrowser();
-
 		try {
 			// 1. 收集所有职位详情页的链接
-			const jobLinks = await this._getJobLinks(page, listPageUrl, totalCount);
+			const jobLinks = await this._getJobLinks(page, listPageUrl, totalCount, maxRetries);
 			this.logger.log(`成功收集到 ${jobLinks.length} 个职位链接`);
 
 			// 2. 遍历链接，抓取职位详情
@@ -145,7 +166,7 @@ export class CrawlJobService {
 			for (let i = 0; i < jobLinks.length; i++) {
 				const link = jobLinks[i];
 				this.logger.log(`正在抓取第 ${i + 1} / ${jobLinks.length} 个职位: ${link}`);
-				const jobDetail = await this._getJobDetails(page, link);
+				const jobDetail = await this._getJobDetails(page, link, maxRetries);
 				if (jobDetail) {
 					allJobs.push(jobDetail);
 				}
@@ -159,9 +180,6 @@ export class CrawlJobService {
 		} catch (error) {
 			this.logger.error('爬虫执行过程中发生错误:', error);
 			throw error;
-		} finally {
-			await browser.close();
-			this.logger.log('浏览器已关闭');
 		}
 	}
 
@@ -170,25 +188,25 @@ export class CrawlJobService {
 	 * @returns 返回浏览器和页面实例
 	 */
 	private async _initializeBrowser(): Promise<{
-		browser: puppeteer.Browser;
-		page: puppeteer.Page;
+		browser: Browser;
+		page: Page;
 	}> {
 		this.logger.log('正在初始化浏览器...');
 		const browserWSEndpoint = process.env.PUPPETEER_BROWSER_WSE_ENDPOINT;
-		let browser;
+		let browser: Browser;
 
 		if (browserWSEndpoint) {
 			// 如果配置了远程端点，则连接到远程浏览器
 			this.logger.log(`正在连接到远程浏览器: ${browserWSEndpoint}`);
 			try {
-				browser = await puppeteer.connect({
+				browser = (await puppeteer.connect({
 					browserWSEndpoint,
 					// 传递一些与本地启动时相同的参数，以确保行为一致
 					defaultViewport: {
 						width: 1366,
 						height: 768
 					}
-				});
+				})) as unknown as Browser;
 				this.logger.log('成功连接到远程浏览器。');
 			} catch (error) {
 				this.logger.error(`连接到远程浏览器失败: ${error.message}`, error.stack);
@@ -197,66 +215,27 @@ export class CrawlJobService {
 		} else {
 			// 否则，启动本地 Puppeteer 实例
 			this.logger.log('未检测到远程浏览器端点，将启动本地 Puppeteer 实例。');
-			browser = await puppeteer.launch({
+			browser = (await puppeteer.launch({
 				headless: false, // 在本地可以设置为 'new' 或 false 进行调试
 				defaultViewport: {
 					width: 1366, // 设置常见的屏幕分辨率
 					height: 768
 				},
 				args: [
-					'--no-sandbox',
-					'--disable-setuid-sandbox',
-					'--disable-dev-shm-usage',
-					'--disable-web-security',
-					'--disable-features=VizDisplayCompositor',
-					'--disable-blink-features=AutomationControlled' // 重要：禁用自动化控制标识
+					'--no-sandbox', // Docker/CI 环境必须
+					'--disable-setuid-sandbox', // Docker/CI 环境必须
+					'--disable-dev-shm-usage', // 防止内存溢出
+					'--disable-web-security', // 允许跨域等（功能性需求）
+					'--disable-features=VizDisplayCompositor'
+					// '--disable-blink-features=AutomationControlled' // 移除：完全交给 StealthPlugin 处理
 				]
-			});
+			})) as unknown as Browser;
 			this.logger.log('本地 Puppeteer 实例启动成功。');
 		}
 
-		const page = await browser.newPage();
-
-		// 设置随机的用户代理
-		const userAgents = [
-			'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-			'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36',
-			'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-			'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
-		];
-		const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
-		await page.setUserAgent(randomUserAgent);
-
-		// 设置额外的请求头
-		await page.setExtraHTTPHeaders({
-			'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-			'Accept-Encoding': 'gzip, deflate, br',
-			Accept:
-				'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-			'Cache-Control': 'no-cache',
-			Pragma: 'no-cache',
-			'Sec-Fetch-Dest': 'document',
-			'Sec-Fetch-Mode': 'navigate',
-			'Sec-Fetch-Site': 'none',
-			'Upgrade-Insecure-Requests': '1'
-		});
-
-		// 移除 webdriver 标识
-		await page.evaluateOnNewDocument(() => {
-			Object.defineProperty(navigator, 'webdriver', {
-				get: () => undefined
-			});
-
-			// 重写 plugins 数组
-			Object.defineProperty(navigator, 'plugins', {
-				get: () => [1, 2, 3, 4, 5]
-			});
-
-			// 重写 languages 属性
-			Object.defineProperty(navigator, 'languages', {
-				get: () => ['zh-CN', 'zh', 'en']
-			});
-		});
+		// 启用 Stealth 插件后，它会自动处理 User-Agent、webdriver、chrome 属性等指纹
+		// 手动设置可能会覆盖插件的优化配置，甚至引入特征矛盾
+		// 因此移除手动的 User-Agent 和 Header 设置，完全信任插件
 
 		//会导致认证页面加载不出来,无法手动验证,所以暂时注释掉
 		// 过滤掉图片、样式、字体、媒体等资源的请求,阻止加载不必要的资源以提高速度
@@ -269,6 +248,8 @@ export class CrawlJobService {
         request.continue();
       }
     }); */
+
+		const page = await browser.newPage();
 
 		// 监控响应状态
 		page.on('response', response => {
@@ -288,40 +269,62 @@ export class CrawlJobService {
 	 * @param page - Puppeteer 页面对象
 	 * @param listPageUrl - 职位列表页的 URL
 	 * @param totalCount - 要收集的链接总数
+	 * @param maxRetries - 最大重试次数
 	 * @returns 职位详情页链接数组
 	 */
 	private async _getJobLinks(
-		page: puppeteer.Page,
+		page: Page,
 		listPageUrl: string,
-		totalCount: number
+		totalCount: number,
+		maxRetries: number
 	): Promise<string[]> {
-		this.logger.log(`正在访问职位列表页: ${listPageUrl}`);
+		let retries = 0;
+		let lastError: any;
 
-		// 添加访问频率伪装
-		await this._simulateHumanBehavior('list');
+		while (retries <= maxRetries) {
+			try {
+				if (retries > 0) {
+					this.logger.log(
+						`正在重试访问职位列表页 (第 ${retries}/${maxRetries} 次): ${listPageUrl}`
+					);
+				} else {
+					this.logger.log(`正在访问职位列表页: ${listPageUrl}`);
+				}
 
-		await page.goto(listPageUrl, { waitUntil: 'networkidle2' }); // 等待网络空闲
+				// 添加访问频率伪装
+				await this._simulateHumanBehavior('list');
 
-		// 确认页面是否正常加载了内容
-		try {
-			await page.waitForSelector('.job-list-new .item', { timeout: 100000 });
-		} catch (e) {
-			this.logger.warn('在10秒内未找到 .job-list-new .item 元素，可能页面没有职位或结构已改变。');
-			// 尝试刷新页面
-			await page.reload({ waitUntil: 'networkidle2' });
-			await page.waitForSelector('.job-list-new .item', { timeout: 100000 });
+				await page.goto(listPageUrl, { waitUntil: 'networkidle2' }); // 等待网络空闲
+
+				// 确认页面是否正常加载了内容
+				await page.waitForSelector('.job-list-new .item', { timeout: dataLoadTimeout });
+
+				await this._scrollAndLoadJobs(page, totalCount);
+
+				this.logger.log('开始从页面提取职位链接...');
+				const links = await page.$$eval('.job-list-new .item a', anchors =>
+					anchors.map(a => `https://m.zhipin.com${a.getAttribute('href')}`)
+				);
+
+				// 去重并截取到目标数量
+				const uniqueLinks = [...new Set(links)];
+				return uniqueLinks.slice(0, totalCount);
+			} catch (error) {
+				lastError = error;
+				retries++;
+				this.logger.warn(`获取职位列表失败: ${error.message}`);
+
+				if (retries > maxRetries) {
+					break;
+				}
+
+				this.logger.log('等待一段时间后重试...');
+				await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
+			}
 		}
 
-		await this._scrollAndLoadJobs(page, totalCount);
-
-		this.logger.log('开始从页面提取职位链接...');
-		const links = await page.$$eval('.job-list-new .item a', anchors =>
-			anchors.map(a => `https://m.zhipin.com${a.getAttribute('href')}`)
-		);
-
-		// 去重并截取到目标数量
-		const uniqueLinks = [...new Set(links)];
-		return uniqueLinks.slice(0, totalCount);
+		this.logger.error(`多次尝试获取职位列表失败，已达到最大重试次数 ${maxRetries}`);
+		throw lastError;
 	}
 
 	/**
@@ -329,7 +332,7 @@ export class CrawlJobService {
 	 * @param page - Puppeteer 页面对象
 	 * @param totalCount - 目标加载的职位总数
 	 */
-	private async _scrollAndLoadJobs(page: puppeteer.Page, totalCount: number): Promise<void> {
+	private async _scrollAndLoadJobs(page: Page, totalCount: number): Promise<void> {
 		this.logger.log(`开始滚动页面，目标加载 ${totalCount} 个职位...`);
 		let currentJobCount = 0;
 		let previousJobCount = 0;
@@ -364,7 +367,7 @@ export class CrawlJobService {
 						const currentCount = document.querySelectorAll(selector).length;
 						return currentCount > prevCount;
 					},
-					{ timeout: 100000 },
+					{ timeout: dataLoadTimeout },
 					'.job-list-new .item',
 					currentJobCount
 				);
@@ -389,57 +392,75 @@ export class CrawlJobService {
 	 * 抓取单个职位详情页的信息
 	 * @param page - Puppeteer 页面对象
 	 * @param jobLink - 职位详情页链接
+	 * @param maxRetries - 最大重试次数
 	 * @returns 格式化后的职位数据，如果抓取失败则返回 null
 	 */
 	private async _getJobDetails(
-		page: puppeteer.Page,
-		jobLink: string
+		page: Page,
+		jobLink: string,
+		maxRetries: number
 	): Promise<CreateJobDto | null> {
-		try {
-			// 访问频率伪装
-			await this._simulateHumanBehavior('detail');
+		let retries = 0;
 
-			await page.goto(jobLink, { waitUntil: 'networkidle2' });
-			await page.waitForSelector('.job-sec', { timeout: 100000 });
+		while (retries <= maxRetries) {
+			try {
+				if (retries > 0) {
+					this.logger.debug(`正在重试抓取职位详情 (第 ${retries}/${maxRetries} 次): ${jobLink}`);
+				}
 
-			// 添加用户交互模拟
-			await this._simulateUserInteraction(page);
+				// 访问频率伪装
+				await this._simulateHumanBehavior('detail');
 
-			const jobDetails: CreateJobDto = await page.evaluate(link => {
-				const getText = (selector: string) => {
-					const element = document.querySelector(selector);
-					// 明确处理元素不存在的情况
-					return element ? element.textContent?.trim() || '' : '';
-				};
+				await page.goto(jobLink, { waitUntil: 'networkidle2' });
+				await page.waitForSelector('.job-sec', { timeout: dataLoadTimeout });
 
-				// 从HTML中提取描述并处理<br>标签
-				const getDescription = () => {
-					const descriptionEl = document.querySelector('.job-sec .text');
-					if (!descriptionEl) return '';
-					return descriptionEl.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '');
-				};
+				// 添加用户交互模拟
+				await this._simulateUserInteraction(page);
 
-				return {
-					jobName: getText('.job-banner .job-title'),
-					companyName: getText('.job-company .info-primary .name'),
-					description: getDescription(),
-					location: getText('.job-banner p a.text-city'),
-					salary: getText('.job-banner .salary'),
-					link: link
-				};
-			}, jobLink);
+				const jobDetails: CreateJobDto = await page.evaluate(link => {
+					const getText = (selector: string) => {
+						const element = document.querySelector(selector);
+						// 明确处理元素不存在的情况
+						return element ? element.textContent?.trim() || '' : '';
+					};
 
-			// 简单的验证，确保关键信息存在
-			if (!jobDetails.jobName || !jobDetails.companyName) {
-				this.logger.warn(`职位链接 ${jobLink} 缺少关键信息，已跳过。`);
-				return null;
+					// 从HTML中提取描述并处理<br>标签
+					const getDescription = () => {
+						const descriptionEl = document.querySelector('.job-sec .text');
+						if (!descriptionEl) return '';
+						return descriptionEl.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '');
+					};
+
+					return {
+						jobName: getText('.job-banner .job-title'),
+						companyName: getText('.job-company .info-primary .name'),
+						description: getDescription(),
+						location: getText('.job-banner p a.text-city'),
+						salary: getText('.job-banner .salary'),
+						link: link
+					};
+				}, jobLink);
+
+				// 简单的验证，确保关键信息存在
+				if (!jobDetails.jobName || !jobDetails.companyName) {
+					this.logger.warn(`职位链接 ${jobLink} 缺少关键信息，已跳过。`);
+					return null;
+				}
+
+				return jobDetails;
+			} catch (error) {
+				retries++;
+				this.logger.warn(`抓取职位详情失败: ${jobLink} - ${error.message}`);
+
+				if (retries > maxRetries) {
+					this.logger.error(`抓取职位详情最终失败，跳过: ${jobLink}`);
+					return null;
+				}
+
+				await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
 			}
-
-			return jobDetails;
-		} catch (error) {
-			this.logger.error(`抓取职位详情失败: ${jobLink}`, error.stack);
-			return null;
 		}
+		return null;
 	}
 
 	/**
@@ -531,7 +552,7 @@ export class CrawlJobService {
 	/**
 	 * 模拟真实用户的页面交互行为
 	 */
-	private async _simulateUserInteraction(page: puppeteer.Page): Promise<void> {
+	private async _simulateUserInteraction(page: Page): Promise<void> {
 		// 随机滚动
 		const scrollActions = Math.floor(Math.random() * 3) + 1; // 1-3 次滚动
 		for (let i = 0; i < scrollActions; i++) {

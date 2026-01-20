@@ -44,4 +44,10 @@ export interface StartCrawlDto {
 	 * 职位名称 (可选)
 	 */
 	position?: string;
+
+	/**
+	 * 页面加载/操作失败时的最大重试次数
+	 * @default 7
+	 */
+	maxRetries?: number;
 }
