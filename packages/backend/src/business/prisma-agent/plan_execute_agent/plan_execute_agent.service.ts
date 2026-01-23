@@ -11,9 +11,6 @@ import { Reflection } from '../types';
 import { PlanGraph } from './planner';
 import { ReplanGraph } from './replanner';
 
-const analysisSchema = z.object({
-	highlightAnalysis: z.string().describe('对亮点的详细需求分析，包括功能点、非功能需求、约束等')
-});
 const planSchema = z.object({
 	implementationPlan: z
 		.array(
@@ -66,13 +63,11 @@ export class PlanExecuteAgentService {
 				knowledge?: { retrievedProjectCodes: string; retrievedDomainDocs: string };
 				reflection?: Reflection;
 			},
-			z.infer<typeof analysisSchema>
+			string
 		>
 	> {
 		const modelName = userInfo.userConfig.agent.model.plan;
-		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig);
-
-		const parser = RubustStructuredOutputParser.from(analysisSchema, this.chainService);
+		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig, false);
 
 		const prompt = ChatPromptTemplate.fromMessages([
 			[
@@ -89,9 +84,7 @@ export class PlanExecuteAgentService {
 - 需求分析必须清晰，逻辑清晰，条理清晰。
 - 需求分析必须专业，符合软件需求分析的规范。
 - 需求分析必须准确，符合项目实际情况。
-
-
-{format_instructions}`
+`
 			],
 			[
 				'human',
@@ -130,12 +123,10 @@ export class PlanExecuteAgentService {
 				projectTechStack: input => input.projectInfo.info.techStack.join(', '),
 				lightSpot: input => input.lightSpot,
 				retrievedProjectCodes: input => input.knowledge?.retrievedProjectCodes ?? '无',
-				retrievedDomainDocs: input => input.knowledge?.retrievedDomainDocs ?? '无',
-				format_instructions: () => parser.getFormatInstructions()
+				retrievedDomainDocs: input => input.knowledge?.retrievedDomainDocs ?? '无'
 			},
 			prompt,
-			model,
-			parser
+			model
 		]);
 		chain.getStreamVersion = () =>
 			RunnableSequence.from([
@@ -148,8 +139,7 @@ export class PlanExecuteAgentService {
 					projectTechStack: input => input.projectInfo.info.techStack.join(', '),
 					lightSpot: input => input.lightSpot,
 					retrievedProjectCodes: input => input.knowledge?.retrievedProjectCodes ?? '无',
-					retrievedDomainDocs: input => input.knowledge?.retrievedDomainDocs ?? '无',
-					format_instructions: () => parser.getFormatInstructions()
+					retrievedDomainDocs: input => input.knowledge?.retrievedDomainDocs ?? '无'
 				},
 				prompt,
 				model
@@ -197,9 +187,7 @@ export class PlanExecuteAgentService {
 - 每个步骤都应包含 'stepDescription', 'techStackList', 'challengesList', 'questionsList'。
 - 计划需要具备可执行性，步骤之间逻辑清晰，并且要考虑到潜在的挑战和问题。
 - 当所有步骤都完成后，需求会被实现。
-
-直接输出JSON对象本身,而不是markdown格式的json块。
-比如你应该直接输出"{{"name":"..."}}"而不是"\`\`\`json\n{{"name":"..."}}\n\`\`\`"
+"
 
 {format_instructions}`
 			],
@@ -298,12 +286,11 @@ export class PlanExecuteAgentService {
 				retrievedDomainDocs: string;
 				reflection: string;
 			},
-			z.infer<typeof analysisSchema>
+			string
 		>
 	> {
 		const modelName = userInfo.userConfig.agent.model.replan;
-		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig);
-		const parser = RubustStructuredOutputParser.from(analysisSchema, this.chainService);
+		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig, false);
 		const prompt = ChatPromptTemplate.fromMessages([
 			[
 				'system',
@@ -321,13 +308,8 @@ export class PlanExecuteAgentService {
 - **更新分析**: 基于以上信息，生成一份更新后的、更精确的需求分析报告。
 
 **输出要求:**
-- 你必须只输出一个名为 'highlightAnalysis' 的JSON对象。
 - 新的分析必须明确地回应反馈和反思中提出的问题。
-
-直接输出JSON对象本身,而不是markdown格式的json块。
-比如你应该直接输出"{{"name":"..."}}"而不是"\`\`\`json\n{{"name":"..."}}\n\`\`\`"
-
-{format_instructions}`
+`
 			],
 			[
 				'human',
@@ -369,20 +351,16 @@ export class PlanExecuteAgentService {
 		const chain: any = RunnableSequence.from([
 			(input: any) => ({
 				...input,
-				reflection: input.reflection ?? '无相关反思',
-				format_instructions: parser.getFormatInstructions()
+				reflection: input.reflection ?? '无相关反思'
 			}),
 			prompt,
-			model,
-
-			parser
+			model
 		]);
 		chain.getStreamVersion = () =>
 			RunnableSequence.from([
 				(input: any) => ({
 					...input,
-					reflection: input.reflection ?? '无相关反思',
-					format_instructions: parser.getFormatInstructions()
+					reflection: input.reflection ?? '无相关反思'
 				}),
 				prompt,
 				model

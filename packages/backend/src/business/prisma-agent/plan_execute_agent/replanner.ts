@@ -1,7 +1,5 @@
 import { RunnableConfig } from '@langchain/core/runnables';
 import { Command, END, START, StateGraph } from '@langchain/langgraph';
-import * as fs from 'fs/promises';
-import * as path from 'path';
 import { waitForHumanReview } from '../human_involve_agent/node';
 import { reflect } from '../reflect_agent/node';
 import { GraphState } from '../state';
@@ -62,57 +60,6 @@ export async function retrieveNode(
 			knowledge: {
 				retrievedDomainDocs
 			}
-		}
-	};
-}
-
-/** 已弃用，使用增量同步的uploadCode代替
- * Replan - Code Get Node
- * @description 根据上一步执行结果中记录的已修改/创建的文件列表，读取这些文件的最新内容。
- * @input {GraphState} state - 从 `state.stepResult.output.writtenCodeFiles` 获取文件列表, 从 `state.projectPath` 获取项目根路径。
- * @output {Partial<GraphState>} - eplan文件内容和路径更新到 `state.replanState.projectCodes`。
- */
-export async function codeGetNode(
-	state: typeof GraphState.State,
-	config: NodeConfig
-): Promise<Partial<typeof GraphState.State>> {
-	config.configurable.logger.log('---节点: 获取修改的代码---');
-	const { stepResult, projectPath } = state;
-
-	if (!stepResult?.output.writtenCodeFiles || stepResult.output.writtenCodeFiles.length === 0) {
-		config.configurable.logger.log('没有记录的修改代码, 跳过检索.');
-		return {};
-	}
-	if (!projectPath) {
-		throw new Error('Project path not found in state.');
-	}
-
-	const projectCodes = await Promise.all(
-		stepResult.output.writtenCodeFiles.map(async file => {
-			const fullPath = path.join(projectPath, file.relativePath);
-			try {
-				const content = await fs.readFile(fullPath, 'utf-8');
-				return {
-					relativePath: file.relativePath,
-					content: content,
-					summary: file.summary
-				};
-			} catch (error) {
-				console.error(`Error reading file ${fullPath}:`, error);
-				return {
-					relativePath: file.relativePath,
-					content: `Error reading file: ${(error as Error).message}`,
-					summary: file.summary
-				};
-			}
-		})
-	);
-
-	console.log(`Retrieved content for ${projectCodes.length} code files.`);
-	return {
-		replanState: {
-			...state.replanState,
-			projectCodes: projectCodes
 		}
 	};
 }
@@ -207,7 +154,7 @@ export async function reAnalyze(
 		reflection: reflection ? JSON.stringify(reflection, null, 2) : '无'
 	};
 
-	const { highlightAnalysis } = await chainStreamExecutor(
+	const highlightAnalysis = await chainStreamExecutor(
 		config.configurable.runId,
 		reAnalysisChain,
 		chainInput,
@@ -440,7 +387,6 @@ function afterReflect(state: typeof GraphState.State, config: NodeConfig) {
 // ----- 图 -----
 export const ReplanGraph = new StateGraph(GraphState)
 	.addNode('retrieve', retrieveNode)
-	// .addNode('get_code', codeGetNode)
 	.addNode('upload_code', uploadCode)
 	.addNode('prepare_reflection', prepareReflection)
 	.addNode('reflect', reflect)

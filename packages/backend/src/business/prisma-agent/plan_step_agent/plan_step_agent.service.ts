@@ -33,14 +33,6 @@ interface Prompt_step {
 	systemPrompt: string; //系统词
 }
 
-const stepAnalysisSchema = z.object({
-	stepAnalysis: z
-		.string()
-		.describe(
-			'对当前步骤的详细需求分析，明确该步骤需要完成的具体任务、输入、输出和与项目中其他部分的关系。'
-		)
-});
-
 const stepPlanSchema = z.object({
 	implementationPlan: z
 		.array(
@@ -100,13 +92,12 @@ export class PlanStepAgentService {
 				knowledge?: Knowledge;
 				reflection?: Reflection;
 			},
-			z.infer<typeof stepAnalysisSchema>
+			string
 		>
 	> {
 		const modelName = userInfo.userConfig.agent.model.plan_step;
-		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig);
+		let model = await this.chainService.getStreamLLM(modelName, userInfo.userConfig, false);
 		if (!model) throw new Error('Model not found');
-		const parser = RubustStructuredOutputParser.from(stepAnalysisSchema, this.chainService);
 
 		const prompt = ChatPromptTemplate.fromMessages([
 			[
@@ -119,10 +110,7 @@ export class PlanStepAgentService {
 ### 前同事的反思和建议
 {reflection}
 
-直接输出JSON对象本身,而不是markdown格式的json块。
-比如你应该直接输出"{{"name":"..."}}"而不是"\`\`\`json\n{{"name":"..."}}\n\`\`\`"
-
-{format_instructions}`
+`
 			],
 			[
 				'human',
@@ -162,12 +150,10 @@ export class PlanStepAgentService {
 				projectTechStack: input.projectInfo.info.techStack.join(', '),
 				retrievedProjectCodes: input.knowledge?.retrievedProjectCodes ?? '无',
 				retrievedDomainDocs: input.knowledge?.retrievedDomainDocs ?? '无',
-				reflection: input.reflection ?? '无相关反思',
-				format_instructions: parser.getFormatInstructions()
+				reflection: input.reflection ?? '无相关反思'
 			}),
 			prompt,
-			model,
-			parser
+			model
 		]);
 
 		chain.getStreamVersion = () =>
@@ -182,8 +168,7 @@ export class PlanStepAgentService {
 					projectTechStack: input.projectInfo.info.techStack.join(', '),
 					retrievedProjectCodes: input.knowledge?.retrievedProjectCodes ?? '无',
 					retrievedDomainDocs: input.knowledge?.retrievedDomainDocs ?? '无',
-					reflection: input.reflection ?? '无相关反思',
-					format_instructions: parser.getFormatInstructions()
+					reflection: input.reflection ?? '无相关反思'
 				}),
 				prompt,
 				model

@@ -114,7 +114,7 @@ async function analyzeStep(
 	const newStepPlan: Plan_step = {
 		...stepPlan,
 		output: {
-			stepAnalysis: result.stepAnalysis,
+			stepAnalysis: result,
 			implementationPlan: stepPlan?.output.implementationPlan ?? []
 		},
 		knowledge: stepPlan?.knowledge ?? { retrievedProjectCodes: '', retrievedDomainDocs: '' }
@@ -126,7 +126,7 @@ async function analyzeStep(
 			...state.humanIO,
 			output: {
 				type: ReviewType.ANALYSIS_STEP,
-				content: result.stepAnalysis
+				content: result
 			}
 		},
 		reflection: null
@@ -219,7 +219,7 @@ async function generateFinalPromptNode(
 /**
  * "写入Prompt到文件"节点 (writePromptToFileNode)
  * @description 将最终生成的Prompt写入到 agent_output/cursor_input.md 文件中。
- * @input {GraphState} state - 包含 `finalPrompt` 和 `projectPath`。
+ * @input {GraphState} state - 包含 `finalPrompt`。
  * @output {} - 无状态变更，仅执行文件写入操作。
  */
 async function writePromptToFileNode(
@@ -227,9 +227,9 @@ async function writePromptToFileNode(
 	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
 	config.configurable.logger.log('---节点: 写入Prompt到文件---');
-	const { finalPrompt, projectPath } = state;
-	if (!finalPrompt || !projectPath) {
-		throw new Error('Missing finalPrompt or projectPath.');
+	const { finalPrompt } = state;
+	if (!finalPrompt) {
+		throw new Error('Missing finalPrompt.');
 	}
 
 	//写入agent_output/cursor_input.md

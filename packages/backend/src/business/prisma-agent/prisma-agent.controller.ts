@@ -45,7 +45,7 @@ export class PrismaAgentController {
 		const task = await this.prismaAgentService.startRunAgentTask(
 			project,
 			implementDto.lightspot,
-			implementDto.projectPath,
+			implementDto.projectPath ?? '',
 			userInfo,
 			crypto.randomUUID(),
 			uiType

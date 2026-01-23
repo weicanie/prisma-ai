@@ -278,7 +278,9 @@ export class PrismaAgentService implements OnModuleInit, WithFuncPool {
 		sessionId: string,
 		uiType: 'CLI' | 'WEB' = 'WEB'
 	) {
-		const projectFullPath = path.join(user_data_dir.projectsDirPath(userInfo.userId), projectPath);
+		const projectFullPath = projectPath
+			? path.join(user_data_dir.projectsDirPath(userInfo.userId), projectPath)
+			: '';
 		const userId = userInfo.userId;
 		let adapter: PrismaAgentCLIAdapter | null = null;
 		// 支持CLI和WEB UI两种用户界面

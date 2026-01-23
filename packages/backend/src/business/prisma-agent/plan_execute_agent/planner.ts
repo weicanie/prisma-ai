@@ -21,7 +21,11 @@ export async function uploadCode(
 	const { projectPath, userId, projectInfo } = state;
 	const { projectCodeVDBService, eventBusService } = config.configurable;
 
-	if (!projectPath) throw new Error('Project path is not set');
+	// projectPath未设置则不进行代码的上传和检索
+	if (!projectPath) {
+		console.log('projectPath未设置,不进行代码的上传和检索');
+		return {};
+	}
 	if (!userId) throw new Error('User ID is not set');
 	if (!projectInfo?.name) throw new Error('Project name is not set');
 	if (!projectCodeVDBService) throw new Error('projectCodeVDBService not found in runningConfig');
@@ -62,8 +66,9 @@ export async function retrieveNode(
 	config: NodeConfig
 ): Promise<Partial<typeof GraphState.State>> {
 	config.configurable.logger.log('---节点: 检索知识---');
-	const { projectInfo, lightSpot, userId } = state;
+	const { projectInfo, lightSpot, userId, projectPath } = state;
 	const { knowledgeVDBService, projectCodeVDBService } = config.configurable;
+
 	if (!projectInfo || !lightSpot || !userId || !knowledgeVDBService || !projectCodeVDBService) {
 		throw new Error('Missing required state or services in configurable for retrieval.');
 	}
@@ -74,12 +79,15 @@ export async function retrieveNode(
 
 	const agentConfig = config.configurable.userInfo.userConfig.agent;
 	const [projectDocs, domainDocs] = await Promise.all([
-		projectCodeVDBService.retrieveCodeChunks(
-			lightSpot,
-			agentConfig.topK.plan.projectCode,
-			config.configurable.userInfo,
-			projectName
-		),
+		// projectPath未设置则不进行代码的上传和检索
+		projectPath
+			? projectCodeVDBService.retrieveCodeChunks(
+					lightSpot,
+					agentConfig.topK.plan.projectCode,
+					config.configurable.userInfo,
+					projectName
+				)
+			: Promise.resolve(''),
 		agentConfig.CRAG
 			? knowledgeVDBService.retrieveKonwbase_CRAG(
 					lightSpot,
@@ -138,7 +146,7 @@ export async function analyze(
 
 	const newPlanState: Plan = {
 		output: {
-			highlightAnalysis: result.highlightAnalysis,
+			highlightAnalysis: result,
 			implementationPlan: []
 		}
 	};
@@ -149,7 +157,7 @@ export async function analyze(
 			...state.humanIO,
 			output: {
 				type: ReviewType.ANALYSIS,
-				content: result.highlightAnalysis
+				content: result
 			}
 		},
 		reflection: null // Clear reflection after use
