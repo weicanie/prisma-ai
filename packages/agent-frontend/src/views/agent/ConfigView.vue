@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ChevronLeftIcon } from '@heroicons/vue/20/solid';
 import { AIChatLLM, initialUserConfig, type UserConfig } from '@prisma-ai/shared';
 import { ElMessage } from 'element-plus';
 import { onMounted, reactive, ref } from 'vue';
@@ -48,7 +49,12 @@ onMounted(() => {
 <template>
 	<div class="p-6 max-w-4xl mx-auto">
 		<div class="flex justify-between items-center mb-6">
-			<h1 class="text-2xl font-bold text-gray-800">系统设置</h1>
+			<div class="relative left-5">
+				<el-button type="icon" circle @click="$router.back()">
+					<ChevronLeftIcon class="size-7" />
+				</el-button>
+			</div>
+
 			<div class="space-x-4">
 				<el-button @click="resetConfig" type="danger" plain>重置默认</el-button>
 				<el-button type="primary" @click="saveConfig">保存配置</el-button>
