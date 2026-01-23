@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { recoverAgent } from '@/services/agent';
+import { cn } from '@/utils/lib/utils';
 import { InterruptType, UserAction, type RecoverDto } from '@prisma-ai/shared';
 import { ElMessage } from 'element-plus';
 import { computed, reactive, ref } from 'vue';
+import { useAIChatStore } from '../../../stores/aichat';
+import MilkdownEditorWrapper from './milkdown/MilkdownEditorWrapper.vue';
 
 const props = defineProps<{
 	runId: string;
 	type: InterruptType;
+	class?: string;
+	lastMessage?: string; // 最近一条ai消息
 }>();
 
 const emit = defineEmits<{
@@ -33,6 +38,8 @@ const resultForm = reactive({
 const isHumanReview = computed(() => {
 	return props.type === InterruptType.HumanReview;
 });
+
+const aiChatStore = useAIChatStore();
 
 const submit = async () => {
 	if (isHumanReview.value) {
@@ -84,7 +91,12 @@ const submit = async () => {
 
 <template>
 	<div
-		class="p-4 border rounded-lg shadow-sm bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800"
+		:class="
+			cn(
+				'p-4 border rounded-lg shadow-sm bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800',
+				props.class
+			)
+		"
 	>
 		<h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">
 			{{ isHumanReview ? '人工审核反馈' : '步骤执行反馈' }}
@@ -108,12 +120,17 @@ const submit = async () => {
 				/>
 			</el-form-item>
 
-			<el-form-item v-if="humanForm.action === UserAction.FIX" label="手动修正内容" required>
-				<el-input
-					v-model="fixedContent"
-					type="textarea"
-					:rows="8"
-					placeholder="请输入修正后的完整内容..."
+			<el-form-item
+				v-if="humanForm.action === UserAction.FIX"
+				label="手动修正内容（请输入修正后的完整内容）"
+				required
+			>
+				<MilkdownEditorWrapper
+					:editable="true"
+					class="w-full"
+					layout="default"
+					:value="aiChatStore.fixedContent || props.lastMessage"
+					:onValueUpdated="aiChatStore.setAIChatFixedContent"
 				/>
 			</el-form-item>
 
@@ -130,7 +147,7 @@ const submit = async () => {
 				<el-input v-model="resultForm.summary" type="textarea" placeholder="请输入执行总结..." />
 			</el-form-item>
 			<div class="flex justify-end mt-4">
-				<el-button type="primary" :loading="loading" @click="submit"> 提交 </el-button>
+				<el-button type="primary" :loading="loading" @click="submit"> 提交反馈 </el-button>
 			</div>
 		</el-form>
 	</div>

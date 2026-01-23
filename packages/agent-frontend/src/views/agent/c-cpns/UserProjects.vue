@@ -28,10 +28,16 @@ export type MenuItem = {
 };
 
 // Props 定义
-const props = defineProps<{
-	class?: string;
-	menu?: (project: Project) => { items: MenuItem[] };
-}>();
+const props = withDefaults(
+	defineProps<{
+		class?: string;
+		layout?: 'list' | 'popover';
+		menu?: (project: Project) => { items: MenuItem[] };
+	}>(),
+	{
+		layout: 'list'
+	}
+);
 
 // Emits 定义
 const emit = defineEmits<{
@@ -182,9 +188,79 @@ watch(isOpen, val => {
 			<FolderOpenIcon class="size-4 mr-1 shrink-0 dark:text-zinc-300" />
 			{{ activeProject ? activeProject.label : '选择项目' }}
 		</ElButton>
+		<!-- 内容 -->
+		<div
+			v-if="isOpen && props.layout === 'list'"
+			class="relative z-50 w-[min(500px,80vw)] max-h-[50vh] overflow-y-auto rounded-md bg-white p-3 shadow-lg dark:bg-zinc-900"
+		>
+			<div class="flex flex-col">
+				<ClickCollapsible
+					v-for="group in sortedGroups"
+					:key="group"
+					:default-open="true"
+					class="p-0"
+				>
+					<template #title>
+						<ElTag effect="plain">{{ group }}</ElTag>
+					</template>
+
+					<div class="flex flex-col gap-1 py-1 pl-2">
+						<div
+							v-for="item in groupedProjects[group]"
+							:key="item.key"
+							class="group/item flex w-full items-center justify-between rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800"
+						>
+							<ElButton
+								text
+								:bg="item.key === activeProjectId"
+								class="!h-8 !flex-1 !justify-start !truncate !px-2 !text-xs"
+								@click="handleProjectSelect(item.key)"
+							>
+								<span class="truncate">{{ item.label }}</span>
+								<ElTag v-if="item.score" type="info" size="small" class="ml-2 !text-xs">
+									{{ item.score }}分
+								</ElTag>
+							</ElButton>
+
+							<!-- 项目操作菜单 -->
+							<ElPopover v-if="props.menu" placement="bottom-end" :width="150" trigger="click">
+								<template #reference>
+									<ElButton
+										text
+										circle
+										size="small"
+										class="!size-7 shrink-0 opacity-0 group-hover/item:opacity-100"
+										@click.stop
+									>
+										<EllipsisVerticalIcon class="size-4" />
+									</ElButton>
+								</template>
+								<div class="flex flex-col gap-1">
+									<ElButton
+										v-for="menuItem in props.menu(item).items"
+										:key="menuItem.key"
+										text
+										:type="menuItem.danger ? 'danger' : ''"
+										class="!h-8 !w-full !justify-start !px-2 !text-xs"
+										@click="
+											() => {
+												menuItem.onClick?.();
+											}
+										"
+									>
+										<component :is="menuItem.icon" v-if="menuItem.icon" class="mr-2 size-4" />
+										{{ menuItem.label }}
+									</ElButton>
+								</div>
+							</ElPopover>
+						</div>
+					</div>
+				</ClickCollapsible>
+			</div>
+		</div>
 
 		<!-- 悬浮内容 -->
-		<Teleport to="body">
+		<Teleport to="body" v-if="props.layout === 'popover'">
 			<Transition
 				enter-active-class="transition duration-200 ease-out"
 				enter-from-class="opacity-0 translate-y-1"
@@ -197,9 +273,9 @@ watch(isOpen, val => {
 					<!-- 蒙板 -->
 					<div class="fixed inset-0 bg-black/50 transition-opacity" @click="isOpen = false" />
 
-					<!-- 弹窗内容 -->
+					<!-- 内容 -->
 					<div
-						class="relative z-50 w-[min(500px,80vw)] max-h-[50vh] overflow-y-auto rounded-md border bg-white p-3 shadow-lg dark:bg-zinc-900"
+						class="relative z-50 w-[min(500px,80vw)] max-h-[50vh] overflow-y-auto rounded-md bg-white p-3 shadow-lg dark:bg-zinc-900"
 						:style="{
 							position: 'absolute',
 							bottom: 'calc(80px)',
@@ -225,8 +301,8 @@ watch(isOpen, val => {
 										class="group/item flex w-full items-center justify-between rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800"
 									>
 										<ElButton
-											:type="item.key === activeProjectId ? 'primary' : ''"
-											:text="item.key !== activeProjectId"
+											text
+											:bg="item.key === activeProjectId"
 											class="!h-8 !flex-1 !justify-start !truncate !px-2 !text-xs"
 											@click="handleProjectSelect(item.key)"
 										>
