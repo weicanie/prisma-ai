@@ -1,0 +1,53 @@
+.milkdown {
+	border-radius: 50px;
+}
+.milkdown .ProseMirror {
+	padding: 10px 15px 10px 15px !important;
+	h1 {
+		font-size: 32px;
+
+		line-height: 30px;
+	}
+
+	h2 {
+		font-size: 28px;
+
+		line-height: 24px;
+	}
+
+	h3 {
+		font-size: 20px;
+
+		line-height: 28px;
+
+		margin-top: 16px;
+	}
+
+	h4 {
+		font-size: 18px;
+
+		line-height: 24px;
+
+		margin-top: 12px;
+	}
+
+	h5 {
+		font-size: 16px;
+
+		line-height: 12px;
+
+		margin-top: 10px;
+	}
+
+	h6 {
+		font-size: 116px;
+
+		line-height: 10px;
+
+		margin-top: 8px;
+	}
+
+	p {
+		font-size: 14px;
+	}
+}
