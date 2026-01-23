@@ -251,6 +251,73 @@ export class CrawlJobService {
 
 		const page = await browser.newPage();
 
+		// 注入脚本以绕过历史记录回退防御
+		await page.evaluateOnNewDocument(() => {
+			try {
+				// 1. 覆盖 history.back
+				Object.defineProperty(history, 'back', {
+					value: function () {
+						console.log('Anti-crawler bypass: Blocked history.back()');
+						return; // 不执行任何操作
+					},
+					writable: false,
+					configurable: false
+				});
+
+				// 2. 覆盖 history.go，防止负向导航
+				const originalGo = history.go;
+				Object.defineProperty(history, 'go', {
+					value: function (delta?: number) {
+						if (delta && delta < 0) {
+							console.log(`Anti-crawler bypass: Blocked history.go(${delta})`);
+							return;
+						}
+						// 确保 arguments 类型正确传递
+						return originalGo.apply(this, arguments as any);
+					},
+					writable: false,
+					configurable: false
+				});
+
+				// 3. 拦截 popstate 事件监听 (防止网站通过监听历史记录变化来触发防御逻辑)
+				const originalAddEventListener = window.addEventListener;
+				window.addEventListener = function (type, listener, options) {
+					if (type === 'popstate') {
+						console.log(
+							'Anti-crawler bypass: Blocked popstate listener registration via addEventListener'
+						);
+						return;
+					}
+					return originalAddEventListener.apply(this, arguments as any);
+				};
+
+				// 4. 拦截 window.onpopstate 赋值
+				Object.defineProperty(window, 'onpopstate', {
+					set: function (val) {
+						console.log('Anti-crawler bypass: Blocked window.onpopstate assignment');
+					},
+					get: function () {
+						return null;
+					},
+					configurable: false
+				});
+
+				// 5. 在捕获阶段拦截 popstate 事件，防止其传播到任何已存在的监听器
+				originalAddEventListener.call(
+					window,
+					'popstate',
+					e => {
+						console.log('Anti-crawler bypass: Stopped popstate event propagation');
+						e.stopImmediatePropagation();
+						e.preventDefault();
+					},
+					true // useCapture = true
+				);
+			} catch (e) {
+				console.error('Failed to inject history bypass:', e);
+			}
+		});
+
 		// 监控响应状态
 		page.on('response', response => {
 			if (response.status() === 429) {
