@@ -91,7 +91,7 @@ export class ProjectChainService {
 				llm = await this.thoughtModelService.getDeepSeekThinkingModleflat(
 					'deepseek-reasoner',
 					userInfo.userConfig!,
-					outputSchema
+					true
 				);
 				break;
 			case SelectedLLM.glm_4_6:

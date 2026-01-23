@@ -60,7 +60,7 @@ export class ChainService implements WithFormfixChain {
 	/**
 	 * 获取返回定义的StreamingChunk流的Runnable
 	 */
-	async getStreamLLM(modelType: AIChatLLM, userConfig: UserConfig) {
+	async getStreamLLM(modelType: AIChatLLM, userConfig: UserConfig, jsonMode = true) {
 		let llm: Runnable;
 		switch (modelType) {
 			case AIChatLLM.v3:
@@ -73,14 +73,26 @@ export class ChainService implements WithFormfixChain {
 					}
 				});
 				// 开启json mode
-				llm = (llm as unknown as HAModelClient).withStructuredOutput() as unknown as Runnable;
+				if (jsonMode) {
+					llm = (llm as unknown as HAModelClient).withStructuredOutput() as unknown as Runnable;
+				}
 				llm = this.transformAIMessageStream(llm);
 				break;
 			case AIChatLLM.r1:
-				llm = await this.thoughtModelService.getDeepSeekThinkingModleflat(
-					modelType as any,
-					userConfig!
-				);
+				// 开启json mode
+				if (jsonMode) {
+					llm = await this.thoughtModelService.getDeepSeekThinkingModleflat(
+						modelType as any,
+						userConfig!,
+						true
+					);
+				} else {
+					llm = await this.thoughtModelService.getDeepSeekThinkingModleflat(
+						modelType as any,
+						userConfig!
+					);
+				}
+
 				break;
 			case AIChatLLM.gemini_2_5_pro:
 			case AIChatLLM.gemini_2_5_flash:

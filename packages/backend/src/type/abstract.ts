@@ -24,7 +24,11 @@ export abstract class WithFormfixChain {
 			Exclude<T, Error>
 		>
 	>;
-	abstract getStreamLLM(modelType: AIChatLLM, userConfig: UserConfig): Promise<Runnable>;
+	abstract getStreamLLM(
+		modelType: AIChatLLM,
+		userConfig: UserConfig,
+		jsonMode?: boolean
+	): Promise<Runnable>;
 }
 
 /**

@@ -172,7 +172,7 @@ export class ThoughtModelService {
 	async getDeepSeekThinkingModleflat(
 		config: ChatOpenAIFields | 'deepseek-reasoner',
 		userConfig: UserConfig,
-		schema?: z.Schema
+		jsonMode = false
 	): Promise<Runnable<any, StreamingChunk>> {
 		if (config === 'deepseek-reasoner') {
 			config = {
@@ -184,8 +184,8 @@ export class ThoughtModelService {
 			};
 		}
 		let llm = await this.modelService.getLLMDeepSeek(config);
-		if (schema) {
-			llm = llm.withStructuredOutput(schema) as any;
+		if (jsonMode) {
+			llm = llm.withStructuredOutput({}) as any;
 		}
 		if (!llm) {
 			throw new Error('获取 DeepSeek 模型实例失败。');
