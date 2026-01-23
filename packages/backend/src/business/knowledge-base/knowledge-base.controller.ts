@@ -2,13 +2,17 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestj
 import {
 	type CreateProjectDeepWikiKnowledgeDto,
 	type DeepWikiKnowledgeDto,
+	type PaginatedProjectKnsResult,
+	type UpdateProjectKnowledgeDto,
 	type UserInfoFromToken
 } from '@prisma-ai/shared';
-
-import { type PaginatedProjectKnsResult, type UpdateProjectKnowledgeDto } from '@prisma-ai/shared';
 import crypto from 'crypto';
+import * as fs from 'fs';
+import * as path from 'path';
+
 import { RequireLogin, UserInfo } from '../../decorator';
 import { TaskQueueService } from '../../task-queue/task-queue.service';
+import { user_data_dir } from '../../utils/constants';
 import { CreateKnowledgebaseDto } from './dto/create-knowledgebase.dto';
 import { KnowledgebaseService } from './knowledge-base.service';
 import { ProjectDeepWikiService } from './project-deepwiki.service';
@@ -102,5 +106,25 @@ export class KnowledgebaseController {
 	async getTaskResult(@Param('taskId') taskId: string) {
 		const task = await this.taskQueueService.getTask(taskId);
 		return { task };
+	}
+	/**
+	 * 检查项目代码是否上传了
+	 * @param projectPathName 项目在用户目录中的文件夹名称
+	 * @returns 是否上传
+	 */
+	@RequireLogin()
+	@Get('has_project_code_upload/:projectPathName')
+	async getHasProjectCodeUpload(
+		@Param('projectPathName') projectPathName: string,
+		@UserInfo() userInfo: UserInfoFromToken
+	) {
+		if (!projectPathName) {
+			return false;
+		}
+		const projectFullPath = path.join(
+			user_data_dir.projectsDirPath(userInfo.userId),
+			projectPathName
+		);
+		return fs.existsSync(projectFullPath);
 	}
 }
