@@ -8,7 +8,7 @@ import { StreamingChunk } from '../sse';
 export interface ImplementDto {
 	projectId: string;
 	lightspot: string;
-	projectPath: string;
+	projectPath: string; // 项目文件夹在用户目录中的名字，应为github仓库名称（也应为项目数据的name字段）
 }
 
 /**

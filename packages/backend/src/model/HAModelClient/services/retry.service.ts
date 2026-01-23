@@ -1,5 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { addLLMErrorLog } from '../../../utils/log.utils';
+import { addLogs, logType } from '../../../utils/log.utils';
+const addLLMErrorLog = (error: any, metadata: any) =>
+	addLogs({ error, metadata }, logType.LLMError);
 //指数退避实现
 @Injectable()
 export class RetryService {

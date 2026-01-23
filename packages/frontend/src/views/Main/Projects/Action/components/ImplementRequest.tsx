@@ -30,7 +30,7 @@ const ImplementRequest: React.FC<ImplementRequestProps> = ({ open, onOpenChange,
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>和doro协同实现亮点</DialogTitle>
+					<DialogTitle>和Prisma协同实现亮点</DialogTitle>
 					<DialogDescription>请输入您想要实现的项目亮点和项目名称。</DialogDescription>
 				</DialogHeader>
 				<Textarea
@@ -42,7 +42,7 @@ const ImplementRequest: React.FC<ImplementRequestProps> = ({ open, onOpenChange,
 					rows={6}
 				/>
 				<Input
-					placeholder="例如：prisma-ai"
+					placeholder="项目github仓库名例如：prisma-ai"
 					value={projectPath}
 					onChange={e => {
 						setProjectPath(e.target.value);
