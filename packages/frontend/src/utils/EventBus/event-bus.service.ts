@@ -6,7 +6,9 @@ export enum EventList {
 	//用户token更新
 	tokenUpdated = 'tokenUpdated',
 	//主应用主题更新
-	themeUpdated = 'themeUpdated'
+	themeUpdated = 'themeUpdated',
+	//用户配置更新
+	userConfigUpdated = 'userConfigUpdated'
 }
 
 /* 事件名到payload类型的映射 */
@@ -14,6 +16,7 @@ export interface Event_Payload {
 	[EventList.sessionFree]: void;
 	[EventList.tokenUpdated]: void;
 	[EventList.themeUpdated]: 'light' | 'dark' | 'system';
+	[EventList.userConfigUpdated]: void;
 }
 
 /**

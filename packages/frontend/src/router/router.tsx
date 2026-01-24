@@ -1,5 +1,6 @@
 import { lazy } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import AgentFrontendContainerPage from '../views/Main/AgentFrontend';
 import EditorContainerPage from '../views/Main/ResumeEditor';
 import PreloadChunk from './PreloadChunk';
 import PrivateRoute from './PrivateRoute';
@@ -535,6 +536,15 @@ export const routes = [
 					</UpdateBreadRouter>
 				)
 			},
+			// 智能体前端
+			{
+				path: '/main/agent',
+				element: (
+					<UpdateBreadRouter>
+						<AgentFrontendContainerPage />
+					</UpdateBreadRouter>
+				)
+			},
 			// 问问 Prisma
 			{
 				path: '/main/aichat',
@@ -588,6 +598,7 @@ export const path_name: Record<string, string> = {
 	'/main/projects': '项目经验',
 	'/main/projects/action': 'AI优化',
 	'/main/aichat': '问问 Prisma',
+	'/main/agent': '亮点实现',
 
 	'/main/hjm/job': '匹配岗位',
 	'/main/hjm/job/match-jobs': '简历匹配岗位',

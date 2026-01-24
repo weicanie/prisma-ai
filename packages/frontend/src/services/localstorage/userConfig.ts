@@ -5,6 +5,7 @@
 
 import { isOnline } from '@/utils/constants';
 import { initialUserConfig, type UserConfig } from '@prisma-ai/shared';
+import { eventBusService, EventList } from '../../utils/EventBus/event-bus.service';
 
 // 本地存储键名
 const USER_CONFIG_KEY = 'prisma_user_config';
@@ -34,6 +35,7 @@ export function getUserConfig(): UserConfig {
 export function saveUserConfig(config: UserConfig): void {
 	try {
 		localStorage.setItem(USER_CONFIG_KEY, JSON.stringify(config));
+		eventBusService.emit(EventList.userConfigUpdated);
 	} catch (error) {
 		console.error('保存用户配置失败:', error);
 		throw new Error('保存用户配置失败');

@@ -1,6 +1,7 @@
 import {
 	Book,
 	Bot,
+	BotMessageSquare,
 	Brain,
 	FileText,
 	LayoutList,
@@ -66,6 +67,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 		teams: [
 			{
 				name: '',
+				//@ts-expect-error ...
 				logo: Logo,
 				plan: '从简历到offer'
 			}
@@ -90,8 +92,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			},
 			{
 				title: 'Prisma',
-				icon: Bot,
+				icon: BotMessageSquare,
 				url: '/main/aichat'
+			},
+			{
+				title: '亮点实现',
+				icon: Bot,
+				url: '/main/agent'
 			},
 			...(isOnline
 				? []
