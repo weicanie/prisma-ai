@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.3.1](https://github.com/weicanie/prisma-ai/compare/v5.3.0...v5.3.1) (2026-01-24)
+
+### Bug Fixes
+
+- **nginx:** add static asset handling for agent frontend ([3967e63](https://github.com/weicanie/prisma-ai/commit/3967e6387791348a993893548602a11c34b767b9))
+
 # [5.3.0](https://github.com/weicanie/prisma-ai/compare/v5.2.3...v5.3.0) (2026-01-24)
 
 ### Bug Fixes
