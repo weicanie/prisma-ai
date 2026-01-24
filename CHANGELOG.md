@@ -3,6 +3,46 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.3.0](https://github.com/weicanie/prisma-ai/compare/v5.2.3...v5.3.0) (2026-01-24)
+
+### Bug Fixes
+
+- **uploadcode:** remove the remaining and incorrect logical judgments ([2a30e20](https://github.com/weicanie/prisma-ai/commit/2a30e20dbbf6a08f65a6f3f80d8bf82b1f9898b5))
+
+### Features
+
+- add agent-frontend to dev scripts and update dependencies ([213d87b](https://github.com/weicanie/prisma-ai/commit/213d87b890323c32e1fb0fe3f508a745ec36a10e))
+- add jsonMode parameter to LLM initialization methods ([f798576](https://github.com/weicanie/prisma-ai/commit/f7985768d8484e30bee493ff2be3837e2f5bb10c))
+- **agent-frontend:** add back button to config view ([a33ad8e](https://github.com/weicanie/prisma-ai/commit/a33ad8e8fd27e27009c21027c89542c3b338535b))
+- **agent-frontend:** add Prisma logo to agent messages and improve conversation switching ([9a94d3d](https://github.com/weicanie/prisma-ai/commit/9a94d3d7108817c84374356dedc0a9095f5eacfc))
+- **agent-frontend:** add UserConversations component for managing chat sessions ([7146654](https://github.com/weicanie/prisma-ai/commit/7146654fd3e07a4c248633e5868681ce801159c6))
+- **agent-frontend:** add UserProjects component for project selection ([71d2e1c](https://github.com/weicanie/prisma-ai/commit/71d2e1ce73b678122c08872768fc555d4c5dcbc9))
+- **agent-frontend:** enhance feedback flow and improve UI consistency ([5fdbf9d](https://github.com/weicanie/prisma-ai/commit/5fdbf9df66d3bb775ea71b12b46bf884b07bcc4e))
+- **agent-frontend:** initialize vue 3 frontend project with tailwindcss ([1441b8e](https://github.com/weicanie/prisma-ai/commit/1441b8e69b759b12dd7667d1843578c210f42ed2))
+- **agent:** add agent service modules for conversation and io operations ([7b04513](https://github.com/weicanie/prisma-ai/commit/7b0451340ed9bd3d53ca6449039bd69aa04395f2))
+- **agent:** add project code upload check service ([1dc4d54](https://github.com/weicanie/prisma-ai/commit/1dc4d54d0459f334f43e11d30346521e14f2a881))
+- **agent:** add start form, feedback dialog and Milkdown editor integration ([0d1a8f1](https://github.com/weicanie/prisma-ai/commit/0d1a8f17f4151ee76c7de7afbe961fe1492c1185))
+- **agent:** implement agent chat interface with conversation management ([b6626c0](https://github.com/weicanie/prisma-ai/commit/b6626c04cbe5d6bbd4bcc0ff1d65713b196ca0a4))
+- **agent:** refactor agent config and add settings UI ([06c10e1](https://github.com/weicanie/prisma-ai/commit/06c10e1b128e22cdfac0332965c66db5166197d1))
+- **ai-conversation:** add who field to distinguish llm/agent conversations ([e9cea4e](https://github.com/weicanie/prisma-ai/commit/e9cea4e4bc3214aacb535a60c9c44c5e9f84f428))
+- **aichat:** add who field to ai conversation queries ([95047bc](https://github.com/weicanie/prisma-ai/commit/95047bcc63f43c9d17b9887d29ad6fb040a54c20))
+- **components:** add ClickCollapsible component with controlled/uncontrolled modes ([920a427](https://github.com/weicanie/prisma-ai/commit/920a4279d11469ba18577dadaeb248330a9bdba6))
+- **config:** add user config management with localStorage support ([fe12b2c](https://github.com/weicanie/prisma-ai/commit/fe12b2cede7e4220c6042ab41532f611031446c7))
+- **crawler:** enhance crawler reliability with stealth plugin and retry logic ([004fe27](https://github.com/weicanie/prisma-ai/commit/004fe27afe58111a0442fd6e84be7a63f0397b74))
+- **crawler:** inject script to bypass history-based anti-crawler defenses ([6cc62e2](https://github.com/weicanie/prisma-ai/commit/6cc62e2b908d530ce19bf71c4d90d4aa26b8533e))
+- **editor:** add Milkdown editor components and themes ([161da4d](https://github.com/weicanie/prisma-ai/commit/161da4dfb339c4a36562270cca109ae5219109fc))
+- **frontend:** integrate agent-frontend as micro-app using qiankun ([2c2807b](https://github.com/weicanie/prisma-ai/commit/2c2807b3f5098ae7a07e2f8e127d6a24b4a2fcf5))
+- **knowledge-base:** add endpoint to check project code upload status ([051498d](https://github.com/weicanie/prisma-ai/commit/051498dc97fae371ee2550af192f0ab5f45e58b6))
+- **prisma-agent:** add event types and schemas for agent workflow ([5a5e92e](https://github.com/weicanie/prisma-ai/commit/5a5e92e49b0e44e1866c002d7d469ff6e1213c88))
+- **prisma-agent:** add streaming support and web UI integration ([ea93eb0](https://github.com/weicanie/prisma-ai/commit/ea93eb0ed898cdb21330db840ab0f40deec0471b))
+- **project:** add service to fetch all user projects ([2c91e9d](https://github.com/weicanie/prisma-ai/commit/2c91e9d10632b6b036b647836130ffa07f29f359))
+- **query:** add query hooks and utilities for API integration ([6801e93](https://github.com/weicanie/prisma-ai/commit/6801e93c542afa38e63c9062acfbe9caf9a64a0e))
+- **sse:** implement sse service for streaming answers ([187c7c0](https://github.com/weicanie/prisma-ai/commit/187c7c035309db279b776ffdf625bee741b8023a))
+- **styles:** add utility functions and base styles for theming ([55e4fd7](https://github.com/weicanie/prisma-ai/commit/55e4fd787d9558c99c3cbe4b6b503580eb87e2b8))
+- **theme:** implement theme provider and update app structure ([48aa394](https://github.com/weicanie/prisma-ai/commit/48aa394852528a181b84f259f2792fa33e66054c))
+- **types:** add new types and enum for chat and error handling ([ab75c22](https://github.com/weicanie/prisma-ai/commit/ab75c22f5d999610deb05fb1d0190efa0f6d0761))
+- **utils:** add modern mobile device detection composable ([75a10f8](https://github.com/weicanie/prisma-ai/commit/75a10f8b433aad48b704826d392eed886e8c42dd))
+
 ## [5.2.3](https://github.com/weicanie/prisma-ai/compare/v5.2.2...v5.2.3) (2025-11-21)
 
 ### Features

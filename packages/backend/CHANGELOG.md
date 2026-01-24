@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.3.0](https://github.com/weicanie/prisma-ai/compare/v5.2.3...v5.3.0) (2026-01-24)
+
+### Bug Fixes
+
+- **uploadcode:** remove the remaining and incorrect logical judgments ([2a30e20](https://github.com/weicanie/prisma-ai/commit/2a30e20dbbf6a08f65a6f3f80d8bf82b1f9898b5))
+
+### Features
+
+- add jsonMode parameter to LLM initialization methods ([f798576](https://github.com/weicanie/prisma-ai/commit/f7985768d8484e30bee493ff2be3837e2f5bb10c))
+- **agent:** refactor agent config and add settings UI ([06c10e1](https://github.com/weicanie/prisma-ai/commit/06c10e1b128e22cdfac0332965c66db5166197d1))
+- **ai-conversation:** add who field to distinguish llm/agent conversations ([e9cea4e](https://github.com/weicanie/prisma-ai/commit/e9cea4e4bc3214aacb535a60c9c44c5e9f84f428))
+- **aichat:** add who field to ai conversation queries ([95047bc](https://github.com/weicanie/prisma-ai/commit/95047bcc63f43c9d17b9887d29ad6fb040a54c20))
+- **crawler:** enhance crawler reliability with stealth plugin and retry logic ([004fe27](https://github.com/weicanie/prisma-ai/commit/004fe27afe58111a0442fd6e84be7a63f0397b74))
+- **crawler:** inject script to bypass history-based anti-crawler defenses ([6cc62e2](https://github.com/weicanie/prisma-ai/commit/6cc62e2b908d530ce19bf71c4d90d4aa26b8533e))
+- **knowledge-base:** add endpoint to check project code upload status ([051498d](https://github.com/weicanie/prisma-ai/commit/051498dc97fae371ee2550af192f0ab5f45e58b6))
+- **prisma-agent:** add event types and schemas for agent workflow ([5a5e92e](https://github.com/weicanie/prisma-ai/commit/5a5e92e49b0e44e1866c002d7d469ff6e1213c88))
+- **prisma-agent:** add streaming support and web UI integration ([ea93eb0](https://github.com/weicanie/prisma-ai/commit/ea93eb0ed898cdb21330db840ab0f40deec0471b))
+
 ## [5.2.3](https://github.com/weicanie/prisma-ai/compare/v5.2.2...v5.2.3) (2025-11-21)
 
 **Note:** Version bump only for package backend

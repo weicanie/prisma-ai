@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [5.3.0](https://github.com/weicanie/prisma-ai/compare/v5.2.3...v5.3.0) (2026-01-24)
+
+### Features
+
+- **agent-frontend:** initialize vue 3 frontend project with tailwindcss ([1441b8e](https://github.com/weicanie/prisma-ai/commit/1441b8e69b759b12dd7667d1843578c210f42ed2))
+- **agent:** refactor agent config and add settings UI ([06c10e1](https://github.com/weicanie/prisma-ai/commit/06c10e1b128e22cdfac0332965c66db5166197d1))
+- **crawler:** enhance crawler reliability with stealth plugin and retry logic ([004fe27](https://github.com/weicanie/prisma-ai/commit/004fe27afe58111a0442fd6e84be7a63f0397b74))
+- **prisma-agent:** add event types and schemas for agent workflow ([5a5e92e](https://github.com/weicanie/prisma-ai/commit/5a5e92e49b0e44e1866c002d7d469ff6e1213c88))
+- **types:** add new types and enum for chat and error handling ([ab75c22](https://github.com/weicanie/prisma-ai/commit/ab75c22f5d999610deb05fb1d0190efa0f6d0761))
+
 ## [5.2.3](https://github.com/weicanie/prisma-ai/compare/v5.2.2...v5.2.3) (2025-11-21)
 
 **Note:** Version bump only for package @prisma-ai/shared
