@@ -97,6 +97,7 @@ watch(isOpen, val => {
 		<!-- 添加会话 -->
 		<ElButton
 			text
+			bg
 			class="mt-3 !rounded-[50px] dark:!text-zinc-300"
 			@click="emit('new-conversation')"
 		>

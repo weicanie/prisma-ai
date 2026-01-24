@@ -28,9 +28,10 @@ import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { deleteCurStream, hasCurStream, startAgent } from '../../services/agent';
 import { useTheme } from '../../utils/theme';
 import FeedBack from './c-cpns/FeedBack.vue';
+import MilkdownEditorWrapper from './c-cpns/milkdown/MilkdownEditorWrapper.vue';
+import PrismaLogo from './c-cpns/PrismaLogo.vue';
 import StartForm from './c-cpns/StartForm.vue';
 import UserConversations from './c-cpns/UserConversations.vue';
-import MilkdownEditorWrapper from './c-cpns/milkdown/MilkdownEditorWrapper.vue';
 // ==================== State ====================
 const store = useAIChatStore();
 const { project_id, model, lastConversation } = storeToRefs(store);
@@ -193,7 +194,6 @@ const handleNewConversation = async () => {
 		project_id: project_id.value
 	};
 
-	// Add to UI immediately for better UX
 	conversations.value = [newConversation, ...conversations.value];
 	curConversation.value = uuid;
 	store.setAIChatLastConversation(curConversation.value);
@@ -322,7 +322,7 @@ watch(
 						c => c.keyname === lastConversation.value
 					)
 						? lastConversation.value
-						: historyConversations[0]!.keyname;
+						: historyConversations[historyConversations.length - 1]!.keyname;
 
 					curConversation.value = targetConversation;
 					store.setAIChatLastConversation(targetConversation);
@@ -433,6 +433,12 @@ setTheme('system');
 										)
 									"
 								>
+									<div
+										:class="cn('flex items-center justify-center', isMobile ? 'size-7' : 'size-12')"
+										v-if="item.role !== 'user'"
+									>
+										<PrismaLogo />
+									</div>
 									<div v-if="item.reasonContent && item.role !== 'user'">
 										<ClickCollapsible
 											title="思考过程"
