@@ -123,6 +123,7 @@ const pullTaskReturn = async (task: PersistentTaskVo) => {
 			if (content) {
 				setFormToShow(hasStream.interruptType);
 				await deleteCurStream(task.sessionId!);
+				addMessage(`请您反馈`, 'assistant');
 			}
 		} catch (err) {
 			console.error(err);
@@ -142,16 +143,22 @@ onMounted(() => {
 	}
 });
 
-const startAgentStream = async (dto: ImplementDto) => {
-	// 恢复自动滚动
-	userScrolled.value = false;
+function addMessage(content: string, role: 'user' | 'assistant' = 'user') {
 	const userMessage: ChatMessage = {
-		id: `user-${Date.now()}`,
-		role: 'user',
-		content: '启动Agent'
+		id: `${role}-${Date.now()}`,
+		role,
+		content
 	};
 	const currentHistory = [...messages.value, userMessage];
 	messages.value = currentHistory;
+}
+
+const startAgentStream = async (dto: ImplementDto) => {
+	// 恢复自动滚动
+	userScrolled.value = false;
+	addMessage(`### 启动亮点实现任务
+		 - 目标项目：${dto.projectPath}
+		 - 亮点/需求：${dto.lightspot}`);
 
 	// 启动Agent
 	const { data: task } = await startAgent(
@@ -356,9 +363,9 @@ setTheme('system');
 </script>
 
 <template>
-	<div class="w-full flex h-[calc(100vh-100px)]! bg-white dark:bg-zinc-950 font-sans">
+	<div class="w-full flex h-[calc(100vh-100px)]! bg-global font-sans">
 		<!-- 会话管理 -->
-		<div class="bg-white dark:bg-zinc-950 w-[200px] px-3">
+		<div class="w-[200px] px-3">
 			<UserConversations
 				class="relative"
 				:active-key="curConversation"
@@ -408,7 +415,7 @@ setTheme('system');
 					<div v-if="isFetchingHistory">加载对话历史中...</div>
 					<div
 						v-else
-						class="overflow-auto h-[calc(100vh-200px)]! w-full scb-thin bg-white dark:bg-zinc-950"
+						class="overflow-auto h-[calc(100vh-200px)]! w-full scb-thin"
 						ref="rollContainerRef"
 						@scroll="handleScroll"
 					>
@@ -460,7 +467,7 @@ setTheme('system');
 			</div>
 		</div>
 	</div>
-	<div class="h-[100px] flex justify-center items-center gap-2 bg-white dark:bg-zinc-950">
+	<div class="h-[100px] flex justify-center items-center gap-2 bg-global">
 		<el-button type="primary" round @click="startFormVisible = true">
 			<PlayIcon class="size-5 mr-2" />
 			启动
@@ -480,6 +487,7 @@ setTheme('system');
 				:type="InterruptType.HumanReview"
 				:lastMessage="messages[messages.length - 1]?.content"
 				@submit="handleFeedback()"
+				:addMessage="addMessage"
 			/>
 			<div v-if="formToShow === null" class="my-3">或者</div>
 			<FeedBack
@@ -487,6 +495,7 @@ setTheme('system');
 				runId="1234"
 				:type="InterruptType.ExecuteStep"
 				@submit="handleFeedback()"
+				:addMessage="addMessage"
 			/>
 		</el-dialog>
 

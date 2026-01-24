@@ -36,14 +36,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-	<div
-		:class="
-			cn(
-				'relative z-50 max-h-[50vh] overflow-y-auto rounded-md bg-white p-3 shadow-lg dark:bg-zinc-950',
-				props.class
-			)
-		"
-	>
+	<div :class="cn('relative z-50 max-h-[50vh] overflow-y-auto rounded-md p-3', props.class)">
 		<div class="flex flex-col">
 			<ClickCollapsible
 				v-for="group in props.sortedGroups"

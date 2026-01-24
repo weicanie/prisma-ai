@@ -12,6 +12,7 @@ const props = defineProps<{
 	type: InterruptType;
 	class?: string;
 	lastMessage?: string; // 最近一条ai消息
+	addMessage: (content: string) => void;
 }>();
 
 const emit = defineEmits<{
@@ -78,7 +79,20 @@ const submit = async () => {
 		}
 
 		await recoverAgent(dto as RecoverDto);
-		ElMessage.success('提交成功，Agent 将继续执行');
+		ElMessage.success('反馈成功，Prisma将继续执行');
+		props.addMessage(
+			isHumanReview.value
+				? `### 人工审核
+		- 指示：${humanForm.action}
+		${humanForm.action === UserAction.FIX ? `- 修正后的内容：\`\`\`${dto.fixedContent}\`\`\`` : ''}
+		${humanForm.action === UserAction.REDO ? `- 重做，反馈：\`\`\`${dto.fixedContent}\`\`\`` : ''}
+		`
+				: `### 步骤执行反馈
+				#### 用户反馈
+				${resultForm.userFeedback}
+				#### 执行总结
+				${resultForm.summary}`
+		);
 		emit('success');
 	} catch (error) {
 		console.error(error);
