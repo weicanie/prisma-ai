@@ -16,20 +16,23 @@ WORKDIR /app
 
 COPY ./package.json ./pnpm-lock.yaml ./pnpm-workspace.yaml* ./
 COPY ./packages/frontend/package.json ./packages/frontend/
+COPY ./packages/agent-frontend/package.json ./packages/agent-frontend/
 COPY ./packages/shared/package.json ./packages/shared/
 
-RUN pnpm install --filter frontend --filter @prisma-ai/shared --frozen-lockfile
+RUN pnpm install --filter frontend --filter @prisma-ai/shared --filter agent-frontend --frozen-lockfile
 
 COPY ./packages/shared ./packages/shared
 COPY ./packages/frontend ./packages/frontend
+COPY ./packages/agent-frontend ./packages/agent-frontend
 
 RUN pnpm --filter @prisma-ai/shared build
-
 RUN pnpm --filter frontend build
+RUN pnpm --filter agent-frontend build
 
 FROM nginx:alpine
 
 COPY --from=builder /app/packages/frontend/dist /usr/share/nginx/html
+COPY --from=builder /app/packages/agent-frontend/dist /usr/share/nginx/html/agent
 
 
 COPY ./nginx/conf/default.conf /etc/nginx/conf.d/default.conf
