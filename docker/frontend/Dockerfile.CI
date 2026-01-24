@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # --- Stage 1: Build frontend assets ---
-ARG NODE_VERSION=20.11.0
+ARG NODE_VERSION=22.13.0
 ARG PNPM_VERSION=9.15.4
 
 FROM node:${NODE_VERSION} AS builder
@@ -10,9 +10,6 @@ FROM node:${NODE_VERSION} AS builder
 RUN npm install -g pnpm@${PNPM_VERSION}
 
 WORKDIR /app
-
-# 为 sharp 设置国内镜像源，解决下载超时问题
-# ENV SHARP_DIST_BASE_URL="https://npmmirror.com/mirrors/sharp-libvips"
 
 COPY ./package.json ./pnpm-lock.yaml ./pnpm-workspace.yaml* ./
 COPY ./packages/frontend/package.json ./packages/frontend/
