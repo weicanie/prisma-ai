@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.3.3](https://github.com/weicanie/prisma-ai/compare/v5.3.2...v5.3.3) (2026-01-25)
+
+### Features
+
+- include runId in agent start response for feedback correlation ([ea637bc](https://github.com/weicanie/prisma-ai/commit/ea637bcfcce35c02e2254cc7d45b512807a5a9b0))
+
 # [5.3.0](https://github.com/weicanie/prisma-ai/compare/v5.2.3...v5.3.0) (2026-01-24)
 
 ### Bug Fixes

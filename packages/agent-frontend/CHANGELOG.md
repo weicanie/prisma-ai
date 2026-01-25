@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.3.3](https://github.com/weicanie/prisma-ai/compare/v5.3.2...v5.3.3) (2026-01-25)
+
+### Bug Fixes
+
+- **agent-frontend:** correct lastMessage index and update feedback form label ([63f2f2d](https://github.com/weicanie/prisma-ai/commit/63f2f2d709e1063e2935cbc1c9027c3aa8df96ae))
+- **agent-frontend:** remove unused theme logic and adjust config page layout ([c40b7d8](https://github.com/weicanie/prisma-ai/commit/c40b7d832f6fddfc00edf04f7ad7b35096412933))
+
+### Features
+
+- include runId in agent start response for feedback correlation ([ea637bc](https://github.com/weicanie/prisma-ai/commit/ea637bcfcce35c02e2254cc7d45b512807a5a9b0))
+
 ## [5.3.2](https://github.com/weicanie/prisma-ai/compare/v5.3.1...v5.3.2) (2026-01-25)
 
 **Note:** Version bump only for package agent-frontend
