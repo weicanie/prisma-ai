@@ -120,7 +120,7 @@ const Action: React.FC<ActionProps> = () => {
 	const getAvailableActions = (status: ProjectStatus) => {
 		const isOnline = import.meta.env.VITE_IS_ONLINE === 'true';
 
-		const availableActions = isOnline ? ['mine'] : ['mine', 'collaborate'];
+		const availableActions = ['mine'];
 		// lookup后才能polish
 		if (status === ProjectStatus.lookuped) {
 			availableActions.push('polish');

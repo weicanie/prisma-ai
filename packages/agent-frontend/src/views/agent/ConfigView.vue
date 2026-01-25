@@ -47,7 +47,7 @@ onMounted(() => {
 </script>
 
 <template>
-	<div class="p-6 max-w-4xl mx-auto">
+	<div class="p-6 max-w-4xl mx-auto bg-global">
 		<div class="flex justify-between items-center mb-6">
 			<div class="relative left-5">
 				<el-button type="icon" circle @click="$router.back()">
@@ -176,6 +176,9 @@ onMounted(() => {
 
 			<!-- API Keys 设置 -->
 			<el-tab-pane label="API Keys" name="apikeys">
+				<div class="text-sm my-3 text-gray-500 dark:text-gray-400">
+					默认为用户配置，也可以在此设置 Agent 服务专门使用的API Keys
+				</div>
 				<el-form :model="form" label-position="top">
 					<div class="mb-6">
 						<h3 class="text-lg font-medium mb-4 pb-2 border-b border-gray-200">LLM 服务商</h3>

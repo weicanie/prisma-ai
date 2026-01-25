@@ -9,7 +9,7 @@ services:
       - "3123:3000"
 
   prisma-ai-backend:
-    image: docker.1ms.run/onlyie/prisma-ai-backend:5.0.0
+    image: docker.1ms.run/onlyie/prisma-ai-backend:5.3.1
     depends_on:
       # mysql经常需要启动好几次才能成功,得在它启动成功后再启动服务
       mysql-container:
@@ -50,7 +50,7 @@ services:
       - ./project_wikis:/app/project_wikis
       - ./packages/backend/prisma_agent_config.json:/app/packages/backend/prisma_agent_config.json
   magic-resume-container:
-    image: docker.1ms.run/onlyie/prisma-ai-resume-editor:5.0.0
+    image: docker.1ms.run/onlyie/prisma-ai-resume-editor:5.3.1
     # build:
     #   context: .
     #   dockerfile: ./docker/magic-resume/Dockerfile.CI
@@ -59,13 +59,13 @@ services:
     restart: unless-stopped
     container_name: magic-resume
   deepwiki-down:
-    image: docker.1ms.run/onlyie/prisma-ai-deepwiki-down:latest
+    image: docker.1ms.run/onlyie/prisma-ai-deepwiki-down:5.3.1
     volumes:
       # docker run -v 需要处理windows兼容性
       - ./user_data:/user_data
     command: service --host 0.0.0.0 --port 9009
   nginx-container:
-    image: docker.1ms.run/onlyie/prisma-ai-nginx:5.0.0
+    image: docker.1ms.run/onlyie/prisma-ai-nginx:5.3.1
     ports:
       - '80:80' # HTTP
       # HTTPS (如需启用)
