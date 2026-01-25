@@ -369,11 +369,15 @@ export class PrismaAgentService implements OnModuleInit, WithFuncPool {
 						},
 						interruptData
 					});
+					const onceCb = resolve => e => {
+						if (e.metadata.runId === runningConfig.runId) {
+							resolve(e.resumeCommand);
+							this.eventBusService.off(EventList.pa_recover, onceCb);
+						}
+					};
 					// 等待用户返回恢复指令
 					const resumeCommand = await new Promise<Command>(resolve => {
-						this.eventBusService.once(EventList.pa_recover, e => {
-							resolve(e.resumeCommand);
-						});
+						this.eventBusService.on(EventList.pa_recover, onceCb(resolve));
 					});
 
 					// 将下一个循环的输入设置为恢复指令。

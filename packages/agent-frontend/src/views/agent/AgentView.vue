@@ -485,7 +485,6 @@ watch(
 		<el-dialog v-model="feedbackVisible" title="反馈" width="650px" destroy-on-close>
 			<FeedBack
 				v-if="formToShow === InterruptType.HumanReview || formToShow === null"
-				runId="123"
 				:type="InterruptType.HumanReview"
 				:lastMessage="messages[messages.length - 1]?.content"
 				@submit="handleFeedback()"
@@ -494,7 +493,6 @@ watch(
 			<div v-if="formToShow === null" class="my-3">或者</div>
 			<FeedBack
 				v-if="formToShow === InterruptType.ExecuteStep || formToShow === null"
-				runId="1234"
 				:type="InterruptType.ExecuteStep"
 				@submit="handleFeedback()"
 				:addMessage="addMessage"

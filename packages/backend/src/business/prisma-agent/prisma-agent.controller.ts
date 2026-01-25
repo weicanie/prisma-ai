@@ -42,15 +42,16 @@ export class PrismaAgentController {
 		@Query('uiType') uiType: 'CLI' | 'WEB' = 'WEB'
 	) {
 		const project = await this.projectService.findProjectById(implementDto.projectId, userInfo);
+		const runId = crypto.randomUUID();
 		const task = await this.prismaAgentService.startRunAgentTask(
 			project,
 			implementDto.lightspot,
 			implementDto.projectPath ?? '',
 			userInfo,
-			crypto.randomUUID(),
+			runId,
 			uiType
 		);
-		return task;
+		return { ...task, runId };
 	}
 
 	/** sse流式获取agent输出

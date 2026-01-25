@@ -8,7 +8,6 @@ import { useAIChatStore } from '../../../stores/aichat';
 import MilkdownEditorWrapper from './milkdown/MilkdownEditorWrapper.vue';
 
 const props = defineProps<{
-	runId: string;
 	type: InterruptType;
 	class?: string;
 	lastMessage?: string; // 最近一条ai消息
@@ -56,8 +55,15 @@ const submit = async () => {
 
 	loading.value = true;
 	try {
+		const curTask: { runId: string } = JSON.parse(
+			window.localStorage.getItem('lastAgentTask') || '{}'
+		);
+		if (!curTask.runId) {
+			ElMessage.error('请先启动Agent');
+			return;
+		}
 		const dto: Partial<RecoverDto> = {
-			runId: props.runId
+			runId: curTask.runId
 		};
 
 		if (isHumanReview.value) {

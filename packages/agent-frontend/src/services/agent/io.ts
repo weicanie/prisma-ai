@@ -14,10 +14,10 @@ import { instance } from '../config';
  * @returns 启动结果（可能是runId或其他信息，根据后端实现调整）
  */
 export async function startAgent(dto: ImplementDto) {
-	const res = await instance.post<ImplementDto, ServerDataFormat<PersistentTaskVo>>(
-		'/prisma_agent/start',
-		dto
-	);
+	const res = await instance.post<
+		ImplementDto,
+		ServerDataFormat<PersistentTaskVo & { runId: string }>
+	>('/prisma_agent/start', dto);
 	return res.data;
 }
 
