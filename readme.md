@@ -168,7 +168,7 @@ PrismaAI解决你求职时最头疼的 4 件事：
 > DeepWiki 是一款AI工具，为GitHub上的代码库自动生成交互式、可对话的文档。
 > prisma-ai 的 deepwiki: https://deepwiki.com/weicanie/prisma-ai
 
-<img width="2355" height="1546" alt="image" src="https://github.com/user-attachments/assets/7bc8aed7-459e-4523-96e5-85e87f68d24a" />
+
 
 ### v5.0.0：ai助手 Prisma
 
@@ -177,7 +177,17 @@ PrismaAI解决你求职时最头疼的 4 件事：
 通过用户记忆，用户现在可以在prisma-ai hub匹配适合自己的面经和面试题，来进行针对性学习。
 优化了知识库检索。
 
-<img src="https://github.com/weicanie/prisma-ai/blob/main/images/readme/Prisma.png" alt="Prisma"/>
+
+
+### v5.3.3：项目亮点实现agent 的GUI
+
+> 项目亮点实现agent基于`plan-executer`架构，深度集成用户项目代码和文档知识库，支持人工审核、反思，多轮迭代，致力于帮助用户将项目亮点落地到实际项目中。
+
+<img width="2077" height="1549" alt="image" src="https://github.com/user-attachments/assets/62aab69e-865c-4faa-a1ee-e9879848b021" />
+
+<img width="1791" height="1417" alt="image" src="https://github.com/user-attachments/assets/5eb9866f-097b-4591-b57a-3a40e3c34446" />
+
+
 
 ---
 
