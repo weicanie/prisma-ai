@@ -26,7 +26,6 @@ import { ElMessage } from 'element-plus';
 import { storeToRefs } from 'pinia';
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { deleteCurStream, hasCurStream, startAgent } from '../../services/agent';
-import { useTheme } from '../../utils/theme';
 import FeedBack from './c-cpns/FeedBack.vue';
 import MilkdownEditorWrapper from './c-cpns/milkdown/MilkdownEditorWrapper.vue';
 import PrismaLogo from './c-cpns/PrismaLogo.vue';
@@ -357,9 +356,6 @@ watch(
 	},
 	{ immediate: true }
 );
-//TODO 主题和主应用同步
-const { setTheme } = useTheme();
-setTheme('system');
 </script>
 
 <template>
