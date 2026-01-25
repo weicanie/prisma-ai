@@ -486,7 +486,7 @@ watch(
 			<FeedBack
 				v-if="formToShow === InterruptType.HumanReview || formToShow === null"
 				:type="InterruptType.HumanReview"
-				:lastMessage="messages[messages.length - 1]?.content"
+				:lastMessage="messages[messages.length - 2]?.content"
 				@submit="handleFeedback()"
 				:addMessage="addMessage"
 			/>

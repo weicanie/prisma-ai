@@ -123,7 +123,7 @@ const submit = async () => {
 		</h3>
 
 		<el-form v-if="isHumanReview" label-position="top">
-			<el-form-item label="操作建议">
+			<el-form-item label="操作">
 				<el-radio-group v-model="humanForm.action">
 					<el-radio-button :label="UserAction.ACCEPT">接受 (Accept)</el-radio-button>
 					<el-radio-button :label="UserAction.FIX">修正 (Fix)</el-radio-button>
