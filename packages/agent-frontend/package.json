@@ -1,6 +1,6 @@
 {
   "name": "agent-frontend",
-  "version": "5.3.3",
+  "version": "5.3.4",
   "private": true,
   "type": "module",
   "engines": {
