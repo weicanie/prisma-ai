@@ -22,8 +22,7 @@
 			"@business/*": ["src/business/*"],
 			"@agent/*": ["src/agent/*"],
 			"@utils/*": ["src/utils/*"],
-			"@types/*": ["src/type/*"],
-			"@prisma/*": ["./prisma/generated/*"]
+			"@types/*": ["src/type/*"]
 		}
 	},
 	"module": {

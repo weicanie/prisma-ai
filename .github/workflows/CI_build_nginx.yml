@@ -14,7 +14,7 @@ on:
         description: 'Dockerfile 的路径'
         required: true
         type: string
-        default: './docker/frontend/Dockerfile'
+        default: './docker/frontend/Dockerfile.CI'
       version_tag:
         description: '要推送的镜像版本标签 (例如 1.0.0)'
         required: true
