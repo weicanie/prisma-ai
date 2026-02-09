@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Button } from '../../../../components/ui/button';
 import { cn } from '../../../../lib/utils';
 import { selectProjectMd } from '../../../../store/projects';
+//TODO 利用style元素动态添加样式，使用层叠覆盖而不是现有的多套冗余的样式
 import './theme.css'; //编辑器主题样式
 
 export interface EditorProps {
