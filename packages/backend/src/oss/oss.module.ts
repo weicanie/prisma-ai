@@ -29,9 +29,9 @@ import { OssService } from './oss.service';
 			inject: [ConfigService],
 			async useFactory(configService: ConfigService) {
 				const client = new Minio.Client({
-					// 必须指向 Nginx 容器，因为它是内部通信的下一跳
-					endPoint: 'nginx-container',
-					port: 80,
+					//生产环境必须指向 Nginx 容器，因为它是内部通信的下一跳
+					endPoint: process.env.NODE_ENV === 'production' ? 'nginx-container' : 'localhost',
+					port: process.env.NODE_ENV === 'production' ? 80 : Number(process.env.OSS_PORT) || 9000,
 					useSSL: false,
 					accessKey: configService.get('OSS_ACCESSKEY'),
 					secretKey: configService.get('OSS_SECRETKEY'),
