@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://github.com/weicanie/prisma-ai/blob/main/images/readme/logo.png" alt="Logo"/>
+<img src="https://github.com/weicanie/prisma-ai/blob/main/images/readme/logo.png" alt="Logo" width="50%"/>
 </p>
 
 <div align="center">
@@ -26,7 +26,7 @@
   简体中文 | <a href="i18n/README-EN.md">English</a>
 </p>
 
----
+<!-- ---
 
 <p align="center">
   <a href="https://www.douyin.com/video/7566259892604980530" target="_blank">
@@ -36,7 +36,7 @@
   <strong>点击图片观看项目介绍视频</strong>
 </p>
 
----
+--- -->
 
 ## 🎯 为什么是PrismaAI
 
