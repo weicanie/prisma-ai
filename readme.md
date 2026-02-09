@@ -1,6 +1,14 @@
+<p align="center">
+<img src="https://github.com/weicanie/prisma-ai/blob/main/images/readme/logo.png" alt="Logo"/>
+</p>
+
+<div align="center">
+
 # PrismaAI：你的求职AI co-pilot
 
 开源免费，从简历到 offer，优化你的项目，定制你的简历，为你匹配工作，并帮助你做好面试准备。
+
+</div>
 
 <p align="center">
   <a href="https://github.com/weicanie/prisma-ai/blob/main/LICENSE">
