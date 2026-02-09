@@ -7,6 +7,10 @@
 # PrismaAI：你的求职AI co-pilot
 
 开源免费，从简历到 offer，优化你的项目，定制你的简历，为你匹配工作，并帮助你做好面试准备。
+<br>
+
+**您可以在 [https://ai.pinkprisma.com](https://ai.pinkprisma.com) 免费使用PrismaAI。**
+
 
 </div>
 
@@ -99,7 +103,8 @@ PrismaAI解决你求职时最头疼的 4 件事：
 
 ### 🌐 在线使用
 
-您可以在 [www.ai.pinkprisma.com](https://www.pinkprisma.com) 上在线免费使用PrismaAI。
+您可以在 [https://ai.pinkprisma.com](https://ai.pinkprisma.com) 在线免费使用PrismaAI。
+
 
 > 岗位爬取与匹配、题库导入与anki集成，目前只能在本地部署使用，其它所有功能都可以在线使用。
 
@@ -226,3 +231,4 @@ PrismaAI解决你求职时最头疼的 4 件事：
 - (2) 商业竞争、数据转售等牟利行为；
 - (3) 高频访问干扰网站正常运行；
 - (4) 任何违反中华人民共和国相关法律法规的行为。
+
