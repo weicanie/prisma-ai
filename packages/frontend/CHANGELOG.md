@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.3.5](https://github.com/weicanie/prisma-ai/compare/v5.3.4...v5.3.5) (2026-02-12)
+
+**Note:** Version bump only for package frontend
+
 ## [5.3.2](https://github.com/weicanie/prisma-ai/compare/v5.3.1...v5.3.2) (2026-01-25)
 
 **Note:** Version bump only for package frontend

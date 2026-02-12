@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [5.3.5](https://github.com/weicanie/prisma-ai/compare/v5.3.4...v5.3.5) (2026-02-12)
+
+### Bug Fixes
+
+- adjust OSS and email configs for environment-specific deployments ([5208463](https://github.com/weicanie/prisma-ai/commit/52084634fc535156266ccc923ab2d3b71fda71b9))
+
+### Features
+
+- **code-embedding:** add C# support and switch to langchain text splitter ([9928150](https://github.com/weicanie/prisma-ai/commit/99281501f3f46b2b655b3857945a689dc4f358d5))
+
 ## [5.3.4](https://github.com/weicanie/prisma-ai/compare/v5.3.3...v5.3.4) (2026-01-27)
 
 **Note:** Version bump only for package root
