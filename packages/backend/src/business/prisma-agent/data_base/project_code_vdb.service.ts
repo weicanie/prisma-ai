@@ -51,6 +51,7 @@ export class ProjectCodeVDBService {
 		javascript: ['.js', '.jsx', '.cjs', '.mjs'],
 		typescript: ['.ts'],
 		tsx: ['.tsx'],
+		jsx: ['.jsx'],
 		java: ['.java'],
 		go: ['.go'],
 		python: ['.py'],
@@ -76,7 +77,9 @@ export class ProjectCodeVDBService {
 			this._projectCodeEmbeddingTaskHandler.bind(this)
 		);
 		this.logger.log(`项目代码向量化任务处理器已注册: ${this.taskTypeCodeEmbedding}`);
-		this.loadGrammars();
+		//TODO 暂时使用Langchain的RecursiveCharacterTextSplitter切分代码
+		// 代码检索功能重构后，再使用tree-sitter切分代码
+		// this.loadGrammars();
 
 		this.extensionToLangMap = {};
 		for (const lang in this.languageExtensions) {
@@ -361,7 +364,7 @@ export class ProjectCodeVDBService {
 						const lang = this._getLangFromExtension(fileExtension);
 						if (!lang) continue;
 
-						const chunks = await this.splitCodeIntoChunks(sourceCode, lang);
+						const chunks = await this.splitCodeIntoChunksLc(sourceCode, lang);
 						if (chunks.length === 0) continue;
 
 						const fileDocs = chunks.map(
@@ -502,12 +505,38 @@ export class ProjectCodeVDBService {
 			javascript: 'js',
 			typescript: 'js',
 			tsx: 'js',
+			jsx: 'js',
 			java: 'java',
 			go: 'go',
 			python: 'python',
 			cpp: 'cpp'
 		};
 		return mapping[lang] || null;
+	}
+
+	/**
+	 * 使用Langchain的RecursiveCharacterTextSplitter对代码文件进行切分
+	 * @param sourceCode
+	 * @param lang
+	 */
+	public async splitCodeIntoChunksLc(sourceCode: string, lang: string): Promise<string[]> {
+		const lcLang = this._mapToLangchainLang(lang);
+		let splitter: RecursiveCharacterTextSplitter;
+
+		if (lcLang) {
+			this.logger.log(`Using language-specific splitter for: ${lcLang}`);
+			splitter = RecursiveCharacterTextSplitter.fromLanguage(lcLang, {
+				chunkSize: 1500,
+				chunkOverlap: 200
+			});
+		} else {
+			this.logger.log(`Using generic character splitter for: ${lang}`);
+			splitter = new RecursiveCharacterTextSplitter({
+				chunkSize: 1500,
+				chunkOverlap: 200
+			});
+		}
+		return await splitter.splitText(sourceCode);
 	}
 
 	/**
