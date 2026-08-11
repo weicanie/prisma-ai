@@ -115,6 +115,38 @@ export class ChainService implements WithFormfixChain {
 	}
 
 	/**
+	 * Resolve the same user-selected model routes as the Agent, without wrapping
+	 * the result as an SSE stream. Background structured-output jobs use this.
+	 */
+	async getStructuredLLM(modelType: AIChatLLM, userConfig: UserConfig): Promise<Runnable> {
+		switch (modelType) {
+			case AIChatLLM.v3:
+				return this.modelService.getLLMDeepSeek({
+					...this.modelService.deepseek_config,
+					model: AIChatLLM.v3,
+					configuration: {
+						...this.modelService.deepseek_config.configuration,
+						apiKey: userConfig.llm.deepseek.apiKey
+					}
+				});
+			case AIChatLLM.r1:
+				return this.thoughtModelService.getDeepSeekThinkingModleflat(modelType as any, userConfig, true);
+			case AIChatLLM.gemini_2_5_pro:
+			case AIChatLLM.gemini_2_5_flash:
+			case AIChatLLM.gemini_2_5_pro_proxy:
+				return this.thoughtModelService.getGeminiThinkingModelFlat(modelType as any, userConfig);
+			case AIChatLLM.glm_4_6:
+				return this.modelService.glmModelpool({
+					need: GlmNeed.high,
+					apiKey: userConfig.llm.zhipu.apiKey,
+					modelName: GlmModel.glm_4_6
+				}) as unknown as Runnable;
+			default:
+				throw new Error(`Unsupported structured task model: ${modelType}`);
+		}
+	}
+
+	/**
 	 * 创建链, memory默认使用BufferMemory, memory是否注入prompt取决于prompt是否提供{chat_history}插槽
 	 * @description chat_record -> memory -> chat_history -> prompt -> llm
 	 * @param llm 模型实例

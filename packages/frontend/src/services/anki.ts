@@ -23,6 +23,31 @@ export async function startUploadToAnki() {
 	return res.data;
 }
 
+export async function startPdfQuestionBankImport(files: File[], projectKnowledgeId?: string) {
+	const formData = new FormData();
+	files.forEach(file => formData.append('files', file));
+	if (projectKnowledgeId) formData.append('projectKnowledgeId', projectKnowledgeId);
+	const res = await instance.post<FormData, SDF<{ id: string }>>(
+		'/question/import-pdf-question-bank-to-anki',
+		formData,
+		{ headers: { 'Content-Type': 'multipart/form-data' } }
+	);
+	return res.data;
+}
+
+export async function retryPdfQuestionBankImport(taskId: string) {
+	const res = await instance.post<null, SDF<{ id: string }>>(
+		`/question/import-pdf-question-bank-to-anki/retry/${taskId}`,
+		null
+	);
+	return res.data;
+}
+
+export async function abortTask(taskId: string) {
+	const res = await instance.post<null, SDF<{ id: string; aborted: boolean }>>(`/question/task/${taskId}/abort`, null);
+	return res.data;
+}
+
 export async function getTaskResult(taskId: string) {
 	const res = await instance.get<SDF<{ task: PersistentTaskVo }>>(`/question/task/${taskId}`);
 	return res.data;

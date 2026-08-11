@@ -32,6 +32,7 @@ model user {
   user_articles      user_article[]
   ai_conversation    ai_conversation[]
   user_project       user_project[]
+  pdf_question_import_meta pdf_question_import_meta[]
   user_notifications UserNotification[] // 用户通知的中间表
   user_violations    UserViolation[] // 用户违规记录
 }
@@ -70,11 +71,32 @@ model article {
   time_update     DateTime? @default(now()) @db.Timestamp(0) //题目更新时间
 
   user_articles user_article[]
+  pdf_question_import_meta pdf_question_import_meta?
 
   @@index([job_type], map: "job_type")
   @@index([content_type], map: "content_type")
   @@index([quiz_type], map: "quiz_type")
   @@index([hard], map: "hard")
+}
+
+model pdf_question_import_meta {
+  id                 Int      @id @default(autoincrement())
+  article_id         Int      @unique
+  user_id            Int
+  input_hash         String   @db.VarChar(64)
+  pipeline_version   String   @db.VarChar(64)
+  project_repository String?  @db.VarChar(255)
+  status             String   @db.VarChar(32)
+  failure_reason     String?  @db.LongText
+  attempt_count      Int      @default(0)
+  create_at          DateTime @default(now()) @db.Timestamp(0)
+  update_at          DateTime @default(now()) @updatedAt @db.Timestamp(0)
+
+  article article @relation(fields: [article_id], references: [id], onDelete: Cascade)
+  user    user    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, input_hash])
+  @@index([user_id, status])
 }
 
 //上传知识库的项目

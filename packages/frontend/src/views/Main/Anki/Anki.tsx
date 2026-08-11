@@ -9,16 +9,21 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { PersistentTaskVo, StartCrawlQuestionDto } from '@prisma-ai/shared';
-import { Database, ExternalLink, Play, Square } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ProjectKnowledgeTypeEnum, type PersistentTaskVo, type ProjectKnowledgeVo, type StartCrawlQuestionDto } from '@prisma-ai/shared';
+import { Database, ExternalLink, FileText, FileUp, Play, Square, Trash2, X } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import {
 	getTaskResult,
+	abortTask,
+	retryPdfQuestionBankImport,
 	startCrawlQuestions,
 	startGenerateMindmap,
+	startPdfQuestionBankImport,
 	startUploadToAnki
 } from '../../../services/anki';
+import { findAllUserKnowledge } from '../../../services/knowbase';
 import { PageHeader } from '../components/PageHeader';
 import { browserlessUrl } from '../Hjm/DataCrawl';
 
@@ -35,7 +40,7 @@ function useTaskPolling(taskId: string | null, onTaskComplete?: () => void) {
 				if (response.code === '0') {
 					const task = response.data.task;
 					setTaskData(task);
-					if (task.status === 'completed' || task.status === 'failed') {
+					if (task.status === 'completed' || task.status === 'failed' || task.status === 'aborted') {
 						clearInterval(interval);
 						toast.success(`任务 ${task.status}: ${task.error || '已完成'}`);
 						// 任务完成后调用回调函数
@@ -77,6 +82,11 @@ export function Anki() {
 	const [crawlTaskId, setCrawlTaskId] = useState<string | null>(null);
 	const [mindmapTaskId, setMindmapTaskId] = useState<string | null>(null);
 	const [ankiTaskId, setAnkiTaskId] = useState<string | null>(null);
+	const [pdfTaskId, setPdfTaskId] = useState<string | null>(null);
+	const [pdfFiles, setPdfFiles] = useState<File[]>([]);
+	const [projectKnowledgeId, setProjectKnowledgeId] = useState<string>('none');
+	const [projectCodeBases, setProjectCodeBases] = useState<ProjectKnowledgeVo[]>([]);
+	const pdfFileInputRef = useRef<HTMLInputElement>(null);
 
 	// Polling hooks for each task
 	const crawlTaskData = useTaskPolling(crawlTaskId, () => {
@@ -85,6 +95,24 @@ export function Anki() {
 	});
 	const mindmapTaskData = useTaskPolling(mindmapTaskId);
 	const ankiTaskData = useTaskPolling(ankiTaskId);
+	const pdfTaskData = useTaskPolling(pdfTaskId);
+
+	useEffect(() => {
+		void findAllUserKnowledge({ page: 1, limit: 1000 }).then(response => {
+			if (response.code === '0') {
+				setProjectCodeBases(response.data.data.filter(item => item.type === ProjectKnowledgeTypeEnum.userProjectCode));
+			}
+		});
+	}, []);
+
+	const fileKey = (file: File) => `${file.name}:${file.size}:${file.lastModified}`;
+	const appendPdfFiles = (files: File[]) => {
+		setPdfFiles(previous => {
+			const merged = [...previous, ...files.filter(file => file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))];
+			return [...new Map(merged.map(file => [fileKey(file), file])).values()];
+		});
+	};
+	const removePdfFile = (file: File) => setPdfFiles(previous => previous.filter(item => fileKey(item) !== fileKey(file)));
 
 	const getProgress = (task: PersistentTaskVo | null) => {
 		if (!task) return 0;
@@ -155,6 +183,36 @@ export function Anki() {
 		}
 	};
 
+	const handlePdfImport = async () => {
+		if (!pdfFiles.length) {
+			toast.warning('请先选择 PDF 文件');
+			return;
+		}
+		try {
+			const response = await startPdfQuestionBankImport(pdfFiles, projectKnowledgeId === 'none' ? undefined : projectKnowledgeId);
+			if (response.code === '0') {
+				setPdfTaskId(response.data.id);
+				toast.success(`PDF 题库导入任务已启动，ID: ${response.data.id}`);
+			} else toast.error(`启动失败: ${response.message}`);
+		} catch (error) {
+			toast.error(`请求异常: ${(error as Error).message}`);
+		}
+	};
+
+	const handleAbortPdfImport = async () => {
+		if (!pdfTaskId) return;
+		const response = await abortTask(pdfTaskId);
+		if (response.code === '0') toast.info('已请求停止导入任务');
+		else toast.error(`停止失败: ${response.message}`);
+	};
+
+	const handleRetryPdfImport = async () => {
+		if (!pdfTaskId) return;
+		const response = await retryPdfQuestionBankImport(pdfTaskId);
+		if (response.code === '0') setPdfTaskId(response.data.id);
+		else toast.error(`重试失败: ${response.message}`);
+	};
+
 	const TaskProgress = ({
 		title,
 		taskData,
@@ -203,6 +261,51 @@ export function Anki() {
 				</div>
 			</PageHeader>
 			<div className="space-y-6 p-4">
+				<Card className="border-primary/30 bg-background/50">
+					<CardHeader>
+						<CardTitle>智能 PDF 题库导入</CardTitle>
+						<CardDescription>从 PDF 提取面试题，生成答案、思维导图并导入 Anki。</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-4">
+						<div className="space-y-2">
+							<Label>关联项目代码库（可选）</Label>
+							<Select value={projectKnowledgeId} onValueChange={setProjectKnowledgeId}>
+								<SelectTrigger className="w-full max-w-xl"><SelectValue placeholder="不关联项目代码库" /></SelectTrigger>
+								<SelectContent>
+									<SelectItem value="none">不关联项目代码库</SelectItem>
+									{projectCodeBases.map(item => <SelectItem key={item.id} value={item.id}>{item.name} ({item.content})</SelectItem>)}
+								</SelectContent>
+							</Select>
+						</div>
+						<div className="rounded-md border border-dashed p-4">
+							<input ref={pdfFileInputRef} className="sr-only" type="file" multiple accept=".pdf,application/pdf" onChange={event => { appendPdfFiles(Array.from(event.target.files ?? [])); event.currentTarget.value = ''; }} />
+							<div className="flex flex-wrap items-center gap-3">
+								<Button type="button" variant="outline" onClick={() => pdfFileInputRef.current?.click()}><FileUp />选择 PDF</Button>
+								<span className="text-sm text-muted-foreground">已选择 {pdfFiles.length} 个文件</span>
+								{pdfFiles.length > 0 && <Button type="button" variant="outline" size="icon" title="清空已选文件" aria-label="清空已选文件" onClick={() => setPdfFiles([])}><Trash2 /></Button>}
+							</div>
+							{pdfFiles.length > 0 && <div className="mt-3 max-h-52 space-y-2 overflow-y-auto">
+								{pdfFiles.map(file => <div key={fileKey(file)} className="flex min-h-10 items-center gap-3 rounded-md border bg-muted/20 px-3 py-2 text-sm">
+									<FileText className="size-4 shrink-0 text-muted-foreground" />
+									<span className="min-w-0 flex-1 truncate" title={file.name}>{file.name}</span>
+									<span className="shrink-0 text-muted-foreground">{(file.size / 1024 / 1024).toFixed(1)} MB</span>
+									<Button type="button" variant="outline" size="icon" title={`移除 ${file.name}`} aria-label={`移除 ${file.name}`} onClick={() => removePdfFile(file)}><X /></Button>
+								</div>)}
+							</div>}
+						</div>
+					</CardContent>
+					<CardFooter className="flex flex-wrap gap-3">
+						<Button onClick={handlePdfImport} disabled={!pdfFiles.length || (!!pdfTaskId && !['completed', 'failed', 'aborted'].includes(pdfTaskData?.status ?? ''))}><Play />开始导入</Button>
+						{pdfTaskId && ['pending', 'running'].includes(pdfTaskData?.status ?? '') && <Button variant="destructive" onClick={handleAbortPdfImport}><Square />停止导入</Button>}
+						{pdfTaskId && ['failed', 'aborted'].includes(pdfTaskData?.status ?? '') && <Button variant="outline" onClick={handleRetryPdfImport}>重试失败项</Button>}
+					</CardFooter>
+					{pdfTaskData && <CardContent>
+						<p className="text-sm font-medium">PDF 导入进度</p>
+						<p className="text-sm text-muted-foreground">状态: {pdfTaskData.status}</p>
+						<p className="text-sm text-muted-foreground">{pdfTaskData.progress?.completedCount ?? 0} / {pdfTaskData.progress?.totalCount ?? '?'}</p>
+						{pdfTaskData.error && <p className="text-sm text-destructive">错误: {pdfTaskData.error}</p>}
+					</CardContent>}
+				</Card>
 				<Card className="bg-background/50">
 					<CardHeader>
 						<CardTitle>1. 题库数据获取</CardTitle>
