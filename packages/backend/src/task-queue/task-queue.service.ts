@@ -116,6 +116,12 @@ export class TaskQueueService {
 					return;
 				}
 
+				if (task.status === TaskStatus.ABORTED) {
+					this.activeCount--;
+					this.processQueue();
+					return;
+				}
+
 				// 更新任务状态
 				task.status = TaskStatus.RUNNING;
 				task.startedAt = Date.now();
@@ -132,7 +138,7 @@ export class TaskQueueService {
 							.then(async () => {
 								// 任务成功完成
 								const updatedTask = await this.getTask(taskId);
-								if (updatedTask) {
+								if (updatedTask && updatedTask.status !== TaskStatus.ABORTED) {
 									updatedTask.status = TaskStatus.COMPLETED;
 									updatedTask.finishedAt = Date.now();
 									await this.saveTask(updatedTask);

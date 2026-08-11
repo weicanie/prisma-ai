@@ -176,6 +176,21 @@ export class KnowledgebaseService {
 		} as ProjectKnowledgeVo;
 	}
 
+	/** Resolve a user-owned repository knowledge entry to its vector namespace name. */
+	async resolveUserProjectCode(id: string, userInfo: UserInfoFromToken) {
+		const knowledge = await this.knowledgebaseModel
+			.findOne({
+				_id: new Types.ObjectId(id),
+				'userInfo.userId': userInfo.userId,
+				type: ProjectKnowledgeTypeEnum.userProjectCode
+			})
+			.exec();
+		if (!knowledge) throw new NotFoundException('关联的项目代码库不存在或无权访问');
+		const repositoryName = path.basename(knowledge.content.replace(/[\\/]+$/, '')).replace(/\.git$/i, '');
+		if (!repositoryName) throw new NotFoundException('项目代码库地址无效');
+		return { id: String(knowledge._id), repositoryName, repositoryUrl: knowledge.content };
+	}
+
 	async update(
 		id: string,
 		updateKnowledgeDto: UpdateProjectKnowledgeDto,

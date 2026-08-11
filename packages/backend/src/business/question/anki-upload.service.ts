@@ -41,9 +41,11 @@ export class AnkiUploadService implements OnModuleInit {
 	private readonly logger = new Logger(AnkiUploadService.name);
 	private readonly ANKI_CONNECT_URL = 'http://localhost:8765';
 	private readonly ANKI_MODEL_NAME = '面试题2.0';
+	private readonly PDF_QUESTION_BANK_MODEL_NAME = 'PDF 智能题库';
 	private readonly PAGE_SIZE = 500; // 每次从数据库查询的数量
 	private readonly ANKI_API_BATCH_SIZE = 20; // 每次调用Anki-Connect API的笔记数量
 	private readonly ankiHttpAgent: http.Agent; // 用于Anki-Connect请求的自定义HttpAgent
+	private pdfQuestionBankModelReady: Promise<void> | null = null;
 
 	constructor(
 		private readonly db: DbService,
@@ -82,6 +84,54 @@ export class AnkiUploadService implements OnModuleInit {
 			}
 		);
 		return task;
+	}
+
+	/** Upload or update one PDF question-bank note without involving normal question deduplication. */
+	async uploadPdfQuestionToAnki(articleId: number): Promise<void> {
+		const qdata = await this.db.article.findUnique({ where: { id: articleId } });
+		if (!qdata || !qdata.link.startsWith('pdf-question-import://')) return;
+		await this.ensurePdfQuestionBankModel();
+		const note = this.buildPdfQuestionBankNote(qdata);
+		await this.createDeck(note.deckName);
+
+		if (qdata.anki_note_id) {
+			try {
+				await this.requestAnkiConnect('updateNoteFields', { note: { id: Number(qdata.anki_note_id), fields: note.fields } });
+				await this.db.article.update({ where: { id: articleId }, data: { content_mindmap: note.fields.思维导图 } });
+				return;
+			} catch (error) {
+				if (!(error instanceof Error) || !error.message.includes('Note was not found')) throw error;
+				this.logger.warn(`PDF question ${articleId} no longer exists in Anki, creating it again.`);
+			}
+		}
+
+		const check = await this.canAddNotes([note]);
+		if (!check[0]?.canAdd) {
+			if (check[0]?.error === DUMPLICATE_ERROR_MESSAGE) {
+				const noteId = await this.findPdfQuestionNote(qdata.link);
+				if (noteId) {
+					await this.db.article.update({ where: { id: articleId }, data: { anki_note_id: noteId, content_mindmap: note.fields.思维导图 } });
+					await this.db.pdf_question_import_meta.updateMany({ where: { article_id: articleId }, data: { status: 'UPLOADED' } });
+					return;
+				}
+				throw new Error(`Anki duplicate detected but stable PDF import key was not found: ${qdata.link}`);
+			}
+			throw new Error(check[0]?.error ?? 'Anki rejected the PDF question');
+		}
+		const [noteId] = await this.addNotes([note]);
+		if (!noteId) throw new Error('Anki did not return a note id for the PDF question');
+		await this.db.article.update({ where: { id: articleId }, data: { anki_note_id: noteId, content_mindmap: note.fields.思维导图 } });
+		await this.db.pdf_question_import_meta.updateMany({ where: { article_id: articleId }, data: { status: 'UPLOADED' } });
+	}
+
+	private async findPdfQuestionNote(importKey: string): Promise<number | null> {
+		const modelQuery = `model:"${this.PDF_QUESTION_BANK_MODEL_NAME.replace(/([\\"])/g, '\\$1')}"`;
+		const noteIds = await this.requestAnkiConnect('findNotes', { query: modelQuery });
+		if (!Array.isArray(noteIds) || !noteIds.length) return null;
+		const notes = await this.requestAnkiConnect('notesInfo', { notes: noteIds });
+		if (!Array.isArray(notes)) return null;
+		const matched = notes.find(note => note?.fields?.导入键?.value === importKey);
+		return matched?.noteId ? Number(matched.noteId) : null;
 	}
 
 	/**
@@ -266,6 +316,48 @@ export class AnkiUploadService implements OnModuleInit {
 				qdata.link.startsWith('https://fe.ecool.fun') ? '前端' : '后端'
 			]
 		};
+	}
+
+	private buildPdfQuestionBankNote(qdata: article): AnkiNote {
+		const sanitizePart = (value: string) => value.replace(/[\\/:*?"<>|]/g, '_').trim() || '未分类';
+		return {
+			deckName: `PDF 题库::${sanitizePart(qdata.job_type ?? '未分类')}::${sanitizePart(qdata.hard ?? '未分类')}::${sanitizePart(qdata.content_type ?? '未分类')}`,
+			modelName: this.PDF_QUESTION_BANK_MODEL_NAME,
+			fields: {
+				导入键: qdata.link,
+				标题: qdata.title ?? '无',
+				内容: qdata.content ?? '无',
+				要点: qdata.gist ?? '无',
+				思维导图: qdata.content_mindmap ?? '无',
+				标签: qdata.content_type ?? '未分类',
+				频次: qdata.hard ?? '未分类'
+			},
+			tags: ['pdf-question-import', qdata.job_type ?? '未分类', qdata.hard ?? '未分类', qdata.content_type ?? '未分类']
+		};
+	}
+
+	private async ensurePdfQuestionBankModel(): Promise<void> {
+		if (this.pdfQuestionBankModelReady) return this.pdfQuestionBankModelReady;
+		this.pdfQuestionBankModelReady = (async () => {
+			const names = await this.requestAnkiConnect('modelNames', {});
+			if (Array.isArray(names) && names.includes(this.PDF_QUESTION_BANK_MODEL_NAME)) return;
+			try {
+				await this.requestAnkiConnect('createModel', {
+					modelName: this.PDF_QUESTION_BANK_MODEL_NAME,
+					inOrderFields: ['导入键', '标题', '内容', '要点', '思维导图', '标签', '频次'],
+					css: '.import-key { display: none; }\n.card { font-family: Arial, sans-serif; font-size: 20px; text-align: left; }',
+					cardTemplates: [{
+						Name: 'PDF 题库卡片',
+						Front: '<div class="import-key">{{导入键}}</div><h2>{{标题}}</h2>',
+						Back: '{{FrontSide}}<hr id="answer"><div>{{内容}}</div><hr><h3>要点</h3><div>{{要点}}</div><hr><h3>思维导图</h3><pre>{{思维导图}}</pre>'
+					}]
+				});
+			} catch (error) {
+				const refreshed = await this.requestAnkiConnect('modelNames', {});
+				if (!Array.isArray(refreshed) || !refreshed.includes(this.PDF_QUESTION_BANK_MODEL_NAME)) throw error;
+			}
+		})();
+		try { await this.pdfQuestionBankModelReady; } catch (error) { this.pdfQuestionBankModelReady = null; throw error; }
 	}
 
 	/**
